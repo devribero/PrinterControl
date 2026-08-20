@@ -16,6 +16,12 @@ function isValidReport(value: unknown): value is MonthlyReport {
   return typeof r.generatedAt === "string" && Array.isArray(r.monthlyUsage) && Array.isArray(r.printers);
 }
 
+/**
+ * Fallback de desenvolvimento: só é chamado quando a API está indisponível
+ * (ver lib/app-data.tsx). Com a API no ar, o relatório mensal vem dela e
+ * apenas dela — misturar as duas fontes esconderia de qual delas veio cada
+ * número.
+ */
 export async function loadMonthlyReport(): Promise<MonthlyReport | null> {
   try {
     const res = await fetch("/data/monthly-report.json", { cache: "no-store" });

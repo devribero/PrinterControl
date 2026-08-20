@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from app.database import get_session
 from app.models.user import User
-from app.schemas.user import UserLogin, TokenResponse
+from app.schemas.user import UserLogin, TokenResponse, UserResponse
 from app.services.auth import verify_password, create_access_token, hash_password
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -19,7 +19,7 @@ def login(credentials: UserLogin, session: Session = Depends(get_session)):
         )
 
     access_token = create_access_token(data={"sub": user.email})
-    return TokenResponse(access_token=access_token)
+    return TokenResponse(access_token=access_token, user=UserResponse.model_validate(user))
 
 
 @router.post("/register", response_model=TokenResponse)

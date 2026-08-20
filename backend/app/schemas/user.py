@@ -24,3 +24,5 @@ class UserResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    # Dados do usuario logado, para o frontend nao precisar de outra chamada.
+    user: UserResponse | None = None
