@@ -139,6 +139,19 @@ class MockSNMPScenarios:
             snmp_responded=True,
         )
 
+    @staticmethod
+    def counter_reset() -> SNMPResult:
+        """Contador reiniciado (troca de placa/formatador): page_count baixo."""
+        return SNMPResult(
+            status="online",
+            page_count=12,
+            toners=[_toner("K", 100, 1)],
+            uptime="0d, 1h, 5m",
+            reachable=True,
+            snmp_responded=True,
+            error="contador reiniciado (simulado)",
+        )
+
 
 # Fonte unica da lista de cenarios (a API valida contra ela).
 SCENARIOS = {
@@ -150,6 +163,7 @@ SCENARIOS = {
     "snmp_partial": MockSNMPScenarios.snmp_partial,
     "mono_critical": MockSNMPScenarios.mono_critical,
     "color_mixed_levels": MockSNMPScenarios.color_mixed_levels,
+    "counter_reset": MockSNMPScenarios.counter_reset,
 }
 
 

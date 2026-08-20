@@ -2,8 +2,8 @@
 
 /**
  * Dependências externas: react (useState) e lucide-react (ícones do form).
- * Login puramente client-side contra data/accounts.ts (ver o aviso lá) —
- * não bate em nenhum backend. `onSuccess` é a única saída deste componente;
+ * A validação das credenciais é feita pelo backend (POST /api/auth/login via
+ * lib/auth.ts). `onSuccess` é a única saída deste componente;
  * quem decide o que fazer com a conta autenticada é App.tsx.
  */
 import { useState, type FormEvent } from "react";
@@ -20,7 +20,8 @@ import {
   Wifi,
   Printer as PrinterIcon,
 } from "lucide-react";
-import { ACCOUNTS, type Account } from "../data/accounts";
+import { login, type Account } from "../lib/auth";
+import { ApiError } from "../lib/api";
 import { useToast } from "../lib/toast";
 import ElginLogo from "./ElginLogo";
 import { cn } from "../lib/cn";
@@ -101,25 +102,25 @@ export default function Login({ onSuccess }: LoginProps) {
   const [shake, setShake] = useState(false);
   const { push } = useToast();
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (loading) return;
     setError("");
     setLoading(true);
 
-    window.setTimeout(() => {
-      const account = ACCOUNTS.find((a) => a.email === email.trim().toLowerCase() && a.password === password);
-
-      if (account) {
-        onSuccess(account, remember);
-        return;
-      }
-
+    try {
+      const account = await login(email, password, remember);
+      onSuccess(account, remember);
+    } catch (err) {
       setLoading(false);
-      setError("E-mail ou senha incorretos. Verifique os dados e tente novamente.");
+      setError(
+        err instanceof ApiError && err.status === 0
+          ? err.message
+          : "E-mail ou senha incorretos. Verifique os dados e tente novamente.",
+      );
       setShake(true);
       window.setTimeout(() => setShake(false), 420);
-    }, 650);
+    }
   }
 
   function handleForgotPassword(e: React.MouseEvent) {

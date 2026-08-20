@@ -1,0 +1,16 @@
+{
+  "0": "SNMPClient",
+  "1": "collect.py",
+  "2": "PrinterCollector",
+  "3": "SNMPResult",
+  "4": "routes/auth.py",
+  "5": "printers.py",
+  "6": "FakeAgent",
+  "7": "tests_collect_api.py",
+  "8": "app/__init__.py",
+  "9": "routes/__init__.py",
+  "10": "schemas/__init__.py",
+  "11": "services/__init__.py",
+  "12": "tasks/__init__.py",
+  "13": "extract_printers_v2.py"
+}

@@ -46,3 +46,9 @@ backend/.env
 *.njsproj
 *.sln
 *.sw?
+.env.local
+.env*.local
+
+# Bancos SQLite nunca vao para o repositorio
+*.db
+*.db-journal

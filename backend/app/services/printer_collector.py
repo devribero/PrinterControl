@@ -8,11 +8,13 @@ Separa as tres responsabilidades da Etapa 6:
 """
 import re
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.config import settings
 from app.models.printer import Printer, PrinterReading
+from app.services.alert_engine import evaluate_reading
 from app.services.snmp import SNMPClient, SNMPResult
+from app.services.snmp_fleet_mock import FleetMockClient
 from app.services.snmp_mock import MockSNMPClient
 
 # Impressoras coloridas (PS1: $modelo -match 'color|M6530' -or $p.Name -match 'color')
@@ -29,11 +31,17 @@ class PrinterCollector:
     def __init__(self, mode: str = "real", mock_scenario: str = "online_mono"):
         """
         Args:
-            mode: "real" (SNMP de verdade) ou "mock" (cenario simulado)
+            mode: "real" (SNMP de verdade), "mock" (cenario fixo) ou
+                  "fleet" (frota simulada: perfil por impressora e contador
+                  crescente — ver services/snmp_fleet_mock.py)
             mock_scenario: cenario usado quando mode="mock"
         """
         self.mode = mode
-        if mode == "mock":
+        if mode == "fleet":
+            # O client e criado por impressora em collect_and_save, porque
+            # depende do id e do contador anterior de cada uma.
+            self.client = None
+        elif mode == "mock":
             self.client = MockSNMPClient(scenario=mock_scenario)
         else:
             self.client = SNMPClient(
@@ -76,7 +84,19 @@ class PrinterCollector:
             is_color = self.is_color_printer(printer)
 
         try:
-            if self.mode == "real" and self.is_label_printer(printer):
+            if self.mode == "fleet":
+                # Contador anterior para que a leitura nova seja sempre maior.
+                previous = session.exec(
+                    select(PrinterReading)
+                    .where(PrinterReading.printer_id == printer_id)
+                    .order_by(PrinterReading.id.desc())
+                ).first()
+                client = FleetMockClient(
+                    printer_id=printer_id,
+                    previous_page_count=previous.page_count if previous and previous.page_count else None,
+                )
+                result = client.collect(printer.ip, is_color=is_color)
+            elif self.mode == "real" and self.is_label_printer(printer):
                 # PS1 pula SNMP nesses modelos; registra so a conectividade.
                 result = SNMPResult(
                     status="online" if SNMPClient()._ping(printer.ip) else "offline",
@@ -92,6 +112,9 @@ class PrinterCollector:
             session.add(reading)
             session.commit()
             session.refresh(reading)
+
+            # Etapa 8A: alertas automaticos derivados da leitura recem-gravada.
+            alert_actions = evaluate_reading(session, printer_id, reading)
 
             return {
                 "success": True,
@@ -110,6 +133,7 @@ class PrinterCollector:
                 "uptime": result.uptime,
                 "error": result.error,
                 "timestamp": reading.timestamp.isoformat(),
+                "alerts": {k: v for k, v in alert_actions.items() if v != "none" and v != "skipped"},
             }
 
         except Exception as exc:
@@ -134,6 +158,7 @@ class PrinterCollector:
             toner_c=levels.get("C"),
             toner_m=levels.get("M"),
             toner_y=levels.get("Y"),
+            uptime=result.uptime,
         )
 
     @staticmethod

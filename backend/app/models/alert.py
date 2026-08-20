@@ -8,6 +8,9 @@ class Alert(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     printer_id: int = Field(foreign_key="printers.id")
+    # Condicao que gerou o alerta: "offline", "toner:K", "toner:C"...
+    # Chave de deduplicacao: no maximo um alerta ativo por (printer_id, alert_type).
+    alert_type: str | None = Field(default=None, index=True)
     severity: str  # critical, warning, info
     message: str
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)

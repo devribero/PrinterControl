@@ -18,21 +18,14 @@ import {
   departmentUsage,
   decommissionedPrinters,
 } from "../data/printers";
-import { ACCOUNTS, type Account } from "../data/accounts";
-import { loadRealPrinters } from "./fetchPrinters";
+import { logout as clearSession, readStoredAccount, type Account } from "./auth";
+import { fetchAlerts, fetchPrintersWithStatus } from "./api";
+import { adaptAlert, adaptPrinter, loadMonthlyReportFromApi } from "./adaptApi";
 import { loadMonthlyReport, mergeMonthlyReport } from "./fetchMonthlyReport";
 import { deriveAlerts, deriveGlobalToner } from "./deriveFromPrinters";
 import { DEFAULT_FILTERS, filterPrinters, type PrinterFilters } from "./filterPrinters";
 import { useToast } from "./toast";
-import type { Alert, Printer, TonerLevel } from "../types";
-
-const AUTH_KEY = "elgin_auth_email";
-
-function readStoredAccount(): Account | null {
-  if (typeof window === "undefined") return null;
-  const email = localStorage.getItem(AUTH_KEY) ?? sessionStorage.getItem(AUTH_KEY);
-  return ACCOUNTS.find((a) => a.email === email) ?? null;
-}
+import type { Alert, MonthlyReport, Printer, TonerLevel } from "../types";
 
 interface AppDataContextValue {
   account: Account | null;
@@ -46,6 +39,8 @@ interface AppDataContextValue {
   usingRealData: boolean;
   usingRealMonthlyReport: boolean;
   initialLoading: boolean;
+  /** Mensagem quando a API falhou; null quando os dados vieram do backend. */
+  apiError: string | null;
 
   filters: PrinterFilters;
   updateFilter: <K extends keyof PrinterFilters>(key: K, value: PrinterFilters[K]) => void;
@@ -68,10 +63,42 @@ interface AppDataContextValue {
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
 
+/**
+ * Carrega impressoras + alertas do backend em paralelo. Devolve null quando a
+ * API não responde, para o provider cair no conjunto de demonstração em vez
+ * de deixar o painel vazio.
+ */
+async function loadFromApi(): Promise<{
+  printers: Printer[];
+  alerts: Alert[];
+  monthlyReport: MonthlyReport | null;
+} | null> {
+  try {
+    const [apiPrinters, apiAlerts, monthlyReport] = await Promise.all([
+      fetchPrintersWithStatus(),
+      fetchAlerts(false).catch(() => [] as Awaited<ReturnType<typeof fetchAlerts>>),
+      // Já devolve null quando o backend ainda não tem leituras suficientes
+      // para fechar um mês — nesse caso o painel mostra o relatório de
+      // demonstração e o cabeçalho sinaliza isso.
+      loadMonthlyReportFromApi(),
+    ]);
+    return {
+      printers: apiPrinters.map(adaptPrinter),
+      alerts: apiAlerts.map(adaptAlert),
+      monthlyReport,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<Account | null>(null);
   const [rawPrinters, setRawPrinters] = useState<Printer[]>(mockPrinters);
   const [usingRealData, setUsingRealData] = useState(false);
+  // Alertas vindos de /api/alerts; null enquanto o backend não respondeu.
+  const [apiAlerts, setApiAlerts] = useState<Alert[] | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
   const [monthlyReport, setMonthlyReport] = useState<Awaited<ReturnType<typeof loadMonthlyReport>>>(null);
   const [filters, setFilters] = useState<PrinterFilters>(DEFAULT_FILTERS);
   const [selectedPrinter, setSelectedPrinter] = useState<Printer | null>(null);
@@ -93,22 +120,30 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    const printersDone = loadRealPrinters().then((real) => {
-      if (!cancelled && real) {
-        setRawPrinters(real);
+    // Ou tudo vem da API, ou tudo vem das fontes de demonstração — nunca uma
+    // mistura das duas, para que o indicador do cabeçalho seja verdadeiro.
+    const printersDone = loadFromApi().then(async (data) => {
+      if (cancelled) return;
+
+      if (data) {
+        setRawPrinters(data.printers);
+        setApiAlerts(data.alerts);
+        setMonthlyReport(data.monthlyReport);
         setUsingRealData(true);
+        setApiError(null);
+        return;
       }
-    });
-    // Relatório mensal real (scripts/Relatorio-Mensal.ps1) é independente do
-    // coletor de status/toner acima — só existe depois que o script mensal
-    // rodou pelo menos duas vezes. Enquanto isso, fica no mockMonthlyUsage.
-    const reportDone = loadMonthlyReport().then((report) => {
+
+      // Backend fora do ar: dados de demonstração, incluindo o relatório
+      // mensal do coletor PowerShell (se estiver publicado) ou o mock.
+      setApiError("Não foi possível conectar ao servidor. Exibindo dados de demonstração.");
+      const report = await loadMonthlyReport();
       if (!cancelled && report) setMonthlyReport(report);
     });
-    // Skeleton de carregamento inicial: some assim que os dois fetches
-    // decidirem (real ou fallback pro mock), com um piso mínimo pra não
+    // Skeleton de carregamento inicial: some assim que o carregamento
+    // decidir (real ou fallback pro mock), com um piso mínimo pra não
     // "piscar" quando a resposta vem instantânea demais.
-    Promise.allSettled([printersDone, reportDone, new Promise((r) => window.setTimeout(r, 400))]).then(() => {
+    Promise.allSettled([printersDone, new Promise((r) => window.setTimeout(r, 400))]).then(() => {
       if (!cancelled) setInitialLoading(false);
     });
     return () => {
@@ -124,7 +159,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     return { total, online, offline, attention };
   }, [printers]);
 
-  const alerts = useMemo(() => deriveAlerts(printers), [printers]);
+  // Alertas reais do backend quando ele responde; senão, os derivados dos
+  // dados de demonstração (mesmo comportamento de antes).
+  const alerts = useMemo(
+    () => apiAlerts ?? deriveAlerts(printers),
+    [apiAlerts, printers],
+  );
   const globalToner = useMemo(() => deriveGlobalToner(printers) ?? undefined, [printers]);
   const filteredPrinters = useMemo(() => filterPrinters(printers, filters), [printers, filters]);
   const departments = useMemo(() => Array.from(new Set(printers.map((p) => p.department))).sort(), [printers]);
@@ -142,34 +182,36 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setFilters((f) => ({ ...f, [key]: value }));
   }
 
-  function handleLoginSuccess(loggedInAccount: Account, remember: boolean) {
-    if (remember) localStorage.setItem(AUTH_KEY, loggedInAccount.email);
-    else sessionStorage.setItem(AUTH_KEY, loggedInAccount.email);
+  // O token/conta ja foram persistidos por lib/auth.login() antes deste callback.
+  function handleLoginSuccess(loggedInAccount: Account, _remember: boolean) {
     setAccount(loggedInAccount);
   }
 
   function handleLogout() {
-    localStorage.removeItem(AUTH_KEY);
-    sessionStorage.removeItem(AUTH_KEY);
+    clearSession();
     setAccount(null);
   }
 
   async function handleScan() {
     setScanning(true);
     const started = Date.now();
-    const real = await loadRealPrinters();
+    const data = await loadFromApi();
     const elapsed = Date.now() - started;
     if (elapsed < 1100) await new Promise((r) => window.setTimeout(r, 1100 - elapsed));
 
-    if (real) {
-      setRawPrinters(real);
+    if (data) {
+      setRawPrinters(data.printers);
+      setApiAlerts(data.alerts);
+      setMonthlyReport(data.monthlyReport);
       setUsingRealData(true);
-      push({ variant: "success", title: "Rede escaneada", description: `${real.length} impressora(s) encontrada(s) nos servidores.` });
+      setApiError(null);
+      push({ variant: "success", title: "Dados atualizados", description: `${data.printers.length} impressora(s) carregada(s) do servidor.` });
     } else {
+      setApiError("Não foi possível conectar ao servidor. Exibindo dados de demonstração.");
       push({
         variant: "info",
-        title: "Nenhum coletor conectado",
-        description: "Exibindo dados de demonstração. Rode scripts/Coletar-Impressoras.ps1 para dados reais.",
+        title: "Servidor indisponível",
+        description: "Exibindo dados de demonstração. Verifique se o backend está rodando.",
       });
     }
     setLastChecked(new Date());
@@ -193,6 +235,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     usingRealData,
     usingRealMonthlyReport,
     initialLoading,
+    apiError,
 
     filters,
     updateFilter,
