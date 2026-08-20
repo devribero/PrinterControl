@@ -17,7 +17,7 @@ import styles from "./Topbar.module.css";
 
 export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => void }) {
   const { theme, toggleTheme } = useTheme();
-  const { account, alerts, filters, updateFilter, handleScan, scanning, handleLogout, handleAlertSelect, filteredPrinters } = useAppData();
+  const { account, alerts, filters, updateFilter, handleDiscovery, discoveryScanning, handleLogout, handleAlertSelect, filteredPrinters } = useAppData();
   const { push } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -133,9 +133,9 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
           Exportar CSV
         </button>
 
-        <button onClick={handleScan} disabled={scanning} className={cn(styles.textButton, styles.scanButton)}>
-          {scanning ? <Loader2 size={16} className="animate-spin" /> : <RadioTower size={16} />}
-          {scanning ? "Escaneando..." : "Escanear Rede"}
+        <button onClick={handleDiscovery} disabled={discoveryScanning} className={cn(styles.textButton, styles.scanButton)}>
+          {discoveryScanning ? <Loader2 size={16} className="animate-spin" /> : <RadioTower size={16} />}
+          {discoveryScanning ? "Consultando..." : "Escanear Rede"}
         </button>
 
         <div className={styles.dropdownAnchor} ref={menuRef}>

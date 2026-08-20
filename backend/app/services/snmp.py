@@ -77,6 +77,7 @@ class SNMPResult:
     reachable: bool = True
     snmp_responded: bool = False
     error: Optional[str] = None
+    status_reason: Optional[str] = None
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -197,15 +198,23 @@ class SNMPClient:
         Nunca levanta excecao: qualquer falha vira um SNMPResult descrevendo
         o que aconteceu, para que a coleta das demais impressoras continue.
         """
+        self._last_network_error: str | None = None
+
         if not ip or not self._is_ip_like(ip):
             return SNMPResult(
                 status="offline",
                 reachable=False,
                 error=f"IP invalido ou ausente: {ip!r}",
+                status_reason="invalid_or_missing_ip",
             )
 
         if not self._ping(ip):
-            return SNMPResult(status="offline", reachable=False, error="sem resposta ao ping")
+            return SNMPResult(
+                status="offline",
+                reachable=False,
+                error="sem resposta ao ping",
+                status_reason="ping_failed",
+            )
 
         result = SNMPResult(status="online", reachable=True)
         sock: socket.socket | None = None
@@ -230,8 +239,16 @@ class SNMPClient:
 
             if not result.snmp_responded:
                 result.error = "SNMP sem resposta (impressora acessivel, porta 161 muda)"
+                result.status_reason = self._last_network_error or "ping_ok_snmp_not_responding"
             elif result.page_count is None and not result.toners:
                 result.error = "SNMP respondeu, mas sem contador nem toner disponiveis"
+                result.status_reason = "snmp_partial_data"
+            elif result.page_count is None:
+                result.status_reason = "snmp_without_page_count"
+            elif not result.toners:
+                result.status_reason = "snmp_partial_data"
+            else:
+                result.status_reason = "snmp_data_available"
 
             if result.toners:
                 worst = min(t.percent for t in result.toners)
@@ -240,6 +257,7 @@ class SNMPClient:
 
         except Exception as exc:  # nunca propaga para nao derrubar a coleta em lote
             result.error = f"{type(exc).__name__}: {exc}"
+            result.status_reason = "snmp_socket_error" if isinstance(exc, OSError) else "snmp_error"
         finally:
             if sock is not None:
                 sock.close()
@@ -469,7 +487,11 @@ class SNMPClient:
             sock.sendto(packet, (ip, 161))
             response, _addr = sock.recvfrom(8192)
             return response
-        except (socket.timeout, OSError):
+        except socket.timeout:
+            self._last_network_error = "snmp_timeout"
+            return None
+        except OSError:
+            self._last_network_error = "snmp_socket_error"
             return None
 
     # ─────────────────────────────────────────────────────────────────────

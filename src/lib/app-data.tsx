@@ -19,13 +19,13 @@ import {
   decommissionedPrinters,
 } from "../data/printers";
 import { logout as clearSession, readStoredAccount, type Account } from "./auth";
-import { fetchAlerts, fetchPrintersWithStatus } from "./api";
+import { discoverPrinters, fetchAlerts, fetchPrintersWithStatus } from "./api";
 import { adaptAlert, adaptPrinter, loadMonthlyReportFromApi } from "./adaptApi";
 import { loadMonthlyReport, mergeMonthlyReport } from "./fetchMonthlyReport";
 import { deriveAlerts, deriveGlobalToner } from "./deriveFromPrinters";
 import { DEFAULT_FILTERS, filterPrinters, type PrinterFilters } from "./filterPrinters";
 import { useToast } from "./toast";
-import type { Alert, MonthlyReport, Printer, TonerLevel } from "../types";
+import type { Alert, DiscoveredPrinter, MonthlyReport, Printer, TonerLevel } from "../types";
 
 interface AppDataContextValue {
   account: Account | null;
@@ -58,7 +58,12 @@ interface AppDataContextValue {
 
   scanning: boolean;
   lastChecked: Date;
-  handleScan: () => Promise<void>;
+  handleRefresh: () => Promise<void>;
+  handleDiscovery: () => Promise<void>;
+  discoveredPrinters: DiscoveredPrinter[] | null;
+  discoverySource: string | null;
+  discoveryServer: string | null;
+  discoveryScanning: boolean;
 }
 
 const AppDataContext = createContext<AppDataContextValue | null>(null);
@@ -103,6 +108,10 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [filters, setFilters] = useState<PrinterFilters>(DEFAULT_FILTERS);
   const [selectedPrinter, setSelectedPrinter] = useState<Printer | null>(null);
   const [scanning, setScanning] = useState(false);
+  const [discoveredPrinters, setDiscoveredPrinters] = useState<DiscoveredPrinter[] | null>(null);
+  const [discoverySource, setDiscoverySource] = useState<string | null>(null);
+  const [discoveryServer, setDiscoveryServer] = useState<string | null>(null);
+  const [discoveryScanning, setDiscoveryScanning] = useState(false);
   const [lastChecked, setLastChecked] = useState<Date>(() => new Date());
   const [initialLoading, setInitialLoading] = useState(true);
   const { push } = useToast();
@@ -192,7 +201,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setAccount(null);
   }
 
-  async function handleScan() {
+  async function handleRefresh() {
     setScanning(true);
     const started = Date.now();
     const data = await loadFromApi();
@@ -207,7 +216,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       setApiError(null);
       push({ variant: "success", title: "Dados atualizados", description: `${data.printers.length} impressora(s) carregada(s) do servidor.` });
     } else {
+      setRawPrinters(mockPrinters);
+      setApiAlerts(null);
+      setUsingRealData(false);
       setApiError("Não foi possível conectar ao servidor. Exibindo dados de demonstração.");
+      setMonthlyReport(await loadMonthlyReport());
       push({
         variant: "info",
         title: "Servidor indisponível",
@@ -216,6 +229,42 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     }
     setLastChecked(new Date());
     setScanning(false);
+  }
+
+  async function handleDiscovery() {
+    setDiscoveryScanning(true);
+    try {
+      const data = await discoverPrinters();
+      setDiscoveredPrinters(data.printers.map((printer) => ({
+        name: printer.name,
+        server: printer.server,
+        portName: printer.port_name,
+        ip: printer.ip,
+        driverName: printer.driver_name,
+        source: printer.source,
+        ipResolution: printer.ip_resolution,
+        ipGroupSize: printer.ip_group_size,
+        networkQueryReused: printer.network_query_reused,
+        reachable: printer.reachable,
+        snmpResponded: printer.snmp_responded,
+        status: printer.status,
+        statusReason: printer.status_reason,
+        pageCount: printer.page_count,
+        uptime: printer.uptime,
+        toners: printer.toners.map((toner) => ({ color: toner.color, percent: toner.percent, description: toner.description })),
+        error: printer.error,
+      })));
+      setDiscoverySource(data.source);
+      setDiscoveryServer(data.server);
+      push({ variant: "success", title: "Rede consultada", description: `${data.count} fila(s) encontrada(s) em ${data.server}.` });
+    } catch (error) {
+      setDiscoveredPrinters(null);
+      setDiscoverySource(null);
+      setDiscoveryServer(null);
+      push({ variant: "warning", title: "Falha na descoberta", description: error instanceof Error ? error.message : "Não foi possível consultar o Print Server." });
+    } finally {
+      setDiscoveryScanning(false);
+    }
   }
 
   function handleAlertSelect(alert: Alert) {
@@ -253,7 +302,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
     scanning,
     lastChecked,
-    handleScan,
+    handleRefresh,
+    handleDiscovery,
+    discoveredPrinters,
+    discoverySource,
+    discoveryServer,
+    discoveryScanning,
   };
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>;

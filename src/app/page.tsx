@@ -5,7 +5,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { RefreshCw } from "lucide-react";
+import { RadioTower, RefreshCw } from "lucide-react";
 import StatCards from "../components/StatCards";
 import AlertBanner from "../components/AlertBanner";
 import PrinterTable from "../components/PrinterTable";
@@ -15,13 +15,13 @@ import { useAppData } from "../lib/app-data";
 import { NAV_ROUTES } from "../lib/routes";
 import { cn } from "../lib/cn";
 import styles from "./page.module.css";
+import DiscoveryResults from "../components/DiscoveryResults";
 
 export default function DashboardPage() {
   const router = useRouter();
   const {
     lastChecked,
     scanning,
-    handleScan,
     initialLoading,
     stats,
     filters,
@@ -34,6 +34,12 @@ export default function DashboardPage() {
     globalToner,
     worstPrinter,
     monthlyUsage,
+    handleRefresh,
+    handleDiscovery,
+    discoveryScanning,
+    discoveredPrinters,
+    discoverySource,
+    discoveryServer,
   } = useAppData();
 
   return (
@@ -42,11 +48,19 @@ export default function DashboardPage() {
         <p>
           Última verificação: <span className={styles.scanBarStrong}>{lastChecked.toLocaleTimeString("pt-BR")}</span>
         </p>
-        <button onClick={handleScan} disabled={scanning} className={styles.scanButton}>
+        <button onClick={handleRefresh} disabled={scanning} className={styles.scanButton}>
           <RefreshCw size={13} className={scanning ? "animate-spin" : ""} />
           {scanning ? "Verificando..." : "Verificar agora"}
         </button>
+        <button onClick={handleDiscovery} disabled={discoveryScanning} className={styles.mobileDiscoveryButton}>
+          <RadioTower size={13} className={discoveryScanning ? "animate-spin" : ""} />
+          {discoveryScanning ? "Consultando..." : "Escanear Rede"}
+        </button>
       </div>
+
+      {discoveredPrinters && (
+        <DiscoveryResults printers={discoveredPrinters} source={discoverySource} server={discoveryServer} />
+      )}
 
       {initialLoading ? (
         <div className={styles.statsSkeletonGrid}>

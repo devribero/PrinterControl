@@ -47,7 +47,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <div className={styles.footerStatus}>
             <p className={styles.footerStatusItem}>
               <span className={`${styles.statusDot} ${usingRealData ? styles.statusDotOn : styles.statusDotOff}`} />
-              {usingRealData ? "Conectado ao servidor" : "Modo demonstração (dados fictícios)"}
+              {usingRealData ? "API conectada" : "Modo demonstração (dados fictícios)"}
             </p>
             <p className={styles.footerStatusItem}>
               <span className={`${styles.statusDot} ${usingRealMonthlyReport ? styles.statusDotOn : styles.statusDotOff}`} />

@@ -4,7 +4,7 @@
  * Resolve a URL base, serializa/desserializa JSON, anexa o JWT quando existe
  * e normaliza erros em ApiError. Todo fetch para a API deve passar por aqui.
  */
-const BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL?.trim() || "http://127.0.0.1:8000").replace(/\/$/, "");
 
 const TOKEN_KEY = "elgin_auth_token";
 
@@ -56,7 +56,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   let res: Response;
   try {
-    res = await fetch(`${BASE_URL}${path}`, {
+    res = await fetch(`${API_BASE_URL}${path}`, {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -129,6 +129,45 @@ export interface ApiPrinterReading {
   timestamp: string;
 }
 
+export interface ApiDiscoveredToner {
+  color: string;
+  percent: number;
+  index: number;
+  maximum: number;
+  description: string;
+}
+
+export interface ApiDiscoveredPrinter {
+  name: string;
+  server: string;
+  port_name: string;
+  ip: string | null;
+  driver_name: string;
+  model: string | null;
+  printer_type: string | null;
+  source: "print_server_real" | "print_server_mock";
+  ip_resolution: "resolved" | "unresolved";
+  ip_group_size: number;
+  network_query_reused: boolean;
+  reachable: boolean | null;
+  snmp_responded: boolean;
+  status: string;
+  status_reason: string;
+  page_count: number | null;
+  uptime: string | null;
+  toners: ApiDiscoveredToner[];
+  error: string | null;
+}
+
+export interface ApiDiscoveryResponse {
+  server: string;
+  mode: "mock" | "real";
+  source: "print_server_real" | "print_server_mock";
+  count: number;
+  unique_ips: number;
+  printers: ApiDiscoveredPrinter[];
+}
+
 export const api = {
   get: <T>(path: string, options?: Omit<RequestOptions, "method" | "body">) =>
     apiRequest<T>(path, { ...options, method: "GET" }),
@@ -151,6 +190,9 @@ export const fetchAlerts = (resolved = false, signal?: AbortSignal) =>
 /** Historico de leituras de uma impressora, mais recentes primeiro. */
 export const fetchPrinterReadings = (printerId: string | number, limit = 100, signal?: AbortSignal) =>
   api.get<ApiPrinterReading[]>(`/api/printers/${printerId}/readings?limit=${limit}`, { signal });
+
+/** Descoberta transitória via Print Server + enriquecimento SNMP. */
+export const discoverPrinters = () => api.post<ApiDiscoveryResponse>("/api/servers/discover");
 
 /** Campos editáveis de uma impressora (cadastro, não leitura). */
 export interface PrinterInput {

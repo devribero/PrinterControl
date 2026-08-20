@@ -31,6 +31,26 @@ export interface Printer {
   monthlyPages?: MonthlyPageCount[];
 }
 
+export interface DiscoveredPrinter {
+  name: string;
+  server: string;
+  portName: string;
+  ip: string | null;
+  driverName: string;
+  source: "print_server_real" | "print_server_mock";
+  ipResolution: "resolved" | "unresolved";
+  ipGroupSize: number;
+  networkQueryReused: boolean;
+  reachable: boolean | null;
+  snmpResponded: boolean;
+  status: string;
+  statusReason: string;
+  pageCount: number | null;
+  uptime: string | null;
+  toners: { color: string; percent: number; description: string }[];
+  error: string | null;
+}
+
 export interface Alert {
   id: string;
   severity: "critical" | "warning" | "info";
