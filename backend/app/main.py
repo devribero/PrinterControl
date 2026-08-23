@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.config import settings
 from app.database import create_db_and_tables
-from app.routes import auth, printers, alerts, collect, servers
+from app.routes import auth, printers, alerts, collect, servers, users
 from app.services.scheduler import shutdown_scheduler, start_scheduler
 
 logging.basicConfig(
@@ -25,11 +25,12 @@ async def lifespan(app: FastAPI):
 
 
 TAGS_METADATA = [
-    {"name": "auth", "description": "Login e emissao do JWT. O token vai no header `Authorization: Bearer <token>`."},
-    {"name": "printers", "description": "Cadastro das impressoras, leituras e relatorio mensal. Leitura e publica; escrita exige JWT."},
-    {"name": "alerts", "description": "Alertas gerados automaticamente apos cada coleta (offline e niveis de toner)."},
-    {"name": "collect", "description": "Disparo manual de coleta e estado do agendador. Todas as coletas exigem JWT."},
-    {"name": "servers", "description": "Print Server: descoberta de impressoras (Get-Printer/Get-PrinterPort). Nao grava no banco."},
+    {"name": "auth", "description": "Login e dados da conta logada. O token vai no header `Authorization: Bearer <token>`."},
+    {"name": "users", "description": "Gestao de contas (Fase 3). Somente admin: listar, criar, alterar papel/nome/senha e ativar/desativar."},
+    {"name": "printers", "description": "Cadastro das impressoras, leituras e relatorio mensal. Toda rota exige sessao; cadastro/edicao exigem admin; registrar leitura exige operator."},
+    {"name": "alerts", "description": "Alertas gerados automaticamente apos cada coleta (offline e niveis de toner). Leitura exige sessao; resolver/notificar exigem operator."},
+    {"name": "collect", "description": "Disparo manual de coleta e estado do agendador. Coleta real exige operator; coleta simulada e o agendador exigem admin."},
+    {"name": "servers", "description": "Print Server: descoberta e sincronizacao de impressoras (Get-Printer/Get-PrinterPort). Operacoes administrativas."},
 ]
 
 DESCRIPTION = """
@@ -38,9 +39,19 @@ Backend do painel de monitoramento de impressoras.
 **Fluxo:** coleta (SNMP real ou simulada) → `PrinterReading` no SQLite →
 motor de alertas → estes endpoints → painel Next.js.
 
-**Autenticacao:** faca `POST /api/auth/login`, copie o `access_token` e use o
-botao *Authorize* acima. Rotas de leitura (GET) sao publicas; tudo que grava
-exige o token.
+**Autenticacao e permissoes:** faca `POST /api/auth/login`, copie o
+`access_token` e use o botao *Authorize* acima. O papel da conta vem em
+`GET /api/auth/me`.
+
+* `viewer` — somente leitura
+* `operator` — coleta real, resolver/notificar alertas, registrar leituras
+* `admin` — usuarios, cadastro de impressoras, discovery/sync, coleta
+  simulada e agendador
+
+Sem token -> 401; papel insuficiente ou conta desativada -> 403.
+
+Desde a Fase 2 **todas** as rotas de `/api` exigem sessao — as unicas rotas
+publicas sao `POST /api/auth/login`, `GET /` e `GET /health`.
 
 **Ambiente local:** sem acesso a rede das impressoras, use as coletas simuladas
 (`mode="mock"` ou `POST /api/collect/fleet`), disponiveis apenas quando
@@ -83,6 +94,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 
 # Rotas
 app.include_router(auth.router, prefix=settings.api_prefix)
+app.include_router(users.router, prefix=settings.api_prefix)
 app.include_router(printers.router, prefix=settings.api_prefix)
 app.include_router(alerts.router, prefix=settings.api_prefix)
 app.include_router(collect.router, prefix=settings.api_prefix)

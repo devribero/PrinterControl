@@ -29,6 +29,12 @@ export function setToken(token: string, remember: boolean) {
   (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, token);
 }
 
+/** True quando o token foi guardado com "lembrar de mim" (localStorage). */
+export function isTokenPersistent(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(TOKEN_KEY) !== null;
+}
+
 export function clearToken() {
   if (typeof window === "undefined") return;
   localStorage.removeItem(TOKEN_KEY);
@@ -41,6 +47,39 @@ interface RequestOptions {
   /** Envia o Authorization: Bearer quando ha token. Padrao: true. */
   auth?: boolean;
   signal?: AbortSignal;
+}
+
+/** Item do 422 do FastAPI: `{loc: [...], msg: "..."}`. */
+interface ValidationDetail {
+  loc?: unknown[];
+  msg?: string;
+}
+
+/**
+ * Transforma o `detail` do FastAPI em uma frase exibivel.
+ *
+ * Erros de validacao (422) vem como LISTA de objetos, nao string — sem este
+ * tratamento a UI cairia no generico "Erro 422 na requisicao" e esconderia
+ * exatamente a informacao de que o usuario precisa ("senha: deve ter ao
+ * menos 8 caracteres").
+ */
+function describeDetail(detail: unknown): string | null {
+  if (typeof detail === "string") return detail;
+
+  if (Array.isArray(detail)) {
+    const mensagens = (detail as ValidationDetail[])
+      .map((item) => {
+        if (!item?.msg) return null;
+        // `loc` costuma ser ["body", "campo"]; interessa o ultimo trecho.
+        const campo = Array.isArray(item.loc) ? item.loc[item.loc.length - 1] : null;
+        return typeof campo === "string" && campo !== "body" ? `${campo}: ${item.msg}` : item.msg;
+      })
+      .filter((m): m is string => !!m);
+
+    if (mensagens.length > 0) return mensagens.join(" | ");
+  }
+
+  return null;
 }
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -80,7 +119,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   if (!res.ok) {
     const detail = (data as { detail?: unknown } | null)?.detail;
-    throw new ApiError(res.status, typeof detail === "string" ? detail : `Erro ${res.status} na requisicao.`);
+    throw new ApiError(res.status, describeDetail(detail) ?? `Erro ${res.status} na requisicao.`);
   }
 
   return data as T;
@@ -96,10 +135,14 @@ export interface ApiTonerLevel {
 
 export interface ApiPrinterWithStatus {
   id: number;
+  /** Print Server de origem; "" em impressoras cadastradas a mao. */
+  server: string;
   ip: string;
   name: string;
   model: string;
   department: string;
+  /** false = sumiu do Print Server no ultimo sync (nunca e apagada). */
+  active: boolean;
   created_at: string;
   status: string;
   page_count: number;
@@ -212,3 +255,87 @@ export const createPrinter = (data: PrinterInput) =>
 
 export const updatePrinter = (printerId: string | number, data: Partial<PrinterInput>) =>
   api.patch<ApiPrinterWithStatus>(`/api/printers/${printerId}`, data);
+
+/* ── Gestao de contas (/api/users) — somente admin ───────────────────────── */
+
+/** `UserResponse` do backend. Nunca traz hash de senha. */
+export interface ApiUser {
+  id: number;
+  email: string;
+  name: string;
+  role: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface UserCreateInput {
+  email: string;
+  name: string;
+  password: string;
+  role: string;
+}
+
+/** Campos que o admin pode alterar. Todos opcionais (PATCH parcial). */
+export interface UserUpdateInput {
+  name?: string;
+  role?: string;
+  is_active?: boolean;
+  /** Redefinicao de senha pelo admin; enviada em claro e hasheada no backend. */
+  password?: string;
+}
+
+export const fetchUsers = (signal?: AbortSignal) => api.get<ApiUser[]>("/api/users", { signal });
+
+/* ── Print Servers (/api/servers) ────────────────────────────────────────── */
+
+/** `PrintServerResponse` do backend (Fase 4). */
+export interface ApiPrintServer {
+  id: number;
+  host: string;
+  name: string;
+  mode: "mock" | "real";
+  active: boolean;
+  last_status: "unknown" | "online" | "error";
+  last_error: string | null;
+  last_seen_at: string | null;
+  last_sync_at: string | null;
+  created_at: string;
+  printer_count: number;
+  active_printer_count: number;
+  is_default: boolean;
+}
+
+/** O que o sync mudou no banco. */
+export interface ApiSyncResult {
+  server: string;
+  discovered: number;
+  created: number;
+  updated: number;
+  reactivated: number;
+  deactivated: number;
+}
+
+/** Servidores registrados. Leitura — qualquer papel autenticado. */
+export const fetchPrintServers = (signal?: AbortSignal) =>
+  api.get<ApiPrintServer[]>("/api/servers", { signal });
+
+/**
+ * Descoberta de UM servidor: consulta o Print Server e devolve o que existe
+ * agora. NAO grava nada no banco — o par disto e `syncServer`, que grava.
+ * Exige admin.
+ */
+export const discoverServer = (serverId: number) =>
+  api.post<ApiDiscoveryResponse>(`/api/servers/${serverId}/discover`);
+
+/**
+ * Sincroniza UM servidor com o banco: cria as novas, atualiza as existentes
+ * e desativa as que sumiram. Nunca apaga. Escopado ao servidor — impressoras
+ * de outros servidores nao sao tocadas. Exige admin.
+ */
+export const syncServer = (serverId: number) =>
+  api.post<ApiSyncResult>(`/api/servers/${serverId}/sync`);
+
+export const createUser = (data: UserCreateInput) => api.post<ApiUser>("/api/users", data);
+
+export const updateUser = (userId: number, data: UserUpdateInput) =>
+  api.patch<ApiUser>(`/api/users/${userId}`, data);
