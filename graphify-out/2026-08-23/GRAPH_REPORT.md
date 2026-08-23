@@ -5,12 +5,12 @@
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1215 nodes · 2339 edges · 94 communities (62 shown, 32 thin omitted)
+- 1215 nodes · 2341 edges · 94 communities (62 shown, 32 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 111 edges (avg confidence: 0.62)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `df9647eb`
+- Built from commit: `7ea4f963`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -373,7 +373,7 @@ Cohesion: 0.25
 Nodes (4): PrintServerCreate, PrintServerUpdate, `host` fica de fora de proposito: ele e a chave natural que aparece em…, field_validator
 
 ## Knowledge Gaps
-- **257 isolated node(s):** `STATUS_SERVIDOR`, `VALID_STATUS`, `VALID_COLORS`, `ApiMonthlyReport`, `MonthlyPageCount` (+252 more)
+- **257 isolated node(s):** `FormState`, `NavItemProps`, `SidebarProps`, `ChartColors`, `AlertsDonutCardProps` (+252 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **32 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -381,16 +381,16 @@ Nodes (4): PrintServerCreate, PrintServerUpdate, `host` fica de fora de proposit
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `SNMPClient` connect `SNMPClient` to `enrich_discovered_printers`, `printer_fleet.py`, `tests_printer_fleet.py`, `MockSNMPClient`, `SNMPResult`, `Printer`, `.collect_and_save`?**
-  _High betweenness centrality (0.039) - this node is a cross-community bridge._
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
 - **Why does `Printer` connect `Printer` to `tests_print_servers.py`, `printer_fleet.py`, `printers.py`, `servers.py`, `tests_printer_fleet.py`, `User`, `PrintServer`, `services/print_server.py`, `tests_rbac.py`, `alert_engine.py`?**
   _High betweenness centrality (0.024) - this node is a cross-community bridge._
-- **Why does `list_printers_with_status()` connect `printers.py` to `schemas/printer.py`?**
-  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+- **Why does `SNMPResult` connect `SNMPResult` to `enrich_discovered_printers`, `printer_fleet.py`, `tests_printer_fleet.py`, `SNMPClient`, `MockSNMPClient`, `snmp_fleet_mock.py`, `Printer`, `.collect_and_save`?**
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `SNMPClient` (e.g. with `PrinterCollector` and `FakeAgent`) actually correct?**
   _`SNMPClient` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 6 inferred relationships involving `SNMPResult` (e.g. with `enrich_discovered_printers()` and `PrinterCollector`) actually correct?**
   _`SNMPResult` has 6 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 14 inferred relationships involving `Printer` (e.g. with `create_printer()` and `create_server()`) actually correct?**
   _`Printer` has 14 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `STATUS_SERVIDOR`, `VALID_STATUS`, `VALID_COLORS` to the rest of the system?**
+- **What connects `FormState`, `NavItemProps`, `SidebarProps` to the rest of the system?**
   _257 weakly-connected nodes found - possible documentation gaps or missing edges._
