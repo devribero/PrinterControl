@@ -24,6 +24,10 @@ export interface Printer {
   ip: string;
   model: string;
   department: string;
+  /** Print Server de origem; "" quando cadastrada a mao (Fase 4/5). */
+  server: string;
+  /** false = sumiu do Print Server no ultimo sync; o registro e preservado. */
+  active: boolean;
   status: PrinterStatus;
   toner: TonerLevel[] | null;
   pagesPrinted: number;
@@ -49,6 +53,32 @@ export interface DiscoveredPrinter {
   uptime: string | null;
   toners: { color: string; percent: number; description: string }[];
   error: string | null;
+}
+
+/** Print Server registrado, no formato que a UI consome (Fase 5). */
+export interface PrintServer {
+  id: number;
+  host: string;
+  name: string;
+  mode: "mock" | "real";
+  active: boolean;
+  lastStatus: "unknown" | "online" | "error";
+  lastError: string | null;
+  lastSeenAt: string | null;
+  lastSyncAt: string | null;
+  printerCount: number;
+  activePrinterCount: number;
+  isDefault: boolean;
+}
+
+/** Resultado de um sync — o que efetivamente mudou no banco. */
+export interface SyncResult {
+  server: string;
+  discovered: number;
+  created: number;
+  updated: number;
+  reactivated: number;
+  deactivated: number;
 }
 
 export interface Alert {
