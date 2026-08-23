@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from app.database import get_session
-from app.dependencies import require_user
+from app.dependencies import require_admin, require_operator, require_user
 from app.models.user import User
 from datetime import datetime
 
@@ -16,7 +16,15 @@ from app.schemas.printer import (
 )
 from typing import List
 
-router = APIRouter(prefix="/printers", tags=["printers"])
+# Fase 2: TODA rota de impressoras exige sessao. A dependencia fica no
+# router para que nenhuma rota nova nasca publica por esquecimento; as rotas
+# de escrita continuam declarando o papel exigido (require_admin/operator),
+# que roda alem desta.
+router = APIRouter(
+    prefix="/printers",
+    tags=["printers"],
+    dependencies=[Depends(require_user)],
+)
 
 
 @router.get("", response_model=List[PrinterResponse])
@@ -152,7 +160,7 @@ def get_printer(printer_id: int, session: Session = Depends(get_session)):
 def create_printer(
     printer_data: PrinterCreate,
     session: Session = Depends(get_session),
-    _user: User = Depends(require_user),
+    _user: User = Depends(require_admin),
 ):
     # Etapa 4: identidade e (server, name) — IP pode repetir (varias
     # impressoras no mesmo Print Server compartilham porta/endereco).
@@ -178,7 +186,7 @@ def update_printer(
     printer_id: int,
     printer_data: PrinterUpdate,
     session: Session = Depends(get_session),
-    _user: User = Depends(require_user),
+    _user: User = Depends(require_admin),
 ):
     printer = session.get(Printer, printer_id)
     if not printer:
@@ -225,7 +233,7 @@ def create_printer_reading(
     printer_id: int,
     reading_data: PrinterReadingCreate,
     session: Session = Depends(get_session),
-    _user: User = Depends(require_user),
+    _user: User = Depends(require_operator),
 ):
     printer = session.get(Printer, printer_id)
     if not printer:

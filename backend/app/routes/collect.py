@@ -14,9 +14,9 @@ from sqlmodel import Session, select
 
 from app.config import settings
 from app.database import get_session
-from app.dependencies import require_user
+from app.dependencies import require_admin, require_operator
 from app.models.printer import Printer
-from app.models.user import User
+from app.models.user import Role, User
 from app.services.printer_collector import PrinterCollector
 from app.services.scheduler import scheduler_status
 from app.services.snmp_mock import SCENARIOS
@@ -64,10 +64,21 @@ def collect_printer(
     printer_id: int,
     request: CollectRequest,
     session: Session = Depends(get_session),
-    _user: User = Depends(require_user),
+    user: User = Depends(require_operator),
 ):
-    """Coleta uma impressora e persiste a leitura."""
+    """
+    Coleta uma impressora e persiste a leitura.
+
+    Coleta REAL e operacional (operator). Coleta SIMULADA grava leituras
+    ficticias no banco como se fossem reais — e uma ferramenta de
+    desenvolvimento, entao exige admin alem do ALLOW_MOCK_COLLECT.
+    """
     if request.mode == "mock":
+        if not user.has_role(Role.ADMIN.value):
+            raise HTTPException(
+                status_code=403,
+                detail="Coleta simulada e uma operacao administrativa.",
+            )
         if not settings.allow_mock_collect:
             raise HTTPException(
                 status_code=403,
@@ -108,7 +119,7 @@ class FleetCollectResponse(BaseModel):
 @router.post("/fleet", response_model=FleetCollectResponse)
 def collect_fleet(
     session: Session = Depends(get_session),
-    _user: User = Depends(require_user),
+    _user: User = Depends(require_admin),
 ):
     """
     Coleta simulada de TODAS as impressoras cadastradas, em uma chamada.
@@ -168,7 +179,7 @@ def collect_fleet(
 
 
 @router.get("/scenarios")
-def list_scenarios():
+def list_scenarios(_user: User = Depends(require_admin)):
     """Cenarios simulados disponiveis e se o modo mock esta habilitado."""
     return {
         "mock_enabled": settings.allow_mock_collect,
@@ -178,6 +189,6 @@ def list_scenarios():
 
 
 @router.get("/scheduler")
-def get_scheduler_status():
+def get_scheduler_status(_user: User = Depends(require_admin)):
     """Estado da coleta agendada (APScheduler)."""
     return scheduler_status()

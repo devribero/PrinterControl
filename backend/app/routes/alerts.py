@@ -2,14 +2,20 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from datetime import datetime
 from app.database import get_session
-from app.dependencies import require_user
+from app.dependencies import require_operator, require_user
 from app.models.alert import Alert
 from app.models.printer import Printer
 from app.models.user import User
 from app.services.webhook_notifier import send_toner_alert_webhook
 from typing import List
 
-router = APIRouter(prefix="/alerts", tags=["alerts"])
+# Fase 2: alertas expoem estado da frota — exigem sessao em todas as rotas.
+# As acoes (notify/resolve) continuam declarando require_operator por cima.
+router = APIRouter(
+    prefix="/alerts",
+    tags=["alerts"],
+    dependencies=[Depends(require_user)],
+)
 
 
 @router.get("")
@@ -54,7 +60,7 @@ def get_alert(alert_id: int, session: Session = Depends(get_session)):
 def notify_alert(
     alert_id: int,
     session: Session = Depends(get_session),
-    _user: User = Depends(require_user),
+    _user: User = Depends(require_operator),
 ):
     """
     Disparo manual do webhook de alerta (Etapa 6) — equivalente ao botao
@@ -89,7 +95,16 @@ def notify_alert(
 
 
 @router.patch("/{alert_id}/resolve")
-def resolve_alert(alert_id: int, session: Session = Depends(get_session)):
+def resolve_alert(
+    alert_id: int,
+    session: Session = Depends(get_session),
+    _user: User = Depends(require_operator),
+):
+    """
+    Resolve um alerta. Ate a Fase 1 esta rota estava SEM protecao alguma —
+    qualquer um com acesso a API podia apagar alertas ativos do painel. E
+    uma acao operacional: exige operator (admin herda).
+    """
     alert = session.get(Alert, alert_id)
     if not alert:
         raise HTTPException(status_code=404, detail="Alerta não encontrado")

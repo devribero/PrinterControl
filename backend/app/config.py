@@ -1,4 +1,4 @@
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings
 from pathlib import Path
 
@@ -8,14 +8,24 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_DB_PATH = BACKEND_DIR / "printer_control.db"
 
 
+# Valor historico do secret_key. Continua sendo o default para nao quebrar o
+# ambiente de desenvolvimento, mas e explicitamente recusado em producao.
+DEV_SECRET_KEY = "dev-secret-key-change-in-production"
+MIN_PRODUCTION_SECRET_LENGTH = 32
+
+
 class Settings(BaseSettings):
+    # Ambiente de execucao: "development" (padrao, local) ou "production".
+    # Em producao a validacao de seguranca abaixo passa a ser obrigatoria.
+    environment: str = "development"
+
     # Database — caminho ABSOLUTO de proposito: com um caminho relativo o
     # SQLite seguiria o cwd e um `uvicorn` iniciado da raiz do projeto criaria
     # um banco vazio no lugar errado.
     database_url: str = f"sqlite:///{DEFAULT_DB_PATH.as_posix()}"
 
     # JWT
-    secret_key: str = "dev-secret-key-change-in-production"
+    secret_key: str = DEV_SECRET_KEY
     algorithm: str = "HS256"
     access_token_expire_hours: int = 24
 
@@ -64,6 +74,35 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     webhook_url: str = ""
     webhook_timeout_seconds: float = 5.0
+
+    @property
+    def is_production(self) -> bool:
+        return self.environment.strip().lower() == "production"
+
+    @model_validator(mode="after")
+    def _validate_production_secrets(self) -> "Settings":
+        """
+        Impede que um ambiente de producao suba silenciosamente com o secret
+        de desenvolvimento. Em development nada muda — o default continua
+        valendo, apenas fica claramente identificado como tal.
+        """
+        if not self.is_production:
+            return self
+
+        if self.secret_key == DEV_SECRET_KEY or not self.secret_key.strip():
+            raise ValueError(
+                "SECRET_KEY invalida para ENVIRONMENT=production: defina uma chave "
+                "propria (ex.: `python -c \"import secrets;print(secrets.token_urlsafe(48))\"`). "
+                "O valor de desenvolvimento e publico e permitiria forjar JWTs."
+            )
+
+        if len(self.secret_key) < MIN_PRODUCTION_SECRET_LENGTH:
+            raise ValueError(
+                f"SECRET_KEY muito curta para producao: use ao menos "
+                f"{MIN_PRODUCTION_SECRET_LENGTH} caracteres."
+            )
+
+        return self
 
     @field_validator("database_url")
     @classmethod
