@@ -137,10 +137,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_types_printer",
       "community": 11,
       "community_name": "Printer",
-      "norm_label": "printer"
+      "norm_label": "printer",
+      "id": "src_types_printer"
     },
     {
       "label": "MockSNMPScenarios",
@@ -202,10 +202,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_models_printer_printer",
       "community": 25,
       "community_name": "Printer",
-      "norm_label": "printer",
-      "id": "backend_app_models_printer_printer"
+      "norm_label": "printer"
     },
     {
       "label": "PrinterMonthly",
@@ -215,10 +215,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_models_printer_printermonthly",
       "community": 25,
       "community_name": "Printer",
-      "norm_label": "printermonthly",
-      "id": "backend_app_models_printer_printermonthly"
+      "norm_label": "printermonthly"
     },
     {
       "label": "PrinterReading",
@@ -228,10 +228,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_models_printer_printerreading",
       "community": 25,
       "community_name": "Printer",
-      "norm_label": "printerreading",
-      "id": "backend_app_models_printer_printerreading"
+      "norm_label": "printerreading"
     },
     {
       "label": "PrinterCollector",
@@ -462,10 +462,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_types_monthlyusage",
       "community": 29,
       "community_name": "cn",
-      "norm_label": "monthlyusage"
+      "norm_label": "monthlyusage",
+      "id": "src_types_monthlyusage"
     },
     {
       "label": "MonthlyUsageEntry",
@@ -475,10 +475,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_types_monthlyusageentry",
       "community": 29,
       "community_name": "cn",
-      "norm_label": "monthlyusageentry"
+      "norm_label": "monthlyusageentry",
+      "id": "src_types_monthlyusageentry"
     },
     {
       "label": "DiscoveryResultsProps",
@@ -501,10 +501,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_types_discoveredprinter",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "discoveredprinter"
+      "norm_label": "discoveredprinter",
+      "id": "src_types_discoveredprinter"
     },
     {
       "label": "AlertBannerProps",
@@ -540,10 +540,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_types_alert",
       "community": 33,
       "community_name": "AlertsView.tsx",
-      "norm_label": "alert"
+      "norm_label": "alert",
+      "id": "src_types_alert"
     },
     {
       "label": "Config",
@@ -644,10 +644,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_lib_adaptapi_apimonthlyreport",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "apimonthlyreport"
+      "norm_label": "apimonthlyreport",
+      "id": "src_lib_adaptapi_apimonthlyreport"
     },
     {
       "label": "ApiAlert",
@@ -826,10 +826,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_types_printserver",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "printserver"
+      "norm_label": "printserver",
+      "id": "src_types_printserver"
     },
     {
       "label": "SyncResult",
@@ -839,10 +839,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_types_syncresult",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "syncresult"
+      "norm_label": "syncresult",
+      "id": "src_types_syncresult"
     },
     {
       "label": "PrintServerResponse",
@@ -852,10 +852,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_printserverresponse",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "printserverresponse",
-      "id": "backend_app_routes_servers_printserverresponse"
+      "norm_label": "printserverresponse"
     },
     {
       "label": "ServerStatus",
@@ -865,10 +865,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_serverstatus",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "serverstatus",
-      "id": "backend_app_routes_servers_serverstatus"
+      "norm_label": "serverstatus"
     },
     {
       "label": "SyncResponse",
@@ -878,10 +878,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_syncresponse",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "syncresponse",
-      "id": "backend_app_routes_servers_syncresponse"
+      "norm_label": "syncresponse"
     },
     {
       "label": "DepartmentBreakdownProps",
@@ -904,10 +904,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_data_printers_departmentusage",
       "community": 39,
       "community_name": "toast.tsx",
-      "norm_label": "departmentusage"
+      "norm_label": "departmentusage",
+      "id": "src_data_printers_departmentusage"
     },
     {
       "label": "ToastContextValue",
@@ -1073,10 +1073,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_types_monthlypagecount",
       "community": 42,
       "community_name": "types.ts",
-      "norm_label": "monthlypagecount"
+      "norm_label": "monthlypagecount",
+      "id": "src_types_monthlypagecount"
     },
     {
       "label": "TonerLevel",
@@ -1086,10 +1086,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_types_tonerlevel",
       "community": 42,
       "community_name": "types.ts",
-      "norm_label": "tonerlevel"
+      "norm_label": "tonerlevel",
+      "id": "src_types_tonerlevel"
     },
     {
       "label": "Role",
@@ -1125,10 +1125,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_models_print_server_printserver",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "printserver",
-      "id": "backend_app_models_print_server_printserver"
+      "norm_label": "printserver"
     },
     {
       "label": "ServerMode",
@@ -1138,10 +1138,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_models_print_server_servermode",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "servermode",
-      "id": "backend_app_models_print_server_servermode"
+      "norm_label": "servermode"
     },
     {
       "label": "SyncResult",
@@ -1151,10 +1151,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_services_printer_sync_syncresult",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "syncresult",
-      "id": "backend_app_services_printer_sync_syncresult"
+      "norm_label": "syncresult"
     },
     {
       "label": "DiscoveredPrinter",
@@ -1164,10 +1164,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_services_print_server_discoveredprinter",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "discoveredprinter",
-      "id": "backend_app_services_print_server_discoveredprinter"
+      "norm_label": "discoveredprinter"
     },
     {
       "label": "PrintServerError",
@@ -1177,10 +1177,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_services_print_server_printservererror",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "printservererror",
-      "id": "backend_app_services_print_server_printservererror"
+      "norm_label": "printservererror"
     },
     {
       "label": "MockSNMPClient",
@@ -1242,10 +1242,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_types_monthlyreport",
       "community": 50,
       "community_name": "app-data.tsx",
-      "norm_label": "monthlyreport"
+      "norm_label": "monthlyreport",
+      "id": "src_types_monthlyreport"
     },
     {
       "label": "FleetMockClient",
@@ -1385,10 +1385,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_types_printerstatus",
       "community": 56,
       "community_name": "PrinterTable.tsx",
-      "norm_label": "printerstatus"
+      "norm_label": "printerstatus",
+      "id": "src_types_printerstatus"
     },
     {
       "label": "DecommissionedListProps",
@@ -1411,10 +1411,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "id": "src_data_printers_decommissionedprinter",
       "community": 57,
       "community_name": "printers.ts",
-      "norm_label": "decommissionedprinter"
+      "norm_label": "decommissionedprinter",
+      "id": "src_data_printers_decommissionedprinter"
     },
     {
       "label": "ApiUser",
@@ -1567,10 +1567,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_discoveredprinterresponse",
       "community": 7,
       "community_name": "BaseModel",
-      "norm_label": "discoveredprinterresponse",
-      "id": "backend_app_routes_servers_discoveredprinterresponse"
+      "norm_label": "discoveredprinterresponse"
     },
     {
       "label": "DiscoverResponse",
@@ -1580,10 +1580,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_discoverresponse",
       "community": 7,
       "community_name": "BaseModel",
-      "norm_label": "discoverresponse",
-      "id": "backend_app_routes_servers_discoverresponse"
+      "norm_label": "discoverresponse"
     },
     {
       "label": "UserLogin",
@@ -1632,10 +1632,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_printservercreate",
       "community": 80,
       "community_name": "field_validator",
-      "norm_label": "printservercreate",
-      "id": "backend_app_routes_servers_printservercreate"
+      "norm_label": "printservercreate"
     },
     {
       "label": "PrintServerUpdate",
@@ -1645,10 +1645,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_printserverupdate",
       "community": 80,
       "community_name": "field_validator",
-      "norm_label": "printserverupdate",
-      "id": "backend_app_routes_servers_printserverupdate"
+      "norm_label": "printserverupdate"
     },
     {
       "label": "ComingSoonProps",
@@ -2630,10 +2630,10 @@
       "source_location": "L11",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_app_network_page_networkpage",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "networkpage()"
+      "norm_label": "networkpage()",
+      "id": "src_app_network_page_networkpage"
     },
     {
       "label": "DiscoveryResults()",
@@ -2666,10 +2666,10 @@
       "source_location": "L46",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_components_networkview_adaptdiscovered",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "adaptdiscovered()"
+      "norm_label": "adaptdiscovered()",
+      "id": "src_components_networkview_adaptdiscovered"
     },
     {
       "label": "formatarMomento()",
@@ -2678,10 +2678,10 @@
       "source_location": "L68",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_components_networkview_formatarmomento",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "formatarmomento()"
+      "norm_label": "formatarmomento()",
+      "id": "src_components_networkview_formatarmomento"
     },
     {
       "label": "NetworkView()",
@@ -2690,10 +2690,10 @@
       "source_location": "L86",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_components_networkview_networkview",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "networkview()"
+      "norm_label": "networkview()",
+      "id": "src_components_networkview_networkview"
     },
     {
       "label": "executarDescoberta()",
@@ -2702,10 +2702,10 @@
       "source_location": "L165",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_components_networkview_networkview_executardescoberta",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "executardescoberta()"
+      "norm_label": "executardescoberta()",
+      "id": "src_components_networkview_networkview_executardescoberta"
     },
     {
       "label": "executarSync()",
@@ -2714,10 +2714,10 @@
       "source_location": "L189",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_components_networkview_networkview_executarsync",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "executarsync()"
+      "norm_label": "executarsync()",
+      "id": "src_components_networkview_networkview_executarsync"
     },
     {
       "label": "selecionar()",
@@ -2726,10 +2726,10 @@
       "source_location": "L156",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_components_networkview_networkview_selecionar",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "selecionar()"
+      "norm_label": "selecionar()",
+      "id": "src_components_networkview_networkview_selecionar"
     },
     {
       "label": "adaptPrintServer()",
@@ -2738,10 +2738,10 @@
       "source_location": "L69",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_lib_adaptapi_adaptprintserver",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "adaptprintserver()"
+      "norm_label": "adaptprintserver()",
+      "id": "src_lib_adaptapi_adaptprintserver"
     },
     {
       "label": "adaptSyncResult()",
@@ -2750,10 +2750,10 @@
       "source_location": "L86",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_lib_adaptapi_adaptsyncresult",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "adaptsyncresult()"
+      "norm_label": "adaptsyncresult()",
+      "id": "src_lib_adaptapi_adaptsyncresult"
     },
     {
       "label": "discoverServer()",
@@ -3278,10 +3278,10 @@
       "source_location": "L53",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_lib_adaptapi_adaptprinter",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "adaptprinter()"
+      "norm_label": "adaptprinter()",
+      "id": "src_lib_adaptapi_adaptprinter"
     },
     {
       "label": "formatLastSeen()",
@@ -3290,10 +3290,10 @@
       "source_location": "L34",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_lib_adaptapi_formatlastseen",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "formatlastseen()"
+      "norm_label": "formatlastseen()",
+      "id": "src_lib_adaptapi_formatlastseen"
     },
     {
       "label": "toStatus()",
@@ -3302,10 +3302,10 @@
       "source_location": "L19",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_lib_adaptapi_tostatus",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "tostatus()"
+      "norm_label": "tostatus()",
+      "id": "src_lib_adaptapi_tostatus"
     },
     {
       "label": "toToner()",
@@ -3314,10 +3314,10 @@
       "source_location": "L23",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_lib_adaptapi_totoner",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "totoner()"
+      "norm_label": "totoner()",
+      "id": "src_lib_adaptapi_totoner"
     },
     {
       "label": "apiRequest()",
@@ -3506,10 +3506,10 @@
       "source_location": "L274",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_create_server",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "create_server()",
-      "id": "backend_app_routes_servers_create_server"
+      "norm_label": "create_server()"
     },
     {
       "label": "discover()",
@@ -3518,10 +3518,10 @@
       "source_location": "L333",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_discover",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "discover()",
-      "id": "backend_app_routes_servers_discover"
+      "norm_label": "discover()"
     },
     {
       "label": "discover_server()",
@@ -3530,10 +3530,10 @@
       "source_location": "L363",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_discover_server",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "discover_server()",
-      "id": "backend_app_routes_servers_discover_server"
+      "norm_label": "discover_server()"
     },
     {
       "label": "get_current_server()",
@@ -3542,10 +3542,10 @@
       "source_location": "L256",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_get_current_server",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "get_current_server()",
-      "id": "backend_app_routes_servers_get_current_server"
+      "norm_label": "get_current_server()"
     },
     {
       "label": "_get_or_404()",
@@ -3554,10 +3554,10 @@
       "source_location": "L182",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_get_or_404",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "_get_or_404()",
-      "id": "backend_app_routes_servers_get_or_404"
+      "norm_label": "_get_or_404()"
     },
     {
       "label": "list_servers()",
@@ -3566,10 +3566,10 @@
       "source_location": "L267",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_list_servers",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "list_servers()",
-      "id": "backend_app_routes_servers_list_servers"
+      "norm_label": "list_servers()"
     },
     {
       "label": "_marcar_resultado()",
@@ -3578,10 +3578,10 @@
       "source_location": "L189",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_marcar_resultado",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "_marcar_resultado()",
-      "id": "backend_app_routes_servers_marcar_resultado"
+      "norm_label": "_marcar_resultado()"
     },
     {
       "label": "sync()",
@@ -3590,10 +3590,10 @@
       "source_location": "L348",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_sync",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "sync()",
-      "id": "backend_app_routes_servers_sync"
+      "norm_label": "sync()"
     },
     {
       "label": "sync_server()",
@@ -3602,10 +3602,10 @@
       "source_location": "L387",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_sync_server",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "sync_server()",
-      "id": "backend_app_routes_servers_sync_server"
+      "norm_label": "sync_server()"
     },
     {
       "label": "_to_response()",
@@ -3614,10 +3614,10 @@
       "source_location": "L149",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_to_response",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "_to_response()",
-      "id": "backend_app_routes_servers_to_response"
+      "norm_label": "_to_response()"
     },
     {
       "label": "update_server()",
@@ -3626,10 +3626,10 @@
       "source_location": "L307",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_update_server",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "update_server()",
-      "id": "backend_app_routes_servers_update_server"
+      "norm_label": "update_server()"
     },
     {
       "label": "ReportsPage()",
@@ -4466,10 +4466,10 @@
       "source_location": "L84",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_models_print_server_printserver_display_name",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": ".display_name()",
-      "id": "backend_app_models_print_server_printserver_display_name"
+      "norm_label": ".display_name()"
     },
     {
       "label": "obter_modelo()",
@@ -4502,10 +4502,10 @@
       "source_location": "L36",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_services_printer_sync_sync_printers",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "sync_printers()",
-      "id": "backend_app_services_printer_sync_sync_printers"
+      "norm_label": "sync_printers()"
     },
     {
       "label": "discover_printers()",
@@ -4514,10 +4514,10 @@
       "source_location": "L157",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_services_print_server_discover_printers",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "discover_printers()",
-      "id": "backend_app_services_print_server_discover_printers"
+      "norm_label": "discover_printers()"
     },
     {
       "label": "_mock_discover()",
@@ -4526,10 +4526,10 @@
       "source_location": "L47",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_services_print_server_mock_discover",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "_mock_discover()",
-      "id": "backend_app_services_print_server_mock_discover"
+      "norm_label": "_mock_discover()"
     },
     {
       "label": "_real_discover()",
@@ -4538,10 +4538,10 @@
       "source_location": "L109",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_services_print_server_real_discover",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "_real_discover()",
-      "id": "backend_app_services_print_server_real_discover"
+      "norm_label": "_real_discover()"
     },
     {
       "label": "_run_powershell_json()",
@@ -4550,10 +4550,10 @@
       "source_location": "L75",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_services_print_server_run_powershell_json",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "_run_powershell_json()",
-      "id": "backend_app_services_print_server_run_powershell_json"
+      "norm_label": "_run_powershell_json()"
     },
     {
       "label": "check()",
@@ -4586,10 +4586,10 @@
       "source_location": "L56",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_tests_printer_sync_check",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "check()",
-      "id": "backend_tests_printer_sync_check"
+      "norm_label": "check()"
     },
     {
       "label": "check_true()",
@@ -4598,10 +4598,10 @@
       "source_location": "L63",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_tests_printer_sync_check_true",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "check_true()",
-      "id": "backend_tests_printer_sync_check_true"
+      "norm_label": "check_true()"
     },
     {
       "label": "fake_discover()",
@@ -4610,10 +4610,10 @@
       "source_location": "L109",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_tests_printer_sync_fake_discover",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "fake_discover()",
-      "id": "backend_tests_printer_sync_fake_discover"
+      "norm_label": "fake_discover()"
     },
     {
       "label": ".__init__()",
@@ -4682,10 +4682,10 @@
       "source_location": "L90",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_lib_adaptapi_adaptalert",
       "community": 50,
       "community_name": "app-data.tsx",
-      "norm_label": "adaptalert()"
+      "norm_label": "adaptalert()",
+      "id": "src_lib_adaptapi_adaptalert"
     },
     {
       "label": "loadMonthlyReportFromApi()",
@@ -4694,10 +4694,10 @@
       "source_location": "L121",
       "_callable": true,
       "_origin": "ast",
-      "id": "src_lib_adaptapi_loadmonthlyreportfromapi",
       "community": 50,
       "community_name": "app-data.tsx",
-      "norm_label": "loadmonthlyreportfromapi()"
+      "norm_label": "loadmonthlyreportfromapi()",
+      "id": "src_lib_adaptapi_loadmonthlyreportfromapi"
     },
     {
       "label": "discoverPrinters()",
@@ -5678,10 +5678,10 @@
       "source_location": "L36",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_tests_print_servers_check",
       "community": 65,
       "community_name": "tests_print_servers.py",
-      "norm_label": "check()",
-      "id": "backend_tests_print_servers_check"
+      "norm_label": "check()"
     },
     {
       "label": "check_true()",
@@ -5690,10 +5690,10 @@
       "source_location": "L43",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_tests_print_servers_check_true",
       "community": 65,
       "community_name": "tests_print_servers.py",
-      "norm_label": "check_true()",
-      "id": "backend_tests_print_servers_check_true"
+      "norm_label": "check_true()"
     },
     {
       "label": "h()",
@@ -5702,10 +5702,10 @@
       "source_location": "L57",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_tests_print_servers_h",
       "community": 65,
       "community_name": "tests_print_servers.py",
-      "norm_label": "h()",
-      "id": "backend_tests_print_servers_h"
+      "norm_label": "h()"
     },
     {
       "label": "main()",
@@ -5714,10 +5714,10 @@
       "source_location": "L61",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_tests_print_servers_main",
       "community": 65,
       "community_name": "tests_print_servers.py",
-      "norm_label": "main()",
-      "id": "backend_tests_print_servers_main"
+      "norm_label": "main()"
     },
     {
       "label": "_testa_migracao_legada()",
@@ -5726,10 +5726,10 @@
       "source_location": "L220",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_tests_print_servers_testa_migracao_legada",
       "community": 65,
       "community_name": "tests_print_servers.py",
-      "norm_label": "_testa_migracao_legada()",
-      "id": "backend_tests_print_servers_testa_migracao_legada"
+      "norm_label": "_testa_migracao_legada()"
     },
     {
       "label": "get_alert()",
@@ -5870,10 +5870,10 @@
       "source_location": "L208",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_executar_discover",
       "community": 7,
       "community_name": "BaseModel",
-      "norm_label": "_executar_discover()",
-      "id": "backend_app_routes_servers_executar_discover"
+      "norm_label": "_executar_discover()"
     },
     {
       "label": ".setUp()",
@@ -6146,10 +6146,10 @@
       "source_location": "L80",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_printservercreate_mode_valido",
       "community": 80,
       "community_name": "field_validator",
-      "norm_label": "._mode_valido()",
-      "id": "backend_app_routes_servers_printservercreate_mode_valido"
+      "norm_label": "._mode_valido()"
     },
     {
       "label": "._trim()",
@@ -6158,10 +6158,10 @@
       "source_location": "L75",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_printservercreate_trim",
       "community": 80,
       "community_name": "field_validator",
-      "norm_label": "._trim()",
-      "id": "backend_app_routes_servers_printservercreate_trim"
+      "norm_label": "._trim()"
     },
     {
       "label": "._mode_valido()",
@@ -6170,10 +6170,10 @@
       "source_location": "L99",
       "_callable": true,
       "_origin": "ast",
+      "id": "backend_app_routes_servers_printserverupdate_mode_valido",
       "community": 80,
       "community_name": "field_validator",
-      "norm_label": "._mode_valido()",
-      "id": "backend_app_routes_servers_printserverupdate_mode_valido"
+      "norm_label": "._mode_valido()"
     },
     {
       "label": "._name_not_blank()",
@@ -7398,10 +7398,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
+      "id": "exception",
       "community": 21,
       "community_name": "unhandled_exception_handler",
-      "norm_label": "exception",
-      "id": "exception"
+      "norm_label": "exception"
     },
     {
       "label": "exception_handler",
@@ -7508,10 +7508,10 @@
       "source_file": "backend/app/models/__init__.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_app_models_init",
       "community": 25,
       "community_name": "Printer",
-      "norm_label": "models/__init__.py",
-      "id": "backend_app_models_init"
+      "norm_label": "models/__init__.py"
     },
     {
       "label": "models/printer.py",
@@ -7519,10 +7519,10 @@
       "source_file": "backend/app/models/printer.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_app_models_printer",
       "community": 25,
       "community_name": "Printer",
-      "norm_label": "models/printer.py",
-      "id": "backend_app_models_printer"
+      "norm_label": "models/printer.py"
     },
     {
       "label": "SQLModel",
@@ -7530,10 +7530,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
+      "id": "backend_app_models_printer_py_sqlmodel",
       "community": 25,
       "community_name": "Printer",
-      "norm_label": "sqlmodel",
-      "id": "backend_app_models_printer_py_sqlmodel"
+      "norm_label": "sqlmodel"
     },
     {
       "label": "printer_collector.py",
@@ -7574,10 +7574,10 @@
       "source_file": "backend/app/models/printer.py",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "backend_app_models_printer_rationale_7",
       "community": 25,
       "community_name": "Printer",
-      "norm_label": "etapa 4: identidade e (server, name), nao ip \u2014 o print server permite varias...",
-      "id": "backend_app_models_printer_rationale_7"
+      "norm_label": "etapa 4: identidade e (server, name), nao ip \u2014 o print server permite varias..."
     },
     {
       "label": "Orquestrador da coleta de impressoras. Separa as tres responsabilidades da\u2026",
@@ -7805,10 +7805,10 @@
       "source_file": "src/data/printers.ts",
       "source_location": "L1223",
       "_origin": "ast",
-      "id": "src_data_printers_networkhistory",
       "community": 29,
       "community_name": "cn",
-      "norm_label": "networkhistory"
+      "norm_label": "networkhistory",
+      "id": "src_data_printers_networkhistory"
     },
     {
       "label": "chartColors.ts",
@@ -8113,10 +8113,10 @@
       "source_file": "src/app/network/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "src_app_network_page",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "network/page.tsx"
+      "norm_label": "network/page.tsx",
+      "id": "src_app_network_page"
     },
     {
       "label": "DiscoveryResults.tsx",
@@ -8135,10 +8135,10 @@
       "source_file": "src/components/NetworkView.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "src_components_networkview",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "networkview.tsx"
+      "norm_label": "networkview.tsx",
+      "id": "src_components_networkview"
     },
     {
       "label": "STATUS_SERVIDOR",
@@ -8146,10 +8146,10 @@
       "source_file": "src/components/NetworkView.tsx",
       "source_location": "L80",
       "_origin": "ast",
-      "id": "src_components_networkview_status_servidor",
       "community": 32,
       "community_name": "NetworkView.tsx",
-      "norm_label": "status_servidor"
+      "norm_label": "status_servidor",
+      "id": "src_components_networkview_status_servidor"
     },
     {
       "label": "apiErrors.ts",
@@ -8256,10 +8256,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
+      "id": "patch",
       "community": 34,
       "community_name": "users.py",
-      "norm_label": "patch",
-      "id": "patch"
+      "norm_label": "patch"
     },
     {
       "label": "Session",
@@ -8476,10 +8476,10 @@
       "source_file": "src/lib/adaptApi.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "src_lib_adaptapi",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "adaptapi.ts"
+      "norm_label": "adaptapi.ts",
+      "id": "src_lib_adaptapi"
     },
     {
       "label": "VALID_COLORS",
@@ -8487,10 +8487,10 @@
       "source_file": "src/lib/adaptApi.ts",
       "source_location": "L17",
       "_origin": "ast",
-      "id": "src_lib_adaptapi_valid_colors",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "valid_colors"
+      "norm_label": "valid_colors",
+      "id": "src_lib_adaptapi_valid_colors"
     },
     {
       "label": "VALID_STATUS",
@@ -8498,10 +8498,10 @@
       "source_file": "src/lib/adaptApi.ts",
       "source_location": "L16",
       "_origin": "ast",
-      "id": "src_lib_adaptapi_valid_status",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "valid_status"
+      "norm_label": "valid_status",
+      "id": "src_lib_adaptapi_valid_status"
     },
     {
       "label": "api.ts",
@@ -8641,10 +8641,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_app_routes_servers",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "servers.py",
-      "id": "backend_app_routes_servers"
+      "norm_label": "servers.py"
     },
     {
       "label": "Session",
@@ -8652,10 +8652,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_py_session",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "session",
-      "id": "backend_app_routes_servers_py_session"
+      "norm_label": "session"
     },
     {
       "label": "get",
@@ -8663,10 +8663,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
+      "id": "get",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "get",
-      "id": "get"
+      "norm_label": "get"
     },
     {
       "label": "post",
@@ -8674,10 +8674,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
+      "id": "post",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "post",
-      "id": "post"
+      "norm_label": "post"
     },
     {
       "label": "User",
@@ -8685,10 +8685,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
+      "id": "user",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "user",
-      "id": "user"
+      "norm_label": "user"
     },
     {
       "label": "Conta autenticada e seu papel \u2014 usado para decidir o que exibir/permitir.",
@@ -8707,10 +8707,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_1",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "print servers \u2014 registro (fase 4) e descoberta/sincronizacao (etapas 3 e 4)....",
-      "id": "backend_app_routes_servers_rationale_1"
+      "norm_label": "print servers \u2014 registro (fase 4) e descoberta/sincronizacao (etapas 3 e 4)...."
     },
     {
       "label": "Conta as impressoras pela CHAVE NATURAL (host == printers.server). Contar por\u2026",
@@ -8718,10 +8718,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L150",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_150",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "conta as impressoras pela chave natural (host == printers.server). contar por...",
-      "id": "backend_app_routes_servers_rationale_150"
+      "norm_label": "conta as impressoras pela chave natural (host == printers.server). contar por..."
     },
     {
       "label": "Registra o desfecho da ultima descoberta/sync no proprio servidor.",
@@ -8729,10 +8729,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L192",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_192",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "registra o desfecho da ultima descoberta/sync no proprio servidor.",
-      "id": "backend_app_routes_servers_rationale_192"
+      "norm_label": "registra o desfecho da ultima descoberta/sync no proprio servidor."
     },
     {
       "label": "Print Server padrao (`PRINT_SERVER_HOST`) e o modo global. Mantida como estava\u2026",
@@ -8740,10 +8740,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L257",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_257",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "print server padrao (`print_server_host`) e o modo global. mantida como estava...",
-      "id": "backend_app_routes_servers_rationale_257"
+      "norm_label": "print server padrao (`print_server_host`) e o modo global. mantida como estava..."
     },
     {
       "label": "Servidores registrados, com a contagem de impressoras de cada um.",
@@ -8751,10 +8751,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L268",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_268",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "servidores registrados, com a contagem de impressoras de cada um.",
-      "id": "backend_app_routes_servers_rationale_268"
+      "norm_label": "servidores registrados, com a contagem de impressoras de cada um."
     },
     {
       "label": "Registra um Print Server. O host e unico \u2014 e a chave natural.",
@@ -8762,10 +8762,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L279",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_279",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "registra um print server. o host e unico \u2014 e a chave natural.",
-      "id": "backend_app_routes_servers_rationale_279"
+      "norm_label": "registra um print server. o host e unico \u2014 e a chave natural."
     },
     {
       "label": "Altera rotulo, modo e ativacao. `host` nao muda (ver PrintServerUpdate).",
@@ -8773,10 +8773,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L313",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_313",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "altera rotulo, modo e ativacao. `host` nao muda (ver printserverupdate).",
-      "id": "backend_app_routes_servers_rationale_313"
+      "norm_label": "altera rotulo, modo e ativacao. `host` nao muda (ver printserverupdate)."
     },
     {
       "label": "Descobre as impressoras do servidor PADRAO (equivalente a Get-Printer + Get-\u2026",
@@ -8784,10 +8784,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L334",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_334",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "descobre as impressoras do servidor padrao (equivalente a get-printer + get-...",
-      "id": "backend_app_routes_servers_rationale_334"
+      "norm_label": "descobre as impressoras do servidor padrao (equivalente a get-printer + get-..."
     },
     {
       "label": "Descobre e sincroniza o servidor PADRAO com o banco (Etapa 4): cria as novas,\u2026",
@@ -8795,10 +8795,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L349",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_349",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "descobre e sincroniza o servidor padrao com o banco (etapa 4): cria as novas,...",
-      "id": "backend_app_routes_servers_rationale_349"
+      "norm_label": "descobre e sincroniza o servidor padrao com o banco (etapa 4): cria as novas,..."
     },
     {
       "label": "Descoberta de UM servidor registrado, no modo configurado nele.",
@@ -8806,10 +8806,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L368",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_368",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "descoberta de um servidor registrado, no modo configurado nele.",
-      "id": "backend_app_routes_servers_rationale_368"
+      "norm_label": "descoberta de um servidor registrado, no modo configurado nele."
     },
     {
       "label": "Sincroniza UM servidor registrado. O escopo por servidor ja era garantido pelo\u2026",
@@ -8817,10 +8817,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L392",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_392",
       "community": 38,
       "community_name": "servers.py",
-      "norm_label": "sincroniza um servidor registrado. o escopo por servidor ja era garantido pelo...",
-      "id": "backend_app_routes_servers_rationale_392"
+      "norm_label": "sincroniza um servidor registrado. o escopo por servidor ja era garantido pelo..."
     },
     {
       "label": "reports/page.tsx",
@@ -9510,10 +9510,10 @@
       "source_file": "src/types.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "src_types",
       "community": 42,
       "community_name": "types.ts",
-      "norm_label": "types.ts"
+      "norm_label": "types.ts",
+      "id": "src_types"
     },
     {
       "label": "dependencies.py",
@@ -9719,10 +9719,10 @@
       "source_file": "backend/app/models/print_server.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_app_models_print_server",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "models/print_server.py",
-      "id": "backend_app_models_print_server"
+      "norm_label": "models/print_server.py"
     },
     {
       "label": "SQLModel",
@@ -9730,10 +9730,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
+      "id": "backend_app_models_print_server_py_sqlmodel",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "sqlmodel",
-      "id": "backend_app_models_print_server_py_sqlmodel"
+      "norm_label": "sqlmodel"
     },
     {
       "label": "printer_rules.py",
@@ -9752,10 +9752,10 @@
       "source_file": "backend/app/services/printer_sync.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_app_services_printer_sync",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "printer_sync.py",
-      "id": "backend_app_services_printer_sync"
+      "norm_label": "printer_sync.py"
     },
     {
       "label": "Session",
@@ -9763,10 +9763,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
+      "id": "backend_app_services_printer_sync_py_session",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "session",
-      "id": "backend_app_services_printer_sync_py_session"
+      "norm_label": "session"
     },
     {
       "label": "str",
@@ -9774,10 +9774,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
+      "id": "str",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "str",
-      "id": "str"
+      "norm_label": "str"
     },
     {
       "label": "Print Server como entidade (Fase 4). Ate aqui um Print Server existia de duas\u2026",
@@ -9785,10 +9785,10 @@
       "source_file": "backend/app/models/print_server.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_app_models_print_server_rationale_1",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "print server como entidade (fase 4). ate aqui um print server existia de duas...",
-      "id": "backend_app_models_print_server_rationale_1"
+      "norm_label": "print server como entidade (fase 4). ate aqui um print server existia de duas..."
     },
     {
       "label": "Modos aceitos, iguais aos de `settings.print_server_mode`.",
@@ -9796,10 +9796,10 @@
       "source_file": "backend/app/models/print_server.py",
       "source_location": "L36",
       "_origin": "ast",
+      "id": "backend_app_models_print_server_rationale_36",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "modos aceitos, iguais aos de `settings.print_server_mode`.",
-      "id": "backend_app_models_print_server_rationale_36"
+      "norm_label": "modos aceitos, iguais aos de `settings.print_server_mode`."
     },
     {
       "label": "Regras de classificacao portadas do Main.ps1 (Etapa 4). Correspondencia exata:\u2026",
@@ -9840,10 +9840,10 @@
       "source_file": "backend/app/services/printer_sync.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_app_services_printer_sync_rationale_1",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "sincronizacao print server -> banco (etapa 4). print server ->...",
-      "id": "backend_app_services_printer_sync_rationale_1"
+      "norm_label": "sincronizacao print server -> banco (etapa 4). print server ->..."
     },
     {
       "label": "Executa um ciclo completo de sincronizacao para UM Print Server. Ja era\u2026",
@@ -9851,10 +9851,10 @@
       "source_file": "backend/app/services/printer_sync.py",
       "source_location": "L39",
       "_origin": "ast",
+      "id": "backend_app_services_printer_sync_rationale_39",
       "community": 44,
       "community_name": "PrintServer",
-      "norm_label": "executa um ciclo completo de sincronizacao para um print server. ja era...",
-      "id": "backend_app_services_printer_sync_rationale_39"
+      "norm_label": "executa um ciclo completo de sincronizacao para um print server. ja era..."
     },
     {
       "label": "ARCHITECTURE.md",
@@ -10353,10 +10353,10 @@
       "source_file": "backend/app/services/print_server.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_app_services_print_server",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "services/print_server.py",
-      "id": "backend_app_services_print_server"
+      "norm_label": "services/print_server.py"
     },
     {
       "label": "tests_print_server.py",
@@ -10386,10 +10386,10 @@
       "source_file": "backend/tests_printer_sync.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_tests_printer_sync",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "tests_printer_sync.py",
-      "id": "backend_tests_printer_sync"
+      "norm_label": "tests_printer_sync.py"
     },
     {
       "label": "Camada de Print Server (Etapa 3). Reproduz a descoberta de impressoras do\u2026",
@@ -10397,10 +10397,10 @@
       "source_file": "backend/app/services/print_server.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_app_services_print_server_rationale_1",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "camada de print server (etapa 3). reproduz a descoberta de impressoras do...",
-      "id": "backend_app_services_print_server_rationale_1"
+      "norm_label": "camada de print server (etapa 3). reproduz a descoberta de impressoras do..."
     },
     {
       "label": "Equivalente exato de Get-ImpressorasEmpresa + o inicio de Process-\u2026",
@@ -10408,10 +10408,10 @@
       "source_file": "backend/app/services/print_server.py",
       "source_location": "L110",
       "_origin": "ast",
+      "id": "backend_app_services_print_server_rationale_110",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "equivalente exato de get-impressorasempresa + o inicio de process-...",
-      "id": "backend_app_services_print_server_rationale_110"
+      "norm_label": "equivalente exato de get-impressorasempresa + o inicio de process-..."
     },
     {
       "label": "Descobre as impressoras publicadas em um Print Server. `server` e `mode` sao\u2026",
@@ -10419,10 +10419,10 @@
       "source_file": "backend/app/services/print_server.py",
       "source_location": "L160",
       "_origin": "ast",
+      "id": "backend_app_services_print_server_rationale_160",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "descobre as impressoras publicadas em um print server. `server` e `mode` sao...",
-      "id": "backend_app_services_print_server_rationale_160"
+      "norm_label": "descobre as impressoras publicadas em um print server. `server` e `mode` sao..."
     },
     {
       "label": "Uma linha do que Get-Printer + Get-PrinterPort devolveriam, combinadas.",
@@ -10430,10 +10430,10 @@
       "source_file": "backend/app/services/print_server.py",
       "source_location": "L30",
       "_origin": "ast",
+      "id": "backend_app_services_print_server_rationale_30",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "uma linha do que get-printer + get-printerport devolveriam, combinadas.",
-      "id": "backend_app_services_print_server_rationale_30"
+      "norm_label": "uma linha do que get-printer + get-printerport devolveriam, combinadas."
     },
     {
       "label": "RPC ao Print Server falhou ou saida do PowerShell nao pode ser interpretada.",
@@ -10441,10 +10441,10 @@
       "source_file": "backend/app/services/print_server.py",
       "source_location": "L40",
       "_origin": "ast",
+      "id": "backend_app_services_print_server_rationale_40",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "rpc ao print server falhou ou saida do powershell nao pode ser interpretada.",
-      "id": "backend_app_services_print_server_rationale_40"
+      "norm_label": "rpc ao print server falhou ou saida do powershell nao pode ser interpretada."
     },
     {
       "label": "Frota simulada. Inclui de proposito: - drivers que casam as regras de Obter-\u2026",
@@ -10452,10 +10452,10 @@
       "source_file": "backend/app/services/print_server.py",
       "source_location": "L48",
       "_origin": "ast",
+      "id": "backend_app_services_print_server_rationale_48",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "frota simulada. inclui de proposito: - drivers que casam as regras de obter-...",
-      "id": "backend_app_services_print_server_rationale_48"
+      "norm_label": "frota simulada. inclui de proposito: - drivers que casam as regras de obter-..."
     },
     {
       "label": "Executa um comando PowerShell que termina em `ConvertTo-Json` e devolve sempre\u2026",
@@ -10463,10 +10463,10 @@
       "source_file": "backend/app/services/print_server.py",
       "source_location": "L76",
       "_origin": "ast",
+      "id": "backend_app_services_print_server_rationale_76",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "executa um comando powershell que termina em `convertto-json` e devolve sempre...",
-      "id": "backend_app_services_print_server_rationale_76"
+      "norm_label": "executa um comando powershell que termina em `convertto-json` e devolve sempre..."
     },
     {
       "label": "Testes isolados da descoberta do Print Server, sem rede ou banco real.",
@@ -10496,10 +10496,10 @@
       "source_file": "backend/tests_printer_sync.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_tests_printer_sync_rationale_1",
       "community": 46,
       "community_name": "services/print_server.py",
-      "norm_label": "etapa 4 - migracao de schema + sincronizacao print server -> banco. roda...",
-      "id": "backend_tests_printer_sync_rationale_1"
+      "norm_label": "etapa 4 - migracao de schema + sincronizacao print server -> banco. roda..."
     },
     {
       "label": "API_MAP.md",
@@ -12091,10 +12091,10 @@
       "source_file": "src/data/printers.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "src_data_printers",
       "community": 57,
       "community_name": "printers.ts",
-      "norm_label": "printers.ts"
+      "norm_label": "printers.ts",
+      "id": "src_data_printers"
     },
     {
       "label": "decommissionedPrinters",
@@ -12102,10 +12102,10 @@
       "source_file": "src/data/printers.ts",
       "source_location": "L1250",
       "_origin": "ast",
-      "id": "src_data_printers_decommissionedprinters",
       "community": 57,
       "community_name": "printers.ts",
-      "norm_label": "decommissionedprinters"
+      "norm_label": "decommissionedprinters",
+      "id": "src_data_printers_decommissionedprinters"
     },
     {
       "label": "globalToner",
@@ -12113,10 +12113,10 @@
       "source_file": "src/data/printers.ts",
       "source_location": "L1206",
       "_origin": "ast",
-      "id": "src_data_printers_globaltoner",
       "community": 57,
       "community_name": "printers.ts",
-      "norm_label": "globaltoner"
+      "norm_label": "globaltoner",
+      "id": "src_data_printers_globaltoner"
     },
     {
       "label": "monthlyUsage",
@@ -12124,10 +12124,10 @@
       "source_file": "src/data/printers.ts",
       "source_location": "L1214",
       "_origin": "ast",
-      "id": "src_data_printers_monthlyusage",
       "community": 57,
       "community_name": "printers.ts",
-      "norm_label": "monthlyusage"
+      "norm_label": "monthlyusage",
+      "id": "src_data_printers_monthlyusage"
     },
     {
       "label": "printers",
@@ -12135,10 +12135,10 @@
       "source_file": "src/data/printers.ts",
       "source_location": "L13",
       "_origin": "ast",
-      "id": "src_data_printers_printers",
       "community": 57,
       "community_name": "printers.ts",
-      "norm_label": "printers"
+      "norm_label": "printers",
+      "id": "src_data_printers_printers"
     },
     {
       "label": "fetchPrinters.ts",
@@ -13016,10 +13016,10 @@
       "source_file": "backend/tests_print_servers.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_tests_print_servers",
       "community": 65,
       "community_name": "tests_print_servers.py",
-      "norm_label": "tests_print_servers.py",
-      "id": "backend_tests_print_servers"
+      "norm_label": "tests_print_servers.py"
     },
     {
       "label": "Fase 4 - Registro de Print Servers e operacao por servidor. Como\u2026",
@@ -13027,10 +13027,10 @@
       "source_file": "backend/tests_print_servers.py",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "backend_tests_print_servers_rationale_1",
       "community": 65,
       "community_name": "tests_print_servers.py",
-      "norm_label": "fase 4 - registro de print servers e operacao por servidor. como...",
-      "id": "backend_tests_print_servers_rationale_1"
+      "norm_label": "fase 4 - registro de print servers e operacao por servidor. como..."
     },
     {
       "label": "Monta um banco no formato ANTERIOR a Fase 4 (printers sem print_server_id, sem\u2026",
@@ -13038,10 +13038,10 @@
       "source_file": "backend/tests_print_servers.py",
       "source_location": "L221",
       "_origin": "ast",
+      "id": "backend_tests_print_servers_rationale_221",
       "community": 65,
       "community_name": "tests_print_servers.py",
-      "norm_label": "monta um banco no formato anterior a fase 4 (printers sem print_server_id, sem...",
-      "id": "backend_tests_print_servers_rationale_221"
+      "norm_label": "monta um banco no formato anterior a fase 4 (printers sem print_server_id, sem..."
     },
     {
       "label": "get",
@@ -13216,10 +13216,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
+      "id": "basemodel",
       "community": 7,
       "community_name": "BaseModel",
-      "norm_label": "basemodel",
-      "id": "basemodel"
+      "norm_label": "basemodel"
     },
     {
       "label": "Coleta simulada de TODAS as impressoras cadastradas, em uma chamada. Ambiente\u2026",
@@ -13249,10 +13249,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L209",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_209",
       "community": 7,
       "community_name": "BaseModel",
-      "norm_label": "descoberta + enriquecimento snmp, sem tocar no banco.",
-      "id": "backend_app_routes_servers_rationale_209"
+      "norm_label": "descoberta + enriquecimento snmp, sem tocar no banco."
     },
     {
       "label": "main.py",
@@ -13480,10 +13480,10 @@
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
+      "id": "field_validator",
       "community": 80,
       "community_name": "field_validator",
-      "norm_label": "field_validator",
-      "id": "field_validator"
+      "norm_label": "field_validator"
     },
     {
       "label": "`host` fica de fora de proposito: ele e a chave natural que aparece em\u2026",
@@ -13491,10 +13491,10 @@
       "source_file": "backend/app/routes/servers.py",
       "source_location": "L87",
       "_origin": "ast",
+      "id": "backend_app_routes_servers_rationale_87",
       "community": 80,
       "community_name": "field_validator",
-      "norm_label": "`host` fica de fora de proposito: ele e a chave natural que aparece em...",
-      "id": "backend_app_routes_servers_rationale_87"
+      "norm_label": "`host` fica de fora de proposito: ele e a chave natural que aparece em..."
     },
     {
       "label": "BaseModel",
@@ -14511,9 +14511,9 @@
       "source_location": "L287",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_create_server",
-      "target": "backend_app_models_print_server_printserver"
+      "target": "backend_app_models_print_server_printserver",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14523,9 +14523,9 @@
       "source_location": "L303",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_create_server",
-      "target": "backend_app_routes_servers_to_response"
+      "target": "backend_app_routes_servers_to_response",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14535,9 +14535,9 @@
       "source_location": "L342",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_discover",
-      "target": "backend_app_routes_servers_executar_discover"
+      "target": "backend_app_routes_servers_executar_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14547,9 +14547,9 @@
       "source_location": "L369",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_discover_server",
-      "target": "backend_app_routes_servers_get_or_404"
+      "target": "backend_app_routes_servers_get_or_404",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14559,9 +14559,9 @@
       "source_location": "L377",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_discover_server",
-      "target": "backend_app_routes_servers_executar_discover"
+      "target": "backend_app_routes_servers_executar_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14571,9 +14571,9 @@
       "source_location": "L379",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_discover_server",
-      "target": "backend_app_routes_servers_marcar_resultado"
+      "target": "backend_app_routes_servers_marcar_resultado",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14583,9 +14583,9 @@
       "source_location": "L210",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_executar_discover",
-      "target": "backend_app_services_print_server_discover_printers"
+      "target": "backend_app_services_print_server_discover_printers",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14595,9 +14595,9 @@
       "source_location": "L214",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_executar_discover",
-      "target": "backend_app_routes_servers_discoverresponse"
+      "target": "backend_app_routes_servers_discoverresponse",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14607,9 +14607,9 @@
       "source_location": "L221",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_executar_discover",
-      "target": "backend_app_routes_servers_discoveredprinterresponse"
+      "target": "backend_app_routes_servers_discoveredprinterresponse",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14619,9 +14619,9 @@
       "source_location": "L263",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_get_current_server",
-      "target": "backend_app_routes_servers_serverstatus"
+      "target": "backend_app_routes_servers_serverstatus",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14631,9 +14631,9 @@
       "source_location": "L270",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_list_servers",
-      "target": "backend_app_routes_servers_to_response"
+      "target": "backend_app_routes_servers_to_response",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14655,9 +14655,9 @@
       "source_location": "L359",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_sync",
-      "target": "backend_app_routes_servers_syncresponse"
+      "target": "backend_app_routes_servers_syncresponse",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14667,9 +14667,9 @@
       "source_location": "L397",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_sync_server",
-      "target": "backend_app_routes_servers_get_or_404"
+      "target": "backend_app_routes_servers_get_or_404",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14691,9 +14691,9 @@
       "source_location": "L407",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_sync_server",
-      "target": "backend_app_routes_servers_marcar_resultado"
+      "target": "backend_app_routes_servers_marcar_resultado",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14703,9 +14703,9 @@
       "source_location": "L411",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_sync_server",
-      "target": "backend_app_routes_servers_syncresponse"
+      "target": "backend_app_routes_servers_syncresponse",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14715,9 +14715,9 @@
       "source_location": "L165",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_to_response",
-      "target": "backend_app_routes_servers_printserverresponse"
+      "target": "backend_app_routes_servers_printserverresponse",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14727,9 +14727,9 @@
       "source_location": "L314",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_update_server",
-      "target": "backend_app_routes_servers_get_or_404"
+      "target": "backend_app_routes_servers_get_or_404",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -14739,9 +14739,9 @@
       "source_location": "L325",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_update_server",
-      "target": "backend_app_routes_servers_to_response"
+      "target": "backend_app_routes_servers_to_response",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -15051,9 +15051,9 @@
       "source_location": "L179",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_discover_printers",
-      "target": "backend_app_services_print_server_mock_discover"
+      "target": "backend_app_services_print_server_mock_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -15063,9 +15063,9 @@
       "source_location": "L183",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_discover_printers",
-      "target": "backend_app_services_print_server_real_discover"
+      "target": "backend_app_services_print_server_real_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -15075,9 +15075,9 @@
       "source_location": "L185",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_discover_printers",
-      "target": "backend_app_services_print_server_printservererror"
+      "target": "backend_app_services_print_server_printservererror",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -15087,9 +15087,9 @@
       "source_location": "L66",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_mock_discover",
-      "target": "backend_app_services_print_server_discoveredprinter"
+      "target": "backend_app_services_print_server_discoveredprinter",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -15099,9 +15099,9 @@
       "source_location": "L124",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_real_discover",
-      "target": "backend_app_services_print_server_run_powershell_json"
+      "target": "backend_app_services_print_server_run_powershell_json",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -15111,9 +15111,9 @@
       "source_location": "L142",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_real_discover",
-      "target": "backend_app_services_print_server_discoveredprinter"
+      "target": "backend_app_services_print_server_discoveredprinter",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -15123,9 +15123,9 @@
       "source_location": "L90",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_run_powershell_json",
-      "target": "backend_app_services_print_server_printservererror"
+      "target": "backend_app_services_print_server_printservererror",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -15399,9 +15399,9 @@
       "source_location": "L125",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync_sync_printers",
-      "target": "backend_app_services_printer_sync_syncresult"
+      "target": "backend_app_services_printer_sync_syncresult",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -15411,9 +15411,9 @@
       "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync_sync_printers",
-      "target": "backend_app_services_print_server_discover_printers"
+      "target": "backend_app_services_print_server_discover_printers",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -15423,9 +15423,9 @@
       "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync_sync_printers",
-      "target": "backend_app_models_printer_printer"
+      "target": "backend_app_models_printer_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -16647,9 +16647,9 @@
       "source_location": "L122",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers_main",
-      "target": "backend_tests_print_servers_check_true"
+      "target": "backend_tests_print_servers_check_true",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -16659,9 +16659,9 @@
       "source_location": "L209",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers_main",
-      "target": "backend_tests_print_servers_testa_migracao_legada"
+      "target": "backend_tests_print_servers_testa_migracao_legada",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -16671,9 +16671,9 @@
       "source_location": "L75",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers_main",
-      "target": "backend_tests_print_servers_h"
+      "target": "backend_tests_print_servers_h",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -16683,9 +16683,9 @@
       "source_location": "L76",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers_main",
-      "target": "backend_tests_print_servers_check"
+      "target": "backend_tests_print_servers_check",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -16707,9 +16707,9 @@
       "source_location": "L114",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync_fake_discover",
-      "target": "backend_app_services_print_server_discoveredprinter"
+      "target": "backend_app_services_print_server_discoveredprinter",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -17427,9 +17427,9 @@
       "source_location": "L283",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview_networkview",
-      "target": "src_components_networkview_formatarmomento",
-      "confidence_score": 1.0
+      "target": "src_components_networkview_formatarmomento"
     },
     {
       "relation": "calls",
@@ -17439,9 +17439,9 @@
       "source_location": "L440",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview_networkview",
-      "target": "src_components_networkview_adaptdiscovered",
-      "confidence_score": 1.0
+      "target": "src_components_networkview_adaptdiscovered"
     },
     {
       "relation": "calls",
@@ -18123,9 +18123,9 @@
       "source_location": "L62",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi_adaptprinter",
-      "target": "src_lib_adaptapi_tostatus",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_tostatus"
     },
     {
       "relation": "calls",
@@ -18135,9 +18135,9 @@
       "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi_adaptprinter",
-      "target": "src_lib_adaptapi_totoner",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_totoner"
     },
     {
       "relation": "calls",
@@ -18147,9 +18147,9 @@
       "source_location": "L65",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi_adaptprinter",
-      "target": "src_lib_adaptapi_formatlastseen",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_formatlastseen"
     },
     {
       "relation": "calls",
@@ -18675,9 +18675,9 @@
       "source_location": "L156",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview_networkview",
-      "target": "src_components_networkview_networkview_selecionar",
-      "confidence_score": 1.0
+      "target": "src_components_networkview_networkview_selecionar"
     },
     {
       "relation": "contains",
@@ -18687,9 +18687,9 @@
       "source_location": "L165",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview_networkview",
-      "target": "src_components_networkview_networkview_executardescoberta",
-      "confidence_score": 1.0
+      "target": "src_components_networkview_networkview_executardescoberta"
     },
     {
       "relation": "contains",
@@ -18699,9 +18699,9 @@
       "source_location": "L189",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview_networkview",
-      "target": "src_components_networkview_networkview_executarsync",
-      "confidence_score": 1.0
+      "target": "src_components_networkview_networkview_executarsync"
     },
     {
       "relation": "contains",
@@ -19095,9 +19095,9 @@
       "weight": 1.0,
       "context": "decorator",
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_create_server",
-      "target": "post"
+      "target": "post",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19107,9 +19107,9 @@
       "weight": 1.0,
       "context": "decorator",
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_discover",
-      "target": "post"
+      "target": "post",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19119,9 +19119,9 @@
       "weight": 1.0,
       "context": "decorator",
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_discover_server",
-      "target": "post"
+      "target": "post",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19131,9 +19131,9 @@
       "weight": 1.0,
       "context": "decorator",
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_get_current_server",
-      "target": "get"
+      "target": "get",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19143,9 +19143,9 @@
       "weight": 1.0,
       "context": "decorator",
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_list_servers",
-      "target": "get"
+      "target": "get",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19155,9 +19155,9 @@
       "weight": 1.0,
       "context": "decorator",
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_printservercreate_mode_valido",
-      "target": "field_validator"
+      "target": "field_validator",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19167,9 +19167,9 @@
       "weight": 1.0,
       "context": "decorator",
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_printservercreate_trim",
-      "target": "field_validator"
+      "target": "field_validator",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19179,9 +19179,9 @@
       "weight": 1.0,
       "context": "decorator",
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_printserverupdate_mode_valido",
-      "target": "field_validator"
+      "target": "field_validator",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19191,9 +19191,9 @@
       "weight": 1.0,
       "context": "decorator",
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_sync",
-      "target": "post"
+      "target": "post",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19203,9 +19203,9 @@
       "weight": 1.0,
       "context": "decorator",
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_sync_server",
-      "target": "post"
+      "target": "post",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19215,9 +19215,9 @@
       "weight": 1.0,
       "context": "decorator",
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_update_server",
-      "target": "patch"
+      "target": "patch",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19335,9 +19335,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_init",
-      "target": "backend_app_models_user"
+      "target": "backend_app_models_user",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -19347,9 +19347,9 @@
       "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_init",
-      "target": "backend_app_models_printer"
+      "target": "backend_app_models_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -19359,9 +19359,9 @@
       "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_init",
-      "target": "backend_app_models_print_server"
+      "target": "backend_app_models_print_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "re_exports",
@@ -19371,9 +19371,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_init",
-      "target": "backend_app_models_alert"
+      "target": "backend_app_models_alert",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19683,9 +19683,9 @@
       "source_location": "L157",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_discover_printers",
-      "target": "backend_app_services_print_server_discoveredprinter"
+      "target": "backend_app_services_print_server_discoveredprinter",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -19971,9 +19971,9 @@
       "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_init",
-      "target": "backend_app_models_printer_printer"
+      "target": "backend_app_models_printer_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -19983,9 +19983,9 @@
       "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_init",
-      "target": "backend_app_models_printer_printermonthly"
+      "target": "backend_app_models_printer_printermonthly",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -19995,9 +19995,9 @@
       "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_init",
-      "target": "backend_app_models_printer_printerreading"
+      "target": "backend_app_models_printer_printerreading",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -20007,9 +20007,9 @@
       "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_init",
-      "target": "backend_app_models_print_server_printserver"
+      "target": "backend_app_models_print_server_printserver",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -20127,9 +20127,9 @@
       "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_models_print_server_printserver"
+      "target": "backend_app_models_print_server_printserver",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -20139,9 +20139,9 @@
       "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_models_printer_printer"
+      "target": "backend_app_models_printer_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -20151,9 +20151,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_services_print_server_discover_printers"
+      "target": "backend_app_services_print_server_discover_printers",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -20163,9 +20163,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_services_print_server_printservererror"
+      "target": "backend_app_services_print_server_printservererror",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -20175,9 +20175,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_services_printer_sync_sync_printers"
+      "target": "backend_app_services_printer_sync_sync_printers",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -20499,9 +20499,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync",
-      "target": "backend_app_models_print_server_printserver"
+      "target": "backend_app_models_print_server_printserver",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -20511,9 +20511,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync",
-      "target": "backend_app_models_printer_printer"
+      "target": "backend_app_models_printer_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -20523,9 +20523,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync",
-      "target": "backend_app_services_print_server_discover_printers"
+      "target": "backend_app_services_print_server_discover_printers",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -20871,9 +20871,9 @@
       "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "backend_app_models_print_server_printserver"
+      "target": "backend_app_models_print_server_printserver",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -20883,9 +20883,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "backend_app_models_printer_printer"
+      "target": "backend_app_models_printer_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -21003,9 +21003,9 @@
       "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync",
-      "target": "backend_app_models_printer_printer"
+      "target": "backend_app_models_printer_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -21015,9 +21015,9 @@
       "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync",
-      "target": "backend_app_services_print_server_discoveredprinter"
+      "target": "backend_app_services_print_server_discoveredprinter",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -21027,9 +21027,9 @@
       "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync",
-      "target": "backend_app_services_printer_sync_sync_printers"
+      "target": "backend_app_services_printer_sync_sync_printers",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -21447,9 +21447,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_app_network_page",
-      "target": "src_components_networkview_networkview",
-      "confidence_score": 1.0
+      "target": "src_components_networkview_networkview"
     },
     {
       "relation": "imports",
@@ -22047,9 +22047,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_api_apidiscoveryresponse",
-      "confidence_score": 1.0
+      "target": "src_lib_api_apidiscoveryresponse"
     },
     {
       "relation": "imports",
@@ -22059,9 +22059,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_api_discoverserver",
-      "confidence_score": 1.0
+      "target": "src_lib_api_discoverserver"
     },
     {
       "relation": "imports",
@@ -22071,9 +22071,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_api_fetchprintservers",
-      "confidence_score": 1.0
+      "target": "src_lib_api_fetchprintservers"
     },
     {
       "relation": "imports",
@@ -22083,9 +22083,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_api_syncserver",
-      "confidence_score": 1.0
+      "target": "src_lib_api_syncserver"
     },
     {
       "relation": "imports",
@@ -22095,9 +22095,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_adaptapi_adaptprintserver",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_adaptprintserver"
     },
     {
       "relation": "imports",
@@ -22107,9 +22107,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_adaptapi_adaptsyncresult",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_adaptsyncresult"
     },
     {
       "relation": "imports",
@@ -22119,9 +22119,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_apierrors_useapierrorreporter",
-      "confidence_score": 1.0
+      "target": "src_lib_apierrors_useapierrorreporter"
     },
     {
       "relation": "imports",
@@ -22131,9 +22131,9 @@
       "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_app_data_useappdata",
-      "confidence_score": 1.0
+      "target": "src_lib_app_data_useappdata"
     },
     {
       "relation": "imports",
@@ -22143,9 +22143,9 @@
       "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_toast_usetoast",
-      "confidence_score": 1.0
+      "target": "src_lib_toast_usetoast"
     },
     {
       "relation": "imports",
@@ -22155,9 +22155,33 @@
       "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_cn_cn",
-      "confidence_score": 1.0
+      "target": "src_lib_cn_cn"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/NetworkView.tsx",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_components_networkview",
+      "target": "src_components_modal_modal"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/NetworkView.tsx",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_origin": "ast",
+      "confidence_score": 1.0,
+      "source": "src_components_networkview",
+      "target": "src_components_discoveryresults_discoveryresults"
     },
     {
       "relation": "imports",
@@ -22167,9 +22191,9 @@
       "source_location": "L42",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_types_discoveredprinter",
-      "confidence_score": 1.0
+      "target": "src_types_discoveredprinter"
     },
     {
       "relation": "imports",
@@ -22179,9 +22203,9 @@
       "source_location": "L42",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_types_printserver",
-      "confidence_score": 1.0
+      "target": "src_types_printserver"
     },
     {
       "relation": "imports",
@@ -22191,9 +22215,9 @@
       "source_location": "L42",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_types_syncresult",
-      "confidence_score": 1.0
+      "target": "src_types_syncresult"
     },
     {
       "relation": "imports",
@@ -22959,9 +22983,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_data_printers",
-      "target": "src_types_monthlyusageentry",
-      "confidence_score": 1.0
+      "target": "src_types_monthlyusageentry"
     },
     {
       "relation": "imports",
@@ -22971,9 +22995,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_data_printers",
-      "target": "src_types_printer",
-      "confidence_score": 1.0
+      "target": "src_types_printer"
     },
     {
       "relation": "imports",
@@ -22983,9 +23007,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_data_printers",
-      "target": "src_types_tonerlevel",
-      "confidence_score": 1.0
+      "target": "src_types_tonerlevel"
     },
     {
       "relation": "imports",
@@ -22995,9 +23019,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_types_alert",
-      "confidence_score": 1.0
+      "target": "src_types_alert"
     },
     {
       "relation": "imports",
@@ -23007,9 +23031,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_types_monthlyreport",
-      "confidence_score": 1.0
+      "target": "src_types_monthlyreport"
     },
     {
       "relation": "imports",
@@ -23019,9 +23043,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_types_printer",
-      "confidence_score": 1.0
+      "target": "src_types_printer"
     },
     {
       "relation": "imports",
@@ -23031,9 +23055,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_types_printerstatus",
-      "confidence_score": 1.0
+      "target": "src_types_printerstatus"
     },
     {
       "relation": "imports",
@@ -23043,9 +23067,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_types_printserver",
-      "confidence_score": 1.0
+      "target": "src_types_printserver"
     },
     {
       "relation": "imports",
@@ -23055,9 +23079,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_types_syncresult",
-      "confidence_score": 1.0
+      "target": "src_types_syncresult"
     },
     {
       "relation": "imports",
@@ -23067,9 +23091,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_types_tonerlevel",
-      "confidence_score": 1.0
+      "target": "src_types_tonerlevel"
     },
     {
       "relation": "imports",
@@ -23079,9 +23103,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_api_api",
-      "confidence_score": 1.0
+      "target": "src_lib_api_api"
     },
     {
       "relation": "imports",
@@ -23091,9 +23115,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_api_apialert",
-      "confidence_score": 1.0
+      "target": "src_lib_api_apialert"
     },
     {
       "relation": "imports",
@@ -23103,9 +23127,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_api_apiprinterwithstatus",
-      "confidence_score": 1.0
+      "target": "src_lib_api_apiprinterwithstatus"
     },
     {
       "relation": "imports",
@@ -23115,9 +23139,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_api_apiprintserver",
-      "confidence_score": 1.0
+      "target": "src_lib_api_apiprintserver"
     },
     {
       "relation": "imports",
@@ -23127,9 +23151,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_api_apisyncresult",
-      "confidence_score": 1.0
+      "target": "src_lib_api_apisyncresult"
     },
     {
       "relation": "imports",
@@ -23139,9 +23163,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_api_apitonerlevel",
-      "confidence_score": 1.0
+      "target": "src_lib_api_apitonerlevel"
     },
     {
       "relation": "imports",
@@ -23919,9 +23943,9 @@
       "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_print_server",
-      "target": "backend_app_models_print_server_py_sqlmodel"
+      "target": "backend_app_models_print_server_py_sqlmodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -23931,9 +23955,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_printer",
-      "target": "backend_app_models_printer_py_sqlmodel"
+      "target": "backend_app_models_printer_py_sqlmodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24207,9 +24231,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "fastapi"
+      "target": "fastapi",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24219,9 +24243,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "sqlmodel"
+      "target": "sqlmodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24231,9 +24255,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_config"
+      "target": "backend_app_config",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24243,9 +24267,9 @@
       "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_database"
+      "target": "backend_app_database",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24255,9 +24279,9 @@
       "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_dependencies"
+      "target": "backend_app_dependencies",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24267,9 +24291,9 @@
       "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_models_print_server"
+      "target": "backend_app_models_print_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24279,9 +24303,9 @@
       "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_models_printer"
+      "target": "backend_app_models_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24291,9 +24315,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_services_print_server"
+      "target": "backend_app_services_print_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24303,9 +24327,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_services_printer_sync"
+      "target": "backend_app_services_printer_sync",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24471,9 +24495,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server",
-      "target": "backend_app_config"
+      "target": "backend_app_config",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24639,9 +24663,9 @@
       "source_location": "L17",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync",
-      "target": "sqlmodel"
+      "target": "sqlmodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24651,9 +24675,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync",
-      "target": "backend_app_config"
+      "target": "backend_app_config",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24663,9 +24687,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync",
-      "target": "backend_app_models_print_server"
+      "target": "backend_app_models_print_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24675,9 +24699,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync",
-      "target": "backend_app_models_printer"
+      "target": "backend_app_models_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -24687,9 +24711,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync",
-      "target": "backend_app_services_print_server"
+      "target": "backend_app_services_print_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -25011,9 +25035,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "sqlmodel"
+      "target": "sqlmodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -25023,9 +25047,9 @@
       "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "backend_app_config"
+      "target": "backend_app_config",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -25035,9 +25059,9 @@
       "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "backend_app_database"
+      "target": "backend_app_database",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -25047,9 +25071,9 @@
       "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "backend_app_main"
+      "target": "backend_app_main",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -25059,9 +25083,9 @@
       "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "backend_app_models_print_server"
+      "target": "backend_app_models_print_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -25071,9 +25095,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "backend_app_models_printer"
+      "target": "backend_app_models_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -25167,9 +25191,9 @@
       "source_location": "L44",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync",
-      "target": "sqlmodel"
+      "target": "sqlmodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -25179,9 +25203,9 @@
       "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync",
-      "target": "backend_app_database"
+      "target": "backend_app_database",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -25191,9 +25215,9 @@
       "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync",
-      "target": "backend_app_models_printer"
+      "target": "backend_app_models_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -25203,9 +25227,9 @@
       "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync",
-      "target": "backend_app_services_print_server"
+      "target": "backend_app_services_print_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -25215,9 +25239,9 @@
       "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync",
-      "target": "backend_app_services_printer_sync"
+      "target": "backend_app_services_printer_sync",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -25515,9 +25539,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_app_network_page",
-      "target": "src_components_networkview",
-      "confidence_score": 1.0
+      "target": "src_components_networkview"
     },
     {
       "relation": "imports_from",
@@ -26319,9 +26343,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "ref_react",
-      "confidence_score": 1.0
+      "target": "ref_react"
     },
     {
       "relation": "imports_from",
@@ -26331,9 +26355,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_api",
-      "confidence_score": 1.0
+      "target": "src_lib_api"
     },
     {
       "relation": "imports_from",
@@ -26343,9 +26367,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_adaptapi",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi"
     },
     {
       "relation": "imports_from",
@@ -26355,9 +26379,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_apierrors",
-      "confidence_score": 1.0
+      "target": "src_lib_apierrors"
     },
     {
       "relation": "imports_from",
@@ -26367,9 +26391,9 @@
       "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_app_data",
-      "confidence_score": 1.0
+      "target": "src_lib_app_data"
     },
     {
       "relation": "imports_from",
@@ -26379,9 +26403,9 @@
       "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_toast",
-      "confidence_score": 1.0
+      "target": "src_lib_toast"
     },
     {
       "relation": "imports_from",
@@ -26391,9 +26415,9 @@
       "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_lib_cn",
-      "confidence_score": 1.0
+      "target": "src_lib_cn"
     },
     {
       "relation": "imports_from",
@@ -26403,9 +26427,9 @@
       "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_components_modal",
-      "confidence_score": 1.0
+      "target": "src_components_modal"
     },
     {
       "relation": "imports_from",
@@ -26415,9 +26439,9 @@
       "source_location": "L41",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_components_discoveryresults",
-      "confidence_score": 1.0
+      "target": "src_components_discoveryresults"
     },
     {
       "relation": "imports_from",
@@ -26427,9 +26451,9 @@
       "source_location": "L42",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_types",
-      "confidence_score": 1.0
+      "target": "src_types"
     },
     {
       "relation": "imports_from",
@@ -27123,9 +27147,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_data_printers",
-      "target": "src_types",
-      "confidence_score": 1.0
+      "target": "src_types"
     },
     {
       "relation": "imports_from",
@@ -27135,9 +27159,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_types",
-      "confidence_score": 1.0
+      "target": "src_types"
     },
     {
       "relation": "imports_from",
@@ -27147,9 +27171,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_api",
-      "confidence_score": 1.0
+      "target": "src_lib_api"
     },
     {
       "relation": "imports_from",
@@ -27819,9 +27843,9 @@
       "source_location": "L274",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_create_server",
-      "target": "backend_app_routes_servers_printservercreate"
+      "target": "backend_app_routes_servers_printservercreate",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27831,9 +27855,9 @@
       "source_location": "L274",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_create_server",
-      "target": "backend_app_routes_servers_py_session"
+      "target": "backend_app_routes_servers_py_session",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27843,9 +27867,9 @@
       "source_location": "L274",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_create_server",
-      "target": "user"
+      "target": "user",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27855,9 +27879,9 @@
       "source_location": "L333",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_discover",
-      "target": "user"
+      "target": "user",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27867,9 +27891,9 @@
       "source_location": "L363",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_discover_server",
-      "target": "backend_app_routes_servers_py_session"
+      "target": "backend_app_routes_servers_py_session",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27879,9 +27903,9 @@
       "source_location": "L363",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_discover_server",
-      "target": "user"
+      "target": "user",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27891,9 +27915,9 @@
       "source_location": "L256",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_get_current_server",
-      "target": "user"
+      "target": "user",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27903,9 +27927,9 @@
       "source_location": "L182",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_get_or_404",
-      "target": "backend_app_routes_servers_py_session"
+      "target": "backend_app_routes_servers_py_session",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27915,9 +27939,9 @@
       "source_location": "L267",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_list_servers",
-      "target": "backend_app_routes_servers_py_session"
+      "target": "backend_app_routes_servers_py_session",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27927,9 +27951,9 @@
       "source_location": "L267",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_list_servers",
-      "target": "user"
+      "target": "user",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27939,9 +27963,9 @@
       "source_location": "L189",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_marcar_resultado",
-      "target": "backend_app_routes_servers_py_session"
+      "target": "backend_app_routes_servers_py_session",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27951,9 +27975,9 @@
       "source_location": "L348",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_sync",
-      "target": "backend_app_routes_servers_py_session"
+      "target": "backend_app_routes_servers_py_session",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27963,9 +27987,9 @@
       "source_location": "L348",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_sync",
-      "target": "user"
+      "target": "user",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27975,9 +27999,9 @@
       "source_location": "L387",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_sync_server",
-      "target": "backend_app_routes_servers_py_session"
+      "target": "backend_app_routes_servers_py_session",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27987,9 +28011,9 @@
       "source_location": "L387",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_sync_server",
-      "target": "user"
+      "target": "user",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -27999,9 +28023,9 @@
       "source_location": "L149",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_to_response",
-      "target": "backend_app_routes_servers_py_session"
+      "target": "backend_app_routes_servers_py_session",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -28011,9 +28035,9 @@
       "source_location": "L307",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_update_server",
-      "target": "backend_app_routes_servers_printserverupdate"
+      "target": "backend_app_routes_servers_printserverupdate",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -28023,9 +28047,9 @@
       "source_location": "L307",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_update_server",
-      "target": "backend_app_routes_servers_py_session"
+      "target": "backend_app_routes_servers_py_session",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -28035,9 +28059,9 @@
       "source_location": "L307",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_update_server",
-      "target": "user"
+      "target": "user",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -28251,9 +28275,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync_sync_printers",
-      "target": "backend_app_services_printer_sync_py_session"
+      "target": "backend_app_services_printer_sync_py_session",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -28515,9 +28539,9 @@
       "source_location": "L97",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_types_monthlyusageentry",
-      "target": "src_types_monthlyusage",
-      "confidence_score": 1.0
+      "target": "src_types_monthlyusage"
     },
     {
       "relation": "calls",
@@ -29219,9 +29243,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_print_server",
-      "target": "backend_app_models_print_server_servermode"
+      "target": "backend_app_models_print_server_servermode",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29230,9 +29254,9 @@
       "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_print_server",
-      "target": "backend_app_models_print_server_printserver"
+      "target": "backend_app_models_print_server_printserver",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29241,9 +29265,9 @@
       "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_printer",
-      "target": "backend_app_models_printer_printerreading"
+      "target": "backend_app_models_printer_printerreading",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29252,9 +29276,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_printer",
-      "target": "backend_app_models_printer_printer"
+      "target": "backend_app_models_printer_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29263,9 +29287,9 @@
       "source_location": "L71",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_printer",
-      "target": "backend_app_models_printer_printermonthly"
+      "target": "backend_app_models_printer_printermonthly",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29527,9 +29551,9 @@
       "source_location": "L105",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_discoveredprinterresponse"
+      "target": "backend_app_routes_servers_discoveredprinterresponse",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29538,9 +29562,9 @@
       "source_location": "L127",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_discoverresponse"
+      "target": "backend_app_routes_servers_discoverresponse",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29549,9 +29573,9 @@
       "source_location": "L136",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_syncresponse"
+      "target": "backend_app_routes_servers_syncresponse",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29560,9 +29584,9 @@
       "source_location": "L149",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_to_response"
+      "target": "backend_app_routes_servers_to_response",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29571,9 +29595,9 @@
       "source_location": "L182",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_get_or_404"
+      "target": "backend_app_routes_servers_get_or_404",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29582,9 +29606,9 @@
       "source_location": "L189",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_marcar_resultado"
+      "target": "backend_app_routes_servers_marcar_resultado",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29593,9 +29617,9 @@
       "source_location": "L208",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_executar_discover"
+      "target": "backend_app_routes_servers_executar_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29604,9 +29628,9 @@
       "source_location": "L256",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_get_current_server"
+      "target": "backend_app_routes_servers_get_current_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29615,9 +29639,9 @@
       "source_location": "L267",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_list_servers"
+      "target": "backend_app_routes_servers_list_servers",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29626,9 +29650,9 @@
       "source_location": "L274",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_create_server"
+      "target": "backend_app_routes_servers_create_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29637,9 +29661,9 @@
       "source_location": "L307",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_update_server"
+      "target": "backend_app_routes_servers_update_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29648,9 +29672,9 @@
       "source_location": "L333",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_discover"
+      "target": "backend_app_routes_servers_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29659,9 +29683,9 @@
       "source_location": "L348",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_sync"
+      "target": "backend_app_routes_servers_sync",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29670,9 +29694,9 @@
       "source_location": "L363",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_discover_server"
+      "target": "backend_app_routes_servers_discover_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29681,9 +29705,9 @@
       "source_location": "L387",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_sync_server"
+      "target": "backend_app_routes_servers_sync_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29692,9 +29716,9 @@
       "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_serverstatus"
+      "target": "backend_app_routes_servers_serverstatus",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29703,9 +29727,9 @@
       "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_printserverresponse"
+      "target": "backend_app_routes_servers_printserverresponse",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29714,9 +29738,9 @@
       "source_location": "L68",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_printservercreate"
+      "target": "backend_app_routes_servers_printservercreate",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29725,9 +29749,9 @@
       "source_location": "L86",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers",
-      "target": "backend_app_routes_servers_printserverupdate"
+      "target": "backend_app_routes_servers_printserverupdate",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30132,9 +30156,9 @@
       "source_location": "L109",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server",
-      "target": "backend_app_services_print_server_real_discover"
+      "target": "backend_app_services_print_server_real_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30143,9 +30167,9 @@
       "source_location": "L157",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server",
-      "target": "backend_app_services_print_server_discover_printers"
+      "target": "backend_app_services_print_server_discover_printers",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30154,9 +30178,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server",
-      "target": "backend_app_services_print_server_discoveredprinter"
+      "target": "backend_app_services_print_server_discoveredprinter",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30165,9 +30189,9 @@
       "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server",
-      "target": "backend_app_services_print_server_printservererror"
+      "target": "backend_app_services_print_server_printservererror",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30176,9 +30200,9 @@
       "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server",
-      "target": "backend_app_services_print_server_mock_discover"
+      "target": "backend_app_services_print_server_mock_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30187,9 +30211,9 @@
       "source_location": "L75",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server",
-      "target": "backend_app_services_print_server_run_powershell_json"
+      "target": "backend_app_services_print_server_run_powershell_json",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30286,9 +30310,9 @@
       "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync",
-      "target": "backend_app_services_printer_sync_syncresult"
+      "target": "backend_app_services_printer_sync_syncresult",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30297,9 +30321,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync",
-      "target": "backend_app_services_printer_sync_sync_printers"
+      "target": "backend_app_services_printer_sync_sync_printers",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30737,9 +30761,9 @@
       "source_location": "L220",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "backend_tests_print_servers_testa_migracao_legada"
+      "target": "backend_tests_print_servers_testa_migracao_legada",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30748,9 +30772,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "backend_tests_print_servers_check"
+      "target": "backend_tests_print_servers_check",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30759,9 +30783,9 @@
       "source_location": "L43",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "backend_tests_print_servers_check_true"
+      "target": "backend_tests_print_servers_check_true",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30770,9 +30794,9 @@
       "source_location": "L57",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "backend_tests_print_servers_h"
+      "target": "backend_tests_print_servers_h",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30781,9 +30805,9 @@
       "source_location": "L61",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers",
-      "target": "backend_tests_print_servers_main"
+      "target": "backend_tests_print_servers_main",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30869,9 +30893,9 @@
       "source_location": "L109",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync",
-      "target": "backend_tests_printer_sync_fake_discover"
+      "target": "backend_tests_printer_sync_fake_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30880,9 +30904,9 @@
       "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync",
-      "target": "backend_tests_printer_sync_check"
+      "target": "backend_tests_printer_sync_check",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -30891,9 +30915,9 @@
       "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync",
-      "target": "backend_tests_printer_sync_check_true"
+      "target": "backend_tests_printer_sync_check_true",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -33663,9 +33687,9 @@
       "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_app_network_page",
-      "target": "src_app_network_page_networkpage",
-      "confidence_score": 1.0
+      "target": "src_app_network_page_networkpage"
     },
     {
       "relation": "contains",
@@ -34213,9 +34237,9 @@
       "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_components_networkview_adaptdiscovered",
-      "confidence_score": 1.0
+      "target": "src_components_networkview_adaptdiscovered"
     },
     {
       "relation": "contains",
@@ -34224,9 +34248,9 @@
       "source_location": "L68",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_components_networkview_formatarmomento",
-      "confidence_score": 1.0
+      "target": "src_components_networkview_formatarmomento"
     },
     {
       "relation": "contains",
@@ -34235,9 +34259,9 @@
       "source_location": "L80",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_components_networkview_status_servidor",
-      "confidence_score": 1.0
+      "target": "src_components_networkview_status_servidor"
     },
     {
       "relation": "contains",
@@ -34246,9 +34270,9 @@
       "source_location": "L86",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_components_networkview",
-      "target": "src_components_networkview_networkview",
-      "confidence_score": 1.0
+      "target": "src_components_networkview_networkview"
     },
     {
       "relation": "contains",
@@ -34741,9 +34765,9 @@
       "source_location": "L1206",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_data_printers",
-      "target": "src_data_printers_globaltoner",
-      "confidence_score": 1.0
+      "target": "src_data_printers_globaltoner"
     },
     {
       "relation": "contains",
@@ -34752,9 +34776,9 @@
       "source_location": "L1214",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_data_printers",
-      "target": "src_data_printers_monthlyusage",
-      "confidence_score": 1.0
+      "target": "src_data_printers_monthlyusage"
     },
     {
       "relation": "contains",
@@ -34763,9 +34787,9 @@
       "source_location": "L1223",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_data_printers",
-      "target": "src_data_printers_networkhistory",
-      "confidence_score": 1.0
+      "target": "src_data_printers_networkhistory"
     },
     {
       "relation": "contains",
@@ -34774,9 +34798,9 @@
       "source_location": "L1231",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_data_printers",
-      "target": "src_data_printers_departmentusage",
-      "confidence_score": 1.0
+      "target": "src_data_printers_departmentusage"
     },
     {
       "relation": "contains",
@@ -34785,9 +34809,9 @@
       "source_location": "L1241",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_data_printers",
-      "target": "src_data_printers_decommissionedprinter",
-      "confidence_score": 1.0
+      "target": "src_data_printers_decommissionedprinter"
     },
     {
       "relation": "contains",
@@ -34796,9 +34820,9 @@
       "source_location": "L1250",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_data_printers",
-      "target": "src_data_printers_decommissionedprinters",
-      "confidence_score": 1.0
+      "target": "src_data_printers_decommissionedprinters"
     },
     {
       "relation": "contains",
@@ -34807,9 +34831,9 @@
       "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_data_printers",
-      "target": "src_data_printers_printers",
-      "confidence_score": 1.0
+      "target": "src_data_printers_printers"
     },
     {
       "relation": "contains",
@@ -34818,9 +34842,9 @@
       "source_location": "L105",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_adaptapi_apimonthlyreport",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_apimonthlyreport"
     },
     {
       "relation": "contains",
@@ -34829,9 +34853,9 @@
       "source_location": "L121",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_adaptapi_loadmonthlyreportfromapi",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_loadmonthlyreportfromapi"
     },
     {
       "relation": "contains",
@@ -34840,9 +34864,9 @@
       "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_adaptapi_valid_status",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_valid_status"
     },
     {
       "relation": "contains",
@@ -34851,9 +34875,9 @@
       "source_location": "L17",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_adaptapi_valid_colors",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_valid_colors"
     },
     {
       "relation": "contains",
@@ -34862,9 +34886,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_adaptapi_tostatus",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_tostatus"
     },
     {
       "relation": "contains",
@@ -34873,9 +34897,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_adaptapi_totoner",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_totoner"
     },
     {
       "relation": "contains",
@@ -34884,9 +34908,9 @@
       "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_adaptapi_formatlastseen",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_formatlastseen"
     },
     {
       "relation": "contains",
@@ -34895,9 +34919,9 @@
       "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_adaptapi_adaptprinter",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_adaptprinter"
     },
     {
       "relation": "contains",
@@ -34906,9 +34930,9 @@
       "source_location": "L69",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_adaptapi_adaptprintserver",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_adaptprintserver"
     },
     {
       "relation": "contains",
@@ -34917,9 +34941,9 @@
       "source_location": "L86",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_adaptapi_adaptsyncresult",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_adaptsyncresult"
     },
     {
       "relation": "contains",
@@ -34928,9 +34952,9 @@
       "source_location": "L90",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_lib_adaptapi",
-      "target": "src_lib_adaptapi_adaptalert",
-      "confidence_score": 1.0
+      "target": "src_lib_adaptapi_adaptalert"
     },
     {
       "relation": "contains",
@@ -36072,9 +36096,9 @@
       "source_location": "L106",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_types",
-      "target": "src_types_monthlyreport",
-      "confidence_score": 1.0
+      "target": "src_types_monthlyreport"
     },
     {
       "relation": "contains",
@@ -36083,9 +36107,9 @@
       "source_location": "L15",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_types",
-      "target": "src_types_monthlypagecount",
-      "confidence_score": 1.0
+      "target": "src_types_monthlypagecount"
     },
     {
       "relation": "contains",
@@ -36094,9 +36118,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_types",
-      "target": "src_types_printer",
-      "confidence_score": 1.0
+      "target": "src_types_printer"
     },
     {
       "relation": "contains",
@@ -36105,9 +36129,9 @@
       "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_types",
-      "target": "src_types_discoveredprinter",
-      "confidence_score": 1.0
+      "target": "src_types_discoveredprinter"
     },
     {
       "relation": "contains",
@@ -36116,9 +36140,9 @@
       "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_types",
-      "target": "src_types_printserver",
-      "confidence_score": 1.0
+      "target": "src_types_printserver"
     },
     {
       "relation": "contains",
@@ -36127,9 +36151,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_types",
-      "target": "src_types_printerstatus",
-      "confidence_score": 1.0
+      "target": "src_types_printerstatus"
     },
     {
       "relation": "contains",
@@ -36138,9 +36162,9 @@
       "source_location": "L75",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_types",
-      "target": "src_types_syncresult",
-      "confidence_score": 1.0
+      "target": "src_types_syncresult"
     },
     {
       "relation": "contains",
@@ -36149,9 +36173,9 @@
       "source_location": "L84",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_types",
-      "target": "src_types_alert",
-      "confidence_score": 1.0
+      "target": "src_types_alert"
     },
     {
       "relation": "contains",
@@ -36160,9 +36184,9 @@
       "source_location": "L9",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_types",
-      "target": "src_types_tonerlevel",
-      "confidence_score": 1.0
+      "target": "src_types_tonerlevel"
     },
     {
       "relation": "contains",
@@ -36171,9 +36195,9 @@
       "source_location": "L92",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_types",
-      "target": "src_types_monthlyusage",
-      "confidence_score": 1.0
+      "target": "src_types_monthlyusage"
     },
     {
       "relation": "contains",
@@ -36182,9 +36206,9 @@
       "source_location": "L97",
       "weight": 1.0,
       "_origin": "ast",
+      "confidence_score": 1.0,
       "source": "src_types",
-      "target": "src_types_monthlyusageentry",
-      "confidence_score": 1.0
+      "target": "src_types_monthlyusageentry"
     },
     {
       "relation": "contains",
@@ -36457,9 +36481,9 @@
       "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_print_server_printserver",
-      "target": "backend_app_models_print_server_py_sqlmodel"
+      "target": "backend_app_models_print_server_py_sqlmodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36468,9 +36492,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_print_server_servermode",
-      "target": "str"
+      "target": "str",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36479,9 +36503,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_printer_printer",
-      "target": "backend_app_models_printer_py_sqlmodel"
+      "target": "backend_app_models_printer_py_sqlmodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36490,9 +36514,9 @@
       "source_location": "L71",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_printer_printermonthly",
-      "target": "backend_app_models_printer_py_sqlmodel"
+      "target": "backend_app_models_printer_py_sqlmodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36501,9 +36525,9 @@
       "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_printer_printerreading",
-      "target": "backend_app_models_printer_py_sqlmodel"
+      "target": "backend_app_models_printer_py_sqlmodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36578,9 +36602,9 @@
       "source_location": "L105",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_discoveredprinterresponse",
-      "target": "basemodel"
+      "target": "basemodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36589,9 +36613,9 @@
       "source_location": "L127",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_discoverresponse",
-      "target": "basemodel"
+      "target": "basemodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36600,9 +36624,9 @@
       "source_location": "L68",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_printservercreate",
-      "target": "basemodel"
+      "target": "basemodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36611,9 +36635,9 @@
       "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_printserverresponse",
-      "target": "basemodel"
+      "target": "basemodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36622,9 +36646,9 @@
       "source_location": "L86",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_printserverupdate",
-      "target": "basemodel"
+      "target": "basemodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36633,9 +36657,9 @@
       "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_serverstatus",
-      "target": "basemodel"
+      "target": "basemodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36644,9 +36668,9 @@
       "source_location": "L136",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_syncresponse",
-      "target": "basemodel"
+      "target": "basemodel",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36787,9 +36811,9 @@
       "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_printservererror",
-      "target": "exception"
+      "target": "exception",
+      "confidence_score": 1.0
     },
     {
       "relation": "inherits",
@@ -36864,9 +36888,9 @@
       "source_location": "L84",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_print_server_printserver",
-      "target": "backend_app_models_print_server_printserver_display_name"
+      "target": "backend_app_models_print_server_printserver_display_name",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -36886,9 +36910,9 @@
       "source_location": "L75",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_printservercreate",
-      "target": "backend_app_routes_servers_printservercreate_trim"
+      "target": "backend_app_routes_servers_printservercreate_trim",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -36897,9 +36921,9 @@
       "source_location": "L80",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_printservercreate",
-      "target": "backend_app_routes_servers_printservercreate_mode_valido"
+      "target": "backend_app_routes_servers_printservercreate_mode_valido",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -36908,9 +36932,9 @@
       "source_location": "L99",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_printserverupdate",
-      "target": "backend_app_routes_servers_printserverupdate_mode_valido"
+      "target": "backend_app_routes_servers_printserverupdate_mode_valido",
+      "confidence_score": 1.0
     },
     {
       "relation": "method",
@@ -37931,9 +37955,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_print_server_rationale_1",
-      "target": "backend_app_models_print_server"
+      "target": "backend_app_models_print_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -37942,9 +37966,9 @@
       "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_print_server_rationale_36",
-      "target": "backend_app_models_print_server_servermode"
+      "target": "backend_app_models_print_server_servermode",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -37953,9 +37977,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_models_printer_rationale_7",
-      "target": "backend_app_models_printer_printer"
+      "target": "backend_app_models_printer_printer",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38107,9 +38131,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_1",
-      "target": "backend_app_routes_servers"
+      "target": "backend_app_routes_servers",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38118,9 +38142,9 @@
       "source_location": "L150",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_150",
-      "target": "backend_app_routes_servers_to_response"
+      "target": "backend_app_routes_servers_to_response",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38129,9 +38153,9 @@
       "source_location": "L192",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_192",
-      "target": "backend_app_routes_servers_marcar_resultado"
+      "target": "backend_app_routes_servers_marcar_resultado",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38140,9 +38164,9 @@
       "source_location": "L209",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_209",
-      "target": "backend_app_routes_servers_executar_discover"
+      "target": "backend_app_routes_servers_executar_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38151,9 +38175,9 @@
       "source_location": "L257",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_257",
-      "target": "backend_app_routes_servers_get_current_server"
+      "target": "backend_app_routes_servers_get_current_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38162,9 +38186,9 @@
       "source_location": "L268",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_268",
-      "target": "backend_app_routes_servers_list_servers"
+      "target": "backend_app_routes_servers_list_servers",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38173,9 +38197,9 @@
       "source_location": "L279",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_279",
-      "target": "backend_app_routes_servers_create_server"
+      "target": "backend_app_routes_servers_create_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38184,9 +38208,9 @@
       "source_location": "L313",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_313",
-      "target": "backend_app_routes_servers_update_server"
+      "target": "backend_app_routes_servers_update_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38195,9 +38219,9 @@
       "source_location": "L334",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_334",
-      "target": "backend_app_routes_servers_discover"
+      "target": "backend_app_routes_servers_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38206,9 +38230,9 @@
       "source_location": "L349",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_349",
-      "target": "backend_app_routes_servers_sync"
+      "target": "backend_app_routes_servers_sync",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38217,9 +38241,9 @@
       "source_location": "L368",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_368",
-      "target": "backend_app_routes_servers_discover_server"
+      "target": "backend_app_routes_servers_discover_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38228,9 +38252,9 @@
       "source_location": "L392",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_392",
-      "target": "backend_app_routes_servers_sync_server"
+      "target": "backend_app_routes_servers_sync_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38239,9 +38263,9 @@
       "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_routes_servers_rationale_87",
-      "target": "backend_app_routes_servers_printserverupdate"
+      "target": "backend_app_routes_servers_printserverupdate",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38415,9 +38439,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_rationale_1",
-      "target": "backend_app_services_print_server"
+      "target": "backend_app_services_print_server",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38426,9 +38450,9 @@
       "source_location": "L110",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_rationale_110",
-      "target": "backend_app_services_print_server_real_discover"
+      "target": "backend_app_services_print_server_real_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38437,9 +38461,9 @@
       "source_location": "L160",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_rationale_160",
-      "target": "backend_app_services_print_server_discover_printers"
+      "target": "backend_app_services_print_server_discover_printers",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38448,9 +38472,9 @@
       "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_rationale_30",
-      "target": "backend_app_services_print_server_discoveredprinter"
+      "target": "backend_app_services_print_server_discoveredprinter",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38459,9 +38483,9 @@
       "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_rationale_40",
-      "target": "backend_app_services_print_server_printservererror"
+      "target": "backend_app_services_print_server_printservererror",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38470,9 +38494,9 @@
       "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_rationale_48",
-      "target": "backend_app_services_print_server_mock_discover"
+      "target": "backend_app_services_print_server_mock_discover",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38481,9 +38505,9 @@
       "source_location": "L76",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_print_server_rationale_76",
-      "target": "backend_app_services_print_server_run_powershell_json"
+      "target": "backend_app_services_print_server_run_powershell_json",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38657,9 +38681,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync_rationale_1",
-      "target": "backend_app_services_printer_sync"
+      "target": "backend_app_services_printer_sync",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -38668,9 +38692,9 @@
       "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_app_services_printer_sync_rationale_39",
-      "target": "backend_app_services_printer_sync_sync_printers"
+      "target": "backend_app_services_printer_sync_sync_printers",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -39317,9 +39341,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers_rationale_1",
-      "target": "backend_tests_print_servers"
+      "target": "backend_tests_print_servers",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -39328,9 +39352,9 @@
       "source_location": "L221",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_print_servers_rationale_221",
-      "target": "backend_tests_print_servers_testa_migracao_legada"
+      "target": "backend_tests_print_servers_testa_migracao_legada",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -39350,9 +39374,9 @@
       "source_location": "L1",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "backend_tests_printer_sync_rationale_1",
-      "target": "backend_tests_printer_sync"
+      "target": "backend_tests_printer_sync",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -39804,9 +39828,9 @@
       "source_location": "L190",
       "weight": 0.8,
       "_origin": "ast",
-      "confidence_score": 0.5,
       "source": "backend_app_routes_servers_marcar_resultado",
-      "target": "backend_app_models_print_server_printserver"
+      "target": "backend_app_models_print_server_printserver",
+      "confidence_score": 0.5
     },
     {
       "relation": "uses",
@@ -39816,9 +39840,9 @@
       "source_location": "L149",
       "weight": 0.8,
       "_origin": "ast",
-      "confidence_score": 0.5,
       "source": "backend_app_routes_servers_to_response",
-      "target": "backend_app_models_print_server_printserver"
+      "target": "backend_app_models_print_server_printserver",
+      "confidence_score": 0.5
     },
     {
       "relation": "uses",
@@ -39888,9 +39912,9 @@
       "source_location": "L182",
       "weight": 0.8,
       "_origin": "ast",
-      "confidence_score": 0.5,
       "source": "backend_app_routes_servers_get_or_404",
-      "target": "backend_app_models_print_server_printserver"
+      "target": "backend_app_models_print_server_printserver",
+      "confidence_score": 0.5
     },
     {
       "relation": "uses",
@@ -39910,9 +39934,9 @@
       "source_location": "L295",
       "weight": 0.8,
       "_origin": "ast",
-      "confidence_score": 0.5,
       "source": "backend_app_routes_servers_create_server",
-      "target": "backend_app_models_printer_printer"
+      "target": "backend_app_models_printer_printer",
+      "confidence_score": 0.5
     },
     {
       "relation": "uses",
@@ -39921,9 +39945,9 @@
       "source_location": "L269",
       "weight": 0.8,
       "_origin": "ast",
-      "confidence_score": 0.5,
       "source": "backend_app_routes_servers_list_servers",
-      "target": "backend_app_models_print_server_printserver"
+      "target": "backend_app_models_print_server_printserver",
+      "confidence_score": 0.5
     },
     {
       "relation": "uses",
@@ -39932,9 +39956,9 @@
       "source_location": "L157",
       "weight": 0.8,
       "_origin": "ast",
-      "confidence_score": 0.5,
       "source": "backend_app_routes_servers_to_response",
-      "target": "backend_app_models_printer_printer"
+      "target": "backend_app_models_printer_printer",
+      "confidence_score": 0.5
     },
     {
       "relation": "uses",
@@ -40130,9 +40154,9 @@
       "source_location": "L61",
       "weight": 0.8,
       "_origin": "ast",
-      "confidence_score": 0.5,
       "source": "backend_app_services_printer_sync_sync_printers",
-      "target": "backend_app_models_print_server_printserver"
+      "target": "backend_app_models_print_server_printserver",
+      "confidence_score": 0.5
     },
     {
       "relation": "uses",
@@ -40240,9 +40264,9 @@
       "source_location": "L131",
       "weight": 0.8,
       "_origin": "ast",
-      "confidence_score": 0.5,
       "source": "backend_tests_print_servers_main",
-      "target": "backend_app_models_printer_printer"
+      "target": "backend_app_models_printer_printer",
+      "confidence_score": 0.5
     },
     {
       "relation": "uses",
@@ -40251,9 +40275,9 @@
       "source_location": "L139",
       "weight": 0.8,
       "_origin": "ast",
-      "confidence_score": 0.5,
       "source": "backend_tests_print_servers_main",
-      "target": "backend_app_models_print_server_printserver"
+      "target": "backend_app_models_print_server_printserver",
+      "confidence_score": 0.5
     },
     {
       "relation": "uses",
@@ -41400,5 +41424,5 @@
       "source_file": "CONTEXTO-DESENVOLVIMENTO.md"
     }
   ],
-  "built_at_commit": "df9647eb53c7de03185ae9c1e1372e6ca78228a0"
+  "built_at_commit": "7ea4f9636fab8610423939f0098d3e7b20ef7f4e"
 }
