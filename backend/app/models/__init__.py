@@ -2,6 +2,7 @@ from .user import User
 from .printer import Printer, PrinterReading, PrinterMonthly
 from .print_server import PrintServer
 from .alert import Alert, TonerHistory
+from .notification import Notification
 
 __all__ = [
     "User",
@@ -11,4 +12,5 @@ __all__ = [
     "PrintServer",
     "Alert",
     "TonerHistory",
+    "Notification",
 ]

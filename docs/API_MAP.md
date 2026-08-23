@@ -216,6 +216,81 @@ descartaria o histórico da conta.
 - Frontend: não utilizado
 - Estado: funcional e protegido
 
+## Notificações (Fase 7)
+
+Central **interna**, dirigida a pessoas. Não substitui nem altera `/api/alerts`:
+
+| | Alerta | Notificação |
+|---|---|---|
+| O que é | evento técnico de uma impressora | comunicação para uma pessoa |
+| Quem cria | `alert_engine.evaluate_reading`, após cada leitura | um admin, via `POST /api/notifications` |
+| Identidade | deduplicado por `(printer_id, alert_type)` | uma linha por destinatário |
+| Fim de vida | resolve-se sozinho quando a condição some | marcada como lida por quem recebeu |
+| Tabela | `alerts` | `notifications` |
+
+O vínculo é uma FK **opcional** (`notifications.alert_id`). A notificação
+guarda a própria `message` — um instantâneo do momento em que foi criada —
+em vez de montar o texto lendo o alerta. Consequências práticas:
+
+- resolver ou escalar o alerta **não** altera o que a pessoa recebeu;
+- se o alerta sumir, a resposta traz `alert: null` e a notificação continua
+  legível;
+- uma notificação pode não ter alerta nenhum (aviso administrativo).
+
+A referência ao alerta é lida na hora de responder, apenas para o painel
+poder oferecer o link e mostrar se ele ainda está aberto.
+
+### `GET /api/notifications`
+
+- Arquivo: `backend/app/routes/notifications.py`
+- Função: `list_notifications`
+- Auth: autenticado (qualquer papel)
+- Banco/rede: lê `notifications` **filtrado por `user_id` da sessão**
+- Frontend: não utilizado ainda (rota `/notifications` é placeholder)
+- Estado: funcional
+- Filtros: `unread_only` (bool), `limit` (1–500, padrão 100)
+- Não aceita `user_id` como parâmetro: o destinatário é sempre quem está
+  autenticado, então não há como pedir a caixa alheia
+
+### `GET /api/notifications/unread-count`
+
+- Arquivo: `backend/app/routes/notifications.py`
+- Função: `unread_count`
+- Auth: autenticado (qualquer papel)
+- Banco/rede: `COUNT` em `notifications` do usuário logado
+- Frontend: não utilizado ainda (destinado ao badge do sino)
+- Estado: funcional
+- Retorno: `{ "unread": <int> }`
+
+### `PATCH /api/notifications/{notification_id}/read`
+
+- Arquivo: `backend/app/routes/notifications.py`
+- Função: `mark_as_read`
+- Auth: autenticado — **e a notificação precisa ser sua**
+- Banco/rede: grava `notifications.read_at`
+- Frontend: não utilizado ainda
+- Estado: funcional
+- Idempotente: reler não reescreve o `read_at` da primeira leitura
+- Notificação de outra pessoa responde **404, não 403** — um 403 confirmaria
+  que aquele id existe, e numa caixa pessoal isso já é vazamento
+
+### `POST /api/notifications`
+
+- Arquivo: `backend/app/routes/notifications.py`
+- Função: `create_notifications`
+- Auth: **admin**
+- Banco/rede: insere N linhas em `notifications` (uma por destinatário)
+- Frontend: não utilizado ainda
+- Estado: funcional
+- Corpo: `user_ids` (lista, mín. 1), `message` (não vazia), `severity`
+  opcional (`info`/`warning`/`critical`, padrão `info`), `alert_id` opcional
+- `404` se algum destinatário ou o alerta referenciado não existir
+- `409` se algum destinatário for uma conta desativada — a caixa dela nunca
+  seria aberta, e o remetente precisa saber
+- Destinatários repetidos são deduplicados antes de gravar
+
+Não existe `DELETE`, no mesmo espírito de usuários e Print Servers.
+
 ## Coleta
 
 ### `POST /api/collect/printers/{printer_id}`

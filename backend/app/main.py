@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.config import settings
 from app.database import create_db_and_tables
-from app.routes import auth, printers, alerts, collect, servers, users
+from app.routes import auth, printers, alerts, collect, servers, users, notifications
 from app.services.scheduler import shutdown_scheduler, start_scheduler
 
 logging.basicConfig(
@@ -30,6 +30,7 @@ TAGS_METADATA = [
     {"name": "printers", "description": "Cadastro das impressoras, leituras e relatorio mensal. Toda rota exige sessao; cadastro/edicao exigem admin; registrar leitura exige operator."},
     {"name": "alerts", "description": "Alertas gerados automaticamente apos cada coleta (offline e niveis de toner). Leitura exige sessao; resolver/notificar exigem operator."},
     {"name": "collect", "description": "Disparo manual de coleta e estado do agendador. Coleta real exige operator; coleta simulada e o agendador exigem admin."},
+        {"name": "notifications", "description": "Caixa pessoal de notificacoes do usuario logado. Admin envia; cada um le a sua."},
     {"name": "servers", "description": "Print Server: descoberta e sincronizacao de impressoras (Get-Printer/Get-PrinterPort). Operacoes administrativas."},
 ]
 
@@ -95,6 +96,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 # Rotas
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(users.router, prefix=settings.api_prefix)
+app.include_router(notifications.router, prefix=settings.api_prefix)
 app.include_router(printers.router, prefix=settings.api_prefix)
 app.include_router(alerts.router, prefix=settings.api_prefix)
 app.include_router(collect.router, prefix=settings.api_prefix)
