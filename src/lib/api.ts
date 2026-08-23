@@ -335,6 +335,37 @@ export const discoverServer = (serverId: number) =>
 export const syncServer = (serverId: number) =>
   api.post<ApiSyncResult>(`/api/servers/${serverId}/sync`);
 
+/** Corpo de `POST /api/servers` (`PrintServerCreate` no backend). */
+export interface PrintServerCreateInput {
+  host: string;
+  /** Rotulo legivel. Vazio faz o backend cair no proprio host. */
+  name?: string;
+  mode?: "mock" | "real";
+}
+
+/**
+ * Corpo de `PATCH /api/servers/{id}` (`PrintServerUpdate` no backend).
+ *
+ * `host` NAO entra, e nao e esquecimento: e a chave natural que aparece em
+ * `printers.server` e no UniqueConstraint (server, name). Renomea-lo
+ * orfanaria em silencio todas as impressoras do servidor, entao o backend
+ * tambem o recusa (Fase 4).
+ */
+export interface PrintServerUpdateInput {
+  name?: string;
+  mode?: "mock" | "real";
+  /** false = exclusao logica: o registro e o historico ficam, a operacao para. */
+  active?: boolean;
+}
+
+/** Registra um Print Server. O host e unico — 409 se ja existir. Exige admin. */
+export const createPrintServer = (data: PrintServerCreateInput) =>
+  api.post<ApiPrintServer>("/api/servers", data);
+
+/** Altera rotulo, modo ou ativacao de um servidor registrado. Exige admin. */
+export const updatePrintServer = (serverId: number, data: PrintServerUpdateInput) =>
+  api.patch<ApiPrintServer>(`/api/servers/${serverId}`, data);
+
 export const createUser = (data: UserCreateInput) => api.post<ApiUser>("/api/users", data);
 
 export const updateUser = (userId: number, data: UserUpdateInput) =>

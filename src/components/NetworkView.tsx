@@ -30,8 +30,19 @@ import {
   CircleX,
   Info,
   Clock,
+  Plus,
+  Pencil,
+  Power,
 } from "lucide-react";
-import { discoverServer, fetchPrintServers, syncServer, type ApiDiscoveryResponse } from "../lib/api";
+import {
+  createPrintServer,
+  discoverServer,
+  fetchPrintServers,
+  syncServer,
+  updatePrintServer,
+  type ApiDiscoveryResponse,
+  type PrintServerUpdateInput,
+} from "../lib/api";
 import { adaptPrintServer, adaptSyncResult } from "../lib/adaptApi";
 import { useApiErrorReporter } from "../lib/apiErrors";
 import { useAppData } from "../lib/app-data";
@@ -77,6 +88,27 @@ function formatarMomento(iso: string | null): string {
   });
 }
 
+/**
+ * Estado do formulario de registro/edicao (Fase 6).
+ *
+ * `active` NÃO está aqui de propósito, mesmo padrão do UsersView: desativar
+ * um servidor para a operação contra ele e some com a frota do painel, então
+ * tem fluxo próprio com confirmação, em vez de virar um campo que se salva
+ * junto com uma troca de rótulo.
+ */
+interface ServerFormState {
+  host: string;
+  name: string;
+  mode: "mock" | "real";
+}
+
+const FORM_VAZIO: ServerFormState = { host: "", name: "", mode: "mock" };
+
+const MODOS: { value: "mock" | "real"; label: string; hint: string }[] = [
+  { value: "mock", label: "Simulado", hint: "Frota fictícia, sem tocar a rede. Bom para testar." },
+  { value: "real", label: "Real", hint: "Consulta o Print Server de verdade via PowerShell/SNMP." },
+];
+
 const STATUS_SERVIDOR: Record<PrintServer["lastStatus"], string> = {
   unknown: "Nunca consultado",
   online: "Respondeu",
@@ -103,6 +135,17 @@ export default function NetworkView() {
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
+
+  // Registro/edição do servidor (Fase 6). `editing` null = criando.
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<PrintServer | null>(null);
+  const [form, setForm] = useState<ServerFormState>(FORM_VAZIO);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  // Ativar/desativar — sensível, nunca em um clique só.
+  const [confirmandoAtivacao, setConfirmandoAtivacao] = useState<PrintServer | null>(null);
+  const [alternando, setAlternando] = useState(false);
 
   const carregarServidores = useCallback(async () => {
     setLoadingServers(true);
@@ -156,10 +199,122 @@ export default function NetworkView() {
   function selecionar(id: number) {
     if (id === selectedId) return;
     setSelectedId(id);
+    limparResultados();
+  }
+
+  /** Limpa o que era resultado do servidor anterior. */
+  function limparResultados() {
     setDiscovery(null);
     setDiscoveryError(null);
     setSyncResult(null);
     setSyncError(null);
+  }
+
+  function abrirCriacao() {
+    setEditing(null);
+    setForm(FORM_VAZIO);
+    setFormError(null);
+    setDialogOpen(true);
+  }
+
+  function abrirEdicao(server: PrintServer) {
+    setEditing(server);
+    // `name` cai no host quando vazio (adaptPrintServer); mostrar o host como
+    // se fosse rótulo digitado faria o admin "confirmar" um nome que ele não
+    // escreveu, então o campo abre vazio nesse caso.
+    setForm({
+      host: server.host,
+      name: server.name === server.host ? "" : server.name,
+      mode: server.mode,
+    });
+    setFormError(null);
+    setDialogOpen(true);
+  }
+
+  function validar(): string | null {
+    if (!editing && !form.host.trim()) return "Informe o host do Print Server.";
+    if (!editing && /\s/.test(form.host.trim())) return "O host não pode conter espaços.";
+    return null;
+  }
+
+  async function salvar() {
+    const invalido = validar();
+    if (invalido) {
+      setFormError(invalido);
+      return;
+    }
+
+    setSaving(true);
+    setFormError(null);
+    try {
+      if (editing) {
+        // Só o que mudou. `host` nunca é enviado — imutável por design.
+        const mudancas: PrintServerUpdateInput = {};
+        const rotulo = form.name.trim();
+        const rotuloAtual = editing.name === editing.host ? "" : editing.name;
+        if (rotulo !== rotuloAtual) mudancas.name = rotulo || editing.host;
+        if (form.mode !== editing.mode) mudancas.mode = form.mode;
+
+        if (Object.keys(mudancas).length === 0) {
+          setDialogOpen(false);
+          return;
+        }
+
+        const atualizado = await updatePrintServer(editing.id, mudancas);
+        await carregarServidores();
+        push({
+          variant: "success",
+          title: "Print Server atualizado",
+          description: `${atualizado.name || atualizado.host} salvo.`,
+        });
+      } else {
+        const criado = await createPrintServer({
+          host: form.host.trim(),
+          name: form.name.trim(),
+          mode: form.mode,
+        });
+        await carregarServidores();
+        // Passa a operar sobre o que acabou de registrar; resultados do
+        // servidor anterior não valem mais para este cabeçalho.
+        limparResultados();
+        setSelectedId(criado.id);
+        push({
+          variant: "success",
+          title: "Print Server registrado",
+          description: `${criado.host} entrou no registro. Use Descobrir para ver o que ele publica.`,
+        });
+      }
+      setDialogOpen(false);
+    } catch (error) {
+      // 409 (host duplicado) e 422 (modo inválido) ficam no próprio
+      // formulário, onde dá para corrigir sem perder o que foi digitado.
+      setFormError(relatarErro(error, "Não foi possível salvar"));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function confirmarAtivacao() {
+    if (!confirmandoAtivacao) return;
+    const alvo = confirmandoAtivacao;
+    setAlternando(true);
+    try {
+      const atualizado = await updatePrintServer(alvo.id, { active: !alvo.active });
+      await carregarServidores();
+      push({
+        variant: "success",
+        title: atualizado.active ? "Print Server reativado" : "Print Server desativado",
+        description: atualizado.active
+          ? `${alvo.host} voltou a aceitar descoberta e sincronização.`
+          : `${alvo.host} para de ser consultado. As impressoras seguem no cadastro.`,
+      });
+      setConfirmandoAtivacao(null);
+    } catch (error) {
+      relatarErro(error, "Não foi possível alterar o status");
+      setConfirmandoAtivacao(null);
+    } finally {
+      setAlternando(false);
+    }
   }
 
   async function executarDescoberta() {
@@ -226,10 +381,18 @@ export default function NetworkView() {
                 : "Carregando servidores..."}
             </p>
           </div>
-          <button onClick={() => void carregarServidores()} disabled={loadingServers} className={styles.secondaryButton}>
-            <RefreshCw size={15} className={loadingServers ? "animate-spin" : ""} />
-            Atualizar
-          </button>
+          <div className={styles.headerActions}>
+            <button onClick={() => void carregarServidores()} disabled={loadingServers} className={styles.secondaryButton}>
+              <RefreshCw size={15} className={loadingServers ? "animate-spin" : ""} />
+              Atualizar
+            </button>
+            {can.canAdmin && (
+              <button onClick={abrirCriacao} className={styles.primaryButton}>
+                <Plus size={15} />
+                Novo Print Server
+              </button>
+            )}
+          </div>
         </div>
 
         {serversError && !loadingServers && <p className={styles.errorBox}>{serversError}</p>}
@@ -241,48 +404,81 @@ export default function NetworkView() {
         )}
 
         {servers && servers.length === 0 && (
-          <p className={styles.emptyState}>Nenhum Print Server registrado.</p>
+          <p className={styles.emptyState}>
+            {can.canAdmin
+              ? "Nenhum Print Server registrado. Use “Novo Print Server” para cadastrar o primeiro."
+              : "Nenhum Print Server registrado. Peça a um administrador para cadastrar um."}
+          </p>
         )}
 
         {servers && servers.length > 0 && (
           <div className={styles.serverGrid}>
             {servers.map((server) => (
-              <button
+              <div
                 key={server.id}
-                onClick={() => selecionar(server.id)}
                 className={cn(styles.serverCard, server.id === selectedId && styles.serverCardActive)}
-                aria-pressed={server.id === selectedId}
               >
-                <div className={styles.serverCardTop}>
-                  <Server size={16} className={styles.serverIcon} />
-                  <span className={styles.serverHost}>{server.host}</span>
-                  {server.isDefault && <span className={styles.tagNeutral}>padrão</span>}
-                </div>
-                <p className={styles.serverName}>{server.name}</p>
-                <div className={styles.serverTags}>
-                  <span className={cn(styles.tag, server.mode === "real" ? styles.tagReal : styles.tagMock)}>
-                    {server.mode === "real" ? "real" : "simulado"}
-                  </span>
-                  {!server.active && <span className={styles.tagOff}>desativado</span>}
-                  <span
-                    className={cn(
-                      styles.tag,
-                      server.lastStatus === "online" && styles.tagOk,
-                      server.lastStatus === "error" && styles.tagErro,
-                      server.lastStatus === "unknown" && styles.tagNeutral,
-                    )}
-                  >
-                    {STATUS_SERVIDOR[server.lastStatus]}
-                  </span>
-                </div>
-                <p className={styles.serverCounts}>
-                  <strong>{server.activePrinterCount}</strong> ativa(s) de{" "}
-                  <strong>{server.printerCount}</strong> cadastrada(s)
-                </p>
-                <p className={styles.serverMeta}>
-                  <Clock size={12} /> Último sync: {formatarMomento(server.lastSyncAt)}
-                </p>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => selecionar(server.id)}
+                  className={styles.serverSelect}
+                  aria-pressed={server.id === selectedId}
+                >
+                  <div className={styles.serverCardTop}>
+                    <Server size={16} className={styles.serverIcon} />
+                    <span className={styles.serverHost}>{server.host}</span>
+                    {server.isDefault && <span className={styles.tagNeutral}>padrão</span>}
+                  </div>
+                  <p className={styles.serverName}>{server.name}</p>
+                  <div className={styles.serverTags}>
+                    <span className={cn(styles.tag, server.mode === "real" ? styles.tagReal : styles.tagMock)}>
+                      {server.mode === "real" ? "real" : "simulado"}
+                    </span>
+                    {!server.active && <span className={styles.tagOff}>desativado</span>}
+                    <span
+                      className={cn(
+                        styles.tag,
+                        server.lastStatus === "online" && styles.tagOk,
+                        server.lastStatus === "error" && styles.tagErro,
+                        server.lastStatus === "unknown" && styles.tagNeutral,
+                      )}
+                    >
+                      {STATUS_SERVIDOR[server.lastStatus]}
+                    </span>
+                  </div>
+                  <p className={styles.serverCounts}>
+                    <strong>{server.activePrinterCount}</strong> ativa(s) de{" "}
+                    <strong>{server.printerCount}</strong> cadastrada(s)
+                  </p>
+                  <p className={styles.serverMeta}>
+                    <Clock size={12} /> Último sync: {formatarMomento(server.lastSyncAt)}
+                  </p>
+                </button>
+
+                {/* Fora do botão de seleção: aninhar <button> em <button> é
+                    HTML inválido, então o card é um <div> e a seleção virou
+                    um botão irmão destas ações. */}
+                {can.canAdmin && (
+                  <div className={styles.serverActions}>
+                    <button
+                      type="button"
+                      onClick={() => abrirEdicao(server)}
+                      className={styles.cardActionButton}
+                      title="Editar rótulo e modo"
+                    >
+                      <Pencil size={13} /> Editar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmandoAtivacao(server)}
+                      className={cn(styles.cardActionButton, server.active && styles.cardActionDanger)}
+                      title={server.active ? "Desativar este Print Server" : "Reativar este Print Server"}
+                    >
+                      <Power size={13} /> {server.active ? "Desativar" : "Reativar"}
+                    </button>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
@@ -352,9 +548,10 @@ export default function NetworkView() {
 
           {!selected.active && (
             <p className={styles.warnBox}>
-              Este Print Server está desativado: descobrir e sincronizar ficam bloqueados aqui, e
-              o backend também os recusa. A reativação é feita no registro de servidores, que ainda
-              não tem tela própria — por ora, só pela API.
+              Este Print Server está desativado: descobrir e sincronizar ficam bloqueados aqui, e o
+              backend também os recusa. {can.canAdmin
+                ? "Use Reativar no cartão dele acima para voltar a operar."
+                : "Peça a um administrador para reativá-lo."}
             </p>
           )}
 
@@ -509,6 +706,139 @@ export default function NetworkView() {
           </section>
         </>
       )}
+
+      {/* ── Registrar / editar Print Server ─────────────────────────── */}
+      <Modal
+        open={dialogOpen}
+        onClose={() => (saving ? undefined : setDialogOpen(false))}
+        title={editing ? "Editar Print Server" : "Novo Print Server"}
+        subtitle={editing ? editing.host : "O host é a chave do servidor e não muda depois."}
+        maxWidth="30rem"
+        footer={
+          <div className={styles.dialogFooter}>
+            <button onClick={() => setDialogOpen(false)} disabled={saving} className={styles.secondaryButton}>
+              Cancelar
+            </button>
+            <button onClick={() => void salvar()} disabled={saving} className={styles.primaryButton}>
+              {saving ? <Loader2 size={15} className="animate-spin" /> : null}
+              {editing ? "Salvar alterações" : "Registrar"}
+            </button>
+          </div>
+        }
+      >
+        <div className={styles.form}>
+          <label className={styles.field}>
+            <span className={styles.label}>Host</span>
+            <input
+              type="text"
+              value={form.host}
+              onChange={(e) => setForm((f) => ({ ...f, host: e.target.value }))}
+              className={styles.input}
+              placeholder="SRV-IMPRESSAO01"
+              // Mesmo valor de `printers.server`: trocá-lo desligaria em
+              // silêncio todas as impressoras do servidor. O backend recusa.
+              disabled={editing !== null}
+              autoComplete="off"
+            />
+            <span className={styles.hint}>
+              {editing
+                ? "O host não pode ser alterado — é a chave que liga as impressoras a este servidor."
+                : "Nome de rede usado no -ComputerName do PowerShell. Precisa ser único."}
+            </span>
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.label}>Rótulo (opcional)</span>
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              className={styles.input}
+              placeholder={form.host.trim() || "Como este servidor aparece no painel"}
+              autoComplete="off"
+            />
+            <span className={styles.hint}>Em branco, o painel mostra o próprio host.</span>
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.label}>Modo</span>
+            <select
+              value={form.mode}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, mode: e.target.value === "real" ? "real" : "mock" }))
+              }
+              className={styles.select}
+            >
+              {MODOS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+            <span className={styles.hint}>{MODOS.find((m) => m.value === form.mode)?.hint}</span>
+          </label>
+
+          {/* Trocar para simulado num servidor com frota cadastrada é a
+              mesma armadilha do sync em modo mock: o próximo sync desativa
+              tudo que o simulador não publica. */}
+          {editing && form.mode === "mock" && editing.mode === "real" && editing.printerCount > 0 && (
+            <p className={styles.warning}>
+              Este servidor tem <strong>{editing.printerCount}</strong> impressora(s) cadastrada(s).
+              Em modo simulado, o próximo <strong>Sincronizar</strong> marcaria como inativas todas
+              as que o simulador não publicar.
+            </p>
+          )}
+
+          {formError && <p className={styles.formError}>{formError}</p>}
+        </div>
+      </Modal>
+
+      {/* ── Ativar / desativar ──────────────────────────────────────── */}
+      <Modal
+        open={confirmandoAtivacao !== null}
+        onClose={() => (alternando ? undefined : setConfirmandoAtivacao(null))}
+        title={confirmandoAtivacao?.active ? "Desativar este Print Server?" : "Reativar este Print Server?"}
+        subtitle={confirmandoAtivacao?.host}
+        maxWidth="28rem"
+        footer={
+          <div className={styles.dialogFooter}>
+            <button
+              onClick={() => setConfirmandoAtivacao(null)}
+              disabled={alternando}
+              className={styles.secondaryButton}
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => void confirmarAtivacao()}
+              disabled={alternando}
+              className={cn(styles.primaryButton, confirmandoAtivacao?.active && styles.dangerButton)}
+            >
+              {alternando ? <Loader2 size={15} className="animate-spin" /> : <Power size={15} />}
+              {confirmandoAtivacao?.active ? "Desativar" : "Reativar"}
+            </button>
+          </div>
+        }
+      >
+        {confirmandoAtivacao?.active ? (
+          <>
+            <p className={styles.confirmText}>
+              Descoberta e sincronização deixam de rodar contra{" "}
+              <strong>{confirmandoAtivacao.host}</strong>. O registro e o histórico permanecem — é
+              exclusão lógica, o mesmo que <em>desativar</em> faz com um usuário.
+            </p>
+            <p className={styles.confirmText}>
+              As <strong>{confirmandoAtivacao.printerCount}</strong> impressora(s) já cadastradas
+              continuam no banco e no painel; elas só param de ser atualizadas por este servidor.
+            </p>
+          </>
+        ) : (
+          <p className={styles.confirmText}>
+            <strong>{confirmandoAtivacao?.host}</strong> volta a aceitar descoberta e sincronização.
+            Nada é gravado agora — a próxima sincronização é que atualiza o cadastro.
+          </p>
+        )}
+      </Modal>
 
       <Modal
         open={confirmOpen}

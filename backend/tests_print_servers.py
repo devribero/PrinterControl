@@ -205,7 +205,47 @@ def main():
           or client.get("/api/servers", headers=h(tokens["admin"])).json()[0]["host"] != "sequestrado",
           True)
 
-    print("\n[10] Migracao aditiva sobre banco pre-Fase 4")
+    print("\n[10] Contrato consumido pelo formulario do NetworkView (Fase 6)")
+    # A tela de rede monta exatamente estes corpos. O que ja esta coberto
+    # acima NAO se repete aqui — 403 de viewer em POST/PATCH ([2]), 409 de
+    # host duplicado e 422 de modo ([3]), active=false e 409 de discover em
+    # servidor desativado ([7]). Ficam so os pontos de que a UI depende e
+    # que nao estavam testados.
+
+    # Salvar sem rotulo e permitido no formulario, que conta com o backend
+    # caindo no proprio host — o adaptPrintServer do front faz `name || host`
+    # justamente por isso.
+    r = client.post("/api/servers", json={"host": "srv-sem-rotulo", "name": "", "mode": "mock"},
+                    headers=h(tokens["admin"]))
+    check("rotulo vazio -> 201", r.status_code, 201)
+    check("rotulo vazio cai no proprio host", r.json()["name"], "srv-sem-rotulo")
+    sem_rotulo_id = r.json()["id"]
+
+    # O modo escolhido no <select> precisa chegar gravado: [3] so conferia
+    # host e rotulo no retorno do POST.
+    r = client.post("/api/servers", json={"host": "srv-real", "name": "Real", "mode": "real"},
+                    headers=h(tokens["admin"]))
+    check("modo do formulario gravado no POST", r.json()["mode"], "real")
+
+    # O dialogo de edicao salva rotulo e modo de uma vez; ate aqui so havia
+    # PATCH de um campo por vez ([7] active, [8] mode).
+    r = client.patch(f"/api/servers/{sem_rotulo_id}",
+                     json={"name": "Deposito", "mode": "real"}, headers=h(tokens["admin"]))
+    check("PATCH name+mode na mesma requisicao -> 200", r.status_code, 200)
+    check("name aplicado", r.json()["name"], "Deposito")
+    check("mode aplicado", r.json()["mode"], "real")
+
+    # Mesmo alvo do check de [9], mas conferido POR ID. Aquele compara
+    # `servidores[0]["host"]`, que depende da ordenacao alfabetica da lista:
+    # um host sequestrado para um valor que ordenasse na mesma posicao
+    # passaria despercebido.
+    client.patch(f"/api/servers/{sem_rotulo_id}", json={"host": "sequestrado"},
+                 headers=h(tokens["admin"]))
+    estado = next(x for x in client.get("/api/servers", headers=h(tokens["admin"])).json()
+                  if x["id"] == sem_rotulo_id)
+    check("host intacto apos tentativa de troca", estado["host"], "srv-sem-rotulo")
+
+    print("\n[11] Migracao aditiva sobre banco pre-Fase 4")
     check_true("banco legado migrado sem perda", _testa_migracao_legada())
 
     print("\n" + "=" * 70)

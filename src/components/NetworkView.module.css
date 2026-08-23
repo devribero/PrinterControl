@@ -44,16 +44,26 @@
   padding: 1.25rem 1.5rem;
 }
 
+/* O card e uma MOLDURA (div), nao mais um botao: a selecao virou o
+   .serverSelect interno para que os botoes de acao possam ser irmaos dele —
+   <button> dentro de <button> e HTML invalido. */
 .serverCard {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
   border-radius: 0.875rem;
   border: 1px solid var(--color-border);
   background: var(--color-surface-2);
+  overflow: hidden;
+  transition: all 0.15s;
+}
+.serverSelect {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.375rem;
   padding: 0.875rem 1rem;
   text-align: left;
-  transition: all 0.15s;
+  width: 100%;
 }
 
 .serverCard:hover {
@@ -514,4 +524,131 @@
   font-size: 13px;
   line-height: 1.5;
   color: var(--color-ink);
+}
+
+/* ── Fase 6: registro e edicao de Print Server ────────────────────────── */
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  align-self: flex-start;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  background: var(--color-brand);
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.primaryButton:hover:not(:disabled) {
+  background: var(--color-brand-700);
+}
+.primaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.dangerButton {
+  background: var(--color-critical);
+}
+.dangerButton:hover:not(:disabled) {
+  background: var(--color-critical);
+  filter: brightness(0.92);
+}
+
+/* Acoes do card, abaixo da area selecionavel. */
+.serverActions {
+  display: flex;
+  gap: 0.25rem;
+  border-top: 1px solid var(--color-border);
+  padding: 0.375rem 0.5rem;
+}
+.cardActionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  border-radius: 0.5rem;
+  padding: 0.3125rem 0.5rem;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-ink-soft);
+  transition: all 0.15s;
+}
+.cardActionButton:hover {
+  background: var(--color-surface-sunken);
+  color: var(--color-brand);
+}
+.cardActionDanger:hover {
+  color: var(--color-critical);
+}
+
+/* Formulario do dialogo — mesmas medidas do UsersView, para as duas telas
+   administrativas nao divergirem visualmente. */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.input,
+.select {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.input:focus,
+.select:focus {
+  border-color: var(--color-brand);
+}
+.input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+.input::placeholder {
+  color: var(--color-ink-faint);
+}
+.hint {
+  font-size: 12px;
+  color: var(--color-ink-faint);
+}
+.warning {
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-warning);
+  background: var(--color-warning-tint);
+  padding: 0.625rem 0.875rem;
+  font-size: 13px;
+  color: var(--color-ink);
+}
+.formError {
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-critical);
+  background: var(--color-critical-tint);
+  padding: 0.625rem 0.875rem;
+  font-size: 13px;
+  color: var(--color-critical);
 }
