@@ -7,7 +7,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Search, Bell, Download, RadioTower, ChevronDown, Menu, LogOut, Settings, User, Loader2, TriangleAlert, Sun, Moon } from "lucide-react";
+import Link from "next/link";
+import { Search, Bell, Inbox, Download, RadioTower, ChevronDown, Menu, LogOut, Settings, User, Loader2, TriangleAlert, Sun, Moon } from "lucide-react";
 import { useTheme } from "../lib/theme";
 import { useAppData } from "../lib/app-data";
 import { useToast } from "../lib/toast";
@@ -18,7 +19,7 @@ import styles from "./Topbar.module.css";
 
 export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => void }) {
   const { theme, toggleTheme } = useTheme();
-  const { account, can, alerts, filters, updateFilter, handleDiscovery, discoveryScanning, handleLogout, handleAlertSelect, filteredPrinters } = useAppData();
+  const { account, can, alerts, filters, updateFilter, handleDiscovery, discoveryScanning, handleLogout, handleAlertSelect, filteredPrinters, unreadNotifications } = useAppData();
   const { push } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -101,7 +102,12 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
           {notifOpen && (
             <div className={cn(styles.dropdown, styles.dropdownNotif)}>
               <div className={styles.dropdownHeader}>
-                <p className={styles.dropdownHeaderTitle}>Notificações</p>
+                {/* Isto lista ALERTAS da frota (eventos tecnicos de
+                    impressora), nao a caixa pessoal. Ate a Fase 7 as duas
+                    coisas nem existiam separadas e o titulo dizia
+                    "Notificacoes"; agora que existe uma caixa de verdade em
+                    /notifications, manter o nome antigo aqui confundiria. */}
+                <p className={styles.dropdownHeaderTitle}>Alertas da frota</p>
               </div>
               <div className={styles.notifList}>
                 {alerts.length === 0 ? (
@@ -128,6 +134,28 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
             </div>
           )}
         </div>
+
+        {/* Caixa pessoal (Fase 8) — separada do sino de propósito: alerta é
+            evento técnico de impressora, notificação é mensagem para uma
+            pessoa, com leitura individual. O contador vem do
+            AppDataProvider, então marcar como lida na página atualiza aqui. */}
+        <Link
+          href="/notifications"
+          className={cn(styles.iconButton, styles.relative)}
+          aria-label={
+            unreadNotifications > 0
+              ? `Notificações: ${unreadNotifications} não lida(s)`
+              : "Notificações"
+          }
+          title="Minhas notificações"
+        >
+          <Inbox size={18} />
+          {unreadNotifications > 0 && (
+            <span className={styles.notifBadge}>
+              {unreadNotifications > 99 ? "99+" : unreadNotifications}
+            </span>
+          )}
+        </Link>
 
         <button onClick={onExportCsv} className={cn(styles.textButton, styles.exportButton)}>
           <Download size={16} />
