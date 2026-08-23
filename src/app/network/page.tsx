@@ -1,6 +1,13 @@
-import { Network } from "lucide-react";
-import ComingSoon from "../../components/ComingSoon";
+import NetworkView from "../../components/NetworkView";
 
+/**
+ * Rota "/network" — Mapeamento de Rede.
+ *
+ * Visível a qualquer sessão: ver quais Print Servers existem e quais
+ * impressoras pertencem a cada um é leitura. As ações que tocam o Print
+ * Server (Descobrir) ou o banco (Sincronizar) são de admin e ficam
+ * escondidas para os demais papéis — o backend também as recusa (403).
+ */
 export default function NetworkPage() {
-  return <ComingSoon icon={Network} title="Mapeamento de Rede" description="A topologia visual da rede de impressão chega em breve." />;
+  return <NetworkView />;
 }
