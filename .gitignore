@@ -52,3 +52,10 @@ backend/.env
 # Bancos SQLite nunca vao para o repositorio
 *.db
 *.db-journal
+
+# Snapshots compactados do proprio codigo (backend.zip, frontend.zip): o
+# repositorio ja e a fonte da verdade, versiona-los duplica o historico.
+*.zip
+
+# Cache incremental do compilador TypeScript — muda a cada build.
+tsconfig.tsbuildinfo
