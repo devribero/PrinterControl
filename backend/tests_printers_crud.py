@@ -53,16 +53,19 @@ status, payload = request("POST", "/api/auth/login", {"email": EMAIL, "password"
 check("login", status, 200)
 token = payload["access_token"]
 
-print("\n--- 1. leitura (aberta) ---")
-status, printers = request("GET", "/api/printers")
+print("\n--- 1. leitura (exige JWT desde a Fase 2) ---")
+check("GET /api/printers sem token -> 401", request("GET", "/api/printers")[0], 401)
+check("GET /api/alerts sem token -> 401", request("GET", "/api/alerts")[0], 401)
+
+status, printers = request("GET", "/api/printers", token=token)
 check("GET /api/printers", status, 200)
 check("73 impressoras", len(printers), 73)
 
 first_id = printers[0]["id"]
-status, one = request("GET", f"/api/printers/{first_id}")
+status, one = request("GET", f"/api/printers/{first_id}", token=token)
 check("GET /api/printers/{id}", status, 200)
 check_true("campos presentes", all(k in one for k in ("ip", "name", "model", "department")))
-check("id inexistente -> 404", request("GET", "/api/printers/999999")[0], 404)
+check("id inexistente -> 404", request("GET", "/api/printers/999999", token=token)[0], 404)
 
 print("\n--- 2. escrita exige JWT ---")
 novo = {"ip": TEST_IP, "name": "TESTE_TEMP", "model": "Modelo Teste", "department": "TI"}
@@ -89,13 +92,13 @@ temp_id = criada["id"]
 check("ip gravado", criada["ip"], TEST_IP)
 check("nome gravado", criada["name"], "TESTE_TEMP")
 
-status, lista = request("GET", "/api/printers")
+status, lista = request("GET", "/api/printers", token=token)
 check("agora sao 74", len(lista), 74)
-status, com_status = request("GET", "/api/printers/with-status")
+status, com_status = request("GET", "/api/printers/with-status", token=token)
 nova = next(p for p in com_status if p["id"] == temp_id)
 check("aparece em with-status", nova["name"], "TESTE_TEMP")
 check("sem leitura -> last_seen nulo", nova["last_seen"], None)
-check("sem PrinterReading artificial", request("GET", f"/api/printers/{temp_id}/readings")[1], [])
+check("sem PrinterReading artificial", request("GET", f"/api/printers/{temp_id}/readings", token=token)[1], [])
 
 print("\n--- 5. identidade e (server, name), nao IP (Etapa 4) ---")
 status, outra = request("POST", "/api/printers", {**novo, "name": "OUTRA_COM_MESMO_IP"}, token)
@@ -112,7 +115,7 @@ status, editada = request("PATCH", f"/api/printers/{temp_id}", {"name": "TESTE_E
 check("PATCH -> 200", status, 200)
 check("nome atualizado", editada["name"], "TESTE_EDITADO")
 check("departamento atualizado", editada["department"], "Financeiro")
-check("persistiu", request("GET", f"/api/printers/{temp_id}")[1]["name"], "TESTE_EDITADO")
+check("persistiu", request("GET", f"/api/printers/{temp_id}", token=token)[1]["name"], "TESTE_EDITADO")
 
 status, resp = request("PATCH", f"/api/printers/{temp_id}", {"ip": printers[0]["ip"]}, token)
 check("PATCH para IP de outra impressora -> 200 (IP nao e mais unico)", status, 200)
@@ -124,14 +127,14 @@ check("PATCH id inexistente -> 404", request("PATCH", "/api/printers/999999", {"
 print("\n--- 7. leituras historicas intactas ---")
 com_leituras = [p for p in com_status if p["last_seen"]]
 alvo = com_leituras[0]
-antes = request("GET", f"/api/printers/{alvo['id']}/readings?limit=500")[1]
+antes = request("GET", f"/api/printers/{alvo['id']}/readings?limit=500", token=token)[1]
 request("PATCH", f"/api/printers/{alvo['id']}", {"department": "TEMP_TESTE"}, token)
-depois = request("GET", f"/api/printers/{alvo['id']}/readings?limit=500")[1]
+depois = request("GET", f"/api/printers/{alvo['id']}/readings?limit=500", token=token)[1]
 check("quantidade de leituras inalterada", len(depois), len(antes))
 check_true("conteudo das leituras inalterado", depois == antes, f"{len(antes)} leituras conferidas")
 # reverte a edicao da impressora real
 request("PATCH", f"/api/printers/{alvo['id']}", {"department": alvo["department"]}, token)
-check("departamento restaurado", request("GET", f"/api/printers/{alvo['id']}")[1]["department"], alvo["department"])
+check("departamento restaurado", request("GET", f"/api/printers/{alvo['id']}", token=token)[1]["department"], alvo["department"])
 
 print("\n--- 7b. escrita de leituras e coleta exigem JWT (Etapa 13) ---")
 leitura = {"status": "online", "page_count": 123, "toner_k": 50}
@@ -144,7 +147,10 @@ check("coleta fleet sem token -> 401", request("POST", "/api/collect/fleet")[0],
 check("token invalido -> 401", request("POST", f"/api/collect/printers/{temp_id}", mock_body, "nao.e.um.jwt")[0], 401)
 
 status, resp = request("POST", f"/api/collect/printers/{temp_id}", mock_body, token)
-mock_ligado = request("GET", "/api/collect/scenarios")[1]["mock_enabled"]
+# Fase 1: /api/collect/scenarios expoe a configuracao de mock e passou a
+# exigir admin — a conta usada por este teste tem esse papel.
+check("scenarios sem token -> 401", request("GET", "/api/collect/scenarios")[0], 401)
+mock_ligado = request("GET", "/api/collect/scenarios", token=token)[1]["mock_enabled"]
 if mock_ligado:
     check("coleta mock com token e ALLOW_MOCK_COLLECT=true -> 200", status, 200)
 else:
@@ -171,8 +177,8 @@ for pid in (temp_id, outra_id):
     conn.execute("delete from printers where id = ?", (pid,))
 conn.commit()
 conn.close()
-check("temporaria removida", request("GET", f"/api/printers/{temp_id}")[0], 404)
-check("voltou a 73", len(request("GET", "/api/printers")[1]), 73)
+check("temporaria removida", request("GET", f"/api/printers/{temp_id}", token=token)[0], 404)
+check("voltou a 73", len(request("GET", "/api/printers", token=token)[1]), 73)
 
 print("\nRESULTADO:", "TODOS OS TESTES PASSARAM" if not failures else f"FALHAS: {failures}")
 raise SystemExit(1 if failures else 0)

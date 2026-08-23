@@ -25,7 +25,7 @@ from app.database import create_db_and_tables, engine  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models.alert import Alert  # noqa: E402
 from app.models.printer import Printer, PrinterReading  # noqa: E402
-from app.models.user import User  # noqa: E402
+from app.models.user import Role, User  # noqa: E402
 from app.services import alert_engine, webhook_notifier  # noqa: E402
 from app.services.auth import create_access_token, hash_password  # noqa: E402
 
@@ -52,7 +52,10 @@ create_db_and_tables()
 with Session(engine) as s:
     printer = Printer(server="srvtest", name="WH_Test", ip="10.9.9.9", model="Ricoh P502", active=True)
     s.add(printer)
-    s.add(User(email="webhook.test@example.com", password_hash=hash_password("x"), name="Webhook Test"))
+    # Fase 1: /notify e uma acao operacional — o usuario do teste precisa
+    # do papel "operator" (o default de User e "viewer", somente leitura).
+    s.add(User(email="webhook.test@example.com", password_hash=hash_password("x"),
+               name="Webhook Test", role=Role.OPERATOR.value))
     s.commit()
     s.refresh(printer)
     PRINTER_ID = printer.id

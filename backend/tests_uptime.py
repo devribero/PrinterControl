@@ -186,13 +186,27 @@ import app.database as db_module  # noqa: E402
 # usam get_session(), que le esse mesmo modulo — nenhuma troca adicional.
 client = TestClient(main_module.app)
 
-resp_readings = client.get(f"/api/printers/{P1_ID}/readings")
+# Fase 2: a leitura da API exige sessao. Criamos um usuario viewer no banco
+# sintetico — leitura e o menor papel possivel, entao serve de prova de que
+# fechar os GETs nao exige privilegio algum alem de estar autenticado.
+from app.models.user import Role, User  # noqa: E402
+from app.services.auth import create_access_token, hash_password  # noqa: E402
+
+with Session(database_module.engine) as s:
+    s.add(User(email="uptime.viewer@example.com", password_hash=hash_password("x"),
+               name="Uptime Viewer", role=Role.VIEWER.value))
+    s.commit()
+AUTH = {"Authorization": f"Bearer {create_access_token({'sub': 'uptime.viewer@example.com'})}"}
+
+check("GET /readings sem token -> 401", client.get(f"/api/printers/{P1_ID}/readings").status_code, 401)
+
+resp_readings = client.get(f"/api/printers/{P1_ID}/readings", headers=AUTH)
 check("GET /readings -> 200", resp_readings.status_code, 200)
 readings_payload = resp_readings.json()
 check_true("historico contem uptime", len(readings_payload) > 0 and "uptime" in readings_payload[0])
 check("uptime correto no historico via API", readings_payload[0]["uptime"], "45d, 3h, 22m")
 
-resp_status = client.get("/api/printers/with-status")
+resp_status = client.get("/api/printers/with-status", headers=AUTH)
 check("GET /with-status -> 200", resp_status.status_code, 200)
 status_payload = {p["id"]: p for p in resp_status.json()}
 check_true("with-status contem uptime para P1", "uptime" in status_payload[P1_ID])

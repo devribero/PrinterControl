@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
 from app.database import engine, create_db_and_tables
-from app.models.user import User
+from app.models.user import Role, User
 from app.models.printer import Printer
 from app.services.auth import hash_password
 import json
@@ -10,16 +10,22 @@ def seed_database():
 
     with Session(engine) as session:
         # Seed users
+        # Contas de desenvolvimento: admin, porque sao as unicas do banco
+        # semeado e precisam poder criar as demais (POST /api/auth/register
+        # e administrativo desde a Fase 1). Contas criadas por elas nascem
+        # como "viewer".
         users = [
             User(
                 email="mateus.vicentino@example.com",
                 password_hash=hash_password("123"),
                 name="Mateus Vicentino",
+                role=Role.ADMIN.value,
             ),
             User(
                 email="pedro.ribeiro@example.com",
                 password_hash=hash_password("123"),
                 name="Pedro Ribeiro",
+                role=Role.ADMIN.value,
             ),
         ]
 
