@@ -6,12 +6,13 @@
 import {
   api,
   type ApiAlert,
+  type ApiNotification,
   type ApiPrintServer,
   type ApiPrinterWithStatus,
   type ApiSyncResult,
   type ApiTonerLevel,
 } from "./api";
-import type { Alert, MonthlyReport, Printer, PrintServer, PrinterStatus, SyncResult, TonerLevel } from "../types";
+import type { Alert, MonthlyReport, Notification, Printer, PrintServer, PrinterStatus, SyncResult, TonerLevel } from "../types";
 
 const VALID_STATUS: PrinterStatus[] = ["online", "offline", "atencao"];
 const VALID_COLORS = ["K", "C", "M", "Y"] as const;
@@ -85,6 +86,26 @@ export function adaptPrintServer(s: ApiPrintServer): PrintServer {
 
 export function adaptSyncResult(r: ApiSyncResult): SyncResult {
   return { ...r };
+}
+
+export function adaptNotification(n: ApiNotification): Notification {
+  return {
+    id: n.id,
+    message: n.message,
+    severity: n.severity,
+    readAt: n.read_at,
+    createdAt: n.created_at,
+    alertId: n.alert_id,
+    alert: n.alert
+      ? {
+          id: n.alert.id,
+          printerId: n.alert.printer_id,
+          alertType: n.alert.alert_type,
+          severity: n.alert.severity,
+          resolved: n.alert.resolved,
+        }
+      : null,
+  };
 }
 
 export function adaptAlert(a: ApiAlert): Alert {

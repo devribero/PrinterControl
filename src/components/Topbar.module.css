@@ -157,6 +157,11 @@
 }
 
 .iconButton {
+  /* inline-flex tambem para quando o .iconButton e um <a> (o atalho da caixa
+     pessoal): um <a> nasce inline e o padding/badge sairiam tortos. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 0.75rem;
   border: 1px solid var(--color-border);
   background: var(--color-surface);

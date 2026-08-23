@@ -366,6 +366,70 @@ export const createPrintServer = (data: PrintServerCreateInput) =>
 export const updatePrintServer = (serverId: number, data: PrintServerUpdateInput) =>
   api.patch<ApiPrintServer>(`/api/servers/${serverId}`, data);
 
+/* -- Notificacoes internas (/api/notifications) --------------------------- */
+
+/** Referencia ao alerta de origem, quando houver (`AlertRef` no backend). */
+export interface ApiNotificationAlertRef {
+  id: number;
+  printer_id: number;
+  alert_type: string | null;
+  severity: string;
+  resolved: boolean;
+}
+
+/** `NotificationResponse` do backend (Fase 7). */
+export interface ApiNotification {
+  id: number;
+  message: string;
+  severity: "info" | "warning" | "critical";
+  read_at: string | null;
+  created_at: string;
+  alert_id: number | null;
+  alert: ApiNotificationAlertRef | null;
+}
+
+export interface NotificationCreateInput {
+  user_ids: number[];
+  message: string;
+  severity?: "info" | "warning" | "critical";
+  alert_id?: number | null;
+}
+
+/**
+ * Caixa do usuario LOGADO. Nao existe parametro de destinatario: o backend
+ * sempre filtra pela sessao, entao nao ha como pedir a caixa de outra pessoa.
+ */
+export const fetchNotifications = (
+  options: { unreadOnly?: boolean; limit?: number } = {},
+  signal?: AbortSignal,
+) => {
+  const params = new URLSearchParams();
+  if (options.unreadOnly) params.set("unread_only", "true");
+  if (options.limit) params.set("limit", String(options.limit));
+  const qs = params.toString();
+  return api.get<ApiNotification[]>(`/api/notifications${qs ? `?${qs}` : ""}`, { signal });
+};
+
+/** Contador para o badge, sem trazer a lista inteira. */
+export const fetchUnreadNotificationCount = (signal?: AbortSignal) =>
+  api.get<{ unread: number }>("/api/notifications/unread-count", { signal });
+
+/** Idempotente: reler nao reescreve o `read_at` da primeira leitura. */
+export const markNotificationRead = (notificationId: number) =>
+  api.patch<ApiNotification>(`/api/notifications/${notificationId}/read`);
+
+/**
+ * Marca TODAS as nao lidas da caixa do usuario logado, num unico instante.
+ * Idempotente: sem pendencias devolve `marked: 0`, e nunca reescreve o
+ * `read_at` de uma que ja estava lida.
+ */
+export const markAllNotificationsRead = () =>
+  api.post<{ marked: number }>("/api/notifications/read-all");
+
+/** Envia para N destinatarios — uma notificacao por pessoa. Exige admin. */
+export const createNotifications = (data: NotificationCreateInput) =>
+  api.post<ApiNotification[]>("/api/notifications", data);
+
 export const createUser = (data: UserCreateInput) => api.post<ApiUser>("/api/users", data);
 
 export const updateUser = (userId: number, data: UserUpdateInput) =>

@@ -99,6 +99,12 @@ class UnreadCount(BaseModel):
     unread: int
 
 
+class ReadAllResult(BaseModel):
+    #: Quantas estavam nao lidas e foram marcadas agora. 0 quando a caixa ja
+    #: estava toda lida — nao e erro, e o resultado correto.
+    marked: int
+
+
 # ─────────────────────────────────────────────────────────────────────────
 #  Helpers
 # ─────────────────────────────────────────────────────────────────────────
@@ -200,6 +206,42 @@ def mark_as_read(
         session.refresh(n)
 
     return _to_response(session, n)
+
+
+@router.post("/read-all", response_model=ReadAllResult)
+def mark_all_as_read(
+    session: Session = Depends(get_session),
+    user: User = Depends(require_user),
+):
+    """
+    Marca como lidas todas as nao lidas da CAIXA DE QUEM ESTA LOGADO.
+
+    Nao aceita destinatario: como no `GET`, o escopo vem da sessao, entao nao
+    ha parametro capaz de esvaziar a caixa de outra pessoa — nem para admin.
+
+    Um unico instante para todas: elas foram lidas no mesmo gesto, e dar
+    timestamps diferentes por linha inventaria uma ordem que nao existiu.
+
+    Idempotente: chamar de novo devolve `marked: 0` e nao reescreve nenhum
+    `read_at` ja gravado, preservando o instante da primeira leitura.
+    """
+    pendentes = session.exec(
+        select(Notification).where(
+            Notification.user_id == user.id,
+            Notification.read_at == None,  # noqa: E711
+        )
+    ).all()
+
+    if not pendentes:
+        return ReadAllResult(marked=0)
+
+    agora = datetime.utcnow()
+    for n in pendentes:
+        n.read_at = agora
+        session.add(n)
+    session.commit()
+
+    return ReadAllResult(marked=len(pendentes))
 
 
 @router.post("", response_model=list[NotificationResponse], status_code=status.HTTP_201_CREATED)

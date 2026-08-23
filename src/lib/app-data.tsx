@@ -11,7 +11,7 @@
  */
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   printers as mockPrinters,
   monthlyUsage as mockMonthlyUsage,
@@ -19,7 +19,7 @@ import {
   decommissionedPrinters,
 } from "../data/printers";
 import { logout as clearSession, restoreSession, type Account } from "./auth";
-import { ApiError, discoverPrinters, fetchAlerts, fetchPrintersWithStatus } from "./api";
+import { ApiError, discoverPrinters, fetchAlerts, fetchPrintersWithStatus, fetchUnreadNotificationCount } from "./api";
 import { permissionsFor, type Permissions } from "./permissions";
 import { adaptAlert, adaptPrinter, loadMonthlyReportFromApi } from "./adaptApi";
 import { loadMonthlyReport, mergeMonthlyReport } from "./fetchMonthlyReport";
@@ -53,6 +53,15 @@ interface AppDataContextValue {
   initialLoading: boolean;
   /** Mensagem quando a API falhou; null quando os dados vieram do backend. */
   apiError: string | null;
+
+  /**
+   * Nao lidas na caixa pessoal (Fase 8). Vive aqui, e nao no Topbar, porque
+   * duas telas dependem do mesmo numero: o badge do cabecalho e a pagina
+   * /notifications. Marcar uma como lida na pagina chama
+   * `refreshUnreadNotifications` e o badge acompanha na hora.
+   */
+  unreadNotifications: number;
+  refreshUnreadNotifications: () => Promise<void>;
 
   filters: PrinterFilters;
   updateFilter: <K extends keyof PrinterFilters>(key: K, value: PrinterFilters[K]) => void;
@@ -135,6 +144,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [discoveryScanning, setDiscoveryScanning] = useState(false);
   const [lastChecked, setLastChecked] = useState<Date>(() => new Date());
   const [initialLoading, setInitialLoading] = useState(true);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const { push } = useToast();
 
   // Restauracao da sessao: o token guardado so vale se o backend confirmar
@@ -242,6 +252,28 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, [sessionLoading, accountKey]);
+
+  /**
+   * Recarrega o contador. Falha em SILENCIO de proposito: sem backend (modo
+   * demonstracao) ou sem sessao, o badge simplesmente some. Um toast de erro
+   * a cada carga de pagina por causa de um contador seria ruido.
+   */
+  const refreshUnreadNotifications = useCallback(async () => {
+    if (!accountKey) {
+      setUnreadNotifications(0);
+      return;
+    }
+    try {
+      setUnreadNotifications((await fetchUnreadNotificationCount()).unread);
+    } catch {
+      setUnreadNotifications(0);
+    }
+  }, [accountKey]);
+
+  useEffect(() => {
+    if (sessionLoading) return;
+    void refreshUnreadNotifications();
+  }, [sessionLoading, refreshUnreadNotifications]);
 
   const stats = useMemo(() => {
     const total = printers.length;
@@ -410,6 +442,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     usingRealMonthlyReport,
     initialLoading,
     apiError,
+
+    unreadNotifications,
+    refreshUnreadNotifications,
 
     filters,
     updateFilter,

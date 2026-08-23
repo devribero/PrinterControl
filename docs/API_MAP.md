@@ -274,6 +274,22 @@ poder oferecer o link e mostrar se ele ainda está aberto.
 - Notificação de outra pessoa responde **404, não 403** — um 403 confirmaria
   que aquele id existe, e numa caixa pessoal isso já é vazamento
 
+### `POST /api/notifications/read-all`
+
+- Arquivo: `backend/app/routes/notifications.py`
+- Função: `mark_all_as_read`
+- Auth: autenticado (qualquer papel) — mexe só na **própria** caixa
+- Banco/rede: grava `read_at` em todas as não lidas do usuário logado
+- Frontend: `src/components/NotificationsView.tsx` (botão "Marcar todas como lidas")
+- Estado: funcional
+- Retorno: `{ "marked": <int> }` — quantas estavam pendentes
+- Um único timestamp para todas: foram lidas no mesmo gesto, e instantes
+  diferentes por linha inventariam uma ordem que não existiu
+- Idempotente: repetir devolve `marked: 0` e não reescreve nenhum `read_at`
+  já gravado
+- Não aceita destinatário, pelo mesmo motivo do `GET`: o escopo vem da sessão,
+  então não há parâmetro capaz de esvaziar a caixa de outra pessoa
+
 ### `POST /api/notifications`
 
 - Arquivo: `backend/app/routes/notifications.py`

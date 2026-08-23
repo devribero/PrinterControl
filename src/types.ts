@@ -81,6 +81,34 @@ export interface SyncResult {
   deactivated: number;
 }
 
+/**
+ * Referencia ao alerta que originou a notificacao (Fase 7/8).
+ *
+ * E um LINK, nao o conteudo: a notificacao ja traz a propria `message`. Vem
+ * null quando nao ha vinculo ou quando o alerta nao existe mais — nos dois
+ * casos a notificacao continua legivel.
+ */
+export interface NotificationAlertRef {
+  id: number;
+  printerId: number;
+  alertType: string | null;
+  severity: string;
+  /** true = o alerta ja foi resolvido; false = ainda esta aberto. */
+  resolved: boolean;
+}
+
+/** Notificacao da caixa pessoal do usuario logado. */
+export interface Notification {
+  id: number;
+  message: string;
+  severity: "info" | "warning" | "critical";
+  /** null = nao lida. Quando preenchido, e o instante da PRIMEIRA leitura. */
+  readAt: string | null;
+  createdAt: string;
+  alertId: number | null;
+  alert: NotificationAlertRef | null;
+}
+
 export interface Alert {
   id: string;
   severity: "critical" | "warning" | "info";

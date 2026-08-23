@@ -245,7 +245,51 @@ def main():
                     headers=h(tokens["admin"]))
     check("destinatario duplicado gera 1 linha", len(r.json()), 1)
 
-    print("\n[12] O motor de alertas continua intocado")
+    print("\n[12] Marcar todas como lidas (read-all)")
+    # Prepara uma caixa com nao lidas de sobra em DUAS pessoas, para provar
+    # que o read-all de uma nao encosta na outra.
+    client.post("/api/notifications",
+                json={"user_ids": [ids["viewer"], ids["operator"]], "message": "Lote A"},
+                headers=h(tokens["admin"]))
+    client.post("/api/notifications",
+                json={"user_ids": [ids["viewer"]], "message": "Lote B"},
+                headers=h(tokens["admin"]))
+
+    antes_viewer = client.get("/api/notifications/unread-count", headers=h(tokens["viewer"])).json()["unread"]
+    antes_operator = client.get("/api/notifications/unread-count", headers=h(tokens["operator"])).json()["unread"]
+    check_true("viewer tem nao lidas antes", antes_viewer > 0, str(antes_viewer))
+    check_true("operator tem nao lidas antes", antes_operator > 0, str(antes_operator))
+
+    # Guarda o read_at de uma que JA estava lida: o read-all nao pode
+    # reescrever o instante da primeira leitura.
+    ja_lida = next(n for n in client.get("/api/notifications", headers=h(tokens["viewer"])).json()
+                   if n["read_at"] is not None)
+
+    r = client.post("/api/notifications/read-all", headers=h(tokens["viewer"]))
+    check("read-all -> 200", r.status_code, 200)
+    check("marcou as que estavam pendentes", r.json()["marked"], antes_viewer)
+    check("caixa do viewer zerada", client.get("/api/notifications/unread-count",
+                                               headers=h(tokens["viewer"])).json()["unread"], 0)
+    check("caixa do operator INTACTA", client.get("/api/notifications/unread-count",
+                                                  headers=h(tokens["operator"])).json()["unread"], antes_operator)
+
+    depois = client.get("/api/notifications", headers=h(tokens["viewer"])).json()
+    check_true("nenhuma sem read_at", all(n["read_at"] is not None for n in depois))
+    check("read_at anterior preservado",
+          next(n for n in depois if n["id"] == ja_lida["id"])["read_at"], ja_lida["read_at"])
+
+    # Idempotente: repetir nao e erro, so nao ha o que marcar.
+    r2 = client.post("/api/notifications/read-all", headers=h(tokens["viewer"]))
+    check("read-all de novo -> 200", r2.status_code, 200)
+    check("nada a marcar na segunda vez", r2.json()["marked"], 0)
+
+    check("read-all sem token -> 401", client.post("/api/notifications/read-all").status_code, 401)
+    # Qualquer papel mexe na PROPRIA caixa — nao e acao administrativa.
+    r3 = client.post("/api/notifications/read-all", headers=h(tokens["operator"]))
+    check("operator limpa a propria caixa -> 200", r3.status_code, 200)
+    check("e marcou as dele", r3.json()["marked"], antes_operator)
+
+    print("\n[13] O motor de alertas continua intocado")
     # A Fase 7 nao pode ter mexido no historico tecnico: os alertas seguem
     # sendo listados por /api/alerts, sem campo novo nem filtro por usuario.
     # O alerta do teste foi resolvido em [9], entao ele esta na lista de
