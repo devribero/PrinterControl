@@ -18,8 +18,9 @@ import {
   departmentUsage,
   decommissionedPrinters,
 } from "../data/printers";
-import { logout as clearSession, readStoredAccount, type Account } from "./auth";
-import { discoverPrinters, fetchAlerts, fetchPrintersWithStatus } from "./api";
+import { logout as clearSession, restoreSession, type Account } from "./auth";
+import { ApiError, discoverPrinters, fetchAlerts, fetchPrintersWithStatus } from "./api";
+import { permissionsFor, type Permissions } from "./permissions";
 import { adaptAlert, adaptPrinter, loadMonthlyReportFromApi } from "./adaptApi";
 import { loadMonthlyReport, mergeMonthlyReport } from "./fetchMonthlyReport";
 import { deriveAlerts, deriveGlobalToner } from "./deriveFromPrinters";
@@ -28,7 +29,18 @@ import { useToast } from "./toast";
 import type { Alert, DiscoveredPrinter, MonthlyReport, Printer, TonerLevel } from "../types";
 
 interface AppDataContextValue {
+  /** Conta logada (null quando anonimo). Fonte: GET /api/auth/me. */
   account: Account | null;
+  isAuthenticated: boolean;
+  /** true enquanto a sessao guardada ainda esta sendo confirmada no backend. */
+  sessionLoading: boolean;
+  /**
+   * false quando ha token mas o backend nao respondeu para confirma-lo: a UI
+   * abre em modo demonstracao e o papel exibido vem do cache local.
+   */
+  sessionVerified: boolean;
+  /** Permissoes derivadas do papel — mesma hierarquia do backend. */
+  can: Permissions;
   handleLoginSuccess: (loggedInAccount: Account, remember: boolean) => void;
   handleLogout: () => void;
 
@@ -69,15 +81,16 @@ interface AppDataContextValue {
 const AppDataContext = createContext<AppDataContextValue | null>(null);
 
 /**
- * Carrega impressoras + alertas do backend em paralelo. Devolve null quando a
- * API não responde, para o provider cair no conjunto de demonstração em vez
- * de deixar o painel vazio.
+ * Resultado da carga real. O motivo da falha importa: "unauthorized" (401)
+ * significa sessao morta e leva ao logout; "offline" e indisponibilidade do
+ * servidor e cai no conjunto de demonstracao sem derrubar a sessao.
  */
-async function loadFromApi(): Promise<{
-  printers: Printer[];
-  alerts: Alert[];
-  monthlyReport: MonthlyReport | null;
-} | null> {
+type LoadResult =
+  | { ok: true; printers: Printer[]; alerts: Alert[]; monthlyReport: MonthlyReport | null }
+  | { ok: false; reason: "unauthorized" | "offline" };
+
+/** Carrega impressoras + alertas + relatorio mensal do backend, em paralelo. */
+async function loadFromApi(): Promise<LoadResult> {
   try {
     const [apiPrinters, apiAlerts, monthlyReport] = await Promise.all([
       fetchPrintersWithStatus(),
@@ -88,17 +101,25 @@ async function loadFromApi(): Promise<{
       loadMonthlyReportFromApi(),
     ]);
     return {
+      ok: true,
       printers: apiPrinters.map(adaptPrinter),
       alerts: apiAlerts.map(adaptAlert),
       monthlyReport,
     };
-  } catch {
-    return null;
+  } catch (error) {
+    const unauthorized = error instanceof ApiError && error.status === 401;
+    return { ok: false, reason: unauthorized ? "unauthorized" : "offline" };
   }
 }
 
+/** Mensagem exibida quando a carga real nao aconteceu. */
+const OFFLINE_MESSAGE = "Não foi possível conectar ao servidor. Exibindo dados de demonstração.";
+const ANONYMOUS_MESSAGE = "Faça login para ver os dados reais da frota. Exibindo dados de demonstração.";
+
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<Account | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [sessionVerified, setSessionVerified] = useState(false);
   const [rawPrinters, setRawPrinters] = useState<Printer[]>(mockPrinters);
   const [usingRealData, setUsingRealData] = useState(false);
   // Alertas vindos de /api/alerts; null enquanto o backend não respondeu.
@@ -116,8 +137,26 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [initialLoading, setInitialLoading] = useState(true);
   const { push } = useToast();
 
+  // Restauracao da sessao: o token guardado so vale se o backend confirmar
+  // em GET /api/auth/me. 401/403 (token invalido ou conta desativada) limpam
+  // a sessao dentro de restoreSession(); servidor fora do ar mantem o token e
+  // devolve status "unverified".
   useEffect(() => {
-    setAccount(readStoredAccount());
+    let cancelled = false;
+    restoreSession().then((session) => {
+      if (cancelled) return;
+      if (session.status === "anonymous") {
+        setAccount(null);
+        setSessionVerified(false);
+      } else {
+        setAccount(session.account);
+        setSessionVerified(session.status === "authenticated");
+      }
+      setSessionLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Impressoras de fato usadas pela UI: base (mock ou real) + monthlyPages
@@ -127,25 +166,69 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const monthlyUsage = monthlyReport && monthlyReport.monthlyUsage.length > 0 ? monthlyReport.monthlyUsage : mockMonthlyUsage;
   const usingRealMonthlyReport = !!monthlyReport && monthlyReport.monthlyUsage.length > 0;
 
+  // Carga dos dados reais. Roda DEPOIS que a sessao foi resolvida e so
+  // quando ha usuario — e re-roda quando a conta muda (login/troca de
+  // usuario), que era exatamente o que faltava: antes o fetch acontecia uma
+  // unica vez no mount, entao logar depois de cair no fallback deixava o
+  // painel preso nos dados de demonstracao.
+  //
+  // A dependencia e o e-mail (string estavel), nao o objeto `account`, para
+  // nao refazer a carga a cada re-render do provider.
+  const accountKey = account?.email ?? null;
+
   useEffect(() => {
+    if (sessionLoading) return;
+
     let cancelled = false;
+
+    // Anonimo: nao ha token para enviar, entao nem tentamos a API — o painel
+    // do login fica com o conjunto de demonstracao, claramente rotulado.
+    if (!accountKey) {
+      setRawPrinters(mockPrinters);
+      setApiAlerts(null);
+      setUsingRealData(false);
+      setApiError(ANONYMOUS_MESSAGE);
+      setInitialLoading(false);
+      loadMonthlyReport().then((report) => {
+        if (!cancelled && report) setMonthlyReport(report);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setInitialLoading(true);
     // Ou tudo vem da API, ou tudo vem das fontes de demonstração — nunca uma
     // mistura das duas, para que o indicador do cabeçalho seja verdadeiro.
-    const printersDone = loadFromApi().then(async (data) => {
+    const printersDone = loadFromApi().then(async (result) => {
       if (cancelled) return;
 
-      if (data) {
-        setRawPrinters(data.printers);
-        setApiAlerts(data.alerts);
-        setMonthlyReport(data.monthlyReport);
+      if (result.ok) {
+        setRawPrinters(result.printers);
+        setApiAlerts(result.alerts);
+        setMonthlyReport(result.monthlyReport);
         setUsingRealData(true);
         setApiError(null);
+        // A carga foi feita com o token e o backend aceitou: uma sessao que
+        // tinha ficado "nao verificada" (servidor fora do ar na abertura)
+        // esta confirmada agora.
+        setSessionVerified(true);
+        return;
+      }
+
+      if (result.reason === "unauthorized") {
+        // O token expirou ou foi revogado entre a confirmacao da sessao e a
+        // carga: volta ao estado nao autenticado em vez de fingir demo.
+        expireSession();
         return;
       }
 
       // Backend fora do ar: dados de demonstração, incluindo o relatório
       // mensal do coletor PowerShell (se estiver publicado) ou o mock.
-      setApiError("Não foi possível conectar ao servidor. Exibindo dados de demonstração.");
+      setRawPrinters(mockPrinters);
+      setApiAlerts(null);
+      setUsingRealData(false);
+      setApiError(OFFLINE_MESSAGE);
       const report = await loadMonthlyReport();
       if (!cancelled && report) setMonthlyReport(report);
     });
@@ -158,7 +241,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sessionLoading, accountKey]);
 
   const stats = useMemo(() => {
     const total = printers.length;
@@ -191,35 +274,61 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setFilters((f) => ({ ...f, [key]: value }));
   }
 
-  // O token/conta ja foram persistidos por lib/auth.login() antes deste callback.
+  // O token/conta ja foram persistidos por lib/auth.login() antes deste
+  // callback; a conta vem do proprio backend (resposta do login). Trocar o
+  // `account` dispara o efeito acima, que carrega os dados reais.
   function handleLoginSuccess(loggedInAccount: Account, _remember: boolean) {
     setAccount(loggedInAccount);
+    setSessionVerified(true);
+  }
+
+  /**
+   * Encerra a sessao: logout explicito ou 401 do backend (token expirado /
+   * revogado). Alem de limpar a credencial, devolve o painel ao conjunto de
+   * demonstracao — sem sessao nao ha dados reais para exibir, e a proxima
+   * conta nao pode enxergar a frota carregada pela anterior.
+   */
+  function expireSession() {
+    clearSession();
+    setAccount(null);
+    setSessionVerified(false);
+    setRawPrinters(mockPrinters);
+    setApiAlerts(null);
+    setMonthlyReport(null);
+    setUsingRealData(false);
+    setApiError(ANONYMOUS_MESSAGE);
+    setDiscoveredPrinters(null);
+    setDiscoverySource(null);
+    setDiscoveryServer(null);
   }
 
   function handleLogout() {
-    clearSession();
-    setAccount(null);
+    expireSession();
   }
 
   async function handleRefresh() {
     setScanning(true);
     const started = Date.now();
-    const data = await loadFromApi();
+    const result = await loadFromApi();
     const elapsed = Date.now() - started;
     if (elapsed < 1100) await new Promise((r) => window.setTimeout(r, 1100 - elapsed));
 
-    if (data) {
-      setRawPrinters(data.printers);
-      setApiAlerts(data.alerts);
-      setMonthlyReport(data.monthlyReport);
+    if (result.ok) {
+      setRawPrinters(result.printers);
+      setApiAlerts(result.alerts);
+      setMonthlyReport(result.monthlyReport);
       setUsingRealData(true);
       setApiError(null);
-      push({ variant: "success", title: "Dados atualizados", description: `${data.printers.length} impressora(s) carregada(s) do servidor.` });
+      setSessionVerified(true);
+      push({ variant: "success", title: "Dados atualizados", description: `${result.printers.length} impressora(s) carregada(s) do servidor.` });
+    } else if (result.reason === "unauthorized") {
+      expireSession();
+      push({ variant: "warning", title: "Sessão expirada", description: "Faça login novamente para continuar." });
     } else {
       setRawPrinters(mockPrinters);
       setApiAlerts(null);
       setUsingRealData(false);
-      setApiError("Não foi possível conectar ao servidor. Exibindo dados de demonstração.");
+      setApiError(OFFLINE_MESSAGE);
       setMonthlyReport(await loadMonthlyReport());
       push({
         variant: "info",
@@ -261,7 +370,17 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       setDiscoveredPrinters(null);
       setDiscoverySource(null);
       setDiscoveryServer(null);
-      push({ variant: "warning", title: "Falha na descoberta", description: error instanceof Error ? error.message : "Não foi possível consultar o Print Server." });
+
+      if (error instanceof ApiError && error.status === 401) {
+        expireSession();
+        push({ variant: "warning", title: "Sessão expirada", description: "Faça login novamente para continuar." });
+      } else if (error instanceof ApiError && error.status === 403) {
+        // Papel insuficiente (ou conta desativada): o backend recusou a acao,
+        // mas a sessao continua valida — nunca deslogar por 403.
+        push({ variant: "warning", title: "Sem permissão", description: error.message });
+      } else {
+        push({ variant: "warning", title: "Falha na descoberta", description: error instanceof Error ? error.message : "Não foi possível consultar o Print Server." });
+      }
     } finally {
       setDiscoveryScanning(false);
     }
@@ -272,8 +391,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     if (printer) setSelectedPrinter(printer);
   }
 
+  const can = useMemo(() => permissionsFor(account?.role ?? null), [account?.role]);
+
   const value: AppDataContextValue = {
     account,
+    isAuthenticated: account !== null,
+    sessionLoading,
+    sessionVerified,
+    can,
     handleLoginSuccess,
     handleLogout,
 

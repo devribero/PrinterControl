@@ -65,7 +65,7 @@ export default function Sidebar({ mobileOpen, onCloseMobile, onNavigate, onOpenH
   const { theme } = useTheme();
   const chartColors = getChartColors(theme);
   const pathname = usePathname();
-  const { alerts } = useAppData();
+  const { alerts, can } = useAppData();
 
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
@@ -103,13 +103,21 @@ export default function Sidebar({ mobileOpen, onCloseMobile, onNavigate, onOpenH
             <NavItem icon={<Network size={18} />} label="Mapeamento de Rede" href="/network" active={isActive("/network")} onNavigate={onNavigate} />
           </nav>
 
-          <p className={cn(styles.sectionLabel, styles.sectionLabelSpaced)}>CONFIGURAÇÕES</p>
-          <nav className={styles.nav}>
-            <NavItem icon={<UserCog size={18} />} label="Usuários" href="/users" active={isActive("/users")} onNavigate={onNavigate} />
-            <NavItem icon={<Bell size={18} />} label="Notificações" href="/notifications" active={isActive("/notifications")} onNavigate={onNavigate} />
-            <NavItem icon={<Plug size={18} />} label="Integrações" href="/integrations" active={isActive("/integrations")} onNavigate={onNavigate} />
-            <NavItem icon={<Settings size={18} />} label="Configurações" href="/settings" active={isActive("/settings")} onNavigate={onNavigate} />
-          </nav>
+          {/* Área administrativa. As quatro telas ainda são placeholders
+              (ComingSoon), mas todas descrevem operações que o backend já
+              trata como admin — deixá-las visíveis para viewer/operator só
+              prometeria acesso que eles não terão. */}
+          {can.canAdmin && (
+            <>
+              <p className={cn(styles.sectionLabel, styles.sectionLabelSpaced)}>CONFIGURAÇÕES</p>
+              <nav className={styles.nav}>
+                <NavItem icon={<UserCog size={18} />} label="Usuários" href="/users" active={isActive("/users")} onNavigate={onNavigate} />
+                <NavItem icon={<Bell size={18} />} label="Notificações" href="/notifications" active={isActive("/notifications")} onNavigate={onNavigate} />
+                <NavItem icon={<Plug size={18} />} label="Integrações" href="/integrations" active={isActive("/integrations")} onNavigate={onNavigate} />
+                <NavItem icon={<Settings size={18} />} label="Configurações" href="/settings" active={isActive("/settings")} onNavigate={onNavigate} />
+              </nav>
+            </>
+          )}
         </div>
 
         <div className={styles.bottom}>
