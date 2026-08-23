@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
+
 from app.database import get_session
+from app.dependencies import require_user
 from app.models.user import User
 from app.schemas.user import UserLogin, TokenResponse, UserResponse
-from app.services.auth import verify_password, create_access_token, hash_password
+from app.services.auth import verify_password, create_access_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -18,24 +20,19 @@ def login(credentials: UserLogin, session: Session = Depends(get_session)):
             detail="Email ou senha incorretos",
         )
 
+    if not user.is_active:
+        # Mesma mensagem do 403 de require_user: a conta existe e a senha
+        # esta certa, mas o acesso foi revogado por um administrador.
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Conta desativada. Procure um administrador.",
+        )
+
     access_token = create_access_token(data={"sub": user.email})
     return TokenResponse(access_token=access_token, user=UserResponse.model_validate(user))
 
 
-@router.post("/register", response_model=TokenResponse)
-def register(user_data: UserLogin, name: str = "Novo Usuário", session: Session = Depends(get_session)):
-    existing = session.exec(select(User).where(User.email == user_data.email)).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Email já registrado")
-
-    user = User(
-        email=user_data.email,
-        password_hash=hash_password(user_data.password),
-        name=name,
-    )
-    session.add(user)
-    session.commit()
-    session.refresh(user)
-
-    access_token = create_access_token(data={"sub": user.email})
-    return TokenResponse(access_token=access_token)
+@router.get("/me", response_model=UserResponse)
+def read_current_user(user: User = Depends(require_user)):
+    """Conta autenticada e seu papel — usado para decidir o que exibir/permitir."""
+    return UserResponse.model_validate(user)

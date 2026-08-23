@@ -401,6 +401,18 @@
   color: var(--color-ink-faint);
 }
 
+/* Papel do usuário (RBAC) no cabeçalho do menu da conta. */
+.menuAccountRole {
+  margin-top: 0.25rem;
+  display: inline-block;
+  border-radius: 9999px;
+  background: var(--color-brand-tint);
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-brand-700);
+}
+
 .menuList {
   display: flex;
   flex-direction: column;

@@ -8,7 +8,7 @@
 
 import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { Mail, MessageCircle, LifeBuoy } from "lucide-react";
+import { Mail, MessageCircle, LifeBuoy, TriangleAlert } from "lucide-react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import PrinterDetailsModal from "./PrinterDetailsModal";
@@ -21,7 +21,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const pathname = usePathname();
-  const { usingRealData, usingRealMonthlyReport, selectedPrinter, setSelectedPrinter } = useAppData();
+  const { usingRealData, usingRealMonthlyReport, sessionVerified, apiError, selectedPrinter, setSelectedPrinter } = useAppData();
   const { push } = useToast();
 
   return (
@@ -37,6 +37,20 @@ export default function AppShell({ children }: { children: ReactNode }) {
         <Topbar onOpenMobileMenu={() => setMobileMenuOpen(true)} />
 
         <main className={styles.content}>
+          {/* Faixa explícita de modo demonstração. O rodapé já trazia o
+              indicador, mas discreto demais: com um usuário autenticado na
+              tela, números fictícios precisam se anunciar como tais. */}
+          {!usingRealData && (
+            <div className={styles.demoBanner} role="status">
+              <TriangleAlert size={16} className={styles.demoBannerIcon} />
+              <p className={styles.demoBannerText}>
+                <strong>Dados de demonstração.</strong>{" "}
+                {apiError ?? "Os números abaixo são fictícios e não vêm da sua frota."}
+                {!sessionVerified && " A sessão não pôde ser confirmada com o servidor."}
+              </p>
+            </div>
+          )}
+
           <div key={pathname} className={`${styles.view} animate-view-in`}>
             {children}
           </div>
@@ -52,6 +66,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <p className={styles.footerStatusItem}>
               <span className={`${styles.statusDot} ${usingRealMonthlyReport ? styles.statusDotOn : styles.statusDotOff}`} />
               {usingRealMonthlyReport ? "Relatório mensal real" : "Relatório mensal de demonstração"}
+            </p>
+            <p className={styles.footerStatusItem}>
+              <span className={`${styles.statusDot} ${sessionVerified ? styles.statusDotOn : styles.statusDotOff}`} />
+              {sessionVerified ? "Sessão verificada" : "Sessão não verificada"}
             </p>
           </div>
         </footer>

@@ -12,12 +12,13 @@ import { useTheme } from "../lib/theme";
 import { useAppData } from "../lib/app-data";
 import { useToast } from "../lib/toast";
 import { exportPrintersCsv } from "../lib/exportCsv";
+import { ROLE_LABELS } from "../lib/permissions";
 import { cn } from "../lib/cn";
 import styles from "./Topbar.module.css";
 
 export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => void }) {
   const { theme, toggleTheme } = useTheme();
-  const { account, alerts, filters, updateFilter, handleDiscovery, discoveryScanning, handleLogout, handleAlertSelect, filteredPrinters } = useAppData();
+  const { account, can, alerts, filters, updateFilter, handleDiscovery, discoveryScanning, handleLogout, handleAlertSelect, filteredPrinters } = useAppData();
   const { push } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -133,10 +134,15 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
           Exportar CSV
         </button>
 
-        <button onClick={handleDiscovery} disabled={discoveryScanning} className={cn(styles.textButton, styles.scanButton)}>
-          {discoveryScanning ? <Loader2 size={16} className="animate-spin" /> : <RadioTower size={16} />}
-          {discoveryScanning ? "Consultando..." : "Escanear Rede"}
-        </button>
+        {/* Discovery é POST /api/servers/discover, protegido por require_admin
+            no backend. Esconder o botão para os demais papéis evita oferecer
+            uma ação que voltaria 403 — a autorização real continua no backend. */}
+        {can.canAdmin && (
+          <button onClick={handleDiscovery} disabled={discoveryScanning} className={cn(styles.textButton, styles.scanButton)}>
+            {discoveryScanning ? <Loader2 size={16} className="animate-spin" /> : <RadioTower size={16} />}
+            {discoveryScanning ? "Consultando..." : "Escanear Rede"}
+          </button>
+        )}
 
         <div className={styles.dropdownAnchor} ref={menuRef}>
           <button onClick={() => setMenuOpen((o) => !o)} className={styles.accountButton}>
@@ -153,6 +159,7 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
               <div className={styles.dropdownHeader}>
                 <p className={styles.menuAccountName}>{account.name}</p>
                 <p className={styles.menuAccountEmail}>{emailDisplay}</p>
+                <p className={styles.menuAccountRole}>{ROLE_LABELS[account.role]}</p>
               </div>
               <div className={styles.menuList}>
                 <button className={styles.menuItem}>

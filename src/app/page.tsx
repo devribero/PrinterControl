@@ -34,6 +34,7 @@ export default function DashboardPage() {
     globalToner,
     worstPrinter,
     monthlyUsage,
+    can,
     handleRefresh,
     handleDiscovery,
     discoveryScanning,
@@ -52,10 +53,12 @@ export default function DashboardPage() {
           <RefreshCw size={13} className={scanning ? "animate-spin" : ""} />
           {scanning ? "Verificando..." : "Verificar agora"}
         </button>
-        <button onClick={handleDiscovery} disabled={discoveryScanning} className={styles.mobileDiscoveryButton}>
-          <RadioTower size={13} className={discoveryScanning ? "animate-spin" : ""} />
-          {discoveryScanning ? "Consultando..." : "Escanear Rede"}
-        </button>
+        {can.canAdmin && (
+          <button onClick={handleDiscovery} disabled={discoveryScanning} className={styles.mobileDiscoveryButton}>
+            <RadioTower size={13} className={discoveryScanning ? "animate-spin" : ""} />
+            {discoveryScanning ? "Consultando..." : "Escanear Rede"}
+          </button>
+        )}
       </div>
 
       {discoveredPrinters && (
