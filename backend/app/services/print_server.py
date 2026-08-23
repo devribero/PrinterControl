@@ -154,9 +154,17 @@ def _real_discover(server: str, timeout: int) -> list[DiscoveredPrinter]:
 #  Interface publica
 # ─────────────────────────────────────────────────────────────────────────
 
-def discover_printers(server: str | None = None) -> list[DiscoveredPrinter]:
+def discover_printers(
+    server: str | None = None, mode: str | None = None
+) -> list[DiscoveredPrinter]:
     """
-    Descobre as impressoras publicadas no Print Server configurado.
+    Descobre as impressoras publicadas em um Print Server.
+
+    `server` e `mode` sao opcionais e caem na configuracao global quando
+    omitidos — e o comportamento que sempre existiu. A partir da Fase 4 o
+    chamador pode passar o modo do PrintServer registrado, porque numa
+    instalacao com varios servidores um pode estar em producao ("real") e
+    outro sendo simulado ("mock").
 
     Levanta PrintServerError em modo "real" quando o RPC falha — ao
     contrario do Main.ps1, que cai silenciosamente no mock embutido; aqui a
@@ -164,7 +172,7 @@ def discover_printers(server: str | None = None) -> list[DiscoveredPrinter]:
     nao mascarar um problema real de rede/dominio.
     """
     server = server or settings.print_server_host
-    mode = settings.print_server_mode
+    mode = mode or settings.print_server_mode
 
     if mode == "mock":
         logger.info("Descoberta em modo mock | server=%s", server)

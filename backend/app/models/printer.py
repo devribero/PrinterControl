@@ -17,7 +17,19 @@ class Printer(SQLModel, table=True):
 
     # Origem no Print Server (Get-Printer/Get-PrinterPort do Main.ps1).
     # server="" para registros legados/manuais sem Print Server associado.
+    #
+    # Continua sendo a CHAVE NATURAL: participa do UniqueConstraint acima e
+    # e o que o sync compara. A FK abaixo (Fase 4) e a ligacao estruturada
+    # com `print_servers`; as duas guardam o mesmo servidor e sao gravadas
+    # juntas pelo printer_sync, nunca separadamente.
     server: str = Field(default="", index=True)
+
+    # Fase 4: ligacao com o registro de Print Servers. Nula em impressoras
+    # manuais/legadas (server="") e em bancos antes da migracao; a migracao
+    # preenche a partir do host. Coluna aditiva — nenhuma linha e reescrita.
+    print_server_id: Optional[int] = Field(
+        default=None, foreign_key="print_servers.id", index=True
+    )
     name: str = Field(index=True)
     ip: str = Field(index=True)  # NAO unico: impressoras podem compartilhar IP
     port_name: str = Field(default="")
