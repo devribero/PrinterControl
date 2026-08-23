@@ -107,7 +107,9 @@ SERVER = "TESTSRV"  # isolado dos dados legados migrados na Parte A
 
 
 def fake_discover(rows):
-    def _discover(server=None):
+    # `mode` foi acrescentado em discover_printers() na Fase 4 (modo por
+    # servidor); o dublê precisa aceitar o mesmo contrato.
+    def _discover(server=None, mode=None):
         return [
             DiscoveredPrinter(name=n, server=SERVER, port_name=pn, ip=ip, driver_name=dn)
             for n, pn, ip, dn in rows

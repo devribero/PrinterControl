@@ -17,6 +17,7 @@ from datetime import datetime
 from sqlmodel import Session, select
 
 from app.config import settings
+from app.models.print_server import PrintServer
 from app.models.printer import Printer
 from app.services.print_server import discover_printers
 from app.services.printer_rules import obter_modelo, obter_tipo_impressora
@@ -32,9 +33,18 @@ class SyncResult:
     deactivated: int
 
 
-def sync_printers(session: Session, server: str | None = None) -> SyncResult:
+def sync_printers(
+    session: Session, server: str | None = None, mode: str | None = None
+) -> SyncResult:
     """
-    Executa um ciclo completo de sincronizacao para um Print Server.
+    Executa um ciclo completo de sincronizacao para UM Print Server.
+
+    Ja era escopado por servidor desde a Etapa 4 (so mexe nas impressoras
+    daquele host). A Fase 4 acrescenta duas coisas: `mode` opcional, para o
+    servidor registrado ditar seu proprio modo, e o preenchimento da FK
+    `print_server_id` junto com a string `server` — as duas representacoes
+    do mesmo servidor sao gravadas SEMPRE aqui, no mesmo lugar, para nao
+    divergirem.
 
     Levanta PrintServerError (de print_server.py) se a descoberta falhar —
     o chamador decide como responder (a rota traduz em 502). Nada e alterado
@@ -42,8 +52,14 @@ def sync_printers(session: Session, server: str | None = None) -> SyncResult:
     primeiro `session.add`.
     """
     server = server or settings.print_server_host
-    discovered = discover_printers(server)
+    discovered = discover_printers(server, mode=mode)
     now = datetime.utcnow()
+
+    # Id do registro deste host, quando existir. Nao criamos o PrintServer
+    # aqui: quem registra servidor e a rota administrativa/migracao — o sync
+    # apenas liga as impressoras ao registro que ja existe.
+    registro = session.exec(select(PrintServer).where(PrintServer.host == server)).first()
+    print_server_id = registro.id if registro else None
 
     # So considera impressoras JA associadas a este servidor — sincronizar
     # elgjunprt nao pode desativar impressoras de outro servidor.
@@ -66,6 +82,7 @@ def sync_printers(session: Session, server: str | None = None) -> SyncResult:
         if printer is None:
             printer = Printer(
                 server=d.server,
+                print_server_id=print_server_id,
                 name=d.name,
                 ip=d.ip,
                 port_name=d.port_name,
@@ -83,6 +100,7 @@ def sync_printers(session: Session, server: str | None = None) -> SyncResult:
         if not printer.active:
             reactivated += 1
 
+        printer.print_server_id = print_server_id
         printer.ip = d.ip
         printer.port_name = d.port_name
         printer.driver_name = d.driver_name
