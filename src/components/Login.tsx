@@ -116,7 +116,7 @@ export default function Login({ onSuccess }: LoginProps) {
       setError(
         err instanceof ApiError && err.status === 0
           ? err.message
-          : "E-mail ou senha incorretos. Verifique os dados e tente novamente.",
+          : "E-mail/usuário ou senha incorretos. Verifique os dados e tente novamente.",
       );
       setShake(true);
       window.setTimeout(() => setShake(false), 420);
@@ -200,7 +200,7 @@ export default function Login({ onSuccess }: LoginProps) {
           <form className={styles.form} onSubmit={handleSubmit} noValidate>
             <div className={styles.field}>
               <label htmlFor="login-email" className={styles.label}>
-                E-mail
+                E-mail ou usuário
               </label>
               <div className={styles.inputWrap}>
                 <Mail size={17} className={styles.inputIcon} />
@@ -210,7 +210,7 @@ export default function Login({ onSuccess }: LoginProps) {
                   autoComplete="username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu.usuario"
+                  placeholder="seu.usuario ou seu.usuario@elgin.com.br"
                   className={styles.input}
                 />
               </div>

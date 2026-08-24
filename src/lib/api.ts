@@ -306,14 +306,20 @@ export const updatePrinter = (printerId: string | number, data: Partial<PrinterI
 export interface ApiUser {
   id: number;
   email: string;
+  /** Segunda porta de login, opcional; null quando a conta so entra por e-mail. */
+  username: string | null;
   name: string;
   role: string;
   is_active: boolean;
+  /** Troca de senha pendente — ver Account.mustChangePassword em lib/auth.ts. */
+  must_change_password: boolean;
   created_at: string;
 }
 
 export interface UserCreateInput {
   email: string;
+  /** Opcional; backend valida formato (3-32, minusculas, `._-`) e unicidade. */
+  username?: string;
   name: string;
   password: string;
   role: string;
@@ -322,9 +328,11 @@ export interface UserCreateInput {
 /** Campos que o admin pode alterar. Todos opcionais (PATCH parcial). */
 export interface UserUpdateInput {
   name?: string;
+  username?: string;
   role?: string;
   is_active?: boolean;
-  /** Redefinicao de senha pelo admin; enviada em claro e hasheada no backend. */
+  /** Redefinicao de senha pelo admin; enviada em claro e hasheada no backend.
+   * Liga `must_change_password` na conta alterada. */
   password?: string;
 }
 
