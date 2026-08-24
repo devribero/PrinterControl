@@ -16,7 +16,10 @@ from app.config import settings  # noqa: E402
 from app.services.print_server import (  # noqa: E402
     DiscoveredPrinter,
     PrintServerError,
+    _escapar_powershell,
+    _real_discover,
     discover_printers,
+    validar_host,
 )
 
 failures = []
@@ -92,6 +95,71 @@ if os.environ.get("PRINT_SERVER_MODE") == "real":
     settings.print_server_mode = "mock"
 else:
     print("[SKIP] PRINT_SERVER_MODE=real nao definido no ambiente - pulando (normal fora do dominio)")
+
+print("\n--- 8. host malicioso e recusado ANTES de chegar ao PowerShell ---")
+# O host e interpolado em `Get-Printer -ComputerName '<host>'`. Cada entrada
+# abaixo fecha a aspa simples, encadeia um comando, ou usa um caractere que o
+# shell interpreta. Nenhuma pode chegar ao subprocess.
+BARRA = chr(92)
+HOSTS_MALICIOSOS = [
+    f"elgjunprt'; Remove-Item C:{BARRA} -Recurse -Force; '",
+    f"elgjunprt' ; Get-Content C:{BARRA}Windows{BARRA}win.ini ; '",
+    "'; calc.exe; '",
+    "elgjunprt`; whoami",
+    f"elgjunprt | Out-File C:{BARRA}evil.txt",
+    "elgjunprt & whoami",
+    "elgjunprt$(whoami)",
+    "elgjunprt" + chr(10) + "whoami",
+    "elgjunprt; shutdown /s",
+    "elgjunprt with space",
+    "",
+    "   ",
+    "-elgjunprt",       # rotulo nao pode comecar com hifen
+    "elgjunprt-",       # nem terminar
+    "elg..junprt",      # rotulo vazio no meio
+    "a" * 254,          # acima do limite de 253 caracteres
+]
+
+for host in HOSTS_MALICIOSOS:
+    rotulo = repr(host)[:48]
+    try:
+        validar_host(host)
+        check_true(f"host recusado: {rotulo}", False, "ACEITO - injecao possivel")
+    except PrintServerError:
+        check_true(f"host recusado: {rotulo}", True)
+
+# Se alguem afrouxar a regex, o subprocess ainda nao pode ser alcancado:
+# _real_discover valida ANTES de montar qualquer comando. Este teste prova
+# que a chamada morre na validacao, e nao dentro do PowerShell.
+try:
+    _real_discover("elgjunprt'; calc.exe; '", timeout=1)
+    check_true("_real_discover recusa host malicioso", False, "nao levantou")
+except PrintServerError as exc:
+    check_true(
+        "_real_discover recusa host malicioso antes do subprocess",
+        "invalido" in str(exc).lower(),
+        str(exc)[:70],
+    )
+
+print("\n--- 9. hosts legitimos continuam aceitos ---")
+HOSTS_VALIDOS = [
+    ("elgjunprt", "elgjunprt"),
+    ("ELGJUNPRT", "ELGJUNPRT"),
+    ("elgjunprt.elgin.local", "elgjunprt.elgin.local"),
+    ("srv-print-01", "srv-print-01"),
+    ("10.150.6.10", "10.150.6.10"),
+    ("  elgjunprt  ", "elgjunprt"),            # espaco em volta e aparado
+    ("elgjunprt.elgin.local.", "elgjunprt.elgin.local."),  # FQDN com ponto final
+]
+for entrada, esperado in HOSTS_VALIDOS:
+    try:
+        check(f"host valido {entrada!r}", validar_host(entrada), esperado)
+    except PrintServerError as exc:
+        check_true(f"host valido {entrada!r}", False, f"recusado: {exc}")
+
+print("\n--- 10. escape de aspas (2a camada, redundante por escolha) ---")
+check("aspa simples duplicada", _escapar_powershell("a'b"), "a''b")
+check("sem aspas fica igual", _escapar_powershell("elgjunprt"), "elgjunprt")
 
 print("\nRESULTADO:", "TODOS OS TESTES PASSARAM" if not failures else f"FALHAS: {failures}")
 raise SystemExit(1 if failures else 0)

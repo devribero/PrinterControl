@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 from datetime import datetime
 from app.database import get_session
@@ -24,6 +24,13 @@ def list_alerts(
     resolved: bool | None = False,
     printer_id: int | None = None,
     alert_type: str | None = None,
+    # Paginacao (Fase 10). Alertas RESOLVIDOS nunca sao apagados, entao a
+    # tabela so cresce: `?resolved=true` ou `?resolved=` (todos) devolvia o
+    # historico inteiro numa unica resposta. O padrao 200 cobre com folga os
+    # alertas ativos, que e o que o painel mostra; o historico longo passa a
+    # ser lido por paginas via `offset`. Mesmo teto de /api/notifications.
+    limit: int = Query(default=200, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
     session: Session = Depends(get_session),
 ):
     """resolved=false (padrao) -> ativos | true -> resolvidos | omitido como null -> todos."""
@@ -43,7 +50,7 @@ def list_alerts(
     if alert_type:
         query = query.where(Alert.alert_type == alert_type)
 
-    query = query.order_by(Alert.created_at.desc())
+    query = query.order_by(Alert.created_at.desc()).offset(offset).limit(limit)
     alerts = session.exec(query).all()
     return alerts
 

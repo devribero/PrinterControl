@@ -103,7 +103,30 @@ class PrinterWithStatus(PrinterResponse):
     uptime: Optional[str] = None
 
 
+# Estados que a coleta real (services/snmp.py) e capaz de produzir, e os
+# unicos que o painel sabe desenhar (PrinterStatusBadge, StatCards,
+# NetworkView). Qualquer outro valor gravado aqui chega ao frontend como um
+# badge sem cor e sem rotulo, e some dos contadores por status.
+PRINTER_STATUSES = ("online", "offline", "atencao")
+
+# Toner e percentual. O SNMP devolve 0-100; valores fora disso so entram por
+# escrita manual e envenenam o motor de alertas, que compara o nivel com os
+# limiares para decidir se abre alerta critico.
+TONER_MIN = 0
+TONER_MAX = 100
+
+
 class PrinterReadingCreate(BaseModel):
+    """
+    Leitura enviada por `POST /api/printers/{id}/readings`.
+
+    Ate a Fase 10 esta rota aceitava QUALQUER conteudo: status inventado,
+    contador negativo, toner em 5000%. Como as leituras alimentam o painel,
+    o relatorio mensal (que subtrai contadores) e o motor de alertas, um
+    unico registro invalido corrompe as tres coisas — e nao ha como
+    distingui-lo de uma leitura real depois de gravado.
+    """
+
     status: str
     page_count: int
     toner_k: int | None = None
@@ -111,6 +134,38 @@ class PrinterReadingCreate(BaseModel):
     toner_m: int | None = None
     toner_y: int | None = None
     uptime: str | None = None
+
+    @field_validator("status")
+    @classmethod
+    def _status_conhecido(cls, value: str) -> str:
+        limpo = value.strip().lower()
+        if limpo not in PRINTER_STATUSES:
+            raise ValueError(
+                f"status invalido: {value!r}. Use um de: {', '.join(PRINTER_STATUSES)}."
+            )
+        return limpo
+
+    @field_validator("page_count")
+    @classmethod
+    def _contador_nao_negativo(cls, value: int) -> int:
+        # Contador de paginas e cumulativo e so cresce. Um valor negativo
+        # tornaria negativo o "paginas do mes" do relatorio, que e a
+        # diferenca entre o maior e o menor contador do periodo.
+        if value < 0:
+            raise ValueError(f"page_count nao pode ser negativo: {value}.")
+        return value
+
+    @field_validator("toner_k", "toner_c", "toner_m", "toner_y")
+    @classmethod
+    def _toner_percentual(cls, value: int | None, info) -> int | None:
+        if value is None:
+            return None
+        if not (TONER_MIN <= value <= TONER_MAX):
+            raise ValueError(
+                f"{info.field_name} deve estar entre {TONER_MIN} e {TONER_MAX} "
+                f"(percentual); recebido {value}."
+            )
+        return value
 
 
 class PrinterReadingResponse(BaseModel):

@@ -24,7 +24,19 @@ Preencha `backend/.env` (copie de `backend/.env.example`):
 | `PRINT_SERVER_MODE` | `real` | `mock` → recusa subir |
 | `ALLOW_MOCK_COLLECT` | `false` (ou ausente) | `true` → recusa subir |
 | `CORS_ORIGINS` | origem HTTPS do painel | Vazio, `*`, localhost ou http → recusa subir |
-| `COLLECTION_ENABLED` | `true` para coletar sozinho | — |
+| `COLLECTION_ENABLED` | `true` para coletar sozinho | `false` → nada é coletado e ninguém avisa |
+| `LOGIN_MAX_ATTEMPTS` / `LOGIN_WINDOW_SECONDS` | `5` / `900` | Muito alto → força bruta viável |
+| `TRUST_PROXY_HEADERS` | `false` até o Tunnel entrar | `true` sem proxy de confiança **enfraquece** o limite de login |
+
+**Senha das contas de administrador.** Elas não têm mais senha fixa. Num banco
+novo, `seed.py` gera uma senha forte e a mostra **uma única vez**. Num banco
+criado antes da Fase 10 (que ainda usa a senha antiga), rotacione:
+
+```powershell
+.\venv\Scripts\python.exe seed.py --resetar-senhas
+```
+
+Anote na hora — ela não fica gravada em texto claro em lugar nenhum.
 
 Gere a `SECRET_KEY`:
 
@@ -203,6 +215,18 @@ intervalo, o disparo seguinte é descartado em vez de concorrer pelo banco.
 
 ## 8. Dívida técnica conhecida — FK órfã para `printers_old`
 
+> **A lista completa da dívida técnica está em
+> [`TECHNICAL_DEBT.md`](TECHNICAL_DEBT.md) (D1–D13).** Este item continua
+> detalhado aqui porque é o único com uma armadilha *operacional* — alguém
+> mexendo no banco às 2h da manhã precisa esbarrar nele sem ter que abrir
+> outro documento. Lá ele é **D1**.
+>
+> Dois outros itens têm impacto direto na operação e valem conhecer:
+> **D6** (usar sempre `--host 127.0.0.1`; o bloco de execução direta de
+> `app/main.py` sobe em `0.0.0.0`) e **D13** (`/health` existe mas nada o
+> consulta automaticamente — se o banco travar ou a coleta parar, ninguém é
+> avisado).
+
 **Status:** conhecida, aceita, adiada deliberadamente. Não é bug novo nem
 regressão — está no banco desde as etapas antigas e **não afeta a operação
 hoje**. Registrada aqui para não ser redescoberta por acidente.
@@ -215,7 +239,7 @@ renomeou `printers`. Verificável:
 
 ```powershell
 cd backend
-.env\Scripts\python.exe -c "import sqlite3; print(sqlite3.connect('printer_control.db').execute('PRAGMA foreign_key_check').fetchall()[:5])"
+.\venv\Scripts\python.exe -c "import sqlite3; print(sqlite3.connect('printer_control.db').execute('PRAGMA foreign_key_check').fetchall()[:5])"
 ```
 
 ### Por que não incomoda

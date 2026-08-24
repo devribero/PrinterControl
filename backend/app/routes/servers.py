@@ -33,7 +33,7 @@ from app.models.printer import Printer
 from app.services.environment_guard import bloquear_mock_em_producao
 from app.models.user import User
 from app.services.discovery import enrich_discovered_printers
-from app.services.print_server import PrintServerError, discover_printers
+from app.services.print_server import PrintServerError, discover_printers, validar_host
 from app.services.printer_sync import sync_printers
 
 router = APIRouter(prefix="/servers", tags=["servers"])
@@ -75,6 +75,24 @@ class PrintServerCreate(BaseModel):
     @classmethod
     def _trim(cls, value: str) -> str:
         return value.strip()
+
+    @field_validator("host")
+    @classmethod
+    def _host_valido(cls, value: str) -> str:
+        """
+        Recusa no cadastro o que a camada de execucao ja recusaria.
+
+        O host e interpolado num comando do PowerShell em modo real
+        (`Get-Printer -ComputerName '<host>'`), entao `validar_host` e a
+        defesa que importa. Repetir a checagem aqui e sobre QUANDO o erro
+        aparece: com ela o 422 chega no formulario de cadastro, e nao meses
+        depois na primeira sincronizacao — e o valor perigoso nunca chega a
+        existir no banco.
+        """
+        try:
+            return validar_host(value)
+        except PrintServerError as exc:
+            raise ValueError(str(exc)) from None
 
     @field_validator("mode")
     @classmethod

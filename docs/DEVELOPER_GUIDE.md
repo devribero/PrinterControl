@@ -38,11 +38,18 @@ npm run lint
 
 As dependências estão em `backend/requirements.txt`.
 
-A aplicação FastAPI é `app.main:app`. O arquivo `backend/app/main.py` possui execução direta com Uvicorn em:
+A aplicação FastAPI é `app.main:app`.
 
-```text
-0.0.0.0:8000
+O arquivo `backend/app/main.py` tem um bloco de execução direta que sobe em
+`0.0.0.0:8000` com `reload=True`. **Isso é conveniência de desenvolvimento e
+não deve ser usado em produção**: `0.0.0.0` expõe a API a toda a rede, em HTTP
+puro, com o token trafegando no header. Em produção, o comando é sempre:
+
+```powershell
+.\venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
+
+Ver D6 em [`TECHNICAL_DEBT.md`](TECHNICAL_DEBT.md).
 
 O backend espera que os imports `app.*` sejam resolvidos a partir de `backend`.
 
@@ -156,7 +163,22 @@ Existem scripts Python `backend/tests_*.py`, incluindo testes de:
 - uptime;
 - webhook.
 
-Eles não formam necessariamente uma suíte pytest convencional: alguns executam lógica durante a importação e usam bancos/mocks temporários.
+Eles não formam uma suíte pytest convencional: são scripts que executam lógica
+durante a importação, usam bancos/mocks temporários e imprimem `[OK]`/`[FALHA]`.
+
+Rodam com o Python do venv, de dentro de `backend/`:
+
+```powershell
+.\venv\Scripts\python.exe tests_environment.py
+```
+
+Duas suítes **falham hoje por motivo conhecido** (D8): `tests_fleet.py` e
+`tests_printers_crud.py` esperam 73 impressoras e o banco tem 79.
+`tests_collect_api.py` não roda por falta de `requests` (D9). As demais passam.
+
+Suítes que exigem o backend rodando (`tests_printers_crud.py`,
+`tests_collect_api.py`) leem as credenciais do ambiente
+(`TEST_ADMIN_PASSWORD`), já que a senha das contas semeadas deixou de ser fixa.
 
 ## O que não executar em produção sem autorização
 
@@ -172,14 +194,34 @@ Eles não formam necessariamente uma suíte pytest convencional: alguns executam
 
 ## Riscos conhecidos
 
-- fallback do frontend pode mascarar API indisponível;
-- `SECRET_KEY` padrão não é apropriado para produção;
-- CORS atual é apenas local;
-- resolução de alerta não está protegida por JWT;
-- SQLite é single-node;
-- `Main.ps1` contém configuração de webhook embutida;
-- ações de imprimir teste e configurações são simuladas;
-- o botão “Verificar agora” não dispara coleta.
+> **A lista completa e atualizada vive em
+> [`TECHNICAL_DEBT.md`](TECHNICAL_DEBT.md) (D1–D13).** Não mantenha uma
+> segunda lista aqui — foi assim que itens já resolvidos continuaram
+> aparecendo como pendentes por semanas.
+
+Resumo dos que mais afetam quem desenvolve:
+
+- **D1** — FK órfã para `printers_old`. **Não ligue `PRAGMA foreign_keys=ON`**:
+  derruba toda a coleta.
+- **D2** — sem migrações versionadas. `create_all()` não altera tabela
+  existente; adicionar coluna a um modelo não muda o banco já criado.
+- **D6** — o bloco `if __name__ == "__main__"` de `app/main.py` sobe em
+  `0.0.0.0` com `reload=True`. Para produção use sempre
+  `python -m uvicorn app.main:app --host 127.0.0.1 --port 8000`.
+- **D7/D8/D9** — os testes não são pytest, duas suítes falham por contagem
+  desatualizada (73 vs 79 impressoras) e `tests_collect_api.py` não roda por
+  falta de `requests`.
+- **D10** — o frontend não tem teste automatizado nenhum.
+- **D11** — o fallback do painel para dados de demonstração pode mascarar API
+  indisponível (mitigado com faixa e badge).
+- **D3** — SQLite é single-node e tem um escritor por vez.
+
+### Já resolvido — não reabra
+
+Estes itens constavam aqui como pendentes e **não são mais verdade**:
+`SECRET_KEY` de desenvolvimento (produção recusa subir), CORS apenas local
+(é por ambiente, com validação de produção), resolução de alerta sem JWT
+(exige `operator`), e o botão “Verificar agora” (dispara coleta).
 
 ## Escanear Rede (implementado)
 

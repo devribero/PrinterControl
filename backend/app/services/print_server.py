@@ -17,12 +17,89 @@ Dois modos, controlados por settings.print_server_mode:
 """
 import json
 import logging
+import re
 import subprocess
 from dataclasses import dataclass
 
 from app.config import settings
 
 logger = logging.getLogger("printercontrol.print_server")
+
+
+class PrintServerError(Exception):
+    """RPC ao Print Server falhou ou saida do PowerShell nao pode ser interpretada."""
+
+
+# ─────────────────────────────────────────────────────────────────────────
+#  Validacao do host — o nome do servidor entra em uma linha de PowerShell
+# ─────────────────────────────────────────────────────────────────────────
+#
+# `server` chega de fonte controlavel por um admin (PRINT_SERVER_HOST no .env
+# ou o campo `host` de um PrintServer gravado por `POST /api/servers`) e e
+# interpolado num comando executado por powershell.exe. Sem validacao, um host
+# como
+#
+#     elgjunprt'; Remove-Item C:\ -Recurse -Force; '
+#
+# fecha a string do Get-Printer e executa o que vier depois — com os
+# privilegios do servico. Nao e teorico: a rota de cadastro de servidores
+# aceita texto livre.
+#
+# A defesa e uma allowlist, e nao uma lista de caracteres proibidos: um host
+# de Print Server e sempre um hostname NetBIOS, um FQDN ou um IPv4, e todos
+# tres cabem no conjunto [A-Za-z0-9.-]. Qualquer coisa fora disso e recusada
+# antes de chegar ao subprocess.
+#
+# Regras de rotulo (RFC 1123): 1-63 caracteres, comeca e termina em
+# alfanumerico, hifen permitido no meio. Ate 253 caracteres no total.
+_HOSTNAME_LABEL = r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?"
+_HOSTNAME_RE = re.compile(rf"^{_HOSTNAME_LABEL}(?:\.{_HOSTNAME_LABEL})*\.?$")
+_MAX_HOSTNAME_LENGTH = 253
+
+
+def validar_host(server: str) -> str:
+    """
+    Devolve o host se for hostname/FQDN/IPv4 valido; levanta PrintServerError
+    caso contrario.
+
+    Publica de proposito: a rota de cadastro de Print Servers pode usa-la para
+    recusar o valor no momento em que ele e digitado, em vez de deixar o erro
+    aparecer so na primeira sincronizacao.
+    """
+    if not isinstance(server, str):
+        raise PrintServerError(f"Host do Print Server invalido: {server!r} (esperado texto).")
+
+    limpo = server.strip()
+
+    if not limpo:
+        raise PrintServerError("Host do Print Server vazio.")
+
+    if len(limpo) > _MAX_HOSTNAME_LENGTH:
+        raise PrintServerError(
+            f"Host do Print Server muito longo ({len(limpo)} caracteres, maximo "
+            f"{_MAX_HOSTNAME_LENGTH})."
+        )
+
+    if not _HOSTNAME_RE.match(limpo):
+        raise PrintServerError(
+            f"Host do Print Server invalido: {server!r}. Use apenas o nome do "
+            "servidor (ex.: elgjunprt), um FQDN (ex.: elgjunprt.elgin.local) ou "
+            "um IPv4. Espacos, aspas, ponto-e-virgula e outros caracteres nao "
+            "sao aceitos porque o nome e usado em um comando do sistema."
+        )
+
+    return limpo
+
+
+def _escapar_powershell(valor: str) -> str:
+    """
+    Escapa aspas simples para string literal do PowerShell ('' = uma aspa).
+
+    Redundante depois de `validar_host` — a allowlist ja exclui aspas. E de
+    proposito: se um dia alguem afrouxar a regex, ou usar esta funcao com
+    outro campo, a interpolacao continua nao permitindo fechar a string.
+    """
+    return valor.replace("'", "''")
 
 
 @dataclass
@@ -34,10 +111,6 @@ class DiscoveredPrinter:
     port_name: str
     ip: str  # PrinterHostAddress (via PortName) ou o proprio PortName, como no Main.ps1
     driver_name: str
-
-
-class PrintServerError(Exception):
-    """RPC ao Print Server falhou ou saida do PowerShell nao pode ser interpretada."""
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -112,12 +185,19 @@ def _real_discover(server: str, timeout: int) -> list[DiscoveredPrinter]:
     Process-ImpressorasList no Main.ps1 (so a parte de descoberta —
     ping/SNMP ficam para a Etapa 5).
     """
+    # Duas camadas antes da interpolacao: a allowlist recusa o host que nao
+    # for hostname/FQDN/IPv4, e o escape neutraliza aspas simples caso algo
+    # passe. `server` original segue sendo usado no retorno (identidade do
+    # registro); so o que entra no comando e a versao validada.
+    host = validar_host(server)
+    host_ps = _escapar_powershell(host)
+
     printers_cmd = (
-        f"Get-Printer -ComputerName '{server}' -ErrorAction Stop | "
+        f"Get-Printer -ComputerName '{host_ps}' -ErrorAction Stop | "
         "Select-Object Name, DriverName, PortName | ConvertTo-Json -Compress"
     )
     ports_cmd = (
-        f"Get-PrinterPort -ComputerName '{server}' -ErrorAction Stop | "
+        f"Get-PrinterPort -ComputerName '{host_ps}' -ErrorAction Stop | "
         "Select-Object Name, PrinterHostAddress | ConvertTo-Json -Compress"
     )
 
