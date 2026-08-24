@@ -146,34 +146,38 @@ significa que, se a porta 8000 ficar exposta na rede, o tráfego **incluindo o
 token no header `Authorization`** passa a trafegar em claro. O backend não tem
 como se defender disso sozinho.
 
-**⚠️ E existe hoje um caminho que faz exatamente isso.** O bloco de execução
-direta no fim de `app/main.py` é:
+**✅ Corrigido (2026-08-24) o caminho que fazia exatamente isso.** O bloco de
+execução direta no fim de `app/main.py` era:
 
 ```python
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
 ```
 
-`0.0.0.0` significa "responda em **todas** as interfaces de rede" — a API fica
-acessível de qualquer máquina da rede, sem TLS. `reload=True` ainda por cima
-liga o recarregamento automático, que não deve rodar em produção.
+`0.0.0.0` significa "responda em **todas** as interfaces de rede" — a API
+ficava acessível de qualquer máquina da rede, sem TLS, no momento em que
+alguém rodasse o arquivo direto. `reload=True` ainda por cima ligava o
+recarregamento automático, que não deve rodar em produção (reinicia o
+processo a cada arquivo salvo e derruba a coleta agendada junto).
 
-Ou seja: **subir com `python app/main.py` expõe a API à rede; subir com o
-comando do runbook não.** Os dois comandos parecem equivalentes para quem não
-conhece o detalhe, e é fácil escolher o errado.
+Hoje o bloco sobe em `127.0.0.1` fixo — o host **não** é configurável ali de
+propósito: quem precisa expor a API tem o caminho oficial (serviço do Windows
++ Cloudflare Tunnel), e a execução direta não deve ser esse caminho. O reload
+nasce desligado e só liga com `DEV_RELOAD=true` no ambiente.
 
-- ✅ **certo:** `.\venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
-- 🛑 **errado em produção:** `.\venv\Scripts\python.exe app/main.py`
+Os dois comandos abaixo passaram a ser equivalentes em exposição de rede; o do
+runbook continua sendo o de produção porque é o que o serviço usa.
 
-**Bloqueia produção?** Não, **desde que se use o comando do runbook**. Não foi
-alterado nesta rodada por estar fora do escopo pedido — a correção natural é
-trocar o padrão desse bloco para `127.0.0.1` sem `reload`, deixando o
-comportamento de rede exposto atrás de uma flag explícita.
+- ✅ **produção:** `.\venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
+- ✅ **desenvolvimento:** `.\venv\Scripts\python.exe app/main.py` (com `DEV_RELOAD=true` se quiser reload)
+
+**Bloqueia produção?** Não. O restante do D6 — HTTP puro dependendo do túnel
+para TLS — continua válido: é o desenho aceito.
 
 **Verificação obrigatória depois de subir:**
 `netstat -ano | findstr :8000` deve mostrar `127.0.0.1:8000`, **nunca**
 `0.0.0.0:8000`.
-**Custo:** baixo (duas linhas).
+**Custo:** o do bloco de execução direta já foi pago (duas linhas). TLS próprio no backend continua fora de escopo.
 
 ---
 

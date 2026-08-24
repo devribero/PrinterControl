@@ -190,6 +190,25 @@ def health_check():
 
 
 if __name__ == "__main__":
+    import os
+
     import uvicorn
 
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    # POR QUE 127.0.0.1 E NAO 0.0.0.0
+    # --------------------------------
+    # `python -m app.main` existe para desenvolvimento; em producao quem sobe
+    # o processo e o servico do Windows (ver docs/OPERATIONS.md), que ja
+    # escuta em 127.0.0.1 e publica pela Cloudflare Tunnel. O 0.0.0.0 que
+    # estava aqui expunha a API para TODA a rede da empresa no momento em que
+    # alguem rodasse este arquivo direto — sem tunel, sem TLS, sem intencao.
+    # O host deixou de ser configuravel de proposito: quem precisa expor a
+    # API tem o caminho oficial, e este bloco nao deve ser esse caminho.
+    HOST = "127.0.0.1"
+
+    # Reload DESLIGADO por padrao. Ele reinicia o processo a cada arquivo
+    # salvo — util editando codigo, ruim para qualquer execucao que precise
+    # ficar de pe (a coleta agendada morre junto). Ligue explicitamente com
+    # DEV_RELOAD=true quando estiver desenvolvendo.
+    RELOAD = os.getenv("DEV_RELOAD", "").strip().lower() in {"1", "true", "yes", "sim"}
+
+    uvicorn.run("app.main:app", host=HOST, port=8000, reload=RELOAD)
