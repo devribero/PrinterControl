@@ -16,7 +16,7 @@ _falhas = []
 # Credenciais pelo ambiente (Fase 10): a senha das contas semeadas deixou de
 # ser fixa — seed.py agora gera uma aleatoria ou usa SEED_ADMIN_PASSWORD.
 #     set TEST_ADMIN_PASSWORD=<senha>
-ADMIN_EMAIL = os.environ.get("TEST_ADMIN_EMAIL", "mateus.vicentino@example.com")
+ADMIN_EMAIL = os.environ.get("TEST_ADMIN_EMAIL", "mateus.vicentino@elgin.com.br")
 ADMIN_PASSWORD = os.environ.get("TEST_ADMIN_PASSWORD") or os.environ.get("SEED_ADMIN_PASSWORD", "")
 
 

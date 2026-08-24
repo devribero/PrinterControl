@@ -89,6 +89,7 @@ def create_db_and_tables():
     _migrate_alert_type()
     _migrate_reading_uptime()
     _migrate_user_rbac()
+    _migrate_user_login_fields()
     _migrate_print_servers()
 
 
@@ -166,6 +167,66 @@ def _migrate_user_rbac():
         if changed:
             conn.execute(text("CREATE INDEX IF NOT EXISTS ix_users_role ON users (role)"))
 
+        conn.commit()
+
+
+def _migrate_user_login_fields():
+    """
+    Login por username e troca de senha obrigatoria (2026-08-24).
+
+    Adiciona `users.username` e `users.must_change_password` em bancos
+    criados antes desta mudanca. Aditiva e idempotente, mesmo padrao de
+    _migrate_alert_type(): so roda ALTER TABLE se a coluna ainda nao existe,
+    e nunca recria/renomeia/apaga a tabela.
+
+    Os defaults sao os conservadores:
+
+      username = NULL              a conta continua entrando so por e-mail,
+                                   exatamente como antes. Preencher e ato
+                                   deliberado (seed, ou PATCH /api/users).
+      must_change_password = 0     nenhuma conta existente e trancada fora do
+                                   sistema por causa desta migracao. A flag
+                                   passa a valer para contas criadas ou
+                                   resetadas DEPOIS daqui.
+
+    O indice de `username` e UNIQUE e leva o mesmo nome que o SQLModel daria
+    a ele num banco criado do zero (`ix_users_username`), para que os dois
+    caminhos — banco novo e banco migrado — cheguem ao mesmo schema. No
+    SQLite um indice UNIQUE aceita varias linhas com NULL, entao contas sem
+    username convivem sem excecao.
+    """
+    from sqlalchemy import text
+
+    with engine.connect() as conn:
+        cols = {row[1] for row in conn.execute(text("PRAGMA table_info(users)"))}
+        if not cols:
+            return  # tabela ainda nao existe; create_all ja cuidou/cuidara
+
+        if "username" not in cols:
+            conn.execute(text("ALTER TABLE users ADD COLUMN username VARCHAR"))
+            logger.warning(
+                "Migracao de login: coluna users.username criada (vazia; "
+                "contas existentes continuam entrando pelo e-mail)."
+            )
+
+        if "must_change_password" not in cols:
+            conn.execute(text("ALTER TABLE users ADD COLUMN must_change_password BOOLEAN"))
+            logger.warning(
+                "Migracao de login: coluna users.must_change_password criada "
+                "(0 para todas as contas existentes)."
+            )
+
+        # Rede de seguranca: nulo aqui viraria None em Python e um `if
+        # user.must_change_password` silenciosamente falso — o que por acaso
+        # e o comportamento desejado, mas depender de acaso em algo que
+        # tranca ou destranca o sistema nao e aceitavel.
+        conn.execute(
+            text("UPDATE users SET must_change_password = 0 WHERE must_change_password IS NULL")
+        )
+
+        conn.execute(
+            text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_username ON users (username)")
+        )
         conn.commit()
 
 

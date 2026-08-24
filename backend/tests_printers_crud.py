@@ -18,7 +18,7 @@ BASE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000"
 # Credenciais pelo ambiente (Fase 10): a senha das contas semeadas deixou de
 # ser fixa — seed.py agora gera uma aleatoria ou usa SEED_ADMIN_PASSWORD.
 #     set TEST_ADMIN_PASSWORD=<senha>   (ou SEED_ADMIN_PASSWORD)
-EMAIL = os.environ.get("TEST_ADMIN_EMAIL", "mateus.vicentino@example.com")
+EMAIL = os.environ.get("TEST_ADMIN_EMAIL", "mateus.vicentino@elgin.com.br")
 PASSWORD = os.environ.get("TEST_ADMIN_PASSWORD") or os.environ.get("SEED_ADMIN_PASSWORD", "")
 TEST_IP = "10.255.255.254"  # fora das faixas usadas pelas 73
 

@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field, field_validator
 from sqlmodel import Session, func, select
 
 from app.database import get_session
-from app.dependencies import require_admin, require_user
+from app.dependencies import require_active_user, require_admin
 from app.models.alert import Alert
 from app.models.notification import SEVERITIES, Notification
 from app.models.user import User
@@ -25,7 +25,7 @@ from app.models.user import User
 router = APIRouter(
     prefix="/notifications",
     tags=["notifications"],
-    dependencies=[Depends(require_user)],
+    dependencies=[Depends(require_active_user)],
 )
 
 
@@ -157,7 +157,7 @@ def list_notifications(
     unread_only: bool = False,
     limit: int = Query(default=100, ge=1, le=500),
     session: Session = Depends(get_session),
-    user: User = Depends(require_user),
+    user: User = Depends(require_active_user),
 ):
     """
     Caixa do usuario logado, mais recentes primeiro.
@@ -176,7 +176,7 @@ def list_notifications(
 @router.get("/unread-count", response_model=UnreadCount)
 def unread_count(
     session: Session = Depends(get_session),
-    user: User = Depends(require_user),
+    user: User = Depends(require_active_user),
 ):
     """Contador para o badge do sino, sem trazer a lista inteira."""
     total = session.exec(
@@ -191,7 +191,7 @@ def unread_count(
 def mark_as_read(
     notification_id: int,
     session: Session = Depends(get_session),
-    user: User = Depends(require_user),
+    user: User = Depends(require_active_user),
 ):
     """
     Marca como lida. Idempotente: reler nao mexe no `read_at` original, para
@@ -211,7 +211,7 @@ def mark_as_read(
 @router.post("/read-all", response_model=ReadAllResult)
 def mark_all_as_read(
     session: Session = Depends(get_session),
-    user: User = Depends(require_user),
+    user: User = Depends(require_active_user),
 ):
     """
     Marca como lidas todas as nao lidas da CAIXA DE QUEM ESTA LOGADO.

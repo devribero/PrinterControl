@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 from datetime import datetime
 from app.database import get_session
-from app.dependencies import require_operator, require_user
+from app.dependencies import require_active_user, require_operator
 from app.models.alert import Alert
 from app.models.printer import Printer
 from app.models.user import User
@@ -14,7 +14,7 @@ from typing import List
 router = APIRouter(
     prefix="/alerts",
     tags=["alerts"],
-    dependencies=[Depends(require_user)],
+    dependencies=[Depends(require_active_user)],
 )
 
 
