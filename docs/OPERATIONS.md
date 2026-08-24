@@ -12,11 +12,15 @@ e o raciocínio por trás dela em `DEPLOYMENT_ARCHITECTURE.md`.
 **Cloudflare Tunnel: ativo desde 2026-08-24.** `https://elginprint.devribero.online`
 já publica esta API (túnel `Elgin - Impressoras`, conector no Windows
 `DESKTOP-K7J9N5H`) — a porta 8000 continua sem ser exposta diretamente.
-`TRUST_PROXY_HEADERS=true` já está no `.env` real por causa disso. Falta só
-`CORS_ORIGINS`, que continua vazio até o deploy do frontend na Vercel (Fase
-12) preencher com a origem real — passo a passo completo, incluindo esse
-ajuste de `CORS_ORIGINS`, em [`VERCEL_DEPLOY.md`](VERCEL_DEPLOY.md); ver
-também seção 1 abaixo.
+`TRUST_PROXY_HEADERS=true` já está no `.env` real por causa disso.
+
+**Frontend em produção na Vercel desde 2026-08-24:**
+`https://printercontrol.vercel.app` (passo a passo em
+[`VERCEL_DEPLOY.md`](VERCEL_DEPLOY.md)). `CORS_ORIGINS` já foi escrito no
+`.env` real com essa origem, mas **o backend ainda precisa ser reiniciado
+para carregar o valor novo** — se você é quem tem acesso à máquina e está
+lendo isto, veja o alerta na seção 5 de `VERCEL_DEPLOY.md` antes de assumir
+que já está valendo.
 
 ---
 

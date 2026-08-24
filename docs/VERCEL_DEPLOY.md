@@ -1,5 +1,28 @@
 # Deploy do Frontend na Vercel (Fase 12)
 
+> **✅ Deploy concluído em 2026-08-24.** URL de produção:
+> **`https://printercontrol.vercel.app`**.
+>
+> | | |
+> |---|---|
+> | **URL de produção** | `https://printercontrol.vercel.app` |
+> | **`NEXT_PUBLIC_API_URL`** (Vercel) | `https://elginprint.devribero.online` |
+> | **`CORS_ORIGINS`** (`backend/.env`) | `https://printercontrol.vercel.app` — ✅ escrito no arquivo |
+> | **Backend reiniciado com a nova config** | ⬜ **pendente** — feito manualmente por quem tem acesso à máquina (ver nota abaixo) |
+> | **CORS validado ao vivo** (Vercel → API) | ⬜ **pendente**, depende do reinício acima |
+>
+> **Por que o reinício ficou pendente aqui:** a sessão que preparou esta fase
+> não roda como Administrador na máquina Windows (`whoami` confirma um
+> usuário comum) e não conseguiu localizar nem sinalizar o processo real que
+> serve a porta 8000 para reiniciá-lo — ele não aparece em nenhuma consulta
+> de processo sem elevação, o que é consistente com rodar como serviço ou
+> outra conta. Um `fastapi dev main.py` avulso foi encontrado e encerrado
+> durante a investigação, mas ficou confirmado que **não** era o processo
+> que atende o túnel (o `/health` público continuou respondendo sem
+> interrupção, com o uptime subindo, antes e depois). Assim que o backend
+> for reiniciado manualmente, repita a checagem da seção 4 — o cabeçalho
+> `Access-Control-Allow-Origin` deve aparecer na resposta.
+
 Passo a passo para publicar o painel Next.js na Vercel, usando o domínio
 padrão (`*.vercel.app` — domínio customizado fica para uma fase futura) e
 apontando para o backend já publicado pelo Cloudflare Tunnel
@@ -125,6 +148,10 @@ aqui tende a ser de variável de ambiente ausente ou de versão do Node.js
 de uma versão específica, defina em **Project Settings → General → Node.js
 Version**, ou adicione `"engines": {"node": ">=20"}` em `package.json`).
 
+> ✅ Confirmado em 2026-08-24: `https://printercontrol.vercel.app` está no
+> ar. O erro de CORS descrito acima é exatamente o observado — esperado até
+> a seção 5 ser concluída (reinício do backend ainda pendente nesta data).
+
 ---
 
 ## 5. Depois do deploy — atualizar o CORS do backend
@@ -162,9 +189,30 @@ pwsh .\scripts\Servico-PrinterControl.ps1 -Acao parar
 pwsh .\scripts\Servico-PrinterControl.ps1 -Acao iniciar
 ```
 
+> ⚠️ **Isso pressupõe o backend instalado como tarefa agendada** (o caminho
+> documentado em `OPERATIONS.md`). Em 2026-08-24, ao tentar confirmar esse
+> passo, `Get-ScheduledTask -TaskName "PrinterControl*"` não encontrou
+> nenhuma tarefa instalada — o processo real que responde em
+> `elginprint.devribero.online` está rodando por outro caminho (nenhum
+> processo correspondente aparece em consultas sem privilégio de
+> Administrador). Se os comandos acima falharem com "tarefa não instalada",
+> reinicie pelo mecanismo que você sabe que está de fato em uso (terminal
+> elevado, serviço do Windows, etc.) — e considere instalar a tarefa
+> agendada oficial (`-Acao instalar`, `OPERATIONS.md` seção 2) para este
+> tipo de ambiguidade não se repeitir.
+
 **Verificação:** volte à URL da Vercel e tente logar de novo. O erro de CORS
 da seção 4 deve ter desaparecido — login, `/api/auth/me` e o resto do painel
-devem funcionar através do domínio público.
+devem funcionar através do domínio público. Pode confirmar também por fora,
+sem navegador:
+
+```powershell
+curl.exe -i -H "Origin: https://printercontrol.vercel.app" https://elginprint.devribero.online/health
+```
+
+A resposta deve trazer um cabeçalho `Access-Control-Allow-Origin:
+https://printercontrol.vercel.app`. Sem esse cabeçalho, o backend ainda não
+recarregou o `.env` novo.
 
 Nada disso exige um novo deploy do frontend — é só configuração do backend.
 
@@ -199,12 +247,13 @@ precisa reverter commit nem esperar um novo build.
 
 ## 7. Resumo do que fica pendente até alguém com acesso executar
 
-| Item | Onde | Bloqueado por |
+| Item | Onde | Status |
 |---|---|---|
-| Criar o projeto na Vercel e configurar `NEXT_PUBLIC_API_URL` | Painel da Vercel | Login interativo — só quem tem a conta |
-| Primeiro deploy | Painel da Vercel | O item acima |
-| Anotar a URL de Production | Painel da Vercel | O primeiro deploy |
-| `CORS_ORIGINS` no `backend/.env` | Máquina Windows | A URL de Production existir |
-| Reiniciar o backend | Máquina Windows | O item acima |
+| Criar o projeto na Vercel e configurar `NEXT_PUBLIC_API_URL` | Painel da Vercel | ✅ feito — `https://printercontrol.vercel.app` |
+| Primeiro deploy | Painel da Vercel | ✅ feito |
+| Anotar a URL de Production | Painel da Vercel | ✅ feito |
+| `CORS_ORIGINS` no `backend/.env` | Máquina Windows | ✅ feito (arquivo editado, valor correto) |
+| Reiniciar o backend para carregar o `.env` novo | Máquina Windows | ⬜ **pendente** — precisa de acesso elevado à máquina; ver nota no topo do documento |
+| Validar CORS ao vivo (`Access-Control-Allow-Origin` na resposta) | — | ⬜ **pendente**, depende do item acima |
 
 Nada disso exige alterar código deste repositório.
