@@ -35,6 +35,43 @@ Rotas públicas restantes: `POST /api/auth/login`, `GET /` e `GET /health`.
 - Auth: autenticado (qualquer papel)
 - Retorno: `id`, `email`, `name`, `role`, `is_active`, `created_at`
 
+### `PATCH /api/auth/me`
+
+- Arquivo: `backend/app/routes/auth.py`
+- Função: `update_current_user`
+- Auth: autenticado (qualquer papel) — altera só a **própria** conta
+- Banco/rede: grava `users.name`
+- Frontend: `src/components/SettingsView.tsx` (rota `/settings`)
+- Estado: funcional (Fase 8)
+- Corpo: `name` (não vazio). **Só isso.**
+- Não recebe id: o alvo é sempre a sessão, então não existe parâmetro capaz
+  de editar o perfil alheio. Alterar outra conta continua em
+  `PATCH /api/users/{user_id}`, que exige admin
+- `role`, `is_active` e `email` ficam de fora do schema `ProfileUpdate`: se
+  entrassem, qualquer conta poderia se promover a admin e o `/users`
+  existiria por decoração. Campos extras no corpo são ignorados
+
+### `POST /api/auth/change-password`
+
+- Arquivo: `backend/app/routes/auth.py`
+- Função: `change_own_password`
+- Auth: autenticado (qualquer papel) — troca só a **própria** senha
+- Banco/rede: grava `users.password_hash`
+- Frontend: `src/components/SettingsView.tsx`
+- Estado: funcional (Fase 8)
+- Corpo: `current_password`, `new_password` (mín. 8)
+- Retorno: `204 No Content`
+- `400` se a senha atual estiver errada ou se a nova for igual à atual.
+  400 e não 401/403: a sessão é válida e tem permissão, o dado é que está
+  errado — um 401 deslogaria quem só errou de digitação
+- Fecha a lacuna assumida na Fase 3, em que o único caminho era um admin
+  redefinir a senha por `PATCH /api/users/{user_id}` — obrigando a pessoa a
+  entregar a senha nova a outra
+- **Limitação conhecida:** o JWT é stateless e não guarda versão de senha,
+  então tokens emitidos antes da troca continuam válidos até expirarem.
+  Invalidá-los exigiria um campo de versão em `users` e uma checagem em
+  `require_user`
+
 ### `POST /api/auth/login`
 
 - Arquivo: `backend/app/routes/auth.py`
