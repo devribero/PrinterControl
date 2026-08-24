@@ -157,7 +157,15 @@ public/data/monthly-report.json, se existir
 src/data/printers.ts
 ```
 
-O fallback é deliberado no código, mas pode mascarar backend fora do ar ou ausência de dados reais.
+O fallback é deliberado no código e **sempre identificado na interface** (Fase 9):
+
+- faixa no topo (`AppShell.tsx`) sempre que houver número fictício na tela;
+- selo `DemoDataBadge` no próprio card, para quem lê um gráfico isolado ou tira print dele;
+- rótulo do ambiente e três indicadores no rodapé.
+
+A regra é "ou tudo da API, ou tudo de demonstração", com UMA exceção conhecida e agora
+sinalizada: a frota pode ser real enquanto o relatório mensal ainda não fechou no backend.
+Nesse caso os gráficos de consumo são fictícios, e tanto a faixa quanto os selos dizem isso.
 
 ## 9. Dados mock
 
@@ -170,7 +178,23 @@ Os pontos de entrada fictícios são:
 - `scripts/Simular-Ambiente.ps1`;
 - `public/data/*.json` gerados localmente.
 
-O modo mock do Print Server é padrão na configuração atual. O modo mock de coleta exige `ALLOW_MOCK_COLLECT=true`.
+O modo mock do Print Server é padrão na configuração atual. O modo mock de coleta exige
+`ALLOW_MOCK_COLLECT=true`.
+
+**Proteção de produção (Fase 9).** `ENVIRONMENT` tem três valores — `development`, `demo` e
+`production` — e a simulação é bloqueada em duas camadas:
+
+| Camada | Onde | O que faz |
+|---|---|---|
+| Boot | `app/config.py` | `production` **recusa subir** com `PRINT_SERVER_MODE != real` ou `ALLOW_MOCK_COLLECT=true` |
+| Requisição | `app/services/environment_guard.py` | **409** em collect mock, discover/sync de servidor mock e criar/editar servidor com `mode="mock"` |
+
+A segunda camada existe porque a primeira não alcança o modo **por servidor** (Fase 4): um
+Print Server gravado com `mode="mock"` antes de a instância virar produção continua no banco,
+e nenhuma validação de boot o enxerga.
+
+`GET /health` publica o ambiente para o painel — não há `NEXT_PUBLIC_ENVIRONMENT`, porque uma
+variável de build descreveria o bundle e não o servidor a que ele se conectou.
 
 ## 10. Escanear Rede (implementado)
 

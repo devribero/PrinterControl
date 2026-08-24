@@ -26,9 +26,16 @@ import type { MonthlyUsageEntry } from "../types";
 import { useTheme } from "../lib/theme";
 import { getChartColors } from "../lib/chartColors";
 import { cn } from "../lib/cn";
+import DemoDataBadge from "./DemoDataBadge";
 import styles from "./BottomCharts.module.css";
 
-function PagesConsumedCard({ monthlyUsage }: { monthlyUsage: MonthlyUsageEntry[] }) {
+function PagesConsumedCard({
+  monthlyUsage,
+  monthlyFicticio = false,
+}: {
+  monthlyUsage: MonthlyUsageEntry[];
+  monthlyFicticio?: boolean;
+}) {
   const { theme } = useTheme();
   const c = getChartColors(theme);
   const last = monthlyUsage[monthlyUsage.length - 1];
@@ -46,6 +53,10 @@ function PagesConsumedCard({ monthlyUsage }: { monthlyUsage: MonthlyUsageEntry[]
     <div className={styles.card}>
       <div className={styles.headerRow}>
         <h3 className={styles.title}>Consumo de páginas (mês)</h3>
+        <DemoDataBadge
+          ficticio={monthlyFicticio}
+          motivo="O servidor ainda não tem leituras suficientes para fechar o mês, então o consumo mensal exibido é de demonstração."
+        />
         <span className={styles.periodBadge}>
           {last.month}: {last.pages.toLocaleString("pt-BR")}
         </span>
@@ -96,7 +107,13 @@ function PagesConsumedCard({ monthlyUsage }: { monthlyUsage: MonthlyUsageEntry[]
   );
 }
 
-function TotalPrintsCard({ monthlyUsage }: { monthlyUsage: MonthlyUsageEntry[] }) {
+function TotalPrintsCard({
+  monthlyUsage,
+  monthlyFicticio = false,
+}: {
+  monthlyUsage: MonthlyUsageEntry[];
+  monthlyFicticio?: boolean;
+}) {
   const total = monthlyUsage.reduce((sum, m) => sum + m.pages, 0);
   const last = monthlyUsage[monthlyUsage.length - 1];
   const prev = monthlyUsage[monthlyUsage.length - 2];
@@ -106,7 +123,9 @@ function TotalPrintsCard({ monthlyUsage }: { monthlyUsage: MonthlyUsageEntry[] }
 
   return (
     <div className={cn(styles.card, styles.cardFlexCol)}>
-      <h3 className={styles.title}>Impressões totais</h3>
+      <h3 className={styles.title}>
+        Impressões totais <DemoDataBadge ficticio={monthlyFicticio} motivo="O servidor ainda não tem leituras suficientes para fechar o mês, então o consumo mensal exibido é de demonstração." />
+      </h3>
       <p className={styles.totalValue}>{total.toLocaleString("pt-BR")}</p>
       <div className={cn(styles.growthRow, isUp ? styles.growthUp : styles.growthDown)}>
         {isUp ? <TrendingUp size={15} /> : <TrendingDown size={15} />}
@@ -179,14 +198,22 @@ interface BottomChartsProps {
   attention: number;
   total: number;
   monthlyUsage: MonthlyUsageEntry[];
+  /** True quando `monthlyUsage` veio do conjunto de demonstração (Fase 9). */
+  monthlyFicticio?: boolean;
   onViewAlerts: () => void;
 }
 
-export default function BottomCharts({ attention, total, monthlyUsage, onViewAlerts }: BottomChartsProps) {
+export default function BottomCharts({
+  attention,
+  total,
+  monthlyUsage,
+  monthlyFicticio = false,
+  onViewAlerts,
+}: BottomChartsProps) {
   return (
     <div className={styles.grid}>
-      <PagesConsumedCard monthlyUsage={monthlyUsage} />
-      <TotalPrintsCard monthlyUsage={monthlyUsage} />
+      <PagesConsumedCard monthlyUsage={monthlyUsage} monthlyFicticio={monthlyFicticio} />
+      <TotalPrintsCard monthlyUsage={monthlyUsage} monthlyFicticio={monthlyFicticio} />
       <AlertsDonutCard attention={attention} total={total} onViewAll={onViewAlerts} />
     </div>
   );
