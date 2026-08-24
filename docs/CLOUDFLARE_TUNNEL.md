@@ -10,6 +10,7 @@
 > | **Status no painel** | Healthy |
 > | **Validado com** | `GET https://elginprint.devribero.online/health` → `200` |
 > | **`TRUST_PROXY_HEADERS`** | `true` em `backend/.env` (o túnel é agora o único caminho de entrada) |
+> | **Cabeçalhos de segurança** | Configurados no painel (seção 6) — HSTS, "Add security headers" e "Remove X-Powered-By headers" |
 > | **`CORS_ORIGINS`** | continua vazio — Fase 12, quando a Vercel tiver URL (ver seção 7) |
 >
 > O passo a passo abaixo fica como referência para reinstalação, uma segunda
@@ -196,6 +197,15 @@ rodar na mão".
 
 ## 6. Cabeçalhos de segurança — no Cloudflare, não no backend
 
+> ✅ Configurado em 2026-08-24: **HSTS** ligado (SSL/TLS → Edge
+> Certificates), **"Add security headers"** e **"Remove X-Powered-By
+> headers"** ligados (Rules → Overview → Managed Transforms). Este último
+> não estava no plano original deste documento — é um Managed Transform a
+> mais, sem custo: remove o cabeçalho `X-Powered-By` de qualquer resposta
+> que o tenha (o FastAPI não emite esse cabeçalho por padrão, então na
+> prática é rede de segurança contra um middleware futuro que venha a
+> adicioná-lo sem ninguém perceber).
+
 HSTS, `X-Content-Type-Options` e `X-Frame-Options` fazem mais sentido
 configurados no Cloudflare do que no FastAPI, pela mesma razão do D6: o
 backend nunca fala HTTPS — ele não tem como saber, de dentro do processo, se
@@ -377,7 +387,7 @@ existindo no painel até serem apagados por lá.
 |---|---|---|---|
 | Máquina Windows | `cloudflared` instalado e rodando como serviço | Seções 1–2, 5 | ✅ feito (`DESKTOP-K7J9N5H`) |
 | Painel Cloudflare | Túnel criado, Public Hostname `elginprint.devribero.online → 127.0.0.1:8000` | Seções 2–3 | ✅ feito (`Elgin - Impressoras`, Healthy) |
-| Painel Cloudflare | HSTS ligado, cabeçalhos de segurança via Managed Transform | Seção 6 | ⬜ não confirmado — revisar antes de considerar isso fechado de vez |
+| Painel Cloudflare | HSTS ligado, cabeçalhos de segurança via Managed Transform | Seção 6 | ✅ feito (HSTS, "Add security headers", "Remove X-Powered-By headers") |
 | `backend/.env` | `TRUST_PROXY_HEADERS=true` | Seção 7, depois de validar | ✅ feito |
 | `backend/.env` | `CORS_ORIGINS=https://SEU-APP.vercel.app` | Fase 12, quando a URL existir | ⬜ aguardando Fase 12 |
 
