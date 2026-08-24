@@ -15,6 +15,59 @@ engine = create_engine(
 )
 
 
+# ---------------------------------------------------------------------------
+#  PRAGMAs de producao (Fase 10)
+#
+#  Aplicados por conexao — no SQLite, `journal_mode` e persistente no arquivo,
+#  mas `busy_timeout` e `synchronous` valem por conexao e precisam ser
+#  reaplicados sempre.
+# ---------------------------------------------------------------------------
+if "sqlite" in settings.database_url:
+    from sqlalchemy import event
+
+    @event.listens_for(engine, "connect")
+    def _sqlite_pragmas(dbapi_connection, _record):
+        cursor = dbapi_connection.cursor()
+        try:
+            # WAL: leitor nao bloqueia escritor e vice-versa. Importa por dois
+            # motivos aqui — o ciclo de coleta escreve enquanto o painel le, e
+            # o backup online consegue rodar com o servico no ar. Tambem
+            # sobrevive melhor a uma queda abrupta do processo: o journal fica
+            # separado do banco e e reaplicado na proxima abertura.
+            cursor.execute("PRAGMA journal_mode=WAL")
+
+            # Sem isto, duas escritas simultaneas devolvem "database is locked"
+            # IMEDIATAMENTE. Com 5s, a segunda espera a primeira terminar — que
+            # e o comportamento que se espera de um ciclo de coleta rodando
+            # junto com alguem usando o painel.
+            cursor.execute("PRAGMA busy_timeout=5000")
+
+            # NORMAL (e nao OFF) mantem a durabilidade contra queda do
+            # PROCESSO, que e o cenario real aqui: o servico morre e a tarefa
+            # agendada o reergue. FULL so acrescentaria protecao contra queda
+            # de energia do sistema inteiro, ao custo de um fsync por
+            # transacao em cada leitura gravada.
+            cursor.execute("PRAGMA synchronous=NORMAL")
+
+            # foreign_keys FICA DESLIGADO (o padrao do SQLite). NAO e
+            # esquecimento — ligar quebra a aplicacao HOJE.
+            #
+            # `printer_readings` e `alerts` carregam FK para "printers_old",
+            # tabela que a migracao de schema das etapas anteriores renomeou e
+            # descartou. Com a checagem desligada isso e inofensivo; ligada,
+            # todo INSERT de leitura falha com
+            #     no such table: main.printers_old
+            # e a coleta inteira para. Verificavel com PRAGMA foreign_key_check.
+            #
+            # Consertar exige reconstruir as duas tabelas com a FK correta —
+            # migracao de banco, com backup e janela, decidida a parte. Ate la,
+            # a integridade referencial continua garantida pelo codigo (nada
+            # apaga impressora: o que some vira active=False), que e como
+            # sempre funcionou.
+        finally:
+            cursor.close()
+
+
 def create_db_and_tables():
     # Garante que TODOS os modelos estejam registrados em SQLModel.metadata
     # antes do create_all. Sem isto, o create_all so cria as tabelas dos
