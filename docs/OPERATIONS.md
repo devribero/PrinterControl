@@ -13,8 +13,10 @@ e o raciocínio por trás dela em `DEPLOYMENT_ARCHITECTURE.md`.
 já publica esta API (túnel `Elgin - Impressoras`, conector no Windows
 `DESKTOP-K7J9N5H`) — a porta 8000 continua sem ser exposta diretamente.
 `TRUST_PROXY_HEADERS=true` já está no `.env` real por causa disso. Falta só
-`CORS_ORIGINS`, que continua vazio até a Fase 12 preencher com a origem da
-Vercel — ver seção 1 abaixo e a seção "CORS" de `CLOUDFLARE_TUNNEL.md`.
+`CORS_ORIGINS`, que continua vazio até o deploy do frontend na Vercel (Fase
+12) preencher com a origem real — passo a passo completo, incluindo esse
+ajuste de `CORS_ORIGINS`, em [`VERCEL_DEPLOY.md`](VERCEL_DEPLOY.md); ver
+também seção 1 abaixo.
 
 ---
 

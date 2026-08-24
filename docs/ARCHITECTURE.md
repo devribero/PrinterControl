@@ -446,6 +446,10 @@ Corrigir ou revisar antes da exposição:
 - adicionar CORS da Vercel;
 - validar JWT, erros e timeouts por HTTPS.
 
+> Passo a passo operacional documentado em
+> [`VERCEL_DEPLOY.md`](VERCEL_DEPLOY.md) (Fase 12 do projeto — numeração
+> própria, não confundir com esta "FASE 6" do roadmap original).
+
 ### FASE 7 — máquina na rede corporativa
 
 - validar Print Server real;

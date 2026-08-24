@@ -151,23 +151,25 @@ Se o sistema crescer ou precisar de alta disponibilidade, PostgreSQL seria uma e
 2. Validar discovery com mocks e sem escrita.
 3. Validar Print Server real dentro da rede.
 4. Validar SNMP real dentro da rede.
-5. Configurar Tunnel para uma rota de teste protegida — passo a passo em
-   [`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md) (Fase 11; documentado,
-   pendente de execução na máquina real).
-6. Configurar `NEXT_PUBLIC_API_URL` na Vercel.
-7. Adicionar CORS da origem da Vercel.
+5. ✅ Configurar Tunnel para uma rota de teste protegida — feito na Fase 11
+   ([`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md));
+   `elginprint.devribero.online` está no ar e validado.
+6. Configurar `NEXT_PUBLIC_API_URL` na Vercel — passo a passo em
+   [`VERCEL_DEPLOY.md`](VERCEL_DEPLOY.md) (Fase 12; documentado, pendente de
+   execução — exige login interativo na Vercel).
+7. Adicionar CORS da origem da Vercel — só é possível depois do passo 6 (a
+   URL só existe após o primeiro deploy); ver seção 5 de `VERCEL_DEPLOY.md`.
 8. Validar JWT e discovery por HTTPS.
 9. Só depois avaliar coleta agendada e sincronização permanente.
 
 ## Bloqueios atuais
 
-- O passo a passo de Cloudflare Tunnel está documentado
-  ([`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md), Fase 11), mas ainda não
-  foi executado na máquina real — `elginprint.devribero.online` não responde
-  até alguém seguir aquele runbook.
-- O CORS não contém a origem da Vercel (aguardando a Fase 12; ver seção
-  "CORS" de `CLOUDFLARE_TUNNEL.md`).
-- A URL da API ainda tem fallback local.
+- O passo a passo de deploy na Vercel está documentado
+  ([`VERCEL_DEPLOY.md`](VERCEL_DEPLOY.md), Fase 12), mas ainda não foi
+  executado — exige login interativo na conta da Vercel.
+- O CORS não contém a origem da Vercel (depende do item acima).
+- A URL da API ainda tem fallback local (`127.0.0.1:8000`, só usado quando
+  `NEXT_PUBLIC_API_URL` não está definida — ver `VERCEL_DEPLOY.md` seção 1).
 - O backend possui segredo JWT padrão inseguro.
 - `Main.ps1` contém URL de webhook embutida no legado.
 - O endpoint de resolução de alertas não exige JWT.
