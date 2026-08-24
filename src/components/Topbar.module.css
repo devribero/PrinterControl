@@ -63,7 +63,7 @@
 
 @media (min-width: 1024px) {
   .greetingTitle {
-    font-size: 22px;
+    font-size: 1.375rem;
   }
 }
 
@@ -132,7 +132,7 @@
   border-radius: 0.375rem;
   border: 1px solid var(--color-border);
   padding: 0.125rem 0.375rem;
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
   color: var(--color-ink-faint);
 }
@@ -190,7 +190,7 @@
   justify-content: center;
   border-radius: 999px;
   background: var(--color-critical);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   color: #fff;
   box-shadow: 0 0 0 2px var(--color-canvas);
@@ -273,14 +273,14 @@
 }
 
 .notifMessage {
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.35;
   color: var(--color-ink);
 }
 
 .notifTimestamp {
   margin-top: 0.125rem;
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--color-ink-faint);
 }
 
@@ -375,7 +375,7 @@
 }
 
 .accountEmail {
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--color-ink-faint);
 }
 

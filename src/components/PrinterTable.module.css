@@ -24,13 +24,13 @@
 }
 
 .title {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-ink);
 }
 
 .subtitle {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--color-ink-faint);
 }
 
@@ -161,7 +161,7 @@
 }
 
 .filterLabel {
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -178,7 +178,7 @@
   border-radius: 999px;
   border: 1px solid var(--color-border);
   padding: 0.375rem 0.875rem;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   background: var(--color-surface);
   color: var(--color-ink-soft);
@@ -221,7 +221,7 @@
 
 .theadRow {
   text-align: left;
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -470,7 +470,7 @@
 }
 
 .paginationInfo {
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--color-ink-faint);
 }
 

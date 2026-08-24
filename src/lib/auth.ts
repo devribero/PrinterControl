@@ -147,6 +147,34 @@ export async function restoreSession(signal?: AbortSignal): Promise<SessionState
   }
 }
 
+/**
+ * Atualiza o PRÓPRIO perfil (Fase 8). Só o nome: o e-mail é o `sub` do JWT e
+ * trocá-lo invalidaria a própria sessão em silêncio — decisão da Fase 3, que
+ * o backend também recusa.
+ *
+ * Reescreve a cópia local no mesmo storage em que o token vive, senão o nome
+ * antigo voltaria no próximo recarregamento com o servidor fora do ar.
+ */
+export async function updateMyProfile(name: string): Promise<Account> {
+  const account = toAccount(await api.patch<ApiUser>("/api/auth/me", { name }));
+  cacheAccount(account, isTokenPersistent());
+  return account;
+}
+
+/**
+ * Troca a própria senha. Exige a atual — sem isso, um token roubado viraria
+ * posse permanente da conta.
+ *
+ * O backend responde 204; o token atual CONTINUA válido depois da troca (JWT
+ * é stateless e não guarda versão de senha), então não há o que renovar aqui.
+ */
+export async function changeMyPassword(currentPassword: string, newPassword: string): Promise<void> {
+  await api.post<void>("/api/auth/change-password", {
+    current_password: currentPassword,
+    new_password: newPassword,
+  });
+}
+
 export function logout() {
   clearToken();
   if (typeof window !== "undefined") {

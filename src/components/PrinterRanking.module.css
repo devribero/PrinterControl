@@ -44,7 +44,7 @@
 }
 
 .title {
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: var(--color-ink);
 }
@@ -73,7 +73,7 @@
 .rank {
   width: 1rem;
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-ink-faint);
 }
@@ -101,7 +101,7 @@
 
 .total {
   flex-shrink: 0;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   color: var(--color-ink);
 }

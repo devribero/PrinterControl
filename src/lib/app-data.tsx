@@ -43,6 +43,13 @@ interface AppDataContextValue {
   can: Permissions;
   handleLoginSuccess: (loggedInAccount: Account, remember: boolean) => void;
   handleLogout: () => void;
+  /**
+   * Reflete no painel um perfil que o proprio dono acabou de alterar
+   * (Fase 8, perfil e configuracoes). Nao refaz a carga de dados: so o nome
+   * muda, e ele aparece no
+   * Topbar/Sidebar imediatamente.
+   */
+  applyAccountUpdate: (updated: Account) => void;
 
   printers: Printer[];
   monthlyUsage: typeof mockMonthlyUsage;
@@ -423,6 +430,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     if (printer) setSelectedPrinter(printer);
   }
 
+  const applyAccountUpdate = useCallback((updated: Account) => setAccount(updated), []);
+
   const can = useMemo(() => permissionsFor(account?.role ?? null), [account?.role]);
 
   const value: AppDataContextValue = {
@@ -433,6 +442,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     can,
     handleLoginSuccess,
     handleLogout,
+    applyAccountUpdate,
 
     printers,
     monthlyUsage,
