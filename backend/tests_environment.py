@@ -56,6 +56,11 @@ def settings_de_producao(**overrides):
         secret_key=SECRET_VALIDO,
         print_server_mode="real",
         allow_mock_collect=False,
+        # cors_origins explicito desde a Fase 10: producao passou a recusar o
+        # default local. Sem isto, todo caso aqui seria recusado pelo motivo
+        # errado — e o positivo falharia. O CORS tem suite propria em
+        # tests_production.py.
+        cors_origins=["https://painel.exemplo.com"],
         _env_file=None,  # ignora backend/.env: o teste define o cenario inteiro
     )
     base.update(overrides)

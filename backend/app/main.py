@@ -1,26 +1,43 @@
 import logging
+import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.config import settings
-from app.database import create_db_and_tables
-from app.routes import auth, printers, alerts, collect, servers, users, notifications
-from app.services.scheduler import shutdown_scheduler, start_scheduler
+from sqlalchemy import text
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
-)
+from app.config import settings
+from app.database import create_db_and_tables, engine
+from app.logging_config import setup_logging
+from app.routes import auth, printers, alerts, collect, servers, users, notifications
+from app.services.scheduler import scheduler_status, shutdown_scheduler, start_scheduler
+
+setup_logging()
+
+logger = logging.getLogger("printercontrol")
+
+APP_VERSION = "0.1.0"
+
+#: Momento em que o processo subiu — usado por /health para reportar uptime.
+#: Serve para detectar reinicio em laco: um uptime que nunca passa de poucos
+#: minutos significa que o servico esta caindo e sendo reerguido.
+_INICIADO_EM = time.time()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info(
+        "Subindo | ambiente=%s print_server=%s scheduler=%s",
+        settings.environment,
+        settings.print_server_mode,
+        settings.collection_enabled,
+    )
     create_db_and_tables()
-    logging.getLogger("printercontrol").info("Database initialized")
+    logger.info("Database initialized")
     start_scheduler()
     yield
+    logger.info("Encerrando")
     shutdown_scheduler()
 
 
@@ -85,9 +102,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     apenas uma mensagem generica — stack trace e texto de excecao podem
     revelar caminhos de arquivo e estrutura interna.
     """
-    logging.getLogger("printercontrol").exception(
-        "Erro nao tratado em %s %s", request.method, request.url.path
-    )
+    logger.exception("Erro nao tratado em %s %s", request.method, request.url.path)
     return JSONResponse(
         status_code=500,
         content={"detail": "Erro interno do servidor. Consulte os logs do backend."},
@@ -111,7 +126,7 @@ def read_root():
 @app.get("/health")
 def health_check():
     """
-    Saude + IDENTIFICACAO DO AMBIENTE (Fase 9).
+    Saude, identificacao do ambiente (Fase 9) e diagnostico (Fase 10).
 
     O ambiente sai por aqui, e nao por uma NEXT_PUBLIC_* no build do painel,
     de proposito: a variavel de build descreveria o bundle, nao o servidor a
@@ -120,13 +135,47 @@ def health_check():
     Vindo na resposta, o rotulo e sempre o do backend que respondeu.
 
     Continua publica (sem token): o painel precisa do rotulo ANTES do login,
-    para que a tela de entrada de uma instancia de demonstracao ja se anuncie
-    como tal. Por isso o retorno nao traz nada sensivel — nenhum secret, host
-    ou caminho de banco, apenas o nome do ambiente e se a simulacao esta
-    habilitada.
+    e um monitor externo (Cloudflare, uptime check) tambem nao tem token. Por
+    isso o retorno segue sem NADA sensivel — nenhum secret, host de banco,
+    caminho de arquivo ou origem de CORS. O que ha de novo aqui e diagnostico
+    operacional, nao configuracao:
+
+      status      "ok" ou "degraded" — degraded quando o banco nao responde.
+                  Um monitor deve alertar por este campo, e nao so pelo 200.
+      uptime      segundos desde que o processo subiu. Um valor que nunca
+                  cresce denuncia servico reiniciando em laco.
+      database    se um SELECT trivial respondeu agora.
+      scheduler   ligado/rodando, para flagrar coleta parada sem ninguem ver.
+
+    Responde 200 mesmo degradado, de proposito: o processo ESTA de pe e
+    respondendo, e derrubar o healthcheck faria o supervisor reinicia-lo em
+    laco sem corrigir a causa (banco travado, disco cheio). Quem monitora le
+    o campo `status`.
     """
+    banco_ok = True
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+    except Exception:  # noqa: BLE001
+        banco_ok = False
+        # exception() e nao error(): sem o traceback nao da para saber se o
+        # arquivo sumiu, travou por lock ou o disco encheu.
+        logger.exception("Healthcheck: banco nao respondeu")
+
+    try:
+        scheduler = scheduler_status()
+        scheduler_info = {
+            "enabled": scheduler["enabled"],
+            "running": scheduler["running"],
+            "next_run": scheduler["next_run"],
+        }
+    except Exception:  # noqa: BLE001
+        logger.exception("Healthcheck: estado do scheduler indisponivel")
+        scheduler_info = {"enabled": settings.collection_enabled, "running": False, "next_run": None}
+
     return {
-        "status": "ok",
+        "status": "ok" if banco_ok else "degraded",
+        "version": APP_VERSION,
         "environment": settings.environment,
         "is_demo": settings.is_demo,
         "is_production": settings.is_production,
@@ -134,6 +183,9 @@ def health_check():
         # gravadas, mesmo fora de producao.
         "mock_collect_enabled": settings.allow_mock_collect,
         "print_server_mode": settings.print_server_mode,
+        "uptime_seconds": round(time.time() - _INICIADO_EM, 1),
+        "database": "ok" if banco_ok else "erro",
+        "scheduler": scheduler_info,
     }
 
 
