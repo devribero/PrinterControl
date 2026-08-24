@@ -110,7 +110,31 @@ def read_root():
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok"}
+    """
+    Saude + IDENTIFICACAO DO AMBIENTE (Fase 9).
+
+    O ambiente sai por aqui, e nao por uma NEXT_PUBLIC_* no build do painel,
+    de proposito: a variavel de build descreveria o bundle, nao o servidor a
+    que ele acabou se conectando. Um painel compilado como "production" e
+    apontado para o backend de demonstracao mentiria com toda a confianca.
+    Vindo na resposta, o rotulo e sempre o do backend que respondeu.
+
+    Continua publica (sem token): o painel precisa do rotulo ANTES do login,
+    para que a tela de entrada de uma instancia de demonstracao ja se anuncie
+    como tal. Por isso o retorno nao traz nada sensivel — nenhum secret, host
+    ou caminho de banco, apenas o nome do ambiente e se a simulacao esta
+    habilitada.
+    """
+    return {
+        "status": "ok",
+        "environment": settings.environment,
+        "is_demo": settings.is_demo,
+        "is_production": settings.is_production,
+        # Deixa a interface avisar que leituras ficticias podem estar sendo
+        # gravadas, mesmo fora de producao.
+        "mock_collect_enabled": settings.allow_mock_collect,
+        "print_server_mode": settings.print_server_mode,
+    }
 
 
 if __name__ == "__main__":

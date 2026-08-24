@@ -30,6 +30,7 @@ from app.models.print_server import (
     PrintServer,
 )
 from app.models.printer import Printer
+from app.services.environment_guard import bloquear_mock_em_producao
 from app.models.user import User
 from app.services.discovery import enrich_discovered_printers
 from app.services.print_server import PrintServerError, discover_printers
@@ -207,6 +208,16 @@ def _marcar_resultado(
 
 def _executar_discover(server_host: str, mode: str) -> DiscoverResponse:
     """Descoberta + enriquecimento SNMP, sem tocar no banco."""
+    # Ponto unico das duas rotas de discover (a global e a por servidor).
+    # Discover nao grava nada, mas e o que alimenta a tela que leva ao sync:
+    # deixar a frota ficticia aparecer em producao ja induz o erro seguinte.
+    if mode == "mock":
+        bloquear_mock_em_producao(
+            "A descoberta simulada",
+            f"O Print Server {server_host} esta cadastrado com mode='mock'; "
+            "mude para 'real' em /network.",
+        )
+
     found = discover_printers(server_host, mode=mode)
     enriched = enrich_discovered_printers(found, mode=mode)
     source = "print_server_real" if mode == "real" else "print_server_mock"
@@ -284,6 +295,14 @@ def create_server(
             detail=f"Ja existe um Print Server registrado com o host {data.host}.",
         )
 
+    # O default de `mode` e "mock" (historico). Em producao, registrar um
+    # servidor simulado e sempre engano — inclusive por omissao do campo.
+    if data.mode == "mock":
+        bloquear_mock_em_producao(
+            "O cadastro de um Print Server simulado",
+            "Informe mode='real' ao registrar o servidor.",
+        )
+
     server = PrintServer(host=data.host, name=data.name or data.host, mode=data.mode)
     session.add(server)
     session.commit()
@@ -314,6 +333,12 @@ def update_server(
     server = _get_or_404(session, server_id)
 
     data = update.model_dump(exclude_unset=True)
+    if data.get("mode") == "mock":
+        bloquear_mock_em_producao(
+            "Mudar um Print Server para o modo simulado",
+            f"{server.host} tem impressoras reais associadas ao cadastro.",
+        )
+
     for field, value in data.items():
         if value is not None:
             setattr(server, field, value)
@@ -351,6 +376,12 @@ def sync(session: Session = Depends(get_session), _user: User = Depends(require_
     novas, atualiza as existentes, marca como inativas as que sumiram.
     Nunca apaga — leituras e alertas sao preservados.
     """
+    if settings.print_server_mode == "mock":
+        bloquear_mock_em_producao(
+            "A sincronizacao simulada",
+            "Ela desativaria as impressoras reais ausentes da frota ficticia.",
+        )
+
     try:
         result = sync_printers(session)
     except PrintServerError as exc:
@@ -399,6 +430,17 @@ def sync_server(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Print Server {server.host} esta desativado.",
+        )
+
+    # O caso critico desta fase: o modo vive na LINHA do servidor, gravado
+    # antes de a instancia virar producao, entao nenhuma validacao de boot o
+    # enxerga. Sincronizar aqui publicaria a frota ficticia e marcaria como
+    # inativa toda impressora real que ela nao contem.
+    if server.mode == "mock":
+        bloquear_mock_em_producao(
+            "A sincronizacao simulada",
+            f"O Print Server {server.host} esta cadastrado com mode='mock'; "
+            "ela desativaria as impressoras reais ausentes da frota ficticia.",
         )
 
     try:

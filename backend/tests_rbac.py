@@ -238,10 +238,21 @@ def main():
 
     from app.config import DEV_SECRET_KEY, Settings
 
+    # PRINT_SERVER_MODE=real entra em todo caso de producao a partir da Fase 9:
+    # producao passou a recusar tambem a simulacao, e o validador dela roda
+    # ANTES do de secret. Sem isso, os casos abaixo passariam a ser recusados
+    # pelo motivo errado — e o positivo falharia. Fixar o modo mantem a
+    # SECRET_KEY como unica variavel sob teste aqui; o bloqueio de simulacao
+    # tem suite propria em tests_environment.py.
+    # allow_mock_collect explicito porque esta suite exporta
+    # ALLOW_MOCK_COLLECT=true no topo do arquivo, e `_env_file=None` desliga
+    # apenas o .env — as variaveis do PROCESSO continuam sendo lidas.
+    producao = dict(environment="production", print_server_mode="real", allow_mock_collect=False)
+
     casos = [
-        ("secret default em producao e recusado", dict(environment="production", secret_key=DEV_SECRET_KEY), False),
-        ("secret curta em producao e recusada", dict(environment="production", secret_key="curta"), False),
-        ("secret forte em producao e aceita", dict(environment="production", secret_key="k" * 48), True),
+        ("secret default em producao e recusado", dict(producao, secret_key=DEV_SECRET_KEY), False),
+        ("secret curta em producao e recusada", dict(producao, secret_key="curta"), False),
+        ("secret forte em producao e aceita", dict(producao, secret_key="k" * 48), True),
         ("development continua com o default", dict(environment="development", secret_key=DEV_SECRET_KEY), True),
     ]
     for nome, kwargs, deve_aceitar in casos:

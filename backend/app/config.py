@@ -13,10 +13,18 @@ DEFAULT_DB_PATH = BACKEND_DIR / "printer_control.db"
 DEV_SECRET_KEY = "dev-secret-key-change-in-production"
 MIN_PRODUCTION_SECRET_LENGTH = 32
 
+# Ambientes reconhecidos (Fase 9).
+#   development -> maquina de quem desenvolve; simulacao liberada.
+#   demo        -> instancia de demonstracao; dados ficticios sao ESPERADOS e
+#                  a interface os anuncia permanentemente.
+#   production  -> frota real. Qualquer simulacao aqui e erro de configuracao,
+#                  nao preferencia.
+ENVIRONMENTS = ("development", "demo", "production")
+
 
 class Settings(BaseSettings):
-    # Ambiente de execucao: "development" (padrao, local) ou "production".
-    # Em producao a validacao de seguranca abaixo passa a ser obrigatoria.
+    # Ambiente de execucao: "development" (padrao), "demo" ou "production".
+    # Em producao as validacoes abaixo passam a ser obrigatorias.
     environment: str = "development"
 
     # Database — caminho ABSOLUTO de proposito: com um caminho relativo o
@@ -78,6 +86,65 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.environment.strip().lower() == "production"
+
+    @property
+    def is_demo(self) -> bool:
+        return self.environment.strip().lower() == "demo"
+
+    @field_validator("environment")
+    @classmethod
+    def _environment_conhecido(cls, value: str) -> str:
+        """
+        Um ambiente escrito errado nao pode cair no default em silencio:
+        `ENVIRONMENT=producao` (ou "prod", ou "Production" com espaco) daria
+        uma instancia de producao rodando com as regras de desenvolvimento —
+        exatamente o acidente que esta fase existe para impedir. Normaliza
+        caixa e espaco, e recusa o que nao reconhece.
+        """
+        normalizado = value.strip().lower()
+        if normalizado not in ENVIRONMENTS:
+            raise ValueError(
+                f"ENVIRONMENT invalido: {value!r}. Use um de: {', '.join(ENVIRONMENTS)}."
+            )
+        return normalizado
+
+    @model_validator(mode="after")
+    def _validate_production_mock(self) -> "Settings":
+        """
+        Fail-fast: producao nao sobe com simulacao ligada (Fase 9).
+
+        O risco concreto e o default de `print_server_mode`, que e "mock" por
+        razoes historicas. Um deploy de producao que apenas herde esse default
+        e depois rode "Sincronizar" recebe a frota FICTICIA do simulador e
+        marca como inativa toda impressora real que ele nao publica — ou seja,
+        apaga a frota de producao e a substitui por uma inventada, gravando
+        tudo no banco real.
+
+        Recusar no boot, e nao avisar, e deliberado: um aviso em log seria
+        lido depois do estrago. Vale o mesmo raciocinio ja aplicado a
+        SECRET_KEY logo abaixo — configuracao incoerente com o ambiente e
+        erro de operacao, nao preferencia.
+        """
+        if not self.is_production:
+            return self
+
+        if self.print_server_mode != "real":
+            raise ValueError(
+                f"PRINT_SERVER_MODE={self.print_server_mode!r} e incompativel com "
+                "ENVIRONMENT=production: um Print Server simulado publica uma frota "
+                "ficticia, e o proximo sync desativaria as impressoras reais que ela "
+                "nao contem. Defina PRINT_SERVER_MODE=real."
+            )
+
+        if self.allow_mock_collect:
+            raise ValueError(
+                "ALLOW_MOCK_COLLECT=true e incompativel com ENVIRONMENT=production: "
+                "a coleta simulada grava leituras ficticias no banco como se fossem "
+                "reais, contaminando contadores e relatorios. Remova a variavel ou "
+                "defina ALLOW_MOCK_COLLECT=false."
+            )
+
+        return self
 
     @model_validator(mode="after")
     def _validate_production_secrets(self) -> "Settings":
