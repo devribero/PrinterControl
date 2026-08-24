@@ -11,7 +11,15 @@ import { exportPrintersCsv } from "../../lib/exportCsv";
 import styles from "./page.module.css";
 
 export default function ReportsPage() {
-  const { printers, stats, monthlyUsage, departmentUsage, decommissionedPrinters, setSelectedPrinter } = useAppData();
+  const {
+    printers,
+    stats,
+    monthlyUsage,
+    usingRealMonthlyReport,
+    departmentUsage,
+    decommissionedPrinters,
+    setSelectedPrinter,
+  } = useAppData();
   const { push } = useToast();
 
   return (
@@ -53,7 +61,7 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <MonthlyCounters data={monthlyUsage} />
+      <MonthlyCounters data={monthlyUsage} ficticio={!usingRealMonthlyReport} />
       <PrinterRanking printers={printers} onOpenDetails={setSelectedPrinter} />
       <DepartmentBreakdown data={departmentUsage} />
       <DecommissionedList data={decommissionedPrinters} />

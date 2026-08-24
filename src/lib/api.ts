@@ -8,6 +8,50 @@ export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL?.trim() || "http://
 
 const TOKEN_KEY = "elgin_auth_token";
 
+/**
+ * Identificacao do ambiente do BACKEND (Fase 9).
+ *
+ * Vem de GET /health, e nao de uma NEXT_PUBLIC_* embutida no build: a
+ * variavel de build descreve o bundle, nao o servidor a que ele acabou se
+ * conectando. Um painel compilado como "production" e apontado para o
+ * backend de demonstracao mentiria com toda a confianca.
+ */
+export interface BackendEnvironment {
+  environment: "development" | "demo" | "production";
+  is_demo: boolean;
+  is_production: boolean;
+  mock_collect_enabled: boolean;
+  print_server_mode: "mock" | "real";
+}
+
+/**
+ * Le o ambiente do backend. Publica: nao exige token, porque a tela de login
+ * de uma instancia de demonstracao ja precisa se anunciar como tal.
+ *
+ * Devolve null quando o backend nao responde. Quem chama NAO deve tratar
+ * null como producao nem como demo — e "desconhecido", e nesse caso o painel
+ * ja esta exibindo a faixa de servidor indisponivel.
+ */
+export async function fetchBackendEnvironment(): Promise<BackendEnvironment | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/health`, { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = (await res.json()) as Partial<BackendEnvironment>;
+    if (data.environment !== "development" && data.environment !== "demo" && data.environment !== "production") {
+      return null;
+    }
+    return {
+      environment: data.environment,
+      is_demo: data.is_demo === true,
+      is_production: data.is_production === true,
+      mock_collect_enabled: data.mock_collect_enabled === true,
+      print_server_mode: data.print_server_mode === "real" ? "real" : "mock",
+    };
+  } catch {
+    return null;
+  }
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,

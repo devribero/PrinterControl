@@ -34,6 +34,7 @@ export default function DashboardPage() {
     globalToner,
     worstPrinter,
     monthlyUsage,
+    usingRealMonthlyReport,
     can,
     handleRefresh,
     handleDiscovery,
@@ -108,7 +109,13 @@ export default function DashboardPage() {
         />
       </div>
 
-      <BottomCharts attention={stats.attention} total={stats.total} monthlyUsage={monthlyUsage} onViewAlerts={() => router.push("/alerts")} />
+      <BottomCharts
+        attention={stats.attention}
+        total={stats.total}
+        monthlyUsage={monthlyUsage}
+        monthlyFicticio={!usingRealMonthlyReport}
+        onViewAlerts={() => router.push("/alerts")}
+      />
     </>
   );
 }

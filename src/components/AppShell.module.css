@@ -158,3 +158,61 @@
   line-height: 1.4;
   color: var(--color-ink);
 }
+
+/* Faixa de AMBIENTE de demonstração (Fase 9).
+
+   Visualmente distinta da .demoBanner acima de propósito. Aquela é âmbar de
+   aviso: algo saiu do esperado. Esta é informativa e permanente — a
+   instância É de demonstração, não há nada a corrigir —, então usa a cor de
+   marca e uma listra lateral em vez do tom de alerta. Se as duas fossem
+   iguais, a faixa permanente viraria ruído e a de incidente perderia
+   urgência por associação. */
+.demoEnvBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin-bottom: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-brand-border, var(--color-border-strong));
+  border-left: 4px solid var(--color-brand, var(--color-ink));
+  background: var(--color-brand-tint, var(--color-surface));
+  padding: 0.75rem 1rem;
+}
+
+.demoEnvBannerIcon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  color: var(--color-brand, var(--color-ink-soft));
+}
+
+.demoEnvBannerText {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--color-ink);
+}
+
+/* Rótulo do ambiente no rodapé. Sempre presente quando o backend responde,
+   inclusive em produção: saber que se está em produção é tão importante
+   quanto saber que não se está. */
+.envTag {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.0625rem 0.375rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-ink-soft);
+}
+
+.envTagDemo {
+  border-color: var(--color-brand-border, var(--color-border-strong));
+  background: var(--color-brand-tint, transparent);
+  color: var(--color-brand, var(--color-ink));
+}
+
+.envTagProduction {
+  border-color: var(--color-success-border, var(--color-border-strong));
+  background: var(--color-success-tint, transparent);
+  color: var(--color-success, var(--color-ink));
+}

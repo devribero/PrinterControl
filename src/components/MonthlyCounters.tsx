@@ -10,13 +10,16 @@
 import { TrendingUp, TrendingDown, Minus, CalendarRange } from "lucide-react";
 import type { MonthlyUsageEntry } from "../types";
 import { cn } from "../lib/cn";
+import DemoDataBadge from "./DemoDataBadge";
 import styles from "./MonthlyCounters.module.css";
 
 interface MonthlyCountersProps {
   data: MonthlyUsageEntry[];
+  /** True quando `data` veio do conjunto de demonstração, não do backend. */
+  ficticio?: boolean;
 }
 
-export default function MonthlyCounters({ data }: MonthlyCountersProps) {
+export default function MonthlyCounters({ data, ficticio = false }: MonthlyCountersProps) {
   if (data.length === 0) return null;
 
   return (
@@ -26,7 +29,9 @@ export default function MonthlyCounters({ data }: MonthlyCountersProps) {
           <CalendarRange size={17} />
         </div>
         <div>
-          <h2 className={styles.title}>Contadores Mensais</h2>
+          <h2 className={styles.title}>
+            Contadores Mensais <DemoDataBadge ficticio={ficticio} motivo="O servidor ainda não tem leituras suficientes para fechar o mês, então o consumo mensal exibido é de demonstração." />
+          </h2>
           <p className={styles.subtitle}>Total de páginas impressas em cada ciclo de leitura.</p>
         </div>
       </div>

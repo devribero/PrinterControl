@@ -19,7 +19,15 @@ import {
   decommissionedPrinters,
 } from "../data/printers";
 import { logout as clearSession, restoreSession, type Account } from "./auth";
-import { ApiError, discoverPrinters, fetchAlerts, fetchPrintersWithStatus, fetchUnreadNotificationCount } from "./api";
+import {
+  ApiError,
+  discoverPrinters,
+  fetchAlerts,
+  fetchBackendEnvironment,
+  fetchPrintersWithStatus,
+  fetchUnreadNotificationCount,
+  type BackendEnvironment,
+} from "./api";
 import { permissionsFor, type Permissions } from "./permissions";
 import { adaptAlert, adaptPrinter, loadMonthlyReportFromApi } from "./adaptApi";
 import { loadMonthlyReport, mergeMonthlyReport } from "./fetchMonthlyReport";
@@ -57,6 +65,19 @@ interface AppDataContextValue {
   decommissionedPrinters: typeof decommissionedPrinters;
   usingRealData: boolean;
   usingRealMonthlyReport: boolean;
+  /**
+   * Ambiente informado pelo backend em GET /health (Fase 9). null = o
+   * backend nao respondeu; "desconhecido" NAO deve ser tratado como
+   * producao nem como demonstracao.
+   */
+  backendEnv: BackendEnvironment | null;
+  /**
+   * True quando ha numero ficticio na tela por QUALQUER motivo: a frota
+   * inteira e de demonstracao, OU so o relatorio mensal caiu no mock. O
+   * segundo caso e o que passava despercebido — frota real com grafico de
+   * consumo inventado ao lado.
+   */
+  exibindoDadoFicticio: boolean;
   initialLoading: boolean;
   /** Mensagem quando a API falhou; null quando os dados vieram do backend. */
   apiError: string | null;
@@ -138,6 +159,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [sessionVerified, setSessionVerified] = useState(false);
   const [rawPrinters, setRawPrinters] = useState<Printer[]>(mockPrinters);
   const [usingRealData, setUsingRealData] = useState(false);
+  const [backendEnv, setBackendEnv] = useState<BackendEnvironment | null>(null);
   // Alertas vindos de /api/alerts; null enquanto o backend não respondeu.
   const [apiAlerts, setApiAlerts] = useState<Alert[] | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -182,6 +204,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const printers = useMemo(() => mergeMonthlyReport(rawPrinters, monthlyReport), [rawPrinters, monthlyReport]);
   const monthlyUsage = monthlyReport && monthlyReport.monthlyUsage.length > 0 ? monthlyReport.monthlyUsage : mockMonthlyUsage;
   const usingRealMonthlyReport = !!monthlyReport && monthlyReport.monthlyUsage.length > 0;
+  // Um so dos dois basta para haver numero ficticio na tela. Antes desta fase
+  // a faixa olhava apenas usingRealData, entao "frota real + relatorio mensal
+  // mock" — o caso comum, porque o backend precisa de leituras suficientes
+  // para fechar um mes — nao acendia aviso nenhum.
+  const exibindoDadoFicticio = !usingRealData || !usingRealMonthlyReport;
 
   // Carga dos dados reais. Roda DEPOIS que a sessao foi resolvida e so
   // quando ha usuario — e re-roda quando a conta muda (login/troca de
@@ -192,6 +219,19 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   // A dependencia e o e-mail (string estavel), nao o objeto `account`, para
   // nao refazer a carga a cada re-render do provider.
   const accountKey = account?.email ?? null;
+
+  // Ambiente do backend: uma vez, no mount, sem depender de sessao. Precisa
+  // valer ANTES do login para que a tela de entrada de uma instancia de
+  // demonstracao ja se anuncie como tal.
+  useEffect(() => {
+    let cancelled = false;
+    fetchBackendEnvironment().then((env) => {
+      if (!cancelled) setBackendEnv(env);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (sessionLoading) return;
@@ -450,6 +490,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     decommissionedPrinters,
     usingRealData,
     usingRealMonthlyReport,
+    backendEnv,
+    exibindoDadoFicticio,
     initialLoading,
     apiError,
 
