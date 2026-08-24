@@ -247,7 +247,14 @@ def main():
     # allow_mock_collect explicito porque esta suite exporta
     # ALLOW_MOCK_COLLECT=true no topo do arquivo, e `_env_file=None` desliga
     # apenas o .env — as variaveis do PROCESSO continuam sendo lidas.
-    producao = dict(environment="production", print_server_mode="real", allow_mock_collect=False)
+    producao = dict(
+        environment="production",
+        print_server_mode="real",
+        allow_mock_collect=False,
+        # Fase 10 acrescentou a exigencia de CORS proprio em producao; sem
+        # isto o default local seria recusado e o caso positivo falharia.
+        cors_origins=["https://painel.exemplo.com"],
+    )
 
     casos = [
         ("secret default em producao e recusado", dict(producao, secret_key=DEV_SECRET_KEY), False),

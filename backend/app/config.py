@@ -1,5 +1,7 @@
+from typing import Annotated
+
 from pydantic import field_validator, model_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, NoDecode
 from pathlib import Path
 
 
@@ -171,6 +173,94 @@ class Settings(BaseSettings):
 
         return self
 
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def _cors_lista(cls, value):
+        """
+        Aceita "https://a.com, https://b.com" alem da lista JSON.
+
+        Sem isto, `CORS_ORIGINS=https://painel.exemplo.com` no .env explodiria
+        com erro de JSON invalido — e o jeito de escrever que falha e
+        justamente o mais natural.
+        """
+        if isinstance(value, str):
+            texto = value.strip()
+            if not texto:
+                return []
+
+            # JSON e resolvido AQUI, e nao delegado ao pydantic: vindo de
+            # variavel de ambiente o pydantic-settings ja o decodifica antes,
+            # mas passado como argumento (testes, uso programatico) nao — e a
+            # mesma string se comportaria de dois jeitos diferentes.
+            if texto.startswith("["):
+                import json
+
+                try:
+                    decodificado = json.loads(texto)
+                except json.JSONDecodeError:
+                    raise ValueError(
+                        f"CORS_ORIGINS parece JSON mas nao e valido: {texto!r}. "
+                        "Use JSON correto ou uma lista separada por virgulas."
+                    ) from None
+                return decodificado
+
+            return [item.strip() for item in texto.split(",") if item.strip()]
+        return value
+
+    @model_validator(mode="after")
+    def _validate_production_cors(self) -> "Settings":
+        """
+        Producao exige origens proprias e explicitas (Fase 10).
+
+        Tres recusas, todas por motivos distintos:
+
+        - lista vazia: nenhum navegador conseguiria usar o painel, e o
+          sintoma (erro de CORS no console do usuario) nao aponta para a
+          causa. Melhor falhar no boot, onde a mensagem e clara.
+        - "*": com o backend exposto publicamente, qualquer pagina da
+          internet passaria a poder chamar a API com o token da vitima.
+        - localhost: nao e teoria — significa que o .env de producao e uma
+          copia do de desenvolvimento, e entao PROVAVELMENTE ha mais coisa
+          errada nele. Alem disso, uma pagina rodando na maquina de alguem
+          poderia falar com a API de producao.
+        """
+        if not self.is_production:
+            return self
+
+        origens = [o.strip() for o in self.cors_origins if str(o).strip()]
+
+        if not origens:
+            raise ValueError(
+                "CORS_ORIGINS vazio com ENVIRONMENT=production: defina a(s) origem(ns) "
+                "HTTPS do painel (ex.: CORS_ORIGINS=https://painel.vercel.app). "
+                "Sem isso o navegador bloqueia toda chamada do frontend."
+            )
+
+        if any(o == "*" for o in origens):
+            raise ValueError(
+                "CORS_ORIGINS='*' e proibido com ENVIRONMENT=production: com o backend "
+                "exposto publicamente, qualquer site poderia chamar a API usando o token "
+                "de quem estivesse logado. Liste as origens explicitamente."
+            )
+
+        locais = [o for o in origens if "localhost" in o or "127.0.0.1" in o]
+        if locais:
+            raise ValueError(
+                f"CORS_ORIGINS contem origem local {locais!r} com ENVIRONMENT=production. "
+                "Isso normalmente indica um .env de desenvolvimento copiado para o "
+                "servidor — reveja o arquivo inteiro, nao apenas esta variavel."
+            )
+
+        inseguras = [o for o in origens if not o.startswith("https://")]
+        if inseguras:
+            raise ValueError(
+                f"CORS_ORIGINS contem origem sem HTTPS {inseguras!r} com "
+                "ENVIRONMENT=production: o token trafega no header Authorization e "
+                "seria exposto em transito."
+            )
+
+        return self
+
     @field_validator("database_url")
     @classmethod
     def _absolute_sqlite_path(cls, value: str) -> str:
@@ -199,11 +289,39 @@ class Settings(BaseSettings):
 
     # API
     api_prefix: str = "/api"
-    cors_origins: list = [
+
+    # ------------------------------------------------------------------
+    # CORS (Fase 10) — lista EXPLICITA de origens do painel.
+    #
+    # O default cobre o desenvolvimento local. Em producao ele nao serve e
+    # o backend recusa subir com ele: ver _validate_production_cors. A lista
+    # aceita tanto JSON (pydantic-settings) quanto valores separados por
+    # virgula no .env, que e como uma pessoa naturalmente escreve.
+    # ------------------------------------------------------------------
+    # NoDecode desliga a decodificacao automatica de JSON que o
+    # pydantic-settings aplica a campos de tipo complexo vindos do ambiente.
+    # Sem ele, `CORS_ORIGINS=https://painel.vercel.app` — a forma natural de
+    # escrever — nem chega ao validador: explode antes, com erro de JSON.
+    # Com NoDecode o valor chega cru e _cors_lista trata os dois formatos.
+    cors_origins: Annotated[list[str], NoDecode] = [
         "http://localhost:3000",
         "http://localhost:3001",
         "http://127.0.0.1:3000",
     ]
+
+    # ------------------------------------------------------------------
+    # Logs (Fase 10)
+    #
+    # Rodando como tarefa agendada do Windows, ninguem le stdout: sem
+    # arquivo, um erro de madrugada nao deixa rastro. O nivel cai para
+    # WARNING em producao apenas se explicitado; o padrao INFO registra o
+    # ciclo de coleta, que e o que se quer auditar.
+    # ------------------------------------------------------------------
+    log_level: str = "INFO"
+    #: Vazio = so console. Caminho relativo e resolvido sob backend/.
+    log_file: str = "logs/printercontrol.log"
+    log_max_bytes: int = 5 * 1024 * 1024
+    log_backup_count: int = 10
 
     class Config:
         # Caminho absoluto pelo mesmo motivo do database_url: um `.env`
