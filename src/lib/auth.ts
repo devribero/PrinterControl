@@ -17,10 +17,20 @@ export interface Account {
   id: number;
   /** Parte antes do @ — a Topbar exibe `${email}@elgin.com`. */
   email: string;
+  /** Segunda porta de login (opcional). Não é o `sub` do JWT — só exibicao. */
+  username: string | null;
   name: string;
   /** Papel vindo do backend. Governa o que a UI oferece (não o que autoriza). */
   role: Role;
   isActive: boolean;
+  /**
+   * Troca de senha pendente (conta recém-criada ou recém-resetada por um
+   * admin). Enquanto `true`, o AuthGate mostra a tela de troca em vez do
+   * painel — o backend tambem recusa qualquer rota alem de /me e
+   * /change-password (`require_active_user`), entao isto NAO e so
+   * cosmetico: e o reflexo de uma trava que ja existe no servidor.
+   */
+  mustChangePassword: boolean;
 }
 
 const ACCOUNT_KEY = "elgin_auth_account";
@@ -29,9 +39,11 @@ const ACCOUNT_KEY = "elgin_auth_account";
 interface ApiUser {
   id: number;
   email: string;
+  username: string | null;
   name: string;
   role: string;
   is_active: boolean;
+  must_change_password: boolean;
 }
 
 interface LoginResponse {
@@ -44,9 +56,11 @@ function toAccount(user: ApiUser): Account {
   return {
     id: user.id,
     email: user.email.split("@")[0],
+    username: user.username,
     name: user.name,
     role: parseRole(user.role),
     isActive: user.is_active,
+    mustChangePassword: user.must_change_password === true,
   };
 }
 
@@ -71,9 +85,15 @@ function readCachedAccount(): Account | null {
       // responder e substituir o cache.
       id: typeof parsed.id === "number" ? parsed.id : 0,
       email: parsed.email,
+      username: typeof parsed.username === "string" ? parsed.username : null,
       name: parsed.name,
       role: parseRole(parsed.role),
       isActive: parsed.isActive !== false,
+      // Cache gravado antes desta versao nao tem o campo: default false (nao
+      // trancar quem nunca esteve trancado so por causa de um cache antigo).
+      // Sessao nao verificada e so um fallback de exibicao — o backend
+      // continua sendo a autoridade assim que /me responder de novo.
+      mustChangePassword: parsed.mustChangePassword === true,
     };
   } catch {
     return null;
@@ -173,6 +193,22 @@ export async function changeMyPassword(currentPassword: string, newPassword: str
     current_password: currentPassword,
     new_password: newPassword,
   });
+}
+
+/**
+ * Reflete localmente que a troca de senha obrigatória acabou de ser feita.
+ *
+ * O backend já desligou `must_change_password` (é o único ponto que desliga
+ * essa flag — ver `change_own_password` em routes/auth.py), mas a resposta
+ * de `POST /change-password` é 204 sem corpo: não há usuário novo para
+ * derivar. Quem chama (MustChangePasswordGate) já tem a `Account` em mãos e
+ * só precisa desta cópia com a flag baixada, para o AuthGate liberar o
+ * painel sem esperar por um novo `GET /me`.
+ */
+export function withPasswordChanged(account: Account): Account {
+  const updated: Account = { ...account, mustChangePassword: false };
+  cacheAccount(updated, isTokenPersistent());
+  return updated;
 }
 
 export function logout() {

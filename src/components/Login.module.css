@@ -354,6 +354,7 @@
   background: transparent;
   font-size: 0.9375rem;
   color: var(--color-ink);
+  border-color: transparent;
 }
 
 .input::placeholder {
