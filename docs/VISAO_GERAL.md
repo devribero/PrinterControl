@@ -125,7 +125,9 @@ celular, de outra unidade. Por isso ele fica hospedado na Vercel, na internet.
 
 O Cloudflare Tunnel é a ponte: ele deixa o frontend, que está na internet,
 falar com o backend, que está dentro da rede — **sem precisar abrir nenhuma
-porta no firewall da empresa**. É a peça que ainda falta ativar.
+porta no firewall da empresa**. O passo a passo para ativá-lo já está
+documentado em [`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md); falta apenas
+alguém com acesso à máquina Windows e ao painel do Cloudflare executá-lo.
 
 ### O que cada tecnologia é, em uma linha
 
@@ -877,6 +879,7 @@ Parar não causa dano — só congela o painel. Deixar rodar com dado errado, si
 | [`USER_GUIDE.md`](USER_GUIDE.md) | Guia de uso do painel, tela a tela. |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Arquitetura em detalhe técnico. |
 | [`DEPLOYMENT_ARCHITECTURE.md`](DEPLOYMENT_ARCHITECTURE.md) | Plano de exposição externa (Cloudflare Tunnel, Vercel). |
+| [`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md) | Passo a passo operacional: instalar o túnel, apontar o subdomínio, validar. |
 | [`API_MAP.md`](API_MAP.md) | Todas as rotas da API. |
 | [`DATA_FLOW.md`](DATA_FLOW.md) | Como o dado caminha, da impressora ao painel. |
 | [`DEVELOPER_GUIDE.md`](DEVELOPER_GUIDE.md) | Para quem for mexer no código. |

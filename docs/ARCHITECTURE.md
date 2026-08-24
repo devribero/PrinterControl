@@ -436,6 +436,10 @@ Corrigir ou revisar antes da exposição:
 - encaminhar somente para FastAPI;
 - validar saída sem port forwarding.
 
+> Passo a passo operacional documentado em
+> [`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md) (Fase 11 do projeto —
+> numeração própria, não confundir com esta "FASE 5" do roadmap original).
+
 ### FASE 6 — Vercel → Cloudflare → FastAPI
 
 - configurar `NEXT_PUBLIC_API_URL`;

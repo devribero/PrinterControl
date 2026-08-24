@@ -27,8 +27,9 @@ mensais de páginas e histórico por unidade/departamento.
 - **Frontend** — Next.js 16 + React 19 + TypeScript, CSS Modules, Recharts,
   Lucide. Hospedado na Vercel. Não guarda dado nenhum: consome a API.
 
-A ponte entre os dois, em produção, será um **Cloudflare Tunnel** — ainda não
-ativado.
+A ponte entre os dois, em produção, será um **Cloudflare Tunnel** — passo a
+passo documentado em `docs/CLOUDFLARE_TUNNEL.md`, ainda não executado na
+máquina real.
 
 ---
 

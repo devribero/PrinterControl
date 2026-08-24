@@ -151,7 +151,9 @@ Se o sistema crescer ou precisar de alta disponibilidade, PostgreSQL seria uma e
 2. Validar discovery com mocks e sem escrita.
 3. Validar Print Server real dentro da rede.
 4. Validar SNMP real dentro da rede.
-5. Configurar Tunnel para uma rota de teste protegida.
+5. Configurar Tunnel para uma rota de teste protegida — passo a passo em
+   [`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md) (Fase 11; documentado,
+   pendente de execução na máquina real).
 6. Configurar `NEXT_PUBLIC_API_URL` na Vercel.
 7. Adicionar CORS da origem da Vercel.
 8. Validar JWT e discovery por HTTPS.
@@ -159,8 +161,12 @@ Se o sistema crescer ou precisar de alta disponibilidade, PostgreSQL seria uma e
 
 ## Bloqueios atuais
 
-- Não há configuração de Cloudflare Tunnel no repositório.
-- O CORS não contém a origem da Vercel.
+- O passo a passo de Cloudflare Tunnel está documentado
+  ([`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md), Fase 11), mas ainda não
+  foi executado na máquina real — `elginprint.devribero.online` não responde
+  até alguém seguir aquele runbook.
+- O CORS não contém a origem da Vercel (aguardando a Fase 12; ver seção
+  "CORS" de `CLOUDFLARE_TUNNEL.md`).
 - A URL da API ainda tem fallback local.
 - O backend possui segredo JWT padrão inseguro.
 - `Main.ps1` contém URL de webhook embutida no legado.
