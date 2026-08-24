@@ -4,8 +4,17 @@ Runbook do backend do PrinterControl em Windows. Escrito para ser seguido por
 alguém que **não** acompanhou o desenvolvimento — inclusive você daqui a seis
 meses, às 2h da manhã.
 
-Escopo: subir, derrubar, diagnosticar, fazer backup e restaurar. A exposição
-externa (Cloudflare Tunnel) é assunto de `DEPLOYMENT_ARCHITECTURE.md`.
+Escopo: subir, derrubar, diagnosticar, fazer backup e restaurar. O passo a
+passo de exposição externa (instalar o `cloudflared`, criar e validar o
+túnel) está em [`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md); a arquitetura
+e o raciocínio por trás dela em `DEPLOYMENT_ARCHITECTURE.md`.
+
+**Cloudflare Tunnel: ativo desde 2026-08-24.** `https://elginprint.devribero.online`
+já publica esta API (túnel `Elgin - Impressoras`, conector no Windows
+`DESKTOP-K7J9N5H`) — a porta 8000 continua sem ser exposta diretamente.
+`TRUST_PROXY_HEADERS=true` já está no `.env` real por causa disso. Falta só
+`CORS_ORIGINS`, que continua vazio até a Fase 12 preencher com a origem da
+Vercel — ver seção 1 abaixo e a seção "CORS" de `CLOUDFLARE_TUNNEL.md`.
 
 ---
 
@@ -26,7 +35,7 @@ Preencha `backend/.env` (copie de `backend/.env.example`):
 | `CORS_ORIGINS` | origem HTTPS do painel | Vazio, `*`, localhost ou http → recusa subir |
 | `COLLECTION_ENABLED` | `true` para coletar sozinho | `false` → nada é coletado e ninguém avisa |
 | `LOGIN_MAX_ATTEMPTS` / `LOGIN_WINDOW_SECONDS` | `5` / `900` | Muito alto → força bruta viável |
-| `TRUST_PROXY_HEADERS` | `false` até o Tunnel entrar | `true` sem proxy de confiança **enfraquece** o limite de login |
+| `TRUST_PROXY_HEADERS` | `true` (o Tunnel já está ativo — ver nota acima) | `true` sem proxy de confiança **enfraquece** o limite de login |
 
 **Senha das contas de administrador.** Elas não têm mais senha fixa. Num banco
 novo, `seed.py` gera uma senha forte e a mostra **uma única vez**. Num banco
