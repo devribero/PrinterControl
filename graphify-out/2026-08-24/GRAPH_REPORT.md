@@ -1,16 +1,16 @@
 # Graph Report - PrinterControl  (2026-08-24)
 
 ## Corpus Check
-- 156 files · ~127,101 words
+- 156 files · ~126,995 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1585 nodes · 3122 edges · 114 communities (92 shown, 22 thin omitted)
+- 1585 nodes · 3123 edges · 117 communities (95 shown, 22 thin omitted)
 - Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 136 edges (avg confidence: 0.59)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6b3a0b86`
+- Built from commit: `f07610ee`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -38,22 +38,22 @@
 - Sidebar.tsx
 - unhandled_exception_handler
 - tests_collect_api.py
-- tests_uptime.py
+- tests_notifications.py
 - Printer
 - schemas/printer.py
-- login
+- Role
 - Operação em Produção
 - Alert
 - printer_sync.py
 - adaptApi.ts
 - User
-- create_notifications
+- notifications.py
 - api.ts
 - SNMPClient
 - enrich_discovered_printers
 - NetworkView
 - Simular-Ambiente.ps1
-- scheduler.py
+- list_scenarios
 - fetchPrinters.ts
 - printers.ts
 - database.py
@@ -80,7 +80,7 @@
 - tests_print_servers.py
 - Autenticação
 - VISAO_GERAL.md
-- Role
+- routes/auth.py
 - tests_printers_crud.py
 - Mapa da API
 - Notificações (Fase 7)
@@ -111,12 +111,15 @@
 - Login.tsx
 - discovery.py
 - tests_login_hardening.py
-- Topbar
+- seed.py
 - theme.tsx
 - Exception
 - Request
-- _migrate_printer_schema
+- tests_production.py
+- RedactSecretsFilter
+- ._validate_production_cors
 - require_user
+- NotificationCreate
 - Ações
 - ElginLogo.tsx
 - Path
@@ -136,8 +139,8 @@
 6. `SNMPResult` - 34 edges
 7. `useToast()` - 29 edges
 8. `create_db_and_tables()` - 27 edges
-9. `Printer` - 26 edges
-10. `PrinterCollector` - 26 edges
+9. `PrinterCollector` - 26 edges
+10. `Printer` - 26 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `active()` --uses--> `Alert`  [INFERRED]
@@ -159,7 +162,7 @@
 - **Stack tecnológico do painel (Vite/React/TS/Tailwind/Recharts/Lucide)** — readme_vite, readme_react, readme_typescript, readme_tailwind_css_v4, readme_recharts, readme_lucide [EXTRACTED 1.00]
 - **Arquitetura de dados de 3 modos (Demo/Real/Simulado)** — contexto_desenvolvimento_elgin_impressoras, contexto_desenvolvimento_modo_demo, contexto_desenvolvimento_modo_real, contexto_desenvolvimento_modo_simulado [EXTRACTED 1.00]
 
-## Communities (114 total, 22 thin omitted)
+## Communities (117 total, 22 thin omitted)
 
 ### Community 0 - "snmp_fleet_mock.py"
 Cohesion: 0.18
@@ -194,8 +197,8 @@ Cohesion: 0.07
 Nodes (52): collect_fleet(), collect_printer(), CollectRequest, CollectResponse, FleetCollectResponse, BaseModel, post, Session (+44 more)
 
 ### Community 8 - "types.ts"
-Cohesion: 0.12
-Nodes (20): AlertsPage(), AlertBanner(), AlertBannerProps, AlertsView(), AlertsViewProps, BottomCharts(), DiscoveryResults(), DiscoveryResultsProps (+12 more)
+Cohesion: 0.14
+Nodes (17): AlertsPage(), AlertBannerProps, AlertsView(), AlertsViewProps, DiscoveryResults(), DiscoveryResultsProps, statusLabel(), FORM_VAZIO (+9 more)
 
 ### Community 9 - "MockSNMPClient"
 Cohesion: 0.20
@@ -225,9 +228,9 @@ Nodes (4): Erro nao tratado: o detalhe vai para o log do servidor, o cliente rec
 Cohesion: 0.67
 Nodes (3): check(), main(), Teste ponta a ponta dos endpoints /api/collect com os cenarios simulados.…
 
-### Community 23 - "tests_uptime.py"
-Cohesion: 0.11
-Nodes (16): _migrate_reading_uptime(), Etapa 7: adiciona printer_readings.uptime em bancos criados antes desta etapa.…, Notification, SQLModel, Notificacoes internas (Fase 7). Por que uma tabela separada de `alerts`…, create_access_token(), hash_password(), Hash de senha e emissao/validacao do JWT. POR QUE PyJWT E NAO python-jose (Fase… (+8 more)
+### Community 23 - "tests_notifications.py"
+Cohesion: 0.15
+Nodes (13): Notification, SQLModel, Notificacoes internas (Fase 7). Por que uma tabela separada de `alerts`…, create_access_token(), hash_password(), Hash de senha e emissao/validacao do JWT. POR QUE PyJWT E NAO python-jose (Fase…, Fase 9 - Mock e Demo Seguros. Cobre as DUAS camadas que protegem o risco…, check() (+5 more)
 
 ### Community 25 - "Printer"
 Cohesion: 0.16
@@ -237,9 +240,9 @@ Nodes (13): Printer, PrinterMonthly, PrinterReading, SQLModel, Etapa 4: identida
 Cohesion: 0.07
 Nodes (34): create_printer(), create_printer_reading(), get_printer(), get_printer_readings(), list_printers(), list_printers_with_status(), monthly_report(), get (+26 more)
 
-### Community 29 - "login"
-Cohesion: 0.19
-Nodes (13): change_own_password(), _identificar_origem(), login(), patch, post, Session, Perfil da PROPRIA conta (Fase 8). So o nome. `require_active_user` (nao…, Troca da propria senha, exigindo a atual. Usa `require_user`, nao… (+5 more)
+### Community 29 - "Role"
+Cohesion: 0.15
+Nodes (17): RBAC minimo (Fase 1). Tres papeis cobrem todas as rotas existentes hoje: -…, Role, _active_admin_count(), create_user(), _ensure_not_last_admin(), list_users(), get, patch (+9 more)
 
 ### Community 30 - "Operação em Produção"
 Cohesion: 0.15
@@ -258,12 +261,12 @@ Cohesion: 0.13
 Nodes (18): adaptAlert(), adaptPrinter(), ApiMonthlyReport, formatLastSeen(), loadMonthlyReportFromApi(), toStatus(), toToner(), VALID_COLORS (+10 more)
 
 ### Community 34 - "User"
-Cohesion: 0.16
-Nodes (17): Fabrica de dependencia: exige que o usuario tenha (ou herde) um dos papeis…, require_roles(), True se o papel do usuario satisfaz qualquer um dos exigidos., User, get, Conta autenticada e seu papel — usado para decidir o que exibir/permitir., read_current_user(), list_notifications() (+9 more)
+Cohesion: 0.19
+Nodes (15): Fabrica de dependencia: exige que o usuario tenha (ou herde) um dos papeis…, require_roles(), True se o papel do usuario satisfaz qualquer um dos exigidos., User, get, Conta autenticada e seu papel — usado para decidir o que exibir/permitir., read_current_user(), check() (+7 more)
 
-### Community 35 - "create_notifications"
-Cohesion: 0.10
-Nodes (25): AlertRef, create_notifications(), mark_all_as_read(), mark_as_read(), _minha_ou_404(), NotificationCreate, NotificationResponse, BaseModel (+17 more)
+### Community 35 - "notifications.py"
+Cohesion: 0.14
+Nodes (25): AlertRef, create_notifications(), list_notifications(), mark_all_as_read(), mark_as_read(), _minha_ou_404(), NotificationResponse, BaseModel (+17 more)
 
 ### Community 36 - "api.ts"
 Cohesion: 0.10
@@ -285,17 +288,17 @@ Nodes (17): adaptDiscovered(), formatarMomento(), NetworkView(), confirmarAtivac
 Cohesion: 0.22
 Nodes (5): Modo Simulado, public/data/monthly-report.json, public/data/printers.json, Arquivos de dados gerados são ignorados pelo git — gerar/apagar localmente nunca afeta o repositório, Impressoras simuladas usam prefixo SIM_ / departamentos TESTE - de propósito, pra nunca confundir com dado real
 
-### Community 41 - "scheduler.py"
-Cohesion: 0.11
-Nodes (19): AsyncIOScheduler, health_check(), lifespan(), Saude, identificacao do ambiente (Fase 9) e diagnostico (Fase 10). O ambiente…, read_root(), get_scheduler_status(), list_scenarios(), get (+11 more)
+### Community 41 - "list_scenarios"
+Cohesion: 0.18
+Nodes (11): health_check(), Saude, identificacao do ambiente (Fase 9) e diagnostico (Fase 10). O ambiente…, read_root(), get_scheduler_status(), list_scenarios(), get, Cenarios simulados disponiveis e se o modo mock esta habilitado., Estado da coleta agendada (APScheduler). (+3 more)
 
 ### Community 43 - "printers.ts"
-Cohesion: 0.14
-Nodes (16): Levantamento_impressões (planilha original), DecommissionedList(), DecommissionedListProps, DepartmentBreakdown(), DepartmentBreakdownProps, MONTHS, RightPanel(), RightPanelProps (+8 more)
+Cohesion: 0.11
+Nodes (17): Levantamento_impressões (planilha original), DecommissionedList(), DecommissionedListProps, DepartmentBreakdown(), DepartmentBreakdownProps, MONTHS, RightPanelProps, Topbar() (+9 more)
 
 ### Community 44 - "database.py"
-Cohesion: 0.16
-Nodes (17): get_session(), _sqlite_pragmas(), Dependencias compartilhadas pelas rotas. Autorizacao (Fase 1) fica CENTRALIZADA…, `require_user` + bloqueio de conta com troca de senha pendente. Toda rota do…, require_active_user(), Configuracao de log (Fase 10). Por que existe como modulo, e nao como um…, Coleta manual de impressoras (Etapa 6). Sem agendamento: cada chamada dispara…, Central de notificacoes internas (Fase 7). Caixa PESSOAL: `GET` e `PATCH`… (+9 more)
+Cohesion: 0.09
+Nodes (27): AsyncIOScheduler, get_session(), _migrate_reading_uptime(), Etapa 7: adiciona printer_readings.uptime em bancos criados antes desta etapa.…, _sqlite_pragmas(), Dependencias compartilhadas pelas rotas. Autorizacao (Fase 1) fica CENTRALIZADA…, `require_user` + bloqueio de conta com troca de senha pendente. Toda rota do…, require_active_user() (+19 more)
 
 ### Community 45 - "PLANO DE IMPLEMENTAÇÃO — ESCANEAR REDE REAL"
 Cohesion: 0.05
@@ -318,8 +321,8 @@ Cohesion: 0.24
 Nodes (12): check(), check_true(), _confere_rbac_do_frontend(), h(), main(), Fase 1 - Autenticacao, RBAC e protecao das rotas. Diferente dos demais…, O frontend tem a sua propria copia da hierarquia de papeis, em…, Cria um banco no formato ANTERIOR a Fase 1 (users sem role/is_active), roda a… (+4 more)
 
 ### Community 50 - "app-data.tsx"
-Cohesion: 0.13
-Nodes (24): decommissionedPrinters, monthlyUsage, BackendEnvironment, discoverPrinters(), fetchBackendEnvironment(), fetchUnreadNotificationCount(), AppDataContext, AppDataContextValue (+16 more)
+Cohesion: 0.14
+Nodes (23): decommissionedPrinters, monthlyUsage, BackendEnvironment, discoverPrinters(), fetchBackendEnvironment(), fetchUnreadNotificationCount(), AppDataContext, AppDataContextValue (+15 more)
 
 ### Community 52 - "UsersView"
 Cohesion: 0.19
@@ -335,11 +338,11 @@ Nodes (17): FORM_VAZIO, formatarMomento(), FormState, ICONE_SEVERIDADE, Notifica
 
 ### Community 55 - "create_db_and_tables"
 Cohesion: 0.11
-Nodes (24): create_db_and_tables(), _migrate_alert_type(), _migrate_print_servers(), _migrate_user_login_fields(), _migrate_user_rbac(), Fase 1 (RBAC): adiciona users.role e users.is_active em bancos criados antes…, Login por username e troca de senha obrigatoria (2026-08-24). Adiciona…, Fase 4: registro de Print Servers. A tabela `print_servers` em si e criada pelo… (+16 more)
+Nodes (22): create_db_and_tables(), _finish_printer_migration(), _migrate_alert_type(), _migrate_print_servers(), _migrate_printer_schema(), _migrate_user_login_fields(), _migrate_user_rbac(), Fase 1 (RBAC): adiciona users.role e users.is_active em bancos criados antes… (+14 more)
 
 ### Community 56 - "Settings"
-Cohesion: 0.06
-Nodes (25): Config, field_validator, Fail-fast: producao nao sobe com simulacao ligada (Fase 9). O risco concreto e…, Impede que um ambiente de producao suba silenciosamente com o secret de…, Aceita "https://a.com, https://b.com" alem da lista JSON. Sem isto,…, Producao exige origens proprias e explicitas (Fase 10). Tres recusas, todas por…, Normaliza um DATABASE_URL sqlite relativo (ex.: sqlite:///./x.db) para um…, Um ambiente escrito errado nao pode cair no default em silencio:… (+17 more)
+Cohesion: 0.15
+Nodes (9): Config, field_validator, Aceita "https://a.com, https://b.com" alem da lista JSON. Sem isto,…, Normaliza um DATABASE_URL sqlite relativo (ex.: sqlite:///./x.db) para um…, Um ambiente escrito errado nao pode cair no default em silencio:…, Settings, Settings de producao valida, sobrescrevendo so o que o teste investiga., settings_de_producao() (+1 more)
 
 ### Community 57 - "SNMPResult"
 Cohesion: 0.13
@@ -385,9 +388,9 @@ Nodes (7): Autenticação, Bloqueio de simulação em produção (Fase 9), `GET 
 Cohesion: 0.20
 Nodes (3): Matriz de Funcionalidades, Itens que os documentos antigos listavam e que **já não existem**, Resolvido na Fase 10 (24/08/2026)
 
-### Community 68 - "Role"
-Cohesion: 0.08
-Nodes (34): RBAC minimo (Fase 1). Tres papeis cobrem todas as rotas existentes hoje: -…, Role, _active_admin_count(), create_user(), _ensure_not_last_admin(), list_users(), get, patch (+26 more)
+### Community 68 - "routes/auth.py"
+Cohesion: 0.09
+Nodes (30): change_own_password(), _identificar_origem(), login(), patch, post, Session, Perfil da PROPRIA conta (Fase 8). So o nome. `require_active_user` (nao…, Troca da propria senha, exigindo a atual. Usa `require_user`, nao… (+22 more)
 
 ### Community 69 - "tests_printers_crud.py"
 Cohesion: 0.33
@@ -438,8 +441,8 @@ Cohesion: 0.26
 Nodes (11): collect_fleet(), _collect_ip_network(), FleetCollectionResult, _group_by_ip(), _group_plan(), Printer, Session, Orquestracao da coleta da frota inteira (Etapa 5). Separacao de… (+3 more)
 
 ### Community 82 - "cn"
-Cohesion: 0.13
-Nodes (19): TonerPage(), PrinterDetailsModal(), config, PrinterStatusBadge(), StatCard(), StatCardProps, StatCards(), StatCardsProps (+11 more)
+Cohesion: 0.08
+Nodes (29): DashboardPage(), TonerPage(), AlertBanner(), BottomCharts(), PrinterDetailsModal(), config, PrinterStatusBadge(), PrinterTable() (+21 more)
 
 ### Community 83 - "RateLimiter"
 Cohesion: 0.15
@@ -450,8 +453,8 @@ Cohesion: 0.22
 Nodes (9): 6. Subir o sistema em produção hoje, Passo 1 — Preparar o `.env`, Passo 2 — Testar a configuração ANTES de subir, Passo 3 — Definir a senha das contas de administrador, Passo 4 — Backup antes de qualquer coisa, Passo 5 — Subir o backend, Passo 6 — Verificar a saúde, Passo 7 — Subir o painel (+1 more)
 
 ### Community 85 - "PrinterTable.tsx"
-Cohesion: 0.20
-Nodes (10): PrintersPage(), PAGE_SIZE_OPTIONS, PrinterTable(), PrinterTableProps, DEFAULT_FILTERS, filterPrinters(), PrinterFilters, getPrinterType() (+2 more)
+Cohesion: 0.28
+Nodes (9): PrintersPage(), PAGE_SIZE_OPTIONS, PrinterTableProps, DEFAULT_FILTERS, filterPrinters(), PrinterFilters, getPrinterType(), PrinterType (+1 more)
 
 ### Community 86 - "PrinterControl — Visão geral do sistema"
 Cohesion: 0.29
@@ -483,7 +486,7 @@ Nodes (3): Modo Real, Contador mensal calculado por diff de duas leituras SNMP a
 
 ### Community 96 - "Login.tsx"
 Cohesion: 0.18
-Nodes (7): ACTIVE_NODES, features, Login(), LoginProps, NETWORK_LINKS, NETWORK_NODES, ApiError
+Nodes (8): ACTIVE_NODES, features, Login(), LoginProps, NETWORK_LINKS, NETWORK_NODES, ApiError, Account
 
 ### Community 97 - "discovery.py"
 Cohesion: 0.39
@@ -493,21 +496,33 @@ Nodes (8): _empty_result(), EnrichedDiscoveredPrinter, _is_color(), _is_label(),
 Cohesion: 0.22
 Nodes (6): medir(), Fase 10 - endurecimento do login. Cobre as duas falhas levantadas na auditoria…, Request minimo: so o que _identificar_origem le., Tentativa com a contagem limpa — isola o caso do limite de tentativas., _Req, tentar()
 
-### Community 99 - "Topbar"
-Cohesion: 0.20
-Nodes (7): DashboardPage(), Topbar(), onExportCsv(), handleAlertSelect(), updateFilter(), exportPrintersCsv(), STATUS_LABEL
+### Community 99 - "seed.py"
+Cohesion: 0.29
+Nodes (9): migrar_dominio(), mostrar_senha_uma_vez(), obter_senha_admin(), Session, Semeia o banco: contas iniciais + a frota de printers_data.json. SENHAS (Fase…, Imprime a senha em destaque. Unica vez que ela aparece em texto claro., Renomeia TODAS as contas `...@example.com` para `...@elgin.com.br`. Uso unico,…, Devolve (senha, foi_gerada). `foi_gerada` decide se a senha precisa ser… (+1 more)
 
 ### Community 100 - "theme.tsx"
 Cohesion: 0.27
 Nodes (8): lerPreferencia(), resolver(), sistemaEscuro(), Theme, ThemeContext, ThemeContextValue, ThemePreference, ThemeProvider()
 
-### Community 103 - "_migrate_printer_schema"
+### Community 103 - "tests_production.py"
+Cohesion: 0.22
+Nodes (4): producao(), Fase 10 - Preparacao para producao corporativa. Cobre o que protege a exposicao…, Sobe um processo separado e diz se a configuracao foi aceita., subir_com_ambiente()
+
+### Community 104 - "RedactSecretsFilter"
+Cohesion: 0.22
+Nodes (8): _caminho_do_log(), Path, Substitui valores sensiveis na mensagem antes de ela ser emitida. Fica no…, Resolve settings.log_file. Vazio = so console., Instala console + arquivo rotativo na raiz do logging. Idempotente: chamar duas…, RedactSecretsFilter, setup_logging(), LogRecord
+
+### Community 105 - "._validate_production_cors"
 Cohesion: 0.29
-Nodes (7): _finish_printer_migration(), _migrate_printer_schema(), Caminho do arquivo .db atual, se o banco for SQLite em disco (nao :memory:)., Etapa 4 — reconstroi `printers` para trocar a identidade de `ip UNIQUE` para…, Recria `printers` (schema atual) e copia `printers_old` para dentro dela, numa…, _sqlite_backup_path(), Path
+Nodes (4): Fail-fast: producao nao sobe com simulacao ligada (Fase 9). O risco concreto e…, Impede que um ambiente de producao suba silenciosamente com o secret de…, Producao exige origens proprias e explicitas (Fase 10). Tres recusas, todas por…, model_validator
 
 ### Community 106 - "require_user"
 Cohesion: 0.33
 Nodes (6): Session, Usuario dono do JWT do header Authorization. 401 se ausente/invalido. O usuario…, require_user(), decode_token(), Devolve {"email": ...} para um token valido, ou None. `algorithms` e uma lista…, HTTPAuthorizationCredentials
+
+### Community 107 - "NotificationCreate"
+Cohesion: 0.47
+Nodes (3): NotificationCreate, field_validator, Uma comunicacao para um ou mais destinatarios (uma linha por pessoa).
 
 ### Community 108 - "Ações"
 Cohesion: 0.33
@@ -518,24 +533,24 @@ Cohesion: 0.40
 Nodes (4): Logo Elgin é redesenho à mão (IA sem acesso a imagens coladas no chat, só uploads), src/components/ (padrão com header-comment por arquivo), ElginLogo(), ElginLogoProps
 
 ## Knowledge Gaps
-- **362 isolated node(s):** `LoginProps`, `features`, `NETWORK_NODES`, `NETWORK_LINKS`, `ACTIVE_NODES` (+357 more)
+- **361 isolated node(s):** `features`, `NETWORK_NODES`, `NETWORK_LINKS`, `ACTIVE_NODES`, `RequestOptions` (+356 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `User` connect `User` to `tests_print_servers.py`, `notifications.py`, `routes/auth.py`, `seed.py`, `servers.py`, `list_scenarios`, `require_user`, `database.py`, `tests_rbac.py`, `create_db_and_tables`, `tests_notifications.py`, `Printer`, `notify_alert`, `schemas/printer.py`, `Role`?**
+  _High betweenness centrality (0.028) - this node is a cross-community bridge._
 - **Why does `SNMPClient` connect `SNMPClient` to `discovery.py`, `PrinterCollector`, `enrich_discovered_printers`, `MockSNMPClient`, `printer_fleet.py`, `Printer`, `tests_printer_fleet.py`?**
-  _High betweenness centrality (0.027) - this node is a cross-community bridge._
-- **Why does `User` connect `User` to `tests_print_servers.py`, `create_notifications`, `Role`, `servers.py`, `scheduler.py`, `require_user`, `database.py`, `tests_rbac.py`, `tests_uptime.py`, `create_db_and_tables`, `Printer`, `notify_alert`, `schemas/printer.py`, `login`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **Why does `SNMPResult` connect `SNMPResult` to `snmp_fleet_mock.py`, `discovery.py`, `PrinterCollector`, `SNMPClient`, `enrich_discovered_printers`, `MockSNMPClient`, `printer_fleet.py`, `Printer`, `tests_printer_fleet.py`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+  _High betweenness centrality (0.020) - this node is a cross-community bridge._
+- **Why does `Settings` connect `Settings` to `tests_production.py`, `._validate_production_cors`, `database.py`, `tests_rbac.py`, `tests_notifications.py`?**
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
 - **Are the 39 inferred relationships involving `User` (e.g. with `require_active_user()` and `require_roles()`) actually correct?**
   _`User` has 39 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `SNMPClient` (e.g. with `PrinterCollector` and `FakeAgent`) actually correct?**
   _`SNMPClient` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 12 inferred relationships involving `Printer` (e.g. with `collect_fleet()` and `create_printer()`) actually correct?**
   _`Printer` has 12 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `LoginProps`, `features`, `NETWORK_NODES` to the rest of the system?**
-  _362 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `features`, `NETWORK_NODES`, `NETWORK_LINKS` to the rest of the system?**
+  _361 weakly-connected nodes found - possible documentation gaps or missing edges._

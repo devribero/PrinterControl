@@ -104,6 +104,32 @@
       "id": "src_lib_theme_themepreference"
     },
     {
+      "label": "RedactSecretsFilter",
+      "file_type": "code",
+      "source_file": "backend/app/logging_config.py",
+      "source_location": "L49",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 104,
+      "community_name": "RedactSecretsFilter",
+      "norm_label": "redactsecretsfilter",
+      "id": "backend_app_logging_config_redactsecretsfilter"
+    },
+    {
+      "label": "NotificationCreate",
+      "file_type": "code",
+      "source_file": "backend/app/routes/notifications.py",
+      "source_location": "L63",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 107,
+      "community_name": "NotificationCreate",
+      "norm_label": "notificationcreate",
+      "id": "backend_app_routes_notifications_notificationcreate"
+    },
+    {
       "label": "ElginLogoProps",
       "file_type": "code",
       "source_file": "src/components/ElginLogo.tsx",
@@ -307,7 +333,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "notification",
       "id": "backend_app_models_notification_notification"
     },
@@ -455,6 +481,19 @@
       "id": "backend_app_schemas_printer_tonerlevel"
     },
     {
+      "label": "Role",
+      "file_type": "code",
+      "source_file": "backend/app/models/user.py",
+      "source_location": "L8",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Role",
+      "norm_label": "role",
+      "id": "backend_app_models_user_role"
+    },
+    {
       "label": "Alert",
       "file_type": "code",
       "source_file": "backend/app/models/alert.py",
@@ -514,10 +553,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apialert",
       "community": 33,
       "community_name": "adaptApi.ts",
-      "norm_label": "apialert",
-      "id": "src_lib_api_apialert"
+      "norm_label": "apialert"
     },
     {
       "label": "ApiNotification",
@@ -527,10 +566,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apinotification",
       "community": 33,
       "community_name": "adaptApi.ts",
-      "norm_label": "apinotification",
-      "id": "src_lib_api_apinotification"
+      "norm_label": "apinotification"
     },
     {
       "label": "ApiPrinterWithStatus",
@@ -540,10 +579,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apiprinterwithstatus",
       "community": 33,
       "community_name": "adaptApi.ts",
-      "norm_label": "apiprinterwithstatus",
-      "id": "src_lib_api_apiprinterwithstatus"
+      "norm_label": "apiprinterwithstatus"
     },
     {
       "label": "ApiPrintServer",
@@ -553,10 +592,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apiprintserver",
       "community": 33,
       "community_name": "adaptApi.ts",
-      "norm_label": "apiprintserver",
-      "id": "src_lib_api_apiprintserver"
+      "norm_label": "apiprintserver"
     },
     {
       "label": "ApiSyncResult",
@@ -566,10 +605,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apisyncresult",
       "community": 33,
       "community_name": "adaptApi.ts",
-      "norm_label": "apisyncresult",
-      "id": "src_lib_api_apisyncresult"
+      "norm_label": "apisyncresult"
     },
     {
       "label": "ApiTonerLevel",
@@ -579,10 +618,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apitonerlevel",
       "community": 33,
       "community_name": "adaptApi.ts",
-      "norm_label": "apitonerlevel",
-      "id": "src_lib_api_apitonerlevel"
+      "norm_label": "apitonerlevel"
     },
     {
       "label": "User",
@@ -606,22 +645,9 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "alertref",
       "id": "backend_app_routes_notifications_alertref"
-    },
-    {
-      "label": "NotificationCreate",
-      "file_type": "code",
-      "source_file": "backend/app/routes/notifications.py",
-      "source_location": "L63",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "create_notifications",
-      "norm_label": "notificationcreate",
-      "id": "backend_app_routes_notifications_notificationcreate"
     },
     {
       "label": "NotificationResponse",
@@ -632,7 +658,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "notificationresponse",
       "id": "backend_app_routes_notifications_notificationresponse"
     },
@@ -645,7 +671,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "readallresult",
       "id": "backend_app_routes_notifications_readallresult"
     },
@@ -658,7 +684,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "unreadcount",
       "id": "backend_app_routes_notifications_unreadcount"
     },
@@ -670,10 +696,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apidiscoveredprinter",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "apidiscoveredprinter",
-      "id": "src_lib_api_apidiscoveredprinter"
+      "norm_label": "apidiscoveredprinter"
     },
     {
       "label": "ApiDiscoveredToner",
@@ -683,10 +709,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apidiscoveredtoner",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "apidiscoveredtoner",
-      "id": "src_lib_api_apidiscoveredtoner"
+      "norm_label": "apidiscoveredtoner"
     },
     {
       "label": "ApiDiscoveryResponse",
@@ -696,10 +722,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apidiscoveryresponse",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "apidiscoveryresponse",
-      "id": "src_lib_api_apidiscoveryresponse"
+      "norm_label": "apidiscoveryresponse"
     },
     {
       "label": "ApiNotificationAlertRef",
@@ -709,10 +735,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apinotificationalertref",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "apinotificationalertref",
-      "id": "src_lib_api_apinotificationalertref"
+      "norm_label": "apinotificationalertref"
     },
     {
       "label": "ApiPrinterReading",
@@ -722,10 +748,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apiprinterreading",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "apiprinterreading",
-      "id": "src_lib_api_apiprinterreading"
+      "norm_label": "apiprinterreading"
     },
     {
       "label": "NotificationCreateInput",
@@ -735,10 +761,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_notificationcreateinput",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "notificationcreateinput",
-      "id": "src_lib_api_notificationcreateinput"
+      "norm_label": "notificationcreateinput"
     },
     {
       "label": "PrinterInput",
@@ -748,10 +774,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_printerinput",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "printerinput",
-      "id": "src_lib_api_printerinput"
+      "norm_label": "printerinput"
     },
     {
       "label": "PrintServerCreateInput",
@@ -761,10 +787,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_printservercreateinput",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "printservercreateinput",
-      "id": "src_lib_api_printservercreateinput"
+      "norm_label": "printservercreateinput"
     },
     {
       "label": "PrintServerUpdateInput",
@@ -774,10 +800,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_printserverupdateinput",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "printserverupdateinput",
-      "id": "src_lib_api_printserverupdateinput"
+      "norm_label": "printserverupdateinput"
     },
     {
       "label": "RequestOptions",
@@ -787,10 +813,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_requestoptions",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "requestoptions",
-      "id": "src_lib_api_requestoptions"
+      "norm_label": "requestoptions"
     },
     {
       "label": "UserCreateInput",
@@ -800,10 +826,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_usercreateinput",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "usercreateinput",
-      "id": "src_lib_api_usercreateinput"
+      "norm_label": "usercreateinput"
     },
     {
       "label": "UserUpdateInput",
@@ -813,10 +839,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_userupdateinput",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "userupdateinput",
-      "id": "src_lib_api_userupdateinput"
+      "norm_label": "userupdateinput"
     },
     {
       "label": "ValidationDetail",
@@ -826,10 +852,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_validationdetail",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "validationdetail",
-      "id": "src_lib_api_validationdetail"
+      "norm_label": "validationdetail"
     },
     {
       "label": "SNMPClient",
@@ -1021,10 +1047,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_backendenvironment",
       "community": 50,
       "community_name": "app-data.tsx",
-      "norm_label": "backendenvironment",
-      "id": "src_lib_api_backendenvironment"
+      "norm_label": "backendenvironment"
     },
     {
       "label": "AppDataContextValue",
@@ -1051,19 +1077,6 @@
       "community_name": "app-data.tsx",
       "norm_label": "loadresult",
       "id": "src_lib_app_data_loadresult"
-    },
-    {
-      "label": "Account",
-      "file_type": "code",
-      "source_file": "src/lib/auth.ts",
-      "source_location": "L14",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 50,
-      "community_name": "app-data.tsx",
-      "norm_label": "account",
-      "id": "src_lib_auth_account"
     },
     {
       "label": "Permissions",
@@ -1170,19 +1183,6 @@
       "id": "backend_app_config_settings"
     },
     {
-      "label": "RedactSecretsFilter",
-      "file_type": "code",
-      "source_file": "backend/app/logging_config.py",
-      "source_location": "L49",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "redactsecretsfilter",
-      "id": "backend_app_logging_config_redactsecretsfilter"
-    },
-    {
       "label": "MockSNMPScenarios",
       "file_type": "code",
       "source_file": "backend/app/services/snmp_mock.py",
@@ -1216,10 +1216,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_auth_apiuser",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "apiuser",
-      "id": "src_lib_auth_apiuser"
+      "norm_label": "apiuser"
     },
     {
       "label": "LoginResponse",
@@ -1229,10 +1229,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_auth_loginresponse",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "loginresponse",
-      "id": "src_lib_auth_loginresponse"
+      "norm_label": "loginresponse"
     },
     {
       "label": "SessionState",
@@ -1242,10 +1242,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_auth_sessionstate",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "sessionstate",
-      "id": "src_lib_auth_sessionstate"
+      "norm_label": "sessionstate"
     },
     {
       "label": "ModalProps",
@@ -1281,10 +1281,10 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apiuser",
       "community": 60,
       "community_name": "useAppData",
-      "norm_label": "apiuser",
-      "id": "src_lib_api_apiuser"
+      "norm_label": "apiuser"
     },
     {
       "label": "Role",
@@ -1391,19 +1391,6 @@
       "id": "backend_app_models_print_server_servermode"
     },
     {
-      "label": "Role",
-      "file_type": "code",
-      "source_file": "backend/app/models/user.py",
-      "source_location": "L8",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 68,
-      "community_name": "Role",
-      "norm_label": "role",
-      "id": "backend_app_models_user_role"
-    },
-    {
       "label": "Config",
       "file_type": "code",
       "source_file": "backend/app/schemas/user.py",
@@ -1412,7 +1399,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "config",
       "id": "backend_app_schemas_user_config"
     },
@@ -1425,7 +1412,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "passwordchange",
       "id": "backend_app_schemas_user_passwordchange"
     },
@@ -1438,7 +1425,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "profileupdate",
       "id": "backend_app_schemas_user_profileupdate"
     },
@@ -1451,7 +1438,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "tokenresponse",
       "id": "backend_app_schemas_user_tokenresponse"
     },
@@ -1464,7 +1451,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "usercreate",
       "id": "backend_app_schemas_user_usercreate"
     },
@@ -1477,7 +1464,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "userlogin",
       "id": "backend_app_schemas_user_userlogin"
     },
@@ -1490,7 +1477,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "userresponse",
       "id": "backend_app_schemas_user_userresponse"
     },
@@ -1503,7 +1490,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "userupdate",
       "id": "backend_app_schemas_user_userupdate"
     },
@@ -1996,10 +1983,23 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
+      "id": "src_lib_api_apierror",
       "community": 96,
       "community_name": "Login.tsx",
-      "norm_label": "apierror",
-      "id": "src_lib_api_apierror"
+      "norm_label": "apierror"
+    },
+    {
+      "label": "Account",
+      "file_type": "code",
+      "source_file": "src/lib/auth.ts",
+      "source_location": "L14",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "id": "src_lib_auth_account",
+      "community": 96,
+      "community_name": "Login.tsx",
+      "norm_label": "account"
     },
     {
       "label": "EnrichedDiscoveredPrinter",
@@ -2172,40 +2172,136 @@
       "id": "src_lib_theme_themeprovider_aomudar"
     },
     {
-      "label": "_finish_printer_migration()",
+      "label": "check()",
       "file_type": "code",
-      "source_file": "backend/app/database.py",
-      "source_location": "L406",
+      "source_file": "backend/tests_production.py",
+      "source_location": "L35",
       "_callable": true,
       "_origin": "ast",
       "community": 103,
-      "community_name": "_migrate_printer_schema",
-      "norm_label": "_finish_printer_migration()",
-      "id": "backend_app_database_finish_printer_migration"
+      "community_name": "tests_production.py",
+      "norm_label": "check()",
+      "id": "backend_tests_production_check"
     },
     {
-      "label": "_migrate_printer_schema()",
+      "label": "check_true()",
       "file_type": "code",
-      "source_file": "backend/app/database.py",
-      "source_location": "L332",
+      "source_file": "backend/tests_production.py",
+      "source_location": "L42",
       "_callable": true,
       "_origin": "ast",
       "community": 103,
-      "community_name": "_migrate_printer_schema",
-      "norm_label": "_migrate_printer_schema()",
-      "id": "backend_app_database_migrate_printer_schema"
+      "community_name": "tests_production.py",
+      "norm_label": "check_true()",
+      "id": "backend_tests_production_check_true"
     },
     {
-      "label": "_sqlite_backup_path()",
+      "label": "producao()",
       "file_type": "code",
-      "source_file": "backend/app/database.py",
-      "source_location": "L321",
+      "source_file": "backend/tests_production.py",
+      "source_location": "L48",
       "_callable": true,
       "_origin": "ast",
       "community": 103,
-      "community_name": "_migrate_printer_schema",
-      "norm_label": "_sqlite_backup_path()",
-      "id": "backend_app_database_sqlite_backup_path"
+      "community_name": "tests_production.py",
+      "norm_label": "producao()",
+      "id": "backend_tests_production_producao"
+    },
+    {
+      "label": "redigir()",
+      "file_type": "code",
+      "source_file": "backend/tests_production.py",
+      "source_location": "L157",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 103,
+      "community_name": "tests_production.py",
+      "norm_label": "redigir()",
+      "id": "backend_tests_production_redigir"
+    },
+    {
+      "label": "subir_com_ambiente()",
+      "file_type": "code",
+      "source_file": "backend/tests_production.py",
+      "source_location": "L111",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 103,
+      "community_name": "tests_production.py",
+      "norm_label": "subir_com_ambiente()",
+      "id": "backend_tests_production_subir_com_ambiente"
+    },
+    {
+      "label": "_caminho_do_log()",
+      "file_type": "code",
+      "source_file": "backend/app/logging_config.py",
+      "source_location": "L84",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 104,
+      "community_name": "RedactSecretsFilter",
+      "norm_label": "_caminho_do_log()",
+      "id": "backend_app_logging_config_caminho_do_log"
+    },
+    {
+      "label": ".filter()",
+      "file_type": "code",
+      "source_file": "backend/app/logging_config.py",
+      "source_location": "L64",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 104,
+      "community_name": "RedactSecretsFilter",
+      "norm_label": ".filter()",
+      "id": "backend_app_logging_config_redactsecretsfilter_filter"
+    },
+    {
+      "label": "setup_logging()",
+      "file_type": "code",
+      "source_file": "backend/app/logging_config.py",
+      "source_location": "L96",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 104,
+      "community_name": "RedactSecretsFilter",
+      "norm_label": "setup_logging()",
+      "id": "backend_app_logging_config_setup_logging"
+    },
+    {
+      "label": "._validate_production_cors()",
+      "file_type": "code",
+      "source_file": "backend/app/config.py",
+      "source_location": "L211",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 105,
+      "community_name": "._validate_production_cors",
+      "norm_label": "._validate_production_cors()",
+      "id": "backend_app_config_settings_validate_production_cors"
+    },
+    {
+      "label": "._validate_production_mock()",
+      "file_type": "code",
+      "source_file": "backend/app/config.py",
+      "source_location": "L114",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 105,
+      "community_name": "._validate_production_cors",
+      "norm_label": "._validate_production_mock()",
+      "id": "backend_app_config_settings_validate_production_mock"
+    },
+    {
+      "label": "._validate_production_secrets()",
+      "file_type": "code",
+      "source_file": "backend/app/config.py",
+      "source_location": "L152",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 105,
+      "community_name": "._validate_production_cors",
+      "norm_label": "._validate_production_secrets()",
+      "id": "backend_app_config_settings_validate_production_secrets"
     },
     {
       "label": "require_user()",
@@ -2230,6 +2326,42 @@
       "community_name": "require_user",
       "norm_label": "decode_token()",
       "id": "backend_app_services_auth_decode_token"
+    },
+    {
+      "label": "._message_not_blank()",
+      "file_type": "code",
+      "source_file": "backend/app/routes/notifications.py",
+      "source_location": "L73",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 107,
+      "community_name": "NotificationCreate",
+      "norm_label": "._message_not_blank()",
+      "id": "backend_app_routes_notifications_notificationcreate_message_not_blank"
+    },
+    {
+      "label": "._sem_duplicatas()",
+      "file_type": "code",
+      "source_file": "backend/app/routes/notifications.py",
+      "source_location": "L88",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 107,
+      "community_name": "NotificationCreate",
+      "norm_label": "._sem_duplicatas()",
+      "id": "backend_app_routes_notifications_notificationcreate_sem_duplicatas"
+    },
+    {
+      "label": "._severity_valida()",
+      "file_type": "code",
+      "source_file": "backend/app/routes/notifications.py",
+      "source_location": "L81",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 107,
+      "community_name": "NotificationCreate",
+      "norm_label": "._severity_valida()",
+      "id": "backend_app_routes_notifications_notificationcreate_severity_valida"
     },
     {
       "label": "ElginLogo()",
@@ -2508,18 +2640,6 @@
       "id": "backend_tests_collect_api_main"
     },
     {
-      "label": "_migrate_reading_uptime()",
-      "file_type": "code",
-      "source_file": "backend/app/database.py",
-      "source_location": "L107",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "tests_uptime.py",
-      "norm_label": "_migrate_reading_uptime()",
-      "id": "backend_app_database_migrate_reading_uptime"
-    },
-    {
       "label": ".is_read()",
       "file_type": "code",
       "source_file": "backend/app/models/notification.py",
@@ -2527,7 +2647,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": ".is_read()",
       "id": "backend_app_models_notification_notification_is_read"
     },
@@ -2539,7 +2659,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "create_access_token()",
       "id": "backend_app_services_auth_create_access_token"
     },
@@ -2551,7 +2671,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "hash_password()",
       "id": "backend_app_services_auth_hash_password"
     },
@@ -2563,7 +2683,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "check()",
       "id": "backend_tests_environment_check"
     },
@@ -2575,7 +2695,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "check_true()",
       "id": "backend_tests_environment_check_true"
     },
@@ -2587,7 +2707,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "check()",
       "id": "backend_tests_notifications_check"
     },
@@ -2599,7 +2719,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "check_true()",
       "id": "backend_tests_notifications_check_true"
     },
@@ -2611,7 +2731,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "h()",
       "id": "backend_tests_notifications_h"
     },
@@ -2623,33 +2743,9 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "main()",
       "id": "backend_tests_notifications_main"
-    },
-    {
-      "label": "check()",
-      "file_type": "code",
-      "source_file": "backend/tests_uptime.py",
-      "source_location": "L44",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "tests_uptime.py",
-      "norm_label": "check()",
-      "id": "backend_tests_uptime_check"
-    },
-    {
-      "label": "check_true()",
-      "file_type": "code",
-      "source_file": "backend/tests_uptime.py",
-      "source_location": "L51",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "tests_uptime.py",
-      "norm_label": "check_true()",
-      "id": "backend_tests_uptime_check_true"
     },
     {
       "label": "check()",
@@ -2952,64 +3048,64 @@
       "id": "backend_app_schemas_printer_validate_texto"
     },
     {
-      "label": "change_own_password()",
+      "label": "_active_admin_count()",
       "file_type": "code",
-      "source_file": "backend/app/routes/auth.py",
-      "source_location": "L196",
+      "source_file": "backend/app/routes/users.py",
+      "source_location": "L29",
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
-      "norm_label": "change_own_password()",
-      "id": "backend_app_routes_auth_change_own_password"
+      "community_name": "Role",
+      "norm_label": "_active_admin_count()",
+      "id": "backend_app_routes_users_active_admin_count"
     },
     {
-      "label": "_identificar_origem()",
+      "label": "create_user()",
       "file_type": "code",
-      "source_file": "backend/app/routes/auth.py",
-      "source_location": "L53",
+      "source_file": "backend/app/routes/users.py",
+      "source_location": "L75",
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
-      "norm_label": "_identificar_origem()",
-      "id": "backend_app_routes_auth_identificar_origem"
+      "community_name": "Role",
+      "norm_label": "create_user()",
+      "id": "backend_app_routes_users_create_user"
     },
     {
-      "label": "login()",
+      "label": "_ensure_not_last_admin()",
       "file_type": "code",
-      "source_file": "backend/app/routes/auth.py",
-      "source_location": "L72",
+      "source_file": "backend/app/routes/users.py",
+      "source_location": "L37",
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
-      "norm_label": "login()",
-      "id": "backend_app_routes_auth_login"
+      "community_name": "Role",
+      "norm_label": "_ensure_not_last_admin()",
+      "id": "backend_app_routes_users_ensure_not_last_admin"
     },
     {
-      "label": "update_current_user()",
+      "label": "list_users()",
       "file_type": "code",
-      "source_file": "backend/app/routes/auth.py",
-      "source_location": "L172",
+      "source_file": "backend/app/routes/users.py",
+      "source_location": "L69",
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
-      "norm_label": "update_current_user()",
-      "id": "backend_app_routes_auth_update_current_user"
+      "community_name": "Role",
+      "norm_label": "list_users()",
+      "id": "backend_app_routes_users_list_users"
     },
     {
-      "label": "verify_password()",
+      "label": "update_user()",
       "file_type": "code",
-      "source_file": "backend/app/services/auth.py",
-      "source_location": "L39",
+      "source_file": "backend/app/routes/users.py",
+      "source_location": "L119",
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
-      "norm_label": "verify_password()",
-      "id": "backend_app_services_auth_verify_password"
+      "community_name": "Role",
+      "norm_label": "update_user()",
+      "id": "backend_app_routes_users_update_user"
     },
     {
       "label": "_active()",
@@ -3234,10 +3330,10 @@
       "source_location": "L274",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_fetchalerts",
       "community": 33,
       "community_name": "adaptApi.ts",
-      "norm_label": "fetchalerts()",
-      "id": "src_lib_api_fetchalerts"
+      "norm_label": "fetchalerts()"
     },
     {
       "label": "fetchPrintersWithStatus()",
@@ -3246,10 +3342,10 @@
       "source_location": "L270",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_fetchprinterswithstatus",
       "community": 33,
       "community_name": "adaptApi.ts",
-      "norm_label": "fetchprinterswithstatus()",
-      "id": "src_lib_api_fetchprinterswithstatus"
+      "norm_label": "fetchprinterswithstatus()"
     },
     {
       "label": "loadFromApi()",
@@ -3298,18 +3394,6 @@
       "community_name": "User",
       "norm_label": "read_current_user()",
       "id": "backend_app_routes_auth_read_current_user"
-    },
-    {
-      "label": "list_notifications()",
-      "file_type": "code",
-      "source_file": "backend/app/routes/notifications.py",
-      "source_location": "L156",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "User",
-      "norm_label": "list_notifications()",
-      "id": "backend_app_routes_notifications_list_notifications"
     },
     {
       "label": "check()",
@@ -3403,9 +3487,21 @@
       "_callable": true,
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "create_notifications()",
       "id": "backend_app_routes_notifications_create_notifications"
+    },
+    {
+      "label": "list_notifications()",
+      "file_type": "code",
+      "source_file": "backend/app/routes/notifications.py",
+      "source_location": "L156",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "notifications.py",
+      "norm_label": "list_notifications()",
+      "id": "backend_app_routes_notifications_list_notifications"
     },
     {
       "label": "mark_all_as_read()",
@@ -3415,7 +3511,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "mark_all_as_read()",
       "id": "backend_app_routes_notifications_mark_all_as_read"
     },
@@ -3427,7 +3523,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "mark_as_read()",
       "id": "backend_app_routes_notifications_mark_as_read"
     },
@@ -3439,45 +3535,9 @@
       "_callable": true,
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "_minha_ou_404()",
       "id": "backend_app_routes_notifications_minha_ou_404"
-    },
-    {
-      "label": "._message_not_blank()",
-      "file_type": "code",
-      "source_file": "backend/app/routes/notifications.py",
-      "source_location": "L73",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "create_notifications",
-      "norm_label": "._message_not_blank()",
-      "id": "backend_app_routes_notifications_notificationcreate_message_not_blank"
-    },
-    {
-      "label": "._sem_duplicatas()",
-      "file_type": "code",
-      "source_file": "backend/app/routes/notifications.py",
-      "source_location": "L88",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "create_notifications",
-      "norm_label": "._sem_duplicatas()",
-      "id": "backend_app_routes_notifications_notificationcreate_sem_duplicatas"
-    },
-    {
-      "label": "._severity_valida()",
-      "file_type": "code",
-      "source_file": "backend/app/routes/notifications.py",
-      "source_location": "L81",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "create_notifications",
-      "norm_label": "._severity_valida()",
-      "id": "backend_app_routes_notifications_notificationcreate_severity_valida"
     },
     {
       "label": "_to_response()",
@@ -3487,7 +3547,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "_to_response()",
       "id": "backend_app_routes_notifications_to_response"
     },
@@ -3499,7 +3559,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "unread_count()",
       "id": "backend_app_routes_notifications_unread_count"
     },
@@ -3510,10 +3570,10 @@
       "source_location": "L129",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_apirequest",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "apirequest()",
-      "id": "src_lib_api_apirequest"
+      "norm_label": "apirequest()"
     },
     {
       "label": "createPrinter()",
@@ -3522,10 +3582,10 @@
       "source_location": "L297",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_createprinter",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "createprinter()",
-      "id": "src_lib_api_createprinter"
+      "norm_label": "createprinter()"
     },
     {
       "label": "describeDetail()",
@@ -3534,10 +3594,10 @@
       "source_location": "L110",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_describedetail",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "describedetail()",
-      "id": "src_lib_api_describedetail"
+      "norm_label": "describedetail()"
     },
     {
       "label": "fetchPrinterReadings()",
@@ -3546,10 +3606,10 @@
       "source_location": "L278",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_fetchprinterreadings",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "fetchprinterreadings()",
-      "id": "src_lib_api_fetchprinterreadings"
+      "norm_label": "fetchprinterreadings()"
     },
     {
       "label": "getToken()",
@@ -3558,10 +3618,10 @@
       "source_location": "L66",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_gettoken",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "gettoken()",
-      "id": "src_lib_api_gettoken"
+      "norm_label": "gettoken()"
     },
     {
       "label": "updatePrinter()",
@@ -3570,10 +3630,10 @@
       "source_location": "L300",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_updateprinter",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "updateprinter()",
-      "id": "src_lib_api_updateprinter"
+      "norm_label": "updateprinter()"
     },
     {
       "label": "parse_varbinds()",
@@ -4386,10 +4446,10 @@
       "source_location": "L414",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_createprintserver",
       "community": 39,
       "community_name": "NetworkView",
-      "norm_label": "createprintserver()",
-      "id": "src_lib_api_createprintserver"
+      "norm_label": "createprintserver()"
     },
     {
       "label": "discoverServer()",
@@ -4398,10 +4458,10 @@
       "source_location": "L379",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_discoverserver",
       "community": 39,
       "community_name": "NetworkView",
-      "norm_label": "discoverserver()",
-      "id": "src_lib_api_discoverserver"
+      "norm_label": "discoverserver()"
     },
     {
       "label": "fetchPrintServers()",
@@ -4410,10 +4470,10 @@
       "source_location": "L371",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_fetchprintservers",
       "community": 39,
       "community_name": "NetworkView",
-      "norm_label": "fetchprintservers()",
-      "id": "src_lib_api_fetchprintservers"
+      "norm_label": "fetchprintservers()"
     },
     {
       "label": "syncServer()",
@@ -4422,10 +4482,10 @@
       "source_location": "L387",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_syncserver",
       "community": 39,
       "community_name": "NetworkView",
-      "norm_label": "syncserver()",
-      "id": "src_lib_api_syncserver"
+      "norm_label": "syncserver()"
     },
     {
       "label": "updatePrintServer()",
@@ -4434,10 +4494,10 @@
       "source_location": "L418",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_updateprintserver",
       "community": 39,
       "community_name": "NetworkView",
-      "norm_label": "updateprintserver()",
-      "id": "src_lib_api_updateprintserver"
+      "norm_label": "updateprintserver()"
     },
     {
       "label": ".collect_and_save()",
@@ -4543,21 +4603,9 @@
       "_callable": true,
       "_origin": "ast",
       "community": 41,
-      "community_name": "scheduler.py",
+      "community_name": "list_scenarios",
       "norm_label": "health_check()",
       "id": "backend_app_main_health_check"
-    },
-    {
-      "label": "lifespan()",
-      "file_type": "code",
-      "source_file": "backend/app/main.py",
-      "source_location": "L29",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 41,
-      "community_name": "scheduler.py",
-      "norm_label": "lifespan()",
-      "id": "backend_app_main_lifespan"
     },
     {
       "label": "read_root()",
@@ -4567,7 +4615,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 41,
-      "community_name": "scheduler.py",
+      "community_name": "list_scenarios",
       "norm_label": "read_root()",
       "id": "backend_app_main_read_root"
     },
@@ -4579,7 +4627,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 41,
-      "community_name": "scheduler.py",
+      "community_name": "list_scenarios",
       "norm_label": "get_scheduler_status()",
       "id": "backend_app_routes_collect_get_scheduler_status"
     },
@@ -4591,21 +4639,9 @@
       "_callable": true,
       "_origin": "ast",
       "community": 41,
-      "community_name": "scheduler.py",
+      "community_name": "list_scenarios",
       "norm_label": "list_scenarios()",
       "id": "backend_app_routes_collect_list_scenarios"
-    },
-    {
-      "label": "run_collection_cycle()",
-      "file_type": "code",
-      "source_file": "backend/app/services/scheduler.py",
-      "source_location": "L32",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 41,
-      "community_name": "scheduler.py",
-      "norm_label": "run_collection_cycle()",
-      "id": "backend_app_services_scheduler_run_collection_cycle"
     },
     {
       "label": "scheduler_status()",
@@ -4615,33 +4651,9 @@
       "_callable": true,
       "_origin": "ast",
       "community": 41,
-      "community_name": "scheduler.py",
+      "community_name": "list_scenarios",
       "norm_label": "scheduler_status()",
       "id": "backend_app_services_scheduler_scheduler_status"
-    },
-    {
-      "label": "shutdown_scheduler()",
-      "file_type": "code",
-      "source_file": "backend/app/services/scheduler.py",
-      "source_location": "L111",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 41,
-      "community_name": "scheduler.py",
-      "norm_label": "shutdown_scheduler()",
-      "id": "backend_app_services_scheduler_shutdown_scheduler"
-    },
-    {
-      "label": "start_scheduler()",
-      "file_type": "code",
-      "source_file": "backend/app/services/scheduler.py",
-      "source_location": "L65",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 41,
-      "community_name": "scheduler.py",
-      "norm_label": "start_scheduler()",
-      "id": "backend_app_services_scheduler_start_scheduler"
     },
     {
       "label": "isValidPrinter()",
@@ -4704,28 +4716,76 @@
       "id": "src_components_rightpanel_quickaction"
     },
     {
-      "label": "RightPanel()",
+      "label": "Topbar()",
       "file_type": "code",
-      "source_file": "src/components/RightPanel.tsx",
-      "source_location": "L49",
+      "source_file": "src/components/Topbar.tsx",
+      "source_location": "L20",
       "_callable": true,
       "_origin": "ast",
       "community": 43,
       "community_name": "printers.ts",
-      "norm_label": "rightpanel()",
-      "id": "src_components_rightpanel_rightpanel"
+      "norm_label": "topbar()",
+      "id": "src_components_topbar_topbar"
     },
     {
-      "label": "tonerChannelColor()",
+      "label": "handleClickOutside()",
       "file_type": "code",
-      "source_file": "src/lib/tonerColor.ts",
-      "source_location": "L23",
+      "source_file": "src/components/Topbar.tsx",
+      "source_location": "L31",
       "_callable": true,
       "_origin": "ast",
       "community": 43,
       "community_name": "printers.ts",
-      "norm_label": "tonerchannelcolor()",
-      "id": "src_lib_tonercolor_tonerchannelcolor"
+      "norm_label": "handleclickoutside()",
+      "id": "src_components_topbar_topbar_handleclickoutside"
+    },
+    {
+      "label": "handleShortcut()",
+      "file_type": "code",
+      "source_file": "src/components/Topbar.tsx",
+      "source_location": "L40",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 43,
+      "community_name": "printers.ts",
+      "norm_label": "handleshortcut()",
+      "id": "src_components_topbar_topbar_handleshortcut"
+    },
+    {
+      "label": "onExportCsv()",
+      "file_type": "code",
+      "source_file": "src/components/Topbar.tsx",
+      "source_location": "L56",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 43,
+      "community_name": "printers.ts",
+      "norm_label": "onexportcsv()",
+      "id": "src_components_topbar_topbar_onexportcsv"
+    },
+    {
+      "label": "handleAlertSelect()",
+      "file_type": "code",
+      "source_file": "src/lib/app-data.tsx",
+      "source_location": "L468",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 43,
+      "community_name": "printers.ts",
+      "norm_label": "handlealertselect()",
+      "id": "src_lib_app_data_appdataprovider_handlealertselect"
+    },
+    {
+      "label": "exportPrintersCsv()",
+      "file_type": "code",
+      "source_file": "src/lib/exportCsv.ts",
+      "source_location": "L14",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 43,
+      "community_name": "printers.ts",
+      "norm_label": "exportprinterscsv()",
+      "id": "src_lib_exportcsv_exportprinterscsv"
     },
     {
       "label": "get_session()",
@@ -4738,6 +4798,18 @@
       "community_name": "database.py",
       "norm_label": "get_session()",
       "id": "backend_app_database_get_session"
+    },
+    {
+      "label": "_migrate_reading_uptime()",
+      "file_type": "code",
+      "source_file": "backend/app/database.py",
+      "source_location": "L107",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "_migrate_reading_uptime()",
+      "id": "backend_app_database_migrate_reading_uptime"
     },
     {
       "label": "_sqlite_pragmas()",
@@ -4764,6 +4836,18 @@
       "id": "backend_app_dependencies_require_active_user"
     },
     {
+      "label": "lifespan()",
+      "file_type": "code",
+      "source_file": "backend/app/main.py",
+      "source_location": "L29",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "lifespan()",
+      "id": "backend_app_main_lifespan"
+    },
+    {
       "label": "_inicio_da_janela()",
       "file_type": "code",
       "source_file": "backend/app/routes/printers.py",
@@ -4774,6 +4858,42 @@
       "community_name": "database.py",
       "norm_label": "_inicio_da_janela()",
       "id": "backend_app_routes_printers_inicio_da_janela"
+    },
+    {
+      "label": "run_collection_cycle()",
+      "file_type": "code",
+      "source_file": "backend/app/services/scheduler.py",
+      "source_location": "L32",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "run_collection_cycle()",
+      "id": "backend_app_services_scheduler_run_collection_cycle"
+    },
+    {
+      "label": "shutdown_scheduler()",
+      "file_type": "code",
+      "source_file": "backend/app/services/scheduler.py",
+      "source_location": "L111",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "shutdown_scheduler()",
+      "id": "backend_app_services_scheduler_shutdown_scheduler"
+    },
+    {
+      "label": "start_scheduler()",
+      "file_type": "code",
+      "source_file": "backend/app/services/scheduler.py",
+      "source_location": "L65",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "start_scheduler()",
+      "id": "backend_app_services_scheduler_start_scheduler"
     },
     {
       "label": "check()",
@@ -4822,6 +4942,30 @@
       "community_name": "database.py",
       "norm_label": "login()",
       "id": "backend_tests_login_username_login"
+    },
+    {
+      "label": "check()",
+      "file_type": "code",
+      "source_file": "backend/tests_uptime.py",
+      "source_location": "L44",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "check()",
+      "id": "backend_tests_uptime_check"
+    },
+    {
+      "label": "check_true()",
+      "file_type": "code",
+      "source_file": "backend/tests_uptime.py",
+      "source_location": "L51",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "check_true()",
+      "id": "backend_tests_uptime_check_true"
     },
     {
       "label": "discover_printers()",
@@ -5034,10 +5178,10 @@
       "source_location": "L282",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_discoverprinters",
       "community": 50,
       "community_name": "app-data.tsx",
-      "norm_label": "discoverprinters()",
-      "id": "src_lib_api_discoverprinters"
+      "norm_label": "discoverprinters()"
     },
     {
       "label": "fetchBackendEnvironment()",
@@ -5046,10 +5190,10 @@
       "source_location": "L35",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_fetchbackendenvironment",
       "community": 50,
       "community_name": "app-data.tsx",
-      "norm_label": "fetchbackendenvironment()",
-      "id": "src_lib_api_fetchbackendenvironment"
+      "norm_label": "fetchbackendenvironment()"
     },
     {
       "label": "fetchUnreadNotificationCount()",
@@ -5058,10 +5202,10 @@
       "source_location": "L466",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_fetchunreadnotificationcount",
       "community": 50,
       "community_name": "app-data.tsx",
-      "norm_label": "fetchunreadnotificationcount()",
-      "id": "src_lib_api_fetchunreadnotificationcount"
+      "norm_label": "fetchunreadnotificationcount()"
     },
     {
       "label": "AppDataProvider()",
@@ -5418,10 +5562,10 @@
       "source_location": "L485",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_createuser",
       "community": 52,
       "community_name": "UsersView",
-      "norm_label": "createuser()",
-      "id": "src_lib_api_createuser"
+      "norm_label": "createuser()"
     },
     {
       "label": "fetchUsers()",
@@ -5430,10 +5574,10 @@
       "source_location": "L339",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_fetchusers",
       "community": 52,
       "community_name": "UsersView",
-      "norm_label": "fetchusers()",
-      "id": "src_lib_api_fetchusers"
+      "norm_label": "fetchusers()"
     },
     {
       "label": "updateUser()",
@@ -5442,10 +5586,10 @@
       "source_location": "L487",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_updateuser",
       "community": 52,
       "community_name": "UsersView",
-      "norm_label": "updateuser()",
-      "id": "src_lib_api_updateuser"
+      "norm_label": "updateuser()"
     },
     {
       "label": "readCachedAccount()",
@@ -5454,10 +5598,10 @@
       "source_location": "L73",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_auth_readcachedaccount",
       "community": 52,
       "community_name": "UsersView",
-      "norm_label": "readcachedaccount()",
-      "id": "src_lib_auth_readcachedaccount"
+      "norm_label": "readcachedaccount()"
     },
     {
       "label": "parseRole()",
@@ -5586,10 +5730,10 @@
       "source_location": "L482",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_createnotifications",
       "community": 54,
       "community_name": "NotificationsView.tsx",
-      "norm_label": "createnotifications()",
-      "id": "src_lib_api_createnotifications"
+      "norm_label": "createnotifications()"
     },
     {
       "label": "fetchNotifications()",
@@ -5598,10 +5742,10 @@
       "source_location": "L454",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_fetchnotifications",
       "community": 54,
       "community_name": "NotificationsView.tsx",
-      "norm_label": "fetchnotifications()",
-      "id": "src_lib_api_fetchnotifications"
+      "norm_label": "fetchnotifications()"
     },
     {
       "label": "markAllNotificationsRead()",
@@ -5610,10 +5754,10 @@
       "source_location": "L478",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_markallnotificationsread",
       "community": 54,
       "community_name": "NotificationsView.tsx",
-      "norm_label": "markallnotificationsread()",
-      "id": "src_lib_api_markallnotificationsread"
+      "norm_label": "markallnotificationsread()"
     },
     {
       "label": "markNotificationRead()",
@@ -5622,10 +5766,10 @@
       "source_location": "L470",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_marknotificationread",
       "community": 54,
       "community_name": "NotificationsView.tsx",
-      "norm_label": "marknotificationread()",
-      "id": "src_lib_api_marknotificationread"
+      "norm_label": "marknotificationread()"
     },
     {
       "label": "create_db_and_tables()",
@@ -5638,6 +5782,18 @@
       "community_name": "create_db_and_tables",
       "norm_label": "create_db_and_tables()",
       "id": "backend_app_database_create_db_and_tables"
+    },
+    {
+      "label": "_finish_printer_migration()",
+      "file_type": "code",
+      "source_file": "backend/app/database.py",
+      "source_location": "L406",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "create_db_and_tables",
+      "norm_label": "_finish_printer_migration()",
+      "id": "backend_app_database_finish_printer_migration"
     },
     {
       "label": "_migrate_alert_type()",
@@ -5664,6 +5820,18 @@
       "id": "backend_app_database_migrate_print_servers"
     },
     {
+      "label": "_migrate_printer_schema()",
+      "file_type": "code",
+      "source_file": "backend/app/database.py",
+      "source_location": "L332",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "create_db_and_tables",
+      "norm_label": "_migrate_printer_schema()",
+      "id": "backend_app_database_migrate_printer_schema"
+    },
+    {
       "label": "_migrate_user_login_fields()",
       "file_type": "code",
       "source_file": "backend/app/database.py",
@@ -5688,52 +5856,16 @@
       "id": "backend_app_database_migrate_user_rbac"
     },
     {
-      "label": "migrar_dominio()",
+      "label": "_sqlite_backup_path()",
       "file_type": "code",
-      "source_file": "backend/seed.py",
-      "source_location": "L139",
+      "source_file": "backend/app/database.py",
+      "source_location": "L321",
       "_callable": true,
       "_origin": "ast",
       "community": 55,
       "community_name": "create_db_and_tables",
-      "norm_label": "migrar_dominio()",
-      "id": "backend_seed_migrar_dominio"
-    },
-    {
-      "label": "mostrar_senha_uma_vez()",
-      "file_type": "code",
-      "source_file": "backend/seed.py",
-      "source_location": "L119",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 55,
-      "community_name": "create_db_and_tables",
-      "norm_label": "mostrar_senha_uma_vez()",
-      "id": "backend_seed_mostrar_senha_uma_vez"
-    },
-    {
-      "label": "obter_senha_admin()",
-      "file_type": "code",
-      "source_file": "backend/seed.py",
-      "source_location": "L94",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 55,
-      "community_name": "create_db_and_tables",
-      "norm_label": "obter_senha_admin()",
-      "id": "backend_seed_obter_senha_admin"
-    },
-    {
-      "label": "seed_database()",
-      "file_type": "code",
-      "source_file": "backend/seed.py",
-      "source_location": "L175",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 55,
-      "community_name": "create_db_and_tables",
-      "norm_label": "seed_database()",
-      "id": "backend_seed_seed_database"
+      "norm_label": "_sqlite_backup_path()",
+      "id": "backend_app_database_sqlite_backup_path"
     },
     {
       "label": "check()",
@@ -5868,78 +6000,6 @@
       "id": "backend_app_config_settings_is_production"
     },
     {
-      "label": "._validate_production_cors()",
-      "file_type": "code",
-      "source_file": "backend/app/config.py",
-      "source_location": "L211",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "._validate_production_cors()",
-      "id": "backend_app_config_settings_validate_production_cors"
-    },
-    {
-      "label": "._validate_production_mock()",
-      "file_type": "code",
-      "source_file": "backend/app/config.py",
-      "source_location": "L114",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "._validate_production_mock()",
-      "id": "backend_app_config_settings_validate_production_mock"
-    },
-    {
-      "label": "._validate_production_secrets()",
-      "file_type": "code",
-      "source_file": "backend/app/config.py",
-      "source_location": "L152",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "._validate_production_secrets()",
-      "id": "backend_app_config_settings_validate_production_secrets"
-    },
-    {
-      "label": "_caminho_do_log()",
-      "file_type": "code",
-      "source_file": "backend/app/logging_config.py",
-      "source_location": "L84",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "_caminho_do_log()",
-      "id": "backend_app_logging_config_caminho_do_log"
-    },
-    {
-      "label": ".filter()",
-      "file_type": "code",
-      "source_file": "backend/app/logging_config.py",
-      "source_location": "L64",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": ".filter()",
-      "id": "backend_app_logging_config_redactsecretsfilter_filter"
-    },
-    {
-      "label": "setup_logging()",
-      "file_type": "code",
-      "source_file": "backend/app/logging_config.py",
-      "source_location": "L96",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "setup_logging()",
-      "id": "backend_app_logging_config_setup_logging"
-    },
-    {
       "label": "settings_de_producao()",
       "file_type": "code",
       "source_file": "backend/tests_environment.py",
@@ -5950,66 +6010,6 @@
       "community_name": "Settings",
       "norm_label": "settings_de_producao()",
       "id": "backend_tests_environment_settings_de_producao"
-    },
-    {
-      "label": "check()",
-      "file_type": "code",
-      "source_file": "backend/tests_production.py",
-      "source_location": "L35",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "check()",
-      "id": "backend_tests_production_check"
-    },
-    {
-      "label": "check_true()",
-      "file_type": "code",
-      "source_file": "backend/tests_production.py",
-      "source_location": "L42",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "check_true()",
-      "id": "backend_tests_production_check_true"
-    },
-    {
-      "label": "producao()",
-      "file_type": "code",
-      "source_file": "backend/tests_production.py",
-      "source_location": "L48",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "producao()",
-      "id": "backend_tests_production_producao"
-    },
-    {
-      "label": "redigir()",
-      "file_type": "code",
-      "source_file": "backend/tests_production.py",
-      "source_location": "L157",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "redigir()",
-      "id": "backend_tests_production_redigir"
-    },
-    {
-      "label": "subir_com_ambiente()",
-      "file_type": "code",
-      "source_file": "backend/tests_production.py",
-      "source_location": "L111",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "subir_com_ambiente()",
-      "id": "backend_tests_production_subir_com_ambiente"
     },
     {
       "label": ".attention_low_toner()",
@@ -6162,10 +6162,10 @@
       "source_location": "L82",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_cleartoken",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "cleartoken()",
-      "id": "src_lib_api_cleartoken"
+      "norm_label": "cleartoken()"
     },
     {
       "label": "isTokenPersistent()",
@@ -6174,10 +6174,10 @@
       "source_location": "L77",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_istokenpersistent",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "istokenpersistent()",
-      "id": "src_lib_api_istokenpersistent"
+      "norm_label": "istokenpersistent()"
     },
     {
       "label": "setToken()",
@@ -6186,10 +6186,10 @@
       "source_location": "L71",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_settoken",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "settoken()",
-      "id": "src_lib_api_settoken"
+      "norm_label": "settoken()"
     },
     {
       "label": "cacheAccount()",
@@ -6198,10 +6198,10 @@
       "source_location": "L67",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_auth_cacheaccount",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "cacheaccount()",
-      "id": "src_lib_auth_cacheaccount"
+      "norm_label": "cacheaccount()"
     },
     {
       "label": "fetchCurrentUser()",
@@ -6210,10 +6210,10 @@
       "source_location": "L121",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_auth_fetchcurrentuser",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "fetchcurrentuser()",
-      "id": "src_lib_auth_fetchcurrentuser"
+      "norm_label": "fetchcurrentuser()"
     },
     {
       "label": "login()",
@@ -6222,10 +6222,10 @@
       "source_location": "L104",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_auth_login",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "login()",
-      "id": "src_lib_auth_login"
+      "norm_label": "login()"
     },
     {
       "label": "logout()",
@@ -6234,10 +6234,10 @@
       "source_location": "L214",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_auth_logout",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "logout()",
-      "id": "src_lib_auth_logout"
+      "norm_label": "logout()"
     },
     {
       "label": "restoreSession()",
@@ -6246,10 +6246,10 @@
       "source_location": "L147",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_auth_restoresession",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "restoresession()",
-      "id": "src_lib_auth_restoresession"
+      "norm_label": "restoresession()"
     },
     {
       "label": "toAccount()",
@@ -6258,10 +6258,10 @@
       "source_location": "L55",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_auth_toaccount",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "toaccount()",
-      "id": "src_lib_auth_toaccount"
+      "norm_label": "toaccount()"
     },
     {
       "label": "updateMyProfile()",
@@ -6270,10 +6270,10 @@
       "source_location": "L178",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_auth_updatemyprofile",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "updatemyprofile()",
-      "id": "src_lib_auth_updatemyprofile"
+      "norm_label": "updatemyprofile()"
     },
     {
       "label": "withPasswordChanged()",
@@ -6282,10 +6282,10 @@
       "source_location": "L208",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_auth_withpasswordchanged",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "withpasswordchanged()",
-      "id": "src_lib_auth_withpasswordchanged"
+      "norm_label": "withpasswordchanged()"
     },
     {
       "label": "get_alert()",
@@ -6390,10 +6390,10 @@
       "source_location": "L23",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_components_authgate_authgate",
       "community": 60,
       "community_name": "useAppData",
-      "norm_label": "authgate()",
-      "id": "src_components_authgate_authgate"
+      "norm_label": "authgate()"
     },
     {
       "label": "Modal()",
@@ -6426,10 +6426,10 @@
       "source_location": "L28",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_components_mustchangepasswordgate_mustchangepasswordgate",
       "community": 60,
       "community_name": "useAppData",
-      "norm_label": "mustchangepasswordgate()",
-      "id": "src_components_mustchangepasswordgate_mustchangepasswordgate"
+      "norm_label": "mustchangepasswordgate()"
     },
     {
       "label": "handleSubmit()",
@@ -6438,10 +6438,10 @@
       "source_location": "L52",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_components_mustchangepasswordgate_mustchangepasswordgate_handlesubmit",
       "community": 60,
       "community_name": "useAppData",
-      "norm_label": "handlesubmit()",
-      "id": "src_components_mustchangepasswordgate_mustchangepasswordgate_handlesubmit"
+      "norm_label": "handlesubmit()"
     },
     {
       "label": "validar()",
@@ -6450,10 +6450,10 @@
       "source_location": "L44",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_components_mustchangepasswordgate_mustchangepasswordgate_validar",
       "community": 60,
       "community_name": "useAppData",
-      "norm_label": "validar()",
-      "id": "src_components_mustchangepasswordgate_mustchangepasswordgate_validar"
+      "norm_label": "validar()"
     },
     {
       "label": "RequireRole()",
@@ -6534,10 +6534,10 @@
       "source_location": "L191",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_auth_changemypassword",
       "community": 60,
       "community_name": "useAppData",
-      "norm_label": "changemypassword()",
-      "id": "src_lib_auth_changemypassword"
+      "norm_label": "changemypassword()"
     },
     {
       "label": "ler()",
@@ -6684,64 +6684,52 @@
       "id": "backend_tests_print_servers_testa_migracao_legada"
     },
     {
-      "label": "_active_admin_count()",
+      "label": "change_own_password()",
       "file_type": "code",
-      "source_file": "backend/app/routes/users.py",
-      "source_location": "L29",
+      "source_file": "backend/app/routes/auth.py",
+      "source_location": "L196",
       "_callable": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
-      "norm_label": "_active_admin_count()",
-      "id": "backend_app_routes_users_active_admin_count"
+      "community_name": "routes/auth.py",
+      "norm_label": "change_own_password()",
+      "id": "backend_app_routes_auth_change_own_password"
     },
     {
-      "label": "create_user()",
+      "label": "_identificar_origem()",
       "file_type": "code",
-      "source_file": "backend/app/routes/users.py",
-      "source_location": "L75",
+      "source_file": "backend/app/routes/auth.py",
+      "source_location": "L53",
       "_callable": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
-      "norm_label": "create_user()",
-      "id": "backend_app_routes_users_create_user"
+      "community_name": "routes/auth.py",
+      "norm_label": "_identificar_origem()",
+      "id": "backend_app_routes_auth_identificar_origem"
     },
     {
-      "label": "_ensure_not_last_admin()",
+      "label": "login()",
       "file_type": "code",
-      "source_file": "backend/app/routes/users.py",
-      "source_location": "L37",
+      "source_file": "backend/app/routes/auth.py",
+      "source_location": "L72",
       "_callable": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
-      "norm_label": "_ensure_not_last_admin()",
-      "id": "backend_app_routes_users_ensure_not_last_admin"
+      "community_name": "routes/auth.py",
+      "norm_label": "login()",
+      "id": "backend_app_routes_auth_login"
     },
     {
-      "label": "list_users()",
+      "label": "update_current_user()",
       "file_type": "code",
-      "source_file": "backend/app/routes/users.py",
-      "source_location": "L69",
+      "source_file": "backend/app/routes/auth.py",
+      "source_location": "L172",
       "_callable": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
-      "norm_label": "list_users()",
-      "id": "backend_app_routes_users_list_users"
-    },
-    {
-      "label": "update_user()",
-      "file_type": "code",
-      "source_file": "backend/app/routes/users.py",
-      "source_location": "L119",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 68,
-      "community_name": "Role",
-      "norm_label": "update_user()",
-      "id": "backend_app_routes_users_update_user"
+      "community_name": "routes/auth.py",
+      "norm_label": "update_current_user()",
+      "id": "backend_app_routes_auth_update_current_user"
     },
     {
       "label": "normalizar_username()",
@@ -6751,7 +6739,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "normalizar_username()",
       "id": "backend_app_schemas_user_normalizar_username"
     },
@@ -6763,7 +6751,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "._name_not_blank()",
       "id": "backend_app_schemas_user_profileupdate_name_not_blank"
     },
@@ -6775,7 +6763,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "._name_not_blank()",
       "id": "backend_app_schemas_user_usercreate_name_not_blank"
     },
@@ -6787,7 +6775,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "._username_valido()",
       "id": "backend_app_schemas_user_usercreate_username_valido"
     },
@@ -6799,7 +6787,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "._name_not_blank()",
       "id": "backend_app_schemas_user_userupdate_name_not_blank"
     },
@@ -6811,9 +6799,21 @@
       "_callable": true,
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "._username_valido()",
       "id": "backend_app_schemas_user_userupdate_username_valido"
+    },
+    {
+      "label": "verify_password()",
+      "file_type": "code",
+      "source_file": "backend/app/services/auth.py",
+      "source_location": "L39",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 68,
+      "community_name": "routes/auth.py",
+      "norm_label": "verify_password()",
+      "id": "backend_app_services_auth_verify_password"
     },
     {
       "label": "check()",
@@ -7164,18 +7164,6 @@
       "id": "src_app_alerts_page_alertspage"
     },
     {
-      "label": "AlertBanner()",
-      "file_type": "code",
-      "source_file": "src/components/AlertBanner.tsx",
-      "source_location": "L15",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "types.ts",
-      "norm_label": "alertbanner()",
-      "id": "src_components_alertbanner_alertbanner"
-    },
-    {
       "label": "AlertsView()",
       "file_type": "code",
       "source_file": "src/components/AlertsView.tsx",
@@ -7186,18 +7174,6 @@
       "community_name": "types.ts",
       "norm_label": "alertsview()",
       "id": "src_components_alertsview_alertsview"
-    },
-    {
-      "label": "BottomCharts()",
-      "file_type": "code",
-      "source_file": "src/components/BottomCharts.tsx",
-      "source_location": "L206",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "types.ts",
-      "norm_label": "bottomcharts()",
-      "id": "src_components_bottomcharts_bottomcharts"
     },
     {
       "label": "DiscoveryResults()",
@@ -7296,6 +7272,18 @@
       "id": "src_components_comingsoon_comingsoon"
     },
     {
+      "label": "DashboardPage()",
+      "file_type": "code",
+      "source_file": "src/app/page.tsx",
+      "source_location": "L20",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "dashboardpage()",
+      "id": "src_app_page_dashboardpage"
+    },
+    {
       "label": "TonerPage()",
       "file_type": "code",
       "source_file": "src/app/toner/page.tsx",
@@ -7306,6 +7294,30 @@
       "community_name": "cn",
       "norm_label": "tonerpage()",
       "id": "src_app_toner_page_tonerpage"
+    },
+    {
+      "label": "AlertBanner()",
+      "file_type": "code",
+      "source_file": "src/components/AlertBanner.tsx",
+      "source_location": "L15",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "alertbanner()",
+      "id": "src_components_alertbanner_alertbanner"
+    },
+    {
+      "label": "BottomCharts()",
+      "file_type": "code",
+      "source_file": "src/components/BottomCharts.tsx",
+      "source_location": "L206",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "bottomcharts()",
+      "id": "src_components_bottomcharts_bottomcharts"
     },
     {
       "label": "Fact()",
@@ -7354,6 +7366,66 @@
       "community_name": "cn",
       "norm_label": "printerstatusbadge()",
       "id": "src_components_printerstatusbadge_printerstatusbadge"
+    },
+    {
+      "label": "PrinterTable()",
+      "file_type": "code",
+      "source_file": "src/components/PrinterTable.tsx",
+      "source_location": "L50",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "printertable()",
+      "id": "src_components_printertable_printertable"
+    },
+    {
+      "label": "handleSettings()",
+      "file_type": "code",
+      "source_file": "src/components/PrinterTable.tsx",
+      "source_location": "L75",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "handlesettings()",
+      "id": "src_components_printertable_printertable_handlesettings"
+    },
+    {
+      "label": "handleTestPage()",
+      "file_type": "code",
+      "source_file": "src/components/PrinterTable.tsx",
+      "source_location": "L65",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "handletestpage()",
+      "id": "src_components_printertable_printertable_handletestpage"
+    },
+    {
+      "label": "handleWebAccess()",
+      "file_type": "code",
+      "source_file": "src/components/PrinterTable.tsx",
+      "source_location": "L70",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "handlewebaccess()",
+      "id": "src_components_printertable_printertable_handlewebaccess"
+    },
+    {
+      "label": "RightPanel()",
+      "file_type": "code",
+      "source_file": "src/components/RightPanel.tsx",
+      "source_location": "L49",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "rightpanel()",
+      "id": "src_components_rightpanel_rightpanel"
     },
     {
       "label": "StatCard()",
@@ -7416,6 +7488,18 @@
       "id": "src_components_tonermonitoring_tonermonitoring"
     },
     {
+      "label": "updateFilter()",
+      "file_type": "code",
+      "source_file": "src/lib/app-data.tsx",
+      "source_location": "L352",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "updatefilter()",
+      "id": "src_lib_app_data_appdataprovider_updatefilter"
+    },
+    {
       "label": "cn()",
       "file_type": "code",
       "source_file": "src/lib/cn.ts",
@@ -7426,6 +7510,18 @@
       "community_name": "cn",
       "norm_label": "cn()",
       "id": "src_lib_cn_cn"
+    },
+    {
+      "label": "tonerChannelColor()",
+      "file_type": "code",
+      "source_file": "src/lib/tonerColor.ts",
+      "source_location": "L23",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "tonerchannelcolor()",
+      "id": "src_lib_tonercolor_tonerchannelcolor"
     },
     {
       "label": "tonerLevelColor()",
@@ -7510,54 +7606,6 @@
       "community_name": "PrinterTable.tsx",
       "norm_label": "printerspage()",
       "id": "src_app_printers_page_printerspage"
-    },
-    {
-      "label": "PrinterTable()",
-      "file_type": "code",
-      "source_file": "src/components/PrinterTable.tsx",
-      "source_location": "L50",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "PrinterTable.tsx",
-      "norm_label": "printertable()",
-      "id": "src_components_printertable_printertable"
-    },
-    {
-      "label": "handleSettings()",
-      "file_type": "code",
-      "source_file": "src/components/PrinterTable.tsx",
-      "source_location": "L75",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "PrinterTable.tsx",
-      "norm_label": "handlesettings()",
-      "id": "src_components_printertable_printertable_handlesettings"
-    },
-    {
-      "label": "handleTestPage()",
-      "file_type": "code",
-      "source_file": "src/components/PrinterTable.tsx",
-      "source_location": "L65",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "PrinterTable.tsx",
-      "norm_label": "handletestpage()",
-      "id": "src_components_printertable_printertable_handletestpage"
-    },
-    {
-      "label": "handleWebAccess()",
-      "file_type": "code",
-      "source_file": "src/components/PrinterTable.tsx",
-      "source_location": "L70",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "PrinterTable.tsx",
-      "norm_label": "handlewebaccess()",
-      "id": "src_components_printertable_printertable_handlewebaccess"
     },
     {
       "label": "filterPrinters()",
@@ -7803,7 +7851,7 @@
       "label": "handleForgotPassword()",
       "file_type": "code",
       "source_file": "src/components/Login.tsx",
-      "source_location": "L139",
+      "source_location": "L126",
       "_callable": true,
       "_origin": "ast",
       "id": "src_components_login_login_handleforgotpassword",
@@ -7830,10 +7878,10 @@
       "source_location": "L56",
       "_callable": true,
       "_origin": "ast",
+      "id": "src_lib_api_apierror_constructor",
       "community": 96,
       "community_name": "Login.tsx",
-      "norm_label": ".constructor()",
-      "id": "src_lib_api_apierror_constructor"
+      "norm_label": ".constructor()"
     },
     {
       "label": "_empty_result()",
@@ -7956,100 +8004,52 @@
       "id": "backend_tests_login_hardening_tentar"
     },
     {
-      "label": "DashboardPage()",
+      "label": "migrar_dominio()",
       "file_type": "code",
-      "source_file": "src/app/page.tsx",
-      "source_location": "L20",
+      "source_file": "backend/seed.py",
+      "source_location": "L139",
       "_callable": true,
       "_origin": "ast",
       "community": 99,
-      "community_name": "Topbar",
-      "norm_label": "dashboardpage()",
-      "id": "src_app_page_dashboardpage"
+      "community_name": "seed.py",
+      "norm_label": "migrar_dominio()",
+      "id": "backend_seed_migrar_dominio"
     },
     {
-      "label": "Topbar()",
+      "label": "mostrar_senha_uma_vez()",
       "file_type": "code",
-      "source_file": "src/components/Topbar.tsx",
-      "source_location": "L20",
+      "source_file": "backend/seed.py",
+      "source_location": "L119",
       "_callable": true,
       "_origin": "ast",
       "community": 99,
-      "community_name": "Topbar",
-      "norm_label": "topbar()",
-      "id": "src_components_topbar_topbar"
+      "community_name": "seed.py",
+      "norm_label": "mostrar_senha_uma_vez()",
+      "id": "backend_seed_mostrar_senha_uma_vez"
     },
     {
-      "label": "handleClickOutside()",
+      "label": "obter_senha_admin()",
       "file_type": "code",
-      "source_file": "src/components/Topbar.tsx",
-      "source_location": "L31",
+      "source_file": "backend/seed.py",
+      "source_location": "L94",
       "_callable": true,
       "_origin": "ast",
       "community": 99,
-      "community_name": "Topbar",
-      "norm_label": "handleclickoutside()",
-      "id": "src_components_topbar_topbar_handleclickoutside"
+      "community_name": "seed.py",
+      "norm_label": "obter_senha_admin()",
+      "id": "backend_seed_obter_senha_admin"
     },
     {
-      "label": "handleShortcut()",
+      "label": "seed_database()",
       "file_type": "code",
-      "source_file": "src/components/Topbar.tsx",
-      "source_location": "L40",
+      "source_file": "backend/seed.py",
+      "source_location": "L175",
       "_callable": true,
       "_origin": "ast",
       "community": 99,
-      "community_name": "Topbar",
-      "norm_label": "handleshortcut()",
-      "id": "src_components_topbar_topbar_handleshortcut"
-    },
-    {
-      "label": "onExportCsv()",
-      "file_type": "code",
-      "source_file": "src/components/Topbar.tsx",
-      "source_location": "L56",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 99,
-      "community_name": "Topbar",
-      "norm_label": "onexportcsv()",
-      "id": "src_components_topbar_topbar_onexportcsv"
-    },
-    {
-      "label": "handleAlertSelect()",
-      "file_type": "code",
-      "source_file": "src/lib/app-data.tsx",
-      "source_location": "L468",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 99,
-      "community_name": "Topbar",
-      "norm_label": "handlealertselect()",
-      "id": "src_lib_app_data_appdataprovider_handlealertselect"
-    },
-    {
-      "label": "updateFilter()",
-      "file_type": "code",
-      "source_file": "src/lib/app-data.tsx",
-      "source_location": "L352",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 99,
-      "community_name": "Topbar",
-      "norm_label": "updatefilter()",
-      "id": "src_lib_app_data_appdataprovider_updatefilter"
-    },
-    {
-      "label": "exportPrintersCsv()",
-      "file_type": "code",
-      "source_file": "src/lib/exportCsv.ts",
-      "source_location": "L14",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 99,
-      "community_name": "Topbar",
-      "norm_label": "exportprinterscsv()",
-      "id": "src_lib_exportcsv_exportprinterscsv"
+      "community_name": "seed.py",
+      "norm_label": "seed_database()",
+      "id": "backend_seed_seed_database"
     },
     {
       "label": "snmp_fleet_mock.py",
@@ -8624,48 +8624,147 @@
       "id": "backend_app_main_py_request"
     },
     {
+      "label": "app/__init__.py",
+      "file_type": "code",
+      "source_file": "backend/app/__init__.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 103,
+      "community_name": "tests_production.py",
+      "norm_label": "app/__init__.py",
+      "id": "backend_app_init"
+    },
+    {
+      "label": "tests_production.py",
+      "file_type": "code",
+      "source_file": "backend/tests_production.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 103,
+      "community_name": "tests_production.py",
+      "norm_label": "tests_production.py",
+      "id": "backend_tests_production"
+    },
+    {
+      "label": "Fase 10 - Preparacao para producao corporativa. Cobre o que protege a exposicao\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/tests_production.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 103,
+      "community_name": "tests_production.py",
+      "norm_label": "fase 10 - preparacao para producao corporativa. cobre o que protege a exposicao...",
+      "id": "backend_tests_production_rationale_1"
+    },
+    {
+      "label": "Sobe um processo separado e diz se a configuracao foi aceita.",
+      "file_type": "rationale",
+      "source_file": "backend/tests_production.py",
+      "source_location": "L112",
+      "_origin": "ast",
+      "community": 103,
+      "community_name": "tests_production.py",
+      "norm_label": "sobe um processo separado e diz se a configuracao foi aceita.",
+      "id": "backend_tests_production_rationale_112"
+    },
+    {
       "label": "Path",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
-      "community": 103,
-      "community_name": "_migrate_printer_schema",
+      "community": 104,
+      "community_name": "RedactSecretsFilter",
       "norm_label": "path",
-      "id": "path"
+      "id": "backend_app_logging_config_py_path"
     },
     {
-      "label": "Caminho do arquivo .db atual, se o banco for SQLite em disco (nao :memory:).",
-      "file_type": "rationale",
-      "source_file": "backend/app/database.py",
-      "source_location": "L322",
+      "label": "LogRecord",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
       "_origin": "ast",
-      "community": 103,
-      "community_name": "_migrate_printer_schema",
-      "norm_label": "caminho do arquivo .db atual, se o banco for sqlite em disco (nao :memory:).",
-      "id": "backend_app_database_rationale_322"
+      "community": 104,
+      "community_name": "RedactSecretsFilter",
+      "norm_label": "logrecord",
+      "id": "logrecord"
     },
     {
-      "label": "Etapa 4 \u2014 reconstroi `printers` para trocar a identidade de `ip UNIQUE` para\u2026",
+      "label": "Substitui valores sensiveis na mensagem antes de ela ser emitida. Fica no\u2026",
       "file_type": "rationale",
-      "source_file": "backend/app/database.py",
-      "source_location": "L333",
+      "source_file": "backend/app/logging_config.py",
+      "source_location": "L50",
       "_origin": "ast",
-      "community": 103,
-      "community_name": "_migrate_printer_schema",
-      "norm_label": "etapa 4 \u2014 reconstroi `printers` para trocar a identidade de `ip unique` para...",
-      "id": "backend_app_database_rationale_333"
+      "community": 104,
+      "community_name": "RedactSecretsFilter",
+      "norm_label": "substitui valores sensiveis na mensagem antes de ela ser emitida. fica no...",
+      "id": "backend_app_logging_config_rationale_50"
     },
     {
-      "label": "Recria `printers` (schema atual) e copia `printers_old` para dentro dela, numa\u2026",
+      "label": "Resolve settings.log_file. Vazio = so console.",
       "file_type": "rationale",
-      "source_file": "backend/app/database.py",
-      "source_location": "L407",
+      "source_file": "backend/app/logging_config.py",
+      "source_location": "L85",
       "_origin": "ast",
-      "community": 103,
-      "community_name": "_migrate_printer_schema",
-      "norm_label": "recria `printers` (schema atual) e copia `printers_old` para dentro dela, numa...",
-      "id": "backend_app_database_rationale_407"
+      "community": 104,
+      "community_name": "RedactSecretsFilter",
+      "norm_label": "resolve settings.log_file. vazio = so console.",
+      "id": "backend_app_logging_config_rationale_85"
+    },
+    {
+      "label": "Instala console + arquivo rotativo na raiz do logging. Idempotente: chamar duas\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/app/logging_config.py",
+      "source_location": "L97",
+      "_origin": "ast",
+      "community": 104,
+      "community_name": "RedactSecretsFilter",
+      "norm_label": "instala console + arquivo rotativo na raiz do logging. idempotente: chamar duas...",
+      "id": "backend_app_logging_config_rationale_97"
+    },
+    {
+      "label": "model_validator",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "community": 105,
+      "community_name": "._validate_production_cors",
+      "norm_label": "model_validator",
+      "id": "model_validator"
+    },
+    {
+      "label": "Fail-fast: producao nao sobe com simulacao ligada (Fase 9). O risco concreto e\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/app/config.py",
+      "source_location": "L115",
+      "_origin": "ast",
+      "community": 105,
+      "community_name": "._validate_production_cors",
+      "norm_label": "fail-fast: producao nao sobe com simulacao ligada (fase 9). o risco concreto e...",
+      "id": "backend_app_config_rationale_115"
+    },
+    {
+      "label": "Impede que um ambiente de producao suba silenciosamente com o secret de\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/app/config.py",
+      "source_location": "L153",
+      "_origin": "ast",
+      "community": 105,
+      "community_name": "._validate_production_cors",
+      "norm_label": "impede que um ambiente de producao suba silenciosamente com o secret de...",
+      "id": "backend_app_config_rationale_153"
+    },
+    {
+      "label": "Producao exige origens proprias e explicitas (Fase 10). Tres recusas, todas por\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/app/config.py",
+      "source_location": "L212",
+      "_origin": "ast",
+      "community": 105,
+      "community_name": "._validate_production_cors",
+      "norm_label": "producao exige origens proprias e explicitas (fase 10). tres recusas, todas por...",
+      "id": "backend_app_config_rationale_212"
     },
     {
       "label": "Session",
@@ -8710,6 +8809,28 @@
       "community_name": "require_user",
       "norm_label": "devolve {\"email\": ...} para um token valido, ou none. `algorithms` e uma lista...",
       "id": "backend_app_services_auth_rationale_58"
+    },
+    {
+      "label": "field_validator",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "community": 107,
+      "community_name": "NotificationCreate",
+      "norm_label": "field_validator",
+      "id": "backend_app_routes_notifications_py_field_validator"
+    },
+    {
+      "label": "Uma comunicacao para um ou mais destinatarios (uma linha por pessoa).",
+      "file_type": "rationale",
+      "source_file": "backend/app/routes/notifications.py",
+      "source_location": "L64",
+      "_origin": "ast",
+      "community": 107,
+      "community_name": "NotificationCreate",
+      "norm_label": "uma comunicacao para um ou mais destinatarios (uma linha por pessoa).",
+      "id": "backend_app_routes_notifications_rationale_64"
     },
     {
       "label": "Acessar via web \u2014 PARCIAL",
@@ -9483,7 +9604,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "notification.py",
       "id": "backend_app_models_notification"
     },
@@ -9494,7 +9615,7 @@
       "source_location": "",
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "sqlmodel",
       "id": "backend_app_models_notification_py_sqlmodel"
     },
@@ -9505,7 +9626,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "services/auth.py",
       "id": "backend_app_services_auth"
     },
@@ -9516,7 +9637,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "tests_environment.py",
       "id": "backend_tests_environment"
     },
@@ -9527,20 +9648,9 @@
       "source_location": "L1",
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "tests_notifications.py",
       "id": "backend_tests_notifications"
-    },
-    {
-      "label": "tests_uptime.py",
-      "file_type": "code",
-      "source_file": "backend/tests_uptime.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "tests_uptime.py",
-      "norm_label": "tests_uptime.py",
-      "id": "backend_tests_uptime"
     },
     {
       "label": "timedelta",
@@ -9549,20 +9659,9 @@
       "source_location": "",
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "timedelta",
       "id": "timedelta"
-    },
-    {
-      "label": "Etapa 7: adiciona printer_readings.uptime em bancos criados antes desta etapa.\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/app/database.py",
-      "source_location": "L108",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "tests_uptime.py",
-      "norm_label": "etapa 7: adiciona printer_readings.uptime em bancos criados antes desta etapa....",
-      "id": "backend_app_database_rationale_108"
     },
     {
       "label": "Notificacoes internas (Fase 7). Por que uma tabela separada de `alerts`\u2026",
@@ -9571,7 +9670,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "notificacoes internas (fase 7). por que uma tabela separada de `alerts`...",
       "id": "backend_app_models_notification_rationale_1"
     },
@@ -9582,7 +9681,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "hash de senha e emissao/validacao do jwt. por que pyjwt e nao python-jose (fase...",
       "id": "backend_app_services_auth_rationale_1"
     },
@@ -9593,7 +9692,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "fase 9 - mock e demo seguros. cobre as duas camadas que protegem o risco...",
       "id": "backend_tests_environment_rationale_1"
     },
@@ -9604,20 +9703,9 @@
       "source_location": "L1",
       "_origin": "ast",
       "community": 23,
-      "community_name": "tests_uptime.py",
+      "community_name": "tests_notifications.py",
       "norm_label": "fase 7 - notificacoes internas. como...",
       "id": "backend_tests_notifications_rationale_1"
-    },
-    {
-      "label": "Etapa 7 - persistencia de uptime. Parte A roda sobre uma COPIA do banco REAL\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/tests_uptime.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "tests_uptime.py",
-      "norm_label": "etapa 7 - persistencia de uptime. parte a roda sobre uma copia do banco real...",
-      "id": "backend_tests_uptime_rationale_1"
     },
     {
       "label": "schemas/__init__.py",
@@ -9961,15 +10049,26 @@
       "id": "backend_app_schemas_printer_rationale_95"
     },
     {
+      "label": "get",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Role",
+      "norm_label": "get",
+      "id": "backend_app_routes_users_py_get"
+    },
+    {
       "label": "patch",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
+      "community_name": "Role",
       "norm_label": "patch",
-      "id": "backend_app_routes_auth_py_patch"
+      "id": "backend_app_routes_users_py_patch"
     },
     {
       "label": "post",
@@ -9978,9 +10077,9 @@
       "source_location": "",
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
+      "community_name": "Role",
       "norm_label": "post",
-      "id": "backend_app_routes_auth_py_post"
+      "id": "backend_app_routes_users_py_post"
     },
     {
       "label": "Session",
@@ -9989,64 +10088,86 @@
       "source_location": "",
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
+      "community_name": "Role",
       "norm_label": "session",
-      "id": "backend_app_routes_auth_py_session"
+      "id": "backend_app_routes_users_py_session"
     },
     {
-      "label": "Request",
+      "label": "Enum",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
-      "norm_label": "request",
-      "id": "request"
+      "community_name": "Role",
+      "norm_label": "enum",
+      "id": "enum"
     },
     {
-      "label": "Perfil da PROPRIA conta (Fase 8). So o nome. `require_active_user` (nao\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/app/routes/auth.py",
-      "source_location": "L177",
+      "label": "str",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
-      "norm_label": "perfil da propria conta (fase 8). so o nome. `require_active_user` (nao...",
-      "id": "backend_app_routes_auth_rationale_177"
+      "community_name": "Role",
+      "norm_label": "str",
+      "id": "str"
     },
     {
-      "label": "Troca da propria senha, exigindo a atual. Usa `require_user`, nao\u2026",
+      "label": "RBAC minimo (Fase 1). Tres papeis cobrem todas as rotas existentes hoje: -\u2026",
       "file_type": "rationale",
-      "source_file": "backend/app/routes/auth.py",
-      "source_location": "L201",
+      "source_file": "backend/app/models/user.py",
+      "source_location": "L9",
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
-      "norm_label": "troca da propria senha, exigindo a atual. usa `require_user`, nao...",
-      "id": "backend_app_routes_auth_rationale_201"
+      "community_name": "Role",
+      "norm_label": "rbac minimo (fase 1). tres papeis cobrem todas as rotas existentes hoje: -...",
+      "id": "backend_app_models_user_rationale_9"
     },
     {
-      "label": "IP de origem da requisicao, para a contagem por IP. `X-Forwarded-For` so e lido\u2026",
+      "label": "Altera nome, username, papel, ativacao e/ou senha de uma conta. Desativar aqui\u2026",
       "file_type": "rationale",
-      "source_file": "backend/app/routes/auth.py",
-      "source_location": "L54",
+      "source_file": "backend/app/routes/users.py",
+      "source_location": "L125",
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
-      "norm_label": "ip de origem da requisicao, para a contagem por ip. `x-forwarded-for` so e lido...",
-      "id": "backend_app_routes_auth_rationale_54"
+      "community_name": "Role",
+      "norm_label": "altera nome, username, papel, ativacao e/ou senha de uma conta. desativar aqui...",
+      "id": "backend_app_routes_users_rationale_125"
     },
     {
-      "label": "Autentica e devolve o JWT. Aceita e-mail OU username em `credentials.email` (o\u2026",
+      "label": "Impede que a ultima conta admin ativa perca o proprio acesso administrativo.\u2026",
       "file_type": "rationale",
-      "source_file": "backend/app/routes/auth.py",
-      "source_location": "L77",
+      "source_file": "backend/app/routes/users.py",
+      "source_location": "L38",
       "_origin": "ast",
       "community": 29,
-      "community_name": "login",
-      "norm_label": "autentica e devolve o jwt. aceita e-mail ou username em `credentials.email` (o...",
-      "id": "backend_app_routes_auth_rationale_77"
+      "community_name": "Role",
+      "norm_label": "impede que a ultima conta admin ativa perca o proprio acesso administrativo....",
+      "id": "backend_app_routes_users_rationale_38"
+    },
+    {
+      "label": "Todas as contas, mais recentes por ultimo (ordem estavel de cadastro).",
+      "file_type": "rationale",
+      "source_file": "backend/app/routes/users.py",
+      "source_location": "L70",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Role",
+      "norm_label": "todas as contas, mais recentes por ultimo (ordem estavel de cadastro).",
+      "id": "backend_app_routes_users_rationale_70"
+    },
+    {
+      "label": "Cria uma conta. Substitui o antigo `POST /api/auth/register` (Fase 1), que ja\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/app/routes/users.py",
+      "source_location": "L76",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "Role",
+      "norm_label": "cria uma conta. substitui o antigo `post /api/auth/register` (fase 1), que ja...",
+      "id": "backend_app_routes_users_rationale_76"
     },
     {
       "label": "1. Antes do primeiro deploy",
@@ -10546,17 +10667,6 @@
       "id": "backend_app_routes_auth_rationale_167"
     },
     {
-      "label": "Caixa do usuario logado, mais recentes primeiro. Nao aceita `user_id` como\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/app/routes/notifications.py",
-      "source_location": "L162",
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "User",
-      "norm_label": "caixa do usuario logado, mais recentes primeiro. nao aceita `user_id` como...",
-      "id": "backend_app_routes_notifications_rationale_162"
-    },
-    {
       "label": "Fase 3 - Gestao administrativa de contas (/api/users). Como tests_rbac.py, NAO\u2026",
       "file_type": "rationale",
       "source_file": "backend/tests_users.py",
@@ -10568,26 +10678,26 @@
       "id": "backend_tests_users_rationale_1"
     },
     {
+      "label": "notifications.py",
+      "file_type": "code",
+      "source_file": "backend/app/routes/notifications.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "notifications.py",
+      "norm_label": "notifications.py",
+      "id": "backend_app_routes_notifications"
+    },
+    {
       "label": "BaseModel",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "basemodel",
       "id": "backend_app_routes_notifications_py_basemodel"
-    },
-    {
-      "label": "field_validator",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "create_notifications",
-      "norm_label": "field_validator",
-      "id": "backend_app_routes_notifications_py_field_validator"
     },
     {
       "label": "get",
@@ -10596,7 +10706,7 @@
       "source_location": "",
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "get",
       "id": "backend_app_routes_notifications_py_get"
     },
@@ -10607,7 +10717,7 @@
       "source_location": "",
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "patch",
       "id": "backend_app_routes_notifications_py_patch"
     },
@@ -10618,7 +10728,7 @@
       "source_location": "",
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "post",
       "id": "backend_app_routes_notifications_py_post"
     },
@@ -10629,7 +10739,7 @@
       "source_location": "",
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "session",
       "id": "backend_app_routes_notifications_py_session"
     },
@@ -10640,9 +10750,20 @@
       "source_location": "",
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "notification",
       "id": "notification"
+    },
+    {
+      "label": "Central de notificacoes internas (Fase 7). Caixa PESSOAL: `GET` e `PATCH`\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/app/routes/notifications.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "notifications.py",
+      "norm_label": "central de notificacoes internas (fase 7). caixa pessoal: `get` e `patch`...",
+      "id": "backend_app_routes_notifications_rationale_1"
     },
     {
       "label": "Busca a notificacao exigindo que ela seja do usuario logado. 404 (e nao 403)\u2026",
@@ -10651,9 +10772,20 @@
       "source_location": "L137",
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "busca a notificacao exigindo que ela seja do usuario logado. 404 (e nao 403)...",
       "id": "backend_app_routes_notifications_rationale_137"
+    },
+    {
+      "label": "Caixa do usuario logado, mais recentes primeiro. Nao aceita `user_id` como\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/app/routes/notifications.py",
+      "source_location": "L162",
+      "_origin": "ast",
+      "community": 35,
+      "community_name": "notifications.py",
+      "norm_label": "caixa do usuario logado, mais recentes primeiro. nao aceita `user_id` como...",
+      "id": "backend_app_routes_notifications_rationale_162"
     },
     {
       "label": "Contador para o badge do sino, sem trazer a lista inteira.",
@@ -10662,7 +10794,7 @@
       "source_location": "L181",
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "contador para o badge do sino, sem trazer a lista inteira.",
       "id": "backend_app_routes_notifications_rationale_181"
     },
@@ -10673,7 +10805,7 @@
       "source_location": "L196",
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "marca como lida. idempotente: reler nao mexe no `read_at` original, para o...",
       "id": "backend_app_routes_notifications_rationale_196"
     },
@@ -10684,7 +10816,7 @@
       "source_location": "L216",
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "marca como lidas todas as nao lidas da caixa de quem esta logado. nao aceita...",
       "id": "backend_app_routes_notifications_rationale_216"
     },
@@ -10695,7 +10827,7 @@
       "source_location": "L253",
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "envia uma comunicacao para um ou mais destinatarios \u2014 uma linha por pessoa....",
       "id": "backend_app_routes_notifications_rationale_253"
     },
@@ -10706,20 +10838,9 @@
       "source_location": "L37",
       "_origin": "ast",
       "community": 35,
-      "community_name": "create_notifications",
+      "community_name": "notifications.py",
       "norm_label": "referencia ao alerta de origem \u2014 link, nao conteudo. a notificacao ja carrega a...",
       "id": "backend_app_routes_notifications_rationale_37"
-    },
-    {
-      "label": "Uma comunicacao para um ou mais destinatarios (uma linha por pessoa).",
-      "file_type": "rationale",
-      "source_file": "backend/app/routes/notifications.py",
-      "source_location": "L64",
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "create_notifications",
-      "norm_label": "uma comunicacao para um ou mais destinatarios (uma linha por pessoa).",
-      "id": "backend_app_routes_notifications_rationale_64"
     },
     {
       "label": "api.ts",
@@ -10727,10 +10848,10 @@
       "source_file": "src/lib/api.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_lib_api",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "api.ts",
-      "id": "src_lib_api"
+      "norm_label": "api.ts"
     },
     {
       "label": "API_BASE_URL",
@@ -10738,10 +10859,10 @@
       "source_file": "src/lib/api.ts",
       "source_location": "L7",
       "_origin": "ast",
+      "id": "src_lib_api_api_base_url",
       "community": 36,
       "community_name": "api.ts",
-      "norm_label": "api_base_url",
-      "id": "src_lib_api_api_base_url"
+      "norm_label": "api_base_url"
     },
     {
       "label": "snmp.py",
@@ -11283,46 +11404,24 @@
       "id": "scripts_simular_ambiente_write_log"
     },
     {
-      "label": "AsyncIOScheduler",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "community": 41,
-      "community_name": "scheduler.py",
-      "norm_label": "asyncioscheduler",
-      "id": "asyncioscheduler"
-    },
-    {
       "label": "get",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
       "community": 41,
-      "community_name": "scheduler.py",
+      "community_name": "list_scenarios",
       "norm_label": "get",
       "id": "backend_app_routes_collect_py_get"
     },
     {
-      "label": "scheduler.py",
-      "file_type": "code",
-      "source_file": "backend/app/services/scheduler.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 41,
-      "community_name": "scheduler.py",
-      "norm_label": "scheduler.py",
-      "id": "backend_app_services_scheduler"
-    },
-    {
       "label": "get",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
       "community": 41,
-      "community_name": "scheduler.py",
+      "community_name": "list_scenarios",
       "norm_label": "get",
       "id": "get"
     },
@@ -11333,7 +11432,7 @@
       "source_location": "L128",
       "_origin": "ast",
       "community": 41,
-      "community_name": "scheduler.py",
+      "community_name": "list_scenarios",
       "norm_label": "saude, identificacao do ambiente (fase 9) e diagnostico (fase 10). o ambiente...",
       "id": "backend_app_main_rationale_128"
     },
@@ -11344,7 +11443,7 @@
       "source_location": "L195",
       "_origin": "ast",
       "community": 41,
-      "community_name": "scheduler.py",
+      "community_name": "list_scenarios",
       "norm_label": "cenarios simulados disponiveis e se o modo mock esta habilitado.",
       "id": "backend_app_routes_collect_rationale_195"
     },
@@ -11355,20 +11454,9 @@
       "source_location": "L205",
       "_origin": "ast",
       "community": 41,
-      "community_name": "scheduler.py",
+      "community_name": "list_scenarios",
       "norm_label": "estado da coleta agendada (apscheduler).",
       "id": "backend_app_routes_collect_rationale_205"
-    },
-    {
-      "label": "Coleta agendada (Etapa 7; frota inteira desde a Etapa 5). APScheduler roda\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/app/services/scheduler.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 41,
-      "community_name": "scheduler.py",
-      "norm_label": "coleta agendada (etapa 7; frota inteira desde a etapa 5). apscheduler roda...",
-      "id": "backend_app_services_scheduler_rationale_1"
     },
     {
       "label": "Estado atual, para o endpoint de diagnostico.",
@@ -11377,31 +11465,9 @@
       "source_location": "L120",
       "_origin": "ast",
       "community": 41,
-      "community_name": "scheduler.py",
+      "community_name": "list_scenarios",
       "norm_label": "estado atual, para o endpoint de diagnostico.",
       "id": "backend_app_services_scheduler_rationale_120"
-    },
-    {
-      "label": "Um ciclo de coleta: toda a frota ativa, agrupada por IP\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/app/services/scheduler.py",
-      "source_location": "L33",
-      "_origin": "ast",
-      "community": 41,
-      "community_name": "scheduler.py",
-      "norm_label": "um ciclo de coleta: toda a frota ativa, agrupada por ip...",
-      "id": "backend_app_services_scheduler_rationale_33"
-    },
-    {
-      "label": "Liga o scheduler conforme o .env. Retorna None quando desabilitado.",
-      "file_type": "rationale",
-      "source_file": "backend/app/services/scheduler.py",
-      "source_location": "L66",
-      "_origin": "ast",
-      "community": 41,
-      "community_name": "scheduler.py",
-      "norm_label": "liga o scheduler conforme o .env. retorna none quando desabilitado.",
-      "id": "backend_app_services_scheduler_rationale_66"
     },
     {
       "label": "fetchPrinters.ts",
@@ -11503,37 +11569,37 @@
       "id": "src_data_printers_printers"
     },
     {
-      "label": "tonerColor.ts",
+      "label": "exportCsv.ts",
       "file_type": "code",
-      "source_file": "src/lib/tonerColor.ts",
+      "source_file": "src/lib/exportCsv.ts",
       "source_location": "L1",
       "_origin": "ast",
       "community": 43,
       "community_name": "printers.ts",
-      "norm_label": "tonercolor.ts",
-      "id": "src_lib_tonercolor"
+      "norm_label": "exportcsv.ts",
+      "id": "src_lib_exportcsv"
     },
     {
-      "label": "CHANNEL_COLOR_DARK",
+      "label": "STATUS_LABEL",
       "file_type": "code",
-      "source_file": "src/lib/tonerColor.ts",
-      "source_location": "L16",
+      "source_file": "src/lib/exportCsv.ts",
+      "source_location": "L8",
       "_origin": "ast",
       "community": 43,
       "community_name": "printers.ts",
-      "norm_label": "channel_color_dark",
-      "id": "src_lib_tonercolor_channel_color_dark"
+      "norm_label": "status_label",
+      "id": "src_lib_exportcsv_status_label"
     },
     {
-      "label": "CHANNEL_COLOR_LIGHT",
+      "label": "AsyncIOScheduler",
       "file_type": "code",
-      "source_file": "src/lib/tonerColor.ts",
-      "source_location": "L9",
+      "source_file": "",
+      "source_location": "",
       "_origin": "ast",
-      "community": 43,
-      "community_name": "printers.ts",
-      "norm_label": "channel_color_light",
-      "id": "src_lib_tonercolor_channel_color_light"
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "asyncioscheduler",
+      "id": "asyncioscheduler"
     },
     {
       "label": "config.py",
@@ -11613,17 +11679,6 @@
       "id": "backend_app_routes_alerts"
     },
     {
-      "label": "routes/auth.py",
-      "file_type": "code",
-      "source_file": "backend/app/routes/auth.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "database.py",
-      "norm_label": "routes/auth.py",
-      "id": "backend_app_routes_auth"
-    },
-    {
       "label": "collect.py",
       "file_type": "code",
       "source_file": "backend/app/routes/collect.py",
@@ -11633,17 +11688,6 @@
       "community_name": "database.py",
       "norm_label": "collect.py",
       "id": "backend_app_routes_collect"
-    },
-    {
-      "label": "notifications.py",
-      "file_type": "code",
-      "source_file": "backend/app/routes/notifications.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "database.py",
-      "norm_label": "notifications.py",
-      "id": "backend_app_routes_notifications"
     },
     {
       "label": "printers.py",
@@ -11679,6 +11723,17 @@
       "id": "backend_app_services_environment_guard"
     },
     {
+      "label": "scheduler.py",
+      "file_type": "code",
+      "source_file": "backend/app/services/scheduler.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "scheduler.py",
+      "id": "backend_app_services_scheduler"
+    },
+    {
       "label": "tests_login_username.py",
       "file_type": "code",
       "source_file": "backend/tests_login_username.py",
@@ -11688,6 +11743,17 @@
       "community_name": "database.py",
       "norm_label": "tests_login_username.py",
       "id": "backend_tests_login_username"
+    },
+    {
+      "label": "tests_uptime.py",
+      "file_type": "code",
+      "source_file": "backend/tests_uptime.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "tests_uptime.py",
+      "id": "backend_tests_uptime"
     },
     {
       "label": "datetime",
@@ -11734,6 +11800,17 @@
       "id": "sqlmodel"
     },
     {
+      "label": "Etapa 7: adiciona printer_readings.uptime em bancos criados antes desta etapa.\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/app/database.py",
+      "source_location": "L108",
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "etapa 7: adiciona printer_readings.uptime em bancos criados antes desta etapa....",
+      "id": "backend_app_database_rationale_108"
+    },
+    {
       "label": "Dependencias compartilhadas pelas rotas. Autorizacao (Fase 1) fica CENTRALIZADA\u2026",
       "file_type": "rationale",
       "source_file": "backend/app/dependencies.py",
@@ -11778,17 +11855,6 @@
       "id": "backend_app_routes_collect_rationale_1"
     },
     {
-      "label": "Central de notificacoes internas (Fase 7). Caixa PESSOAL: `GET` e `PATCH`\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/app/routes/notifications.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 44,
-      "community_name": "database.py",
-      "norm_label": "central de notificacoes internas (fase 7). caixa pessoal: `get` e `patch`...",
-      "id": "backend_app_routes_notifications_rationale_1"
-    },
-    {
       "label": "Primeiro instante do mes que abre uma janela de `months` meses ate hoje.",
       "file_type": "rationale",
       "source_file": "backend/app/routes/printers.py",
@@ -11822,6 +11888,39 @@
       "id": "backend_app_services_environment_guard_rationale_1"
     },
     {
+      "label": "Coleta agendada (Etapa 7; frota inteira desde a Etapa 5). APScheduler roda\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/app/services/scheduler.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "coleta agendada (etapa 7; frota inteira desde a etapa 5). apscheduler roda...",
+      "id": "backend_app_services_scheduler_rationale_1"
+    },
+    {
+      "label": "Um ciclo de coleta: toda a frota ativa, agrupada por IP\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/app/services/scheduler.py",
+      "source_location": "L33",
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "um ciclo de coleta: toda a frota ativa, agrupada por ip...",
+      "id": "backend_app_services_scheduler_rationale_33"
+    },
+    {
+      "label": "Liga o scheduler conforme o .env. Retorna None quando desabilitado.",
+      "file_type": "rationale",
+      "source_file": "backend/app/services/scheduler.py",
+      "source_location": "L66",
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "liga o scheduler conforme o .env. retorna none quando desabilitado.",
+      "id": "backend_app_services_scheduler_rationale_66"
+    },
+    {
       "label": "Login por username e troca de senha obrigatoria (2026-08-24). Cobre as duas\u2026",
       "file_type": "rationale",
       "source_file": "backend/tests_login_username.py",
@@ -11831,6 +11930,17 @@
       "community_name": "database.py",
       "norm_label": "login por username e troca de senha obrigatoria (2026-08-24). cobre as duas...",
       "id": "backend_tests_login_username_rationale_1"
+    },
+    {
+      "label": "Etapa 7 - persistencia de uptime. Parte A roda sobre uma COPIA do banco REAL\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/tests_uptime.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 44,
+      "community_name": "database.py",
+      "norm_label": "etapa 7 - persistencia de uptime. parte a roda sobre uma copia do banco real...",
+      "id": "backend_tests_uptime_rationale_1"
     },
     {
       "label": "A. Endpoint (implementado)",
@@ -13296,28 +13406,6 @@
       "id": "src_components_notificationsview_severidades"
     },
     {
-      "label": "seed.py",
-      "file_type": "code",
-      "source_file": "backend/seed.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 55,
-      "community_name": "create_db_and_tables",
-      "norm_label": "seed.py",
-      "id": "backend_seed"
-    },
-    {
-      "label": "Session",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "community": 55,
-      "community_name": "create_db_and_tables",
-      "norm_label": "session",
-      "id": "backend_seed_py_session"
-    },
-    {
       "label": "tests_profile.py",
       "file_type": "code",
       "source_file": "backend/tests_profile.py",
@@ -13327,6 +13415,17 @@
       "community_name": "create_db_and_tables",
       "norm_label": "tests_profile.py",
       "id": "backend_tests_profile"
+    },
+    {
+      "label": "Path",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "create_db_and_tables",
+      "norm_label": "path",
+      "id": "path"
     },
     {
       "label": "Fase 1 (RBAC): adiciona users.role e users.is_active em bancos criados antes\u2026",
@@ -13362,6 +13461,39 @@
       "id": "backend_app_database_rationale_234"
     },
     {
+      "label": "Caminho do arquivo .db atual, se o banco for SQLite em disco (nao :memory:).",
+      "file_type": "rationale",
+      "source_file": "backend/app/database.py",
+      "source_location": "L322",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "create_db_and_tables",
+      "norm_label": "caminho do arquivo .db atual, se o banco for sqlite em disco (nao :memory:).",
+      "id": "backend_app_database_rationale_322"
+    },
+    {
+      "label": "Etapa 4 \u2014 reconstroi `printers` para trocar a identidade de `ip UNIQUE` para\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/app/database.py",
+      "source_location": "L333",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "create_db_and_tables",
+      "norm_label": "etapa 4 \u2014 reconstroi `printers` para trocar a identidade de `ip unique` para...",
+      "id": "backend_app_database_rationale_333"
+    },
+    {
+      "label": "Recria `printers` (schema atual) e copia `printers_old` para dentro dela, numa\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/app/database.py",
+      "source_location": "L407",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "create_db_and_tables",
+      "norm_label": "recria `printers` (schema atual) e copia `printers_old` para dentro dela, numa...",
+      "id": "backend_app_database_rationale_407"
+    },
+    {
       "label": "Adiciona alerts.alert_type em bancos criados antes da Etapa 8A.",
       "file_type": "rationale",
       "source_file": "backend/app/database.py",
@@ -13371,50 +13503,6 @@
       "community_name": "create_db_and_tables",
       "norm_label": "adiciona alerts.alert_type em bancos criados antes da etapa 8a.",
       "id": "backend_app_database_rationale_97"
-    },
-    {
-      "label": "Semeia o banco: contas iniciais + a frota de printers_data.json. SENHAS (Fase\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/seed.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 55,
-      "community_name": "create_db_and_tables",
-      "norm_label": "semeia o banco: contas iniciais + a frota de printers_data.json. senhas (fase...",
-      "id": "backend_seed_rationale_1"
-    },
-    {
-      "label": "Imprime a senha em destaque. Unica vez que ela aparece em texto claro.",
-      "file_type": "rationale",
-      "source_file": "backend/seed.py",
-      "source_location": "L120",
-      "_origin": "ast",
-      "community": 55,
-      "community_name": "create_db_and_tables",
-      "norm_label": "imprime a senha em destaque. unica vez que ela aparece em texto claro.",
-      "id": "backend_seed_rationale_120"
-    },
-    {
-      "label": "Renomeia TODAS as contas `...@example.com` para `...@elgin.com.br`. Uso unico,\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/seed.py",
-      "source_location": "L140",
-      "_origin": "ast",
-      "community": 55,
-      "community_name": "create_db_and_tables",
-      "norm_label": "renomeia todas as contas `...@example.com` para `...@elgin.com.br`. uso unico,...",
-      "id": "backend_seed_rationale_140"
-    },
-    {
-      "label": "Devolve (senha, foi_gerada). `foi_gerada` decide se a senha precisa ser\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/seed.py",
-      "source_location": "L95",
-      "_origin": "ast",
-      "community": 55,
-      "community_name": "create_db_and_tables",
-      "norm_label": "devolve (senha, foi_gerada). `foi_gerada` decide se a senha precisa ser...",
-      "id": "backend_seed_rationale_95"
     },
     {
       "label": "Fase 8 - Perfil proprio e troca de senha. Como as demais suites desde a Fase 1,\u2026",
@@ -13439,39 +13527,6 @@
       "id": "backend_app_config_py_field_validator"
     },
     {
-      "label": "app/__init__.py",
-      "file_type": "code",
-      "source_file": "backend/app/__init__.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "app/__init__.py",
-      "id": "backend_app_init"
-    },
-    {
-      "label": "Path",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "path",
-      "id": "backend_app_logging_config_py_path"
-    },
-    {
-      "label": "tests_production.py",
-      "file_type": "code",
-      "source_file": "backend/tests_production.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "tests_production.py",
-      "id": "backend_tests_production"
-    },
-    {
       "label": "BaseSettings",
       "file_type": "code",
       "source_file": "",
@@ -13483,50 +13538,6 @@
       "id": "basesettings"
     },
     {
-      "label": "LogRecord",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "logrecord",
-      "id": "logrecord"
-    },
-    {
-      "label": "model_validator",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "model_validator",
-      "id": "model_validator"
-    },
-    {
-      "label": "Fail-fast: producao nao sobe com simulacao ligada (Fase 9). O risco concreto e\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/app/config.py",
-      "source_location": "L115",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "fail-fast: producao nao sobe com simulacao ligada (fase 9). o risco concreto e...",
-      "id": "backend_app_config_rationale_115"
-    },
-    {
-      "label": "Impede que um ambiente de producao suba silenciosamente com o secret de\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/app/config.py",
-      "source_location": "L153",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "impede que um ambiente de producao suba silenciosamente com o secret de...",
-      "id": "backend_app_config_rationale_153"
-    },
-    {
       "label": "Aceita \"https://a.com, https://b.com\" alem da lista JSON. Sem isto,\u2026",
       "file_type": "rationale",
       "source_file": "backend/app/config.py",
@@ -13536,17 +13547,6 @@
       "community_name": "Settings",
       "norm_label": "aceita \"https://a.com, https://b.com\" alem da lista json. sem isto,...",
       "id": "backend_app_config_rationale_179"
-    },
-    {
-      "label": "Producao exige origens proprias e explicitas (Fase 10). Tres recusas, todas por\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/app/config.py",
-      "source_location": "L212",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "producao exige origens proprias e explicitas (fase 10). tres recusas, todas por...",
-      "id": "backend_app_config_rationale_212"
     },
     {
       "label": "Normaliza um DATABASE_URL sqlite relativo (ex.: sqlite:///./x.db) para um\u2026",
@@ -13571,39 +13571,6 @@
       "id": "backend_app_config_rationale_99"
     },
     {
-      "label": "Substitui valores sensiveis na mensagem antes de ela ser emitida. Fica no\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/app/logging_config.py",
-      "source_location": "L50",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "substitui valores sensiveis na mensagem antes de ela ser emitida. fica no...",
-      "id": "backend_app_logging_config_rationale_50"
-    },
-    {
-      "label": "Resolve settings.log_file. Vazio = so console.",
-      "file_type": "rationale",
-      "source_file": "backend/app/logging_config.py",
-      "source_location": "L85",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "resolve settings.log_file. vazio = so console.",
-      "id": "backend_app_logging_config_rationale_85"
-    },
-    {
-      "label": "Instala console + arquivo rotativo na raiz do logging. Idempotente: chamar duas\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/app/logging_config.py",
-      "source_location": "L97",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "instala console + arquivo rotativo na raiz do logging. idempotente: chamar duas...",
-      "id": "backend_app_logging_config_rationale_97"
-    },
-    {
       "label": "Settings de producao valida, sobrescrevendo so o que o teste investiga.",
       "file_type": "rationale",
       "source_file": "backend/tests_environment.py",
@@ -13613,28 +13580,6 @@
       "community_name": "Settings",
       "norm_label": "settings de producao valida, sobrescrevendo so o que o teste investiga.",
       "id": "backend_tests_environment_rationale_54"
-    },
-    {
-      "label": "Fase 10 - Preparacao para producao corporativa. Cobre o que protege a exposicao\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/tests_production.py",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "fase 10 - preparacao para producao corporativa. cobre o que protege a exposicao...",
-      "id": "backend_tests_production_rationale_1"
-    },
-    {
-      "label": "Sobe um processo separado e diz se a configuracao foi aceita.",
-      "file_type": "rationale",
-      "source_file": "backend/tests_production.py",
-      "source_location": "L112",
-      "_origin": "ast",
-      "community": 56,
-      "community_name": "Settings",
-      "norm_label": "sobe um processo separado e diz se a configuracao foi aceita.",
-      "id": "backend_tests_production_rationale_112"
     },
     {
       "label": "snmp_mock.py",
@@ -13785,10 +13730,10 @@
       "source_file": "src/lib/api.ts",
       "source_location": "L258",
       "_origin": "ast",
+      "id": "src_lib_api_api",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "api",
-      "id": "src_lib_api_api"
+      "norm_label": "api"
     },
     {
       "label": "auth.ts",
@@ -13796,10 +13741,10 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_lib_auth",
       "community": 58,
       "community_name": "auth.ts",
-      "norm_label": "auth.ts",
-      "id": "src_lib_auth"
+      "norm_label": "auth.ts"
     },
     {
       "label": "get",
@@ -14269,10 +14214,10 @@
       "source_file": "src/components/AuthGate.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_components_authgate",
       "community": 60,
       "community_name": "useAppData",
-      "norm_label": "authgate.tsx",
-      "id": "src_components_authgate"
+      "norm_label": "authgate.tsx"
     },
     {
       "label": "Modal.tsx",
@@ -14291,10 +14236,10 @@
       "source_file": "src/components/MustChangePasswordGate.tsx",
       "source_location": "L1",
       "_origin": "ast",
+      "id": "src_components_mustchangepasswordgate",
       "community": 60,
       "community_name": "useAppData",
-      "norm_label": "mustchangepasswordgate.tsx",
-      "id": "src_components_mustchangepasswordgate"
+      "norm_label": "mustchangepasswordgate.tsx"
     },
     {
       "label": "RequireRole.tsx",
@@ -15373,15 +15318,15 @@
       "id": "docs_visao_geral"
     },
     {
-      "label": "get",
+      "label": "routes/auth.py",
       "file_type": "code",
-      "source_file": "",
-      "source_location": "",
+      "source_file": "backend/app/routes/auth.py",
+      "source_location": "L1",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
-      "norm_label": "get",
-      "id": "backend_app_routes_users_py_get"
+      "community_name": "routes/auth.py",
+      "norm_label": "routes/auth.py",
+      "id": "backend_app_routes_auth"
     },
     {
       "label": "patch",
@@ -15390,9 +15335,9 @@
       "source_location": "",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "patch",
-      "id": "backend_app_routes_users_py_patch"
+      "id": "backend_app_routes_auth_py_patch"
     },
     {
       "label": "post",
@@ -15401,9 +15346,9 @@
       "source_location": "",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "post",
-      "id": "backend_app_routes_users_py_post"
+      "id": "backend_app_routes_auth_py_post"
     },
     {
       "label": "Session",
@@ -15412,9 +15357,9 @@
       "source_location": "",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "session",
-      "id": "backend_app_routes_users_py_session"
+      "id": "backend_app_routes_auth_py_session"
     },
     {
       "label": "schemas/user.py",
@@ -15423,7 +15368,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "schemas/user.py",
       "id": "backend_app_schemas_user"
     },
@@ -15434,7 +15379,7 @@
       "source_location": "",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "basemodel",
       "id": "backend_app_schemas_user_py_basemodel"
     },
@@ -15445,86 +15390,64 @@
       "source_location": "",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "field_validator",
       "id": "backend_app_schemas_user_py_field_validator"
     },
     {
-      "label": "Enum",
+      "label": "Request",
       "file_type": "code",
       "source_file": "",
       "source_location": "",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
-      "norm_label": "enum",
-      "id": "enum"
+      "community_name": "routes/auth.py",
+      "norm_label": "request",
+      "id": "request"
     },
     {
-      "label": "str",
-      "file_type": "code",
-      "source_file": "",
-      "source_location": "",
-      "_origin": "ast",
-      "community": 68,
-      "community_name": "Role",
-      "norm_label": "str",
-      "id": "str"
-    },
-    {
-      "label": "RBAC minimo (Fase 1). Tres papeis cobrem todas as rotas existentes hoje: -\u2026",
+      "label": "Perfil da PROPRIA conta (Fase 8). So o nome. `require_active_user` (nao\u2026",
       "file_type": "rationale",
-      "source_file": "backend/app/models/user.py",
-      "source_location": "L9",
+      "source_file": "backend/app/routes/auth.py",
+      "source_location": "L177",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
-      "norm_label": "rbac minimo (fase 1). tres papeis cobrem todas as rotas existentes hoje: -...",
-      "id": "backend_app_models_user_rationale_9"
+      "community_name": "routes/auth.py",
+      "norm_label": "perfil da propria conta (fase 8). so o nome. `require_active_user` (nao...",
+      "id": "backend_app_routes_auth_rationale_177"
     },
     {
-      "label": "Altera nome, username, papel, ativacao e/ou senha de uma conta. Desativar aqui\u2026",
+      "label": "Troca da propria senha, exigindo a atual. Usa `require_user`, nao\u2026",
       "file_type": "rationale",
-      "source_file": "backend/app/routes/users.py",
-      "source_location": "L125",
+      "source_file": "backend/app/routes/auth.py",
+      "source_location": "L201",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
-      "norm_label": "altera nome, username, papel, ativacao e/ou senha de uma conta. desativar aqui...",
-      "id": "backend_app_routes_users_rationale_125"
+      "community_name": "routes/auth.py",
+      "norm_label": "troca da propria senha, exigindo a atual. usa `require_user`, nao...",
+      "id": "backend_app_routes_auth_rationale_201"
     },
     {
-      "label": "Impede que a ultima conta admin ativa perca o proprio acesso administrativo.\u2026",
+      "label": "IP de origem da requisicao, para a contagem por IP. `X-Forwarded-For` so e lido\u2026",
       "file_type": "rationale",
-      "source_file": "backend/app/routes/users.py",
-      "source_location": "L38",
+      "source_file": "backend/app/routes/auth.py",
+      "source_location": "L54",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
-      "norm_label": "impede que a ultima conta admin ativa perca o proprio acesso administrativo....",
-      "id": "backend_app_routes_users_rationale_38"
+      "community_name": "routes/auth.py",
+      "norm_label": "ip de origem da requisicao, para a contagem por ip. `x-forwarded-for` so e lido...",
+      "id": "backend_app_routes_auth_rationale_54"
     },
     {
-      "label": "Todas as contas, mais recentes por ultimo (ordem estavel de cadastro).",
+      "label": "Autentica e devolve o JWT. Aceita e-mail OU username em `credentials.email` (o\u2026",
       "file_type": "rationale",
-      "source_file": "backend/app/routes/users.py",
-      "source_location": "L70",
+      "source_file": "backend/app/routes/auth.py",
+      "source_location": "L77",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
-      "norm_label": "todas as contas, mais recentes por ultimo (ordem estavel de cadastro).",
-      "id": "backend_app_routes_users_rationale_70"
-    },
-    {
-      "label": "Cria uma conta. Substitui o antigo `POST /api/auth/register` (Fase 1), que ja\u2026",
-      "file_type": "rationale",
-      "source_file": "backend/app/routes/users.py",
-      "source_location": "L76",
-      "_origin": "ast",
-      "community": 68,
-      "community_name": "Role",
-      "norm_label": "cria uma conta. substitui o antigo `post /api/auth/register` (fase 1), que ja...",
-      "id": "backend_app_routes_users_rationale_76"
+      "community_name": "routes/auth.py",
+      "norm_label": "autentica e devolve o jwt. aceita e-mail ou username em `credentials.email` (o...",
+      "id": "backend_app_routes_auth_rationale_77"
     },
     {
       "label": "Campos que um admin pode alterar em outra conta (Fase 3). Deliberadamente NAO\u2026",
@@ -15533,7 +15456,7 @@
       "source_location": "L108",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "campos que um admin pode alterar em outra conta (fase 3). deliberadamente nao...",
       "id": "backend_app_schemas_user_rationale_108"
     },
@@ -15544,7 +15467,7 @@
       "source_location": "L154",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "credenciais de login. `email` aceita e-mail ou username \u2014 o nome do campo foi...",
       "id": "backend_app_schemas_user_rationale_154"
     },
@@ -15555,7 +15478,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "normaliza e valida um username: minusculas, formato `_username_re`. usada nos...",
       "id": "backend_app_schemas_user_rationale_16"
     },
@@ -15566,7 +15489,7 @@
       "source_location": "L170",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "usuario exposto pela api. `password_hash` nunca aparece aqui.",
       "id": "backend_app_schemas_user_rationale_170"
     },
@@ -15577,7 +15500,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "o que o dono da conta pode alterar em si mesmo (fase 8). so `name`. nao e...",
       "id": "backend_app_schemas_user_rationale_59"
     },
@@ -15588,7 +15511,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "community": 68,
-      "community_name": "Role",
+      "community_name": "routes/auth.py",
       "norm_label": "troca da propria senha (fase 8). `current_password` nao e burocracia: sem ela,...",
       "id": "backend_app_schemas_user_rationale_87"
     },
@@ -16829,17 +16752,6 @@
       "id": "src_app_alerts_page"
     },
     {
-      "label": "app/page.tsx",
-      "file_type": "code",
-      "source_file": "src/app/page.tsx",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "types.ts",
-      "norm_label": "app/page.tsx",
-      "id": "src_app_page"
-    },
-    {
       "label": "AlertBanner.tsx",
       "file_type": "code",
       "source_file": "src/components/AlertBanner.tsx",
@@ -16915,28 +16827,6 @@
       "community_name": "types.ts",
       "norm_label": "status_servidor",
       "id": "src_components_networkview_status_servidor"
-    },
-    {
-      "label": "routes.ts",
-      "file_type": "code",
-      "source_file": "src/lib/routes.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "types.ts",
-      "norm_label": "routes.ts",
-      "id": "src_lib_routes"
-    },
-    {
-      "label": "NAV_ROUTES",
-      "file_type": "code",
-      "source_file": "src/lib/routes.ts",
-      "source_location": "L6",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "types.ts",
-      "norm_label": "nav_routes",
-      "id": "src_lib_routes_nav_routes"
     },
     {
       "label": "types.ts",
@@ -17049,6 +16939,17 @@
       "id": "src_components_comingsoon"
     },
     {
+      "label": "app/page.tsx",
+      "file_type": "code",
+      "source_file": "src/app/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "app/page.tsx",
+      "id": "src_app_page"
+    },
+    {
       "label": "toner/page.tsx",
       "file_type": "code",
       "source_file": "src/app/toner/page.tsx",
@@ -17157,6 +17058,61 @@
       "community_name": "cn",
       "norm_label": "cn.ts",
       "id": "src_lib_cn"
+    },
+    {
+      "label": "routes.ts",
+      "file_type": "code",
+      "source_file": "src/lib/routes.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "routes.ts",
+      "id": "src_lib_routes"
+    },
+    {
+      "label": "NAV_ROUTES",
+      "file_type": "code",
+      "source_file": "src/lib/routes.ts",
+      "source_location": "L6",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "nav_routes",
+      "id": "src_lib_routes_nav_routes"
+    },
+    {
+      "label": "tonerColor.ts",
+      "file_type": "code",
+      "source_file": "src/lib/tonerColor.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "tonercolor.ts",
+      "id": "src_lib_tonercolor"
+    },
+    {
+      "label": "CHANNEL_COLOR_DARK",
+      "file_type": "code",
+      "source_file": "src/lib/tonerColor.ts",
+      "source_location": "L16",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "channel_color_dark",
+      "id": "src_lib_tonercolor_channel_color_dark"
+    },
+    {
+      "label": "CHANNEL_COLOR_LIGHT",
+      "file_type": "code",
+      "source_file": "src/lib/tonerColor.ts",
+      "source_location": "L9",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "cn",
+      "norm_label": "channel_color_light",
+      "id": "src_lib_tonercolor_channel_color_light"
     },
     {
       "label": "rate_limit.py",
@@ -18026,26 +17982,70 @@
       "id": "backend_tests_login_hardening_rationale_65"
     },
     {
-      "label": "exportCsv.ts",
+      "label": "seed.py",
       "file_type": "code",
-      "source_file": "src/lib/exportCsv.ts",
+      "source_file": "backend/seed.py",
       "source_location": "L1",
       "_origin": "ast",
       "community": 99,
-      "community_name": "Topbar",
-      "norm_label": "exportcsv.ts",
-      "id": "src_lib_exportcsv"
+      "community_name": "seed.py",
+      "norm_label": "seed.py",
+      "id": "backend_seed"
     },
     {
-      "label": "STATUS_LABEL",
+      "label": "Session",
       "file_type": "code",
-      "source_file": "src/lib/exportCsv.ts",
-      "source_location": "L8",
+      "source_file": "",
+      "source_location": "",
       "_origin": "ast",
       "community": 99,
-      "community_name": "Topbar",
-      "norm_label": "status_label",
-      "id": "src_lib_exportcsv_status_label"
+      "community_name": "seed.py",
+      "norm_label": "session",
+      "id": "backend_seed_py_session"
+    },
+    {
+      "label": "Semeia o banco: contas iniciais + a frota de printers_data.json. SENHAS (Fase\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/seed.py",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 99,
+      "community_name": "seed.py",
+      "norm_label": "semeia o banco: contas iniciais + a frota de printers_data.json. senhas (fase...",
+      "id": "backend_seed_rationale_1"
+    },
+    {
+      "label": "Imprime a senha em destaque. Unica vez que ela aparece em texto claro.",
+      "file_type": "rationale",
+      "source_file": "backend/seed.py",
+      "source_location": "L120",
+      "_origin": "ast",
+      "community": 99,
+      "community_name": "seed.py",
+      "norm_label": "imprime a senha em destaque. unica vez que ela aparece em texto claro.",
+      "id": "backend_seed_rationale_120"
+    },
+    {
+      "label": "Renomeia TODAS as contas `...@example.com` para `...@elgin.com.br`. Uso unico,\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/seed.py",
+      "source_location": "L140",
+      "_origin": "ast",
+      "community": 99,
+      "community_name": "seed.py",
+      "norm_label": "renomeia todas as contas `...@example.com` para `...@elgin.com.br`. uso unico,...",
+      "id": "backend_seed_rationale_140"
+    },
+    {
+      "label": "Devolve (senha, foi_gerada). `foi_gerada` decide se a senha precisa ser\u2026",
+      "file_type": "rationale",
+      "source_file": "backend/seed.py",
+      "source_location": "L95",
+      "_origin": "ast",
+      "community": 99,
+      "community_name": "seed.py",
+      "norm_label": "devolve (senha, foi_gerada). `foi_gerada` decide se a senha precisa ser...",
+      "id": "backend_seed_rationale_95"
     },
     {
       "label": "src/components/ (padr\u00e3o com header-comment por arquivo)",
@@ -22474,7 +22474,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/Login.tsx",
-      "source_location": "L206",
+      "source_location": "L193",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_login_login",
@@ -22548,9 +22548,9 @@
       "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate_mustchangepasswordgate_handlesubmit",
-      "target": "src_components_mustchangepasswordgate_mustchangepasswordgate_validar"
+      "target": "src_components_mustchangepasswordgate_mustchangepasswordgate_validar",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -23676,9 +23676,9 @@
       "source_location": "L136",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api_apirequest",
-      "target": "src_lib_api_gettoken"
+      "target": "src_lib_api_gettoken",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -23688,9 +23688,9 @@
       "source_location": "L166",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api_apirequest",
-      "target": "src_lib_api_describedetail"
+      "target": "src_lib_api_describedetail",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -23700,9 +23700,9 @@
       "source_location": "L72",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api_settoken",
-      "target": "src_lib_api_cleartoken"
+      "target": "src_lib_api_cleartoken",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -24000,9 +24000,9 @@
       "source_location": "L115",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth_login",
-      "target": "src_lib_auth_fetchcurrentuser"
+      "target": "src_lib_auth_fetchcurrentuser",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -24012,9 +24012,9 @@
       "source_location": "L115",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth_login",
-      "target": "src_lib_auth_toaccount"
+      "target": "src_lib_auth_toaccount",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -24024,9 +24024,9 @@
       "source_location": "L116",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth_login",
-      "target": "src_lib_auth_cacheaccount"
+      "target": "src_lib_auth_cacheaccount",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -24072,9 +24072,9 @@
       "source_location": "L151",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth_restoresession",
-      "target": "src_lib_auth_fetchcurrentuser"
+      "target": "src_lib_auth_fetchcurrentuser",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -24084,9 +24084,9 @@
       "source_location": "L151",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth_restoresession",
-      "target": "src_lib_auth_toaccount"
+      "target": "src_lib_auth_toaccount",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -24108,9 +24108,9 @@
       "source_location": "L153",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth_restoresession",
-      "target": "src_lib_auth_cacheaccount"
+      "target": "src_lib_auth_cacheaccount",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -24120,9 +24120,9 @@
       "source_location": "L159",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth_restoresession",
-      "target": "src_lib_auth_logout"
+      "target": "src_lib_auth_logout",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -24132,9 +24132,9 @@
       "source_location": "L165",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth_restoresession",
-      "target": "src_lib_auth_readcachedaccount"
+      "target": "src_lib_auth_readcachedaccount",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -24156,9 +24156,9 @@
       "source_location": "L179",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth_updatemyprofile",
-      "target": "src_lib_auth_toaccount"
+      "target": "src_lib_auth_toaccount",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -24180,9 +24180,9 @@
       "source_location": "L180",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth_updatemyprofile",
-      "target": "src_lib_auth_cacheaccount"
+      "target": "src_lib_auth_cacheaccount",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -24204,9 +24204,9 @@
       "source_location": "L210",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth_withpasswordchanged",
-      "target": "src_lib_auth_cacheaccount"
+      "target": "src_lib_auth_cacheaccount",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -25515,6 +25515,18 @@
       "confidence_score": 1.0,
       "source": "src_components_historymatrix_historymatrixprops",
       "target": "src_types_printer"
+    },
+    {
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/Login.tsx",
+      "source_location": "L31",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_login_loginprops",
+      "target": "src_lib_auth_account",
+      "confidence_score": 1.0
     },
     {
       "relation": "references",
@@ -28956,9 +28968,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_authgate",
-      "target": "src_lib_app_data_useappdata"
+      "target": "src_lib_app_data_useappdata",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -28968,9 +28980,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_authgate",
-      "target": "src_components_login_login"
+      "target": "src_components_login_login",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -28980,9 +28992,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_authgate",
-      "target": "src_components_mustchangepasswordgate_mustchangepasswordgate"
+      "target": "src_components_mustchangepasswordgate_mustchangepasswordgate",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -29220,9 +29232,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate",
-      "target": "src_lib_auth_changemypassword"
+      "target": "src_lib_auth_changemypassword",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -29232,9 +29244,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate",
-      "target": "src_lib_auth_withpasswordchanged"
+      "target": "src_lib_auth_withpasswordchanged",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -29244,9 +29256,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate",
-      "target": "src_lib_apierrors_useapierrorreporter"
+      "target": "src_lib_apierrors_useapierrorreporter",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -29256,9 +29268,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate",
-      "target": "src_lib_app_data_useappdata"
+      "target": "src_lib_app_data_useappdata",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -29268,9 +29280,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate",
-      "target": "src_lib_toast_usetoast"
+      "target": "src_lib_toast_usetoast",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -31212,9 +31224,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_api_api"
+      "target": "src_lib_api_api",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -31224,9 +31236,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_api_apierror"
+      "target": "src_lib_api_apierror",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -31236,9 +31248,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_api_cleartoken"
+      "target": "src_lib_api_cleartoken",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -31248,9 +31260,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_api_gettoken"
+      "target": "src_lib_api_gettoken",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -31260,9 +31272,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_api_istokenpersistent"
+      "target": "src_lib_api_istokenpersistent",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -31272,9 +31284,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_api_settoken"
+      "target": "src_lib_api_settoken",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -31284,9 +31296,9 @@
       "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_permissions_parserole"
+      "target": "src_lib_permissions_parserole",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -31296,9 +31308,9 @@
       "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_permissions_role"
+      "target": "src_lib_permissions_role",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -34584,9 +34596,9 @@
       "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_authgate",
-      "target": "ref_react"
+      "target": "ref_react",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -34596,9 +34608,9 @@
       "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_authgate",
-      "target": "src_lib_app_data"
+      "target": "src_lib_app_data",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -34608,9 +34620,9 @@
       "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_authgate",
-      "target": "src_components_login"
+      "target": "src_components_login",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -34620,9 +34632,9 @@
       "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_authgate",
-      "target": "src_components_appshell"
+      "target": "src_components_appshell",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -34632,9 +34644,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_authgate",
-      "target": "src_components_mustchangepasswordgate"
+      "target": "src_components_mustchangepasswordgate",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -34908,9 +34920,9 @@
       "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate",
-      "target": "ref_react"
+      "target": "ref_react",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -34920,9 +34932,9 @@
       "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate",
-      "target": "src_lib_auth"
+      "target": "src_lib_auth",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -34932,9 +34944,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate",
-      "target": "src_lib_apierrors"
+      "target": "src_lib_apierrors",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -34944,9 +34956,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate",
-      "target": "src_lib_app_data"
+      "target": "src_lib_app_data",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -34956,9 +34968,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate",
-      "target": "src_lib_toast"
+      "target": "src_lib_toast",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -36216,9 +36228,9 @@
       "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_api"
+      "target": "src_lib_api",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -36228,9 +36240,9 @@
       "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_permissions"
+      "target": "src_lib_permissions",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -45102,9 +45114,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_authgate",
-      "target": "src_components_authgate_authgate"
+      "target": "src_components_authgate_authgate",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -45462,7 +45474,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Login.tsx",
-      "source_location": "L139",
+      "source_location": "L126",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_login_login",
@@ -45520,9 +45532,9 @@
       "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate",
-      "target": "src_components_mustchangepasswordgate_mustchangepasswordgate"
+      "target": "src_components_mustchangepasswordgate_mustchangepasswordgate",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -45531,9 +45543,9 @@
       "source_location": "L44",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate_mustchangepasswordgate",
-      "target": "src_components_mustchangepasswordgate_mustchangepasswordgate_validar"
+      "target": "src_components_mustchangepasswordgate_mustchangepasswordgate_validar",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -45542,9 +45554,9 @@
       "source_location": "L52",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_components_mustchangepasswordgate_mustchangepasswordgate",
-      "target": "src_components_mustchangepasswordgate_mustchangepasswordgate_handlesubmit"
+      "target": "src_components_mustchangepasswordgate_mustchangepasswordgate_handlesubmit",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46477,9 +46489,9 @@
       "source_location": "L110",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_describedetail"
+      "target": "src_lib_api_describedetail",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46488,9 +46500,9 @@
       "source_location": "L129",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apirequest"
+      "target": "src_lib_api_apirequest",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46499,9 +46511,9 @@
       "source_location": "L174",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apitonerlevel"
+      "target": "src_lib_api_apitonerlevel",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46510,9 +46522,9 @@
       "source_location": "L180",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apiprinterwithstatus"
+      "target": "src_lib_api_apiprinterwithstatus",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46521,9 +46533,9 @@
       "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_backendenvironment"
+      "target": "src_lib_api_backendenvironment",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46532,9 +46544,9 @@
       "source_location": "L197",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apialert"
+      "target": "src_lib_api_apialert",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46543,9 +46555,9 @@
       "source_location": "L207",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apiprinterreading"
+      "target": "src_lib_api_apiprinterreading",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46554,9 +46566,9 @@
       "source_location": "L219",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apidiscoveredtoner"
+      "target": "src_lib_api_apidiscoveredtoner",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46565,9 +46577,9 @@
       "source_location": "L227",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apidiscoveredprinter"
+      "target": "src_lib_api_apidiscoveredprinter",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46576,9 +46588,9 @@
       "source_location": "L249",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apidiscoveryresponse"
+      "target": "src_lib_api_apidiscoveryresponse",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46587,9 +46599,9 @@
       "source_location": "L258",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_api"
+      "target": "src_lib_api_api",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46598,9 +46610,9 @@
       "source_location": "L270",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_fetchprinterswithstatus"
+      "target": "src_lib_api_fetchprinterswithstatus",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46609,9 +46621,9 @@
       "source_location": "L274",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_fetchalerts"
+      "target": "src_lib_api_fetchalerts",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46620,9 +46632,9 @@
       "source_location": "L278",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_fetchprinterreadings"
+      "target": "src_lib_api_fetchprinterreadings",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46631,9 +46643,9 @@
       "source_location": "L282",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_discoverprinters"
+      "target": "src_lib_api_discoverprinters",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46642,9 +46654,9 @@
       "source_location": "L285",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_printerinput"
+      "target": "src_lib_api_printerinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46653,9 +46665,9 @@
       "source_location": "L297",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_createprinter"
+      "target": "src_lib_api_createprinter",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46664,9 +46676,9 @@
       "source_location": "L300",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_updateprinter"
+      "target": "src_lib_api_updateprinter",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46675,9 +46687,9 @@
       "source_location": "L306",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apiuser"
+      "target": "src_lib_api_apiuser",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46686,9 +46698,9 @@
       "source_location": "L319",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_usercreateinput"
+      "target": "src_lib_api_usercreateinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46697,9 +46709,9 @@
       "source_location": "L329",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_userupdateinput"
+      "target": "src_lib_api_userupdateinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46708,9 +46720,9 @@
       "source_location": "L339",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_fetchusers"
+      "target": "src_lib_api_fetchusers",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46719,9 +46731,9 @@
       "source_location": "L344",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apiprintserver"
+      "target": "src_lib_api_apiprintserver",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46730,9 +46742,9 @@
       "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_fetchbackendenvironment"
+      "target": "src_lib_api_fetchbackendenvironment",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46741,9 +46753,9 @@
       "source_location": "L361",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apisyncresult"
+      "target": "src_lib_api_apisyncresult",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46752,9 +46764,9 @@
       "source_location": "L371",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_fetchprintservers"
+      "target": "src_lib_api_fetchprintservers",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46763,9 +46775,9 @@
       "source_location": "L379",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_discoverserver"
+      "target": "src_lib_api_discoverserver",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46774,9 +46786,9 @@
       "source_location": "L387",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_syncserver"
+      "target": "src_lib_api_syncserver",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46785,9 +46797,9 @@
       "source_location": "L391",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_printservercreateinput"
+      "target": "src_lib_api_printservercreateinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46796,9 +46808,9 @@
       "source_location": "L406",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_printserverupdateinput"
+      "target": "src_lib_api_printserverupdateinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46807,9 +46819,9 @@
       "source_location": "L414",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_createprintserver"
+      "target": "src_lib_api_createprintserver",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46818,9 +46830,9 @@
       "source_location": "L418",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_updateprintserver"
+      "target": "src_lib_api_updateprintserver",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46829,9 +46841,9 @@
       "source_location": "L424",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apinotificationalertref"
+      "target": "src_lib_api_apinotificationalertref",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46840,9 +46852,9 @@
       "source_location": "L433",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apinotification"
+      "target": "src_lib_api_apinotification",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46851,9 +46863,9 @@
       "source_location": "L443",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_notificationcreateinput"
+      "target": "src_lib_api_notificationcreateinput",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46862,9 +46874,9 @@
       "source_location": "L454",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_fetchnotifications"
+      "target": "src_lib_api_fetchnotifications",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46873,9 +46885,9 @@
       "source_location": "L466",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_fetchunreadnotificationcount"
+      "target": "src_lib_api_fetchunreadnotificationcount",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46884,9 +46896,9 @@
       "source_location": "L470",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_marknotificationread"
+      "target": "src_lib_api_marknotificationread",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46895,9 +46907,9 @@
       "source_location": "L478",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_markallnotificationsread"
+      "target": "src_lib_api_markallnotificationsread",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46906,9 +46918,9 @@
       "source_location": "L482",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_createnotifications"
+      "target": "src_lib_api_createnotifications",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46917,9 +46929,9 @@
       "source_location": "L485",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_createuser"
+      "target": "src_lib_api_createuser",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46928,9 +46940,9 @@
       "source_location": "L487",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_updateuser"
+      "target": "src_lib_api_updateuser",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46939,9 +46951,9 @@
       "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_apierror"
+      "target": "src_lib_api_apierror",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46950,9 +46962,9 @@
       "source_location": "L66",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_gettoken"
+      "target": "src_lib_api_gettoken",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46961,9 +46973,9 @@
       "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_api_base_url"
+      "target": "src_lib_api_api_base_url",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46972,9 +46984,9 @@
       "source_location": "L71",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_settoken"
+      "target": "src_lib_api_settoken",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46983,9 +46995,9 @@
       "source_location": "L77",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_istokenpersistent"
+      "target": "src_lib_api_istokenpersistent",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -46994,9 +47006,9 @@
       "source_location": "L82",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_cleartoken"
+      "target": "src_lib_api_cleartoken",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47005,9 +47017,9 @@
       "source_location": "L88",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_requestoptions"
+      "target": "src_lib_api_requestoptions",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47016,9 +47028,9 @@
       "source_location": "L97",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api",
-      "target": "src_lib_api_validationdetail"
+      "target": "src_lib_api_validationdetail",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47104,9 +47116,9 @@
       "source_location": "L104",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_login"
+      "target": "src_lib_auth_login",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47115,9 +47127,9 @@
       "source_location": "L121",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_fetchcurrentuser"
+      "target": "src_lib_auth_fetchcurrentuser",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47126,9 +47138,9 @@
       "source_location": "L125",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_sessionstate"
+      "target": "src_lib_auth_sessionstate",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47137,9 +47149,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_account"
+      "target": "src_lib_auth_account",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47148,9 +47160,9 @@
       "source_location": "L147",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_restoresession"
+      "target": "src_lib_auth_restoresession",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47159,9 +47171,9 @@
       "source_location": "L178",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_updatemyprofile"
+      "target": "src_lib_auth_updatemyprofile",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47170,9 +47182,9 @@
       "source_location": "L191",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_changemypassword"
+      "target": "src_lib_auth_changemypassword",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47181,9 +47193,9 @@
       "source_location": "L208",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_withpasswordchanged"
+      "target": "src_lib_auth_withpasswordchanged",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47192,9 +47204,9 @@
       "source_location": "L214",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_logout"
+      "target": "src_lib_auth_logout",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47203,9 +47215,9 @@
       "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_apiuser"
+      "target": "src_lib_auth_apiuser",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47214,9 +47226,9 @@
       "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_loginresponse"
+      "target": "src_lib_auth_loginresponse",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47225,9 +47237,9 @@
       "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_toaccount"
+      "target": "src_lib_auth_toaccount",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47236,9 +47248,9 @@
       "source_location": "L67",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_cacheaccount"
+      "target": "src_lib_auth_cacheaccount",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -47247,9 +47259,9 @@
       "source_location": "L73",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_auth",
-      "target": "src_lib_auth_readcachedaccount"
+      "target": "src_lib_auth_readcachedaccount",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -50019,9 +50031,9 @@
       "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
-      "confidence_score": 1.0,
       "source": "src_lib_api_apierror",
-      "target": "src_lib_api_apierror_constructor"
+      "target": "src_lib_api_apierror_constructor",
+      "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
@@ -54773,5 +54785,5 @@
       "source_file": "CONTEXTO-DESENVOLVIMENTO.md"
     }
   ],
-  "built_at_commit": "6b3a0b86897d999e90914b3da998d1c1603759f9"
+  "built_at_commit": "f07610ee88732f09aabfba2f4b2efafcbe59d1c9"
 }
