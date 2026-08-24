@@ -59,3 +59,10 @@ backend/.env
 
 # Cache incremental do compilador TypeScript — muda a cada build.
 tsconfig.tsbuildinfo
+
+# Operacao em producao (Fase 10)
+backend/logs/
+backend/backups/
+# Companheiros do modo WAL do SQLite — estado transitorio, nunca versionado.
+*.db-wal
+*.db-shm
