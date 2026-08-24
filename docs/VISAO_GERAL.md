@@ -449,7 +449,7 @@ carrega mas nenhum dado aparece, e o erro só é visível no console do navegado
 |---|---|---|---|
 | `LOGIN_MAX_ATTEMPTS` | Tentativas erradas antes de bloquear | `5` | Muito alto → força bruta volta a ser viável. `1` → qualquer erro de digitação bloqueia. |
 | `LOGIN_WINDOW_SECONDS` | Duração do bloqueio | `900` (15 min) | Muito curto → o limite quase não atrapalha um ataque. Muito longo → quem errou fica de fora por muito tempo. |
-| `TRUST_PROXY_HEADERS` | Confiar no cabeçalho `X-Forwarded-For` | `false` até o Tunnel entrar; **avaliar** depois | **`true` sem um proxy de confiança na frente ENFRAQUECE a proteção** — o cabeçalho passa a ser escolhido pelo cliente, que troca de "IP" a cada tentativa e anula o limite por IP. |
+| `TRUST_PROXY_HEADERS` | Confiar no cabeçalho `X-Forwarded-For` | `true` (o Cloudflare Tunnel já está ativo — Fase 11) | **`true` sem um proxy de confiança na frente ENFRAQUECE a proteção** — o cabeçalho passa a ser escolhido pelo cliente, que troca de "IP" a cada tentativa e anula o limite por IP. |
 
 ### Webhook (aviso no Teams)
 
@@ -480,6 +480,9 @@ para o log.
 | Variável | O que faz | Se estiver errada |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | Endereço do backend | O painel não acha o backend e mostra dados de demonstração com faixa de aviso. |
+
+Passo a passo de como configurar isso na Vercel (e o que atualizar no
+backend depois) em [`VERCEL_DEPLOY.md`](VERCEL_DEPLOY.md).
 
 ---
 
@@ -880,6 +883,7 @@ Parar não causa dano — só congela o painel. Deixar rodar com dado errado, si
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Arquitetura em detalhe técnico. |
 | [`DEPLOYMENT_ARCHITECTURE.md`](DEPLOYMENT_ARCHITECTURE.md) | Plano de exposição externa (Cloudflare Tunnel, Vercel). |
 | [`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md) | Passo a passo operacional: instalar o túnel, apontar o subdomínio, validar. |
+| [`VERCEL_DEPLOY.md`](VERCEL_DEPLOY.md) | Passo a passo do deploy do frontend na Vercel, variáveis de ambiente e o CORS a atualizar depois. |
 | [`API_MAP.md`](API_MAP.md) | Todas as rotas da API. |
 | [`DATA_FLOW.md`](DATA_FLOW.md) | Como o dado caminha, da impressora ao painel. |
 | [`DEVELOPER_GUIDE.md`](DEVELOPER_GUIDE.md) | Para quem for mexer no código. |
