@@ -113,13 +113,26 @@ export default function Login({ onSuccess }: LoginProps) {
       onSuccess(account, remember);
     } catch (err) {
       setLoading(false);
+
+      // 0 (rede) e 429 (bloqueio por tentativas) já vêm do backend com uma
+      // mensagem específica e verdadeira ("tente novamente em N minuto(s)")
+      // — mostrar "senha incorreta" por cima dela é enganoso: a senha pode
+      // estar certíssima, o pedido nem chegou a ser conferido. Só o "resto"
+      // (401 de fato) cai no texto genérico.
+      const emBloqueioOuOffline = err instanceof ApiError && (err.status === 0 || err.status === 429);
       setError(
-        err instanceof ApiError && err.status === 0
+        emBloqueioOuOffline
           ? err.message
           : "E-mail/usuário ou senha incorretos. Verifique os dados e tente novamente.",
       );
-      setShake(true);
-      window.setTimeout(() => setShake(false), 420);
+
+      // O "shake" sinaliza "o que você digitou está errado" — correto para
+      // 401, mas mentiroso para 429: a digitação pode estar perfeita, o
+      // bloqueio é por excesso de tentativas, não por causa desta.
+      if (!emBloqueioOuOffline) {
+        setShake(true);
+        window.setTimeout(() => setShake(false), 420);
+      }
     }
   }
 
