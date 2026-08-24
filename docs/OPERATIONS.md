@@ -222,8 +222,8 @@ intervalo, o disparo seguinte é descartado em vez de concorrer pelo banco.
 > outro documento. Lá ele é **D1**.
 >
 > Dois outros itens têm impacto direto na operação e valem conhecer:
-> **D6** (usar sempre `--host 127.0.0.1`; o bloco de execução direta de
-> `app/main.py` sobe em `0.0.0.0`) e **D13** (`/health` existe mas nada o
+> **D6** (o backend fala HTTP puro e depende do túnel para TLS; o bloco de
+> execução direta de `app/main.py` já foi corrigido para `127.0.0.1`) e **D13** (`/health` existe mas nada o
 > consulta automaticamente — se o banco travar ou a coleta parar, ninguém é
 > avisado).
 
