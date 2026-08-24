@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 from app.database import get_session
 from app.dependencies import require_admin, require_operator, require_user
@@ -6,6 +6,7 @@ from app.models.user import User
 from datetime import datetime
 
 from app.models.printer import Printer, PrinterReading
+from app.services.environment_guard import bloquear_mock_em_producao
 from app.schemas.printer import (
     PrinterCreate,
     PrinterUpdate,
@@ -27,9 +28,24 @@ router = APIRouter(
 )
 
 
+# Teto das listagens (Fase 10). A frota real tem ~85 impressoras, entao o
+# limite nao corta nada hoje; ele existe para que a resposta continue
+# limitada se a frota crescer ou se alguem pedir `?limit=` absurdo. `offset`
+# acompanha para que uma frota maior que o teto ainda seja alcancavel por
+# paginas, em vez de simplesmente sumir.
+LIMITE_PADRAO_FROTA = 500
+LIMITE_MAXIMO_FROTA = 500
+
+
 @router.get("", response_model=List[PrinterResponse])
-def list_printers(session: Session = Depends(get_session)):
-    printers = session.exec(select(Printer)).all()
+def list_printers(
+    limit: int = Query(default=LIMITE_PADRAO_FROTA, ge=1, le=LIMITE_MAXIMO_FROTA),
+    offset: int = Query(default=0, ge=0),
+    session: Session = Depends(get_session),
+):
+    printers = session.exec(
+        select(Printer).order_by(Printer.id).offset(offset).limit(limit)
+    ).all()
     return printers
 
 
@@ -38,9 +54,21 @@ TONER_LABELS = {"K": "Preto", "C": "Ciano", "M": "Magenta", "Y": "Amarelo"}
 MONTH_LABELS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
 
 
+def _inicio_da_janela(months: int) -> datetime:
+    """Primeiro instante do mes que abre uma janela de `months` meses ate hoje."""
+    hoje = datetime.utcnow()
+    total = (hoje.year * 12 + (hoje.month - 1)) - (months - 1)
+    ano, mes = divmod(total, 12)
+    return datetime(ano, mes + 1, 1)
+
+
 # Precisa vir antes de /{printer_id}, senao "with-status" e lido como id.
 @router.get("/with-status", response_model=List[PrinterWithStatus])
-def list_printers_with_status(session: Session = Depends(get_session)):
+def list_printers_with_status(
+    limit: int = Query(default=LIMITE_PADRAO_FROTA, ge=1, le=LIMITE_MAXIMO_FROTA),
+    offset: int = Query(default=0, ge=0),
+    session: Session = Depends(get_session),
+):
     """
     Impressoras + ultima leitura de cada uma, em uma unica chamada.
 
@@ -48,12 +76,23 @@ def list_printers_with_status(session: Session = Depends(get_session)):
     por impressora. Sem leitura registrada, a impressora vem como "offline"
     com last_seen nulo.
     """
-    printers = session.exec(select(Printer)).all()
+    printers = session.exec(
+        select(Printer).order_by(Printer.id).offset(offset).limit(limit)
+    ).all()
 
-    # Ultima leitura por impressora (id maior = mais recente).
+    # Ultima leitura das impressoras DESTA pagina (id maior = mais recente).
+    # O filtro por printer_id importa: sem ele a varredura percorria a tabela
+    # inteira de leituras — que cresce a cada ciclo de coleta, para sempre —
+    # so para descartar quase tudo.
+    ids_pagina = [p.id for p in printers]
     latest: dict[int, PrinterReading] = {}
-    for reading in session.exec(select(PrinterReading).order_by(PrinterReading.id.desc())):
-        latest.setdefault(reading.printer_id, reading)
+    if ids_pagina:
+        for reading in session.exec(
+            select(PrinterReading)
+            .where(PrinterReading.printer_id.in_(ids_pagina))
+            .order_by(PrinterReading.id.desc())
+        ):
+            latest.setdefault(reading.printer_id, reading)
 
     result = []
     for printer in printers:
@@ -87,7 +126,17 @@ def list_printers_with_status(session: Session = Depends(get_session)):
 
 
 @router.get("/monthly-report")
-def monthly_report(session: Session = Depends(get_session)):
+def monthly_report(
+    # Janela em meses (Fase 10). Esta rota lia a tabela INTEIRA de leituras a
+    # cada chamada — e a tabela cresce a cada ciclo de coleta, sem fim: com
+    # 85 impressoras a cada 5 minutos sao ~7,3 milhoes de linhas por ano,
+    # todas carregadas em memoria para montar um relatorio que na pratica
+    # mostra os ultimos 12 meses. A janela e o limite equivalente ao `limit`
+    # das outras leituras; o intervalo maximo (60) existe para que nem um
+    # pedido explicito de "tudo" derrube o processo.
+    months: int = Query(default=12, ge=1, le=60),
+    session: Session = Depends(get_session),
+):
     """
     Contagem mensal por impressora, derivada de PrinterReading.
 
@@ -96,9 +145,14 @@ def monthly_report(session: Session = Depends(get_session)):
     impressora com uma unica leitura no mes fica com 0, e mes sem leitura nao
     aparece. Sem leituras no banco, devolve listas vazias e o painel segue
     exibindo o relatorio de demonstracao (sinalizado no cabecalho).
+
+    `months` recorta quantos meses para tras entram na conta (padrao 12).
     """
+    inicio = _inicio_da_janela(months)
     readings = session.exec(
-        select(PrinterReading).order_by(PrinterReading.timestamp)
+        select(PrinterReading)
+        .where(PrinterReading.timestamp >= inicio)
+        .order_by(PrinterReading.timestamp)
     ).all()
     if not readings:
         return {"generated_at": datetime.utcnow().isoformat(), "monthly_usage": [], "printers": []}
@@ -218,7 +272,14 @@ def update_printer(
 
 
 @router.get("/{printer_id}/readings")
-def get_printer_readings(printer_id: int, limit: int = 100, session: Session = Depends(get_session)):
+def get_printer_readings(
+    printer_id: int,
+    # Teto explicito (Fase 10): sem ele, `?limit=99999999` carregava o
+    # historico inteiro da impressora em memoria e no JSON de resposta.
+    # Mesmo padrao ja usado em /api/notifications.
+    limit: int = Query(default=100, ge=1, le=500),
+    session: Session = Depends(get_session),
+):
     readings = session.exec(
         select(PrinterReading)
         .where(PrinterReading.printer_id == printer_id)
@@ -235,6 +296,21 @@ def create_printer_reading(
     session: Session = Depends(get_session),
     _user: User = Depends(require_operator),
 ):
+    """
+    Grava uma leitura A MAO. Bloqueada em ENVIRONMENT=production.
+
+    Esta rota era a porta dos fundos da Fase 9: `/api/collect` recusa
+    simulacao em producao, mas quem tivesse um token de operator podia
+    gravar exatamente a mesma leitura ficticia por aqui, sem passar por
+    nenhuma guarda. Em producao a origem legitima de leitura e sempre a
+    coleta (SNMP, manual ou agendada), que escreve pelo PrinterCollector;
+    o painel so LE deste endpoint. Nada real e perdido ao fecha-lo.
+    """
+    bloquear_mock_em_producao(
+        "A gravacao manual de leitura",
+        "Em producao as leituras vem da coleta (POST /api/collect/printers/{id}).",
+    )
+
     printer = session.get(Printer, printer_id)
     if not printer:
         raise HTTPException(status_code=404, detail="Impressora não encontrada")

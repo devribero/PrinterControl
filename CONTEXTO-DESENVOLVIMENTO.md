@@ -1,96 +1,150 @@
-# Contexto de desenvolvimento — Elgin Impressoras
+# Contexto de desenvolvimento — PrinterControl
 
-Resumo do que foi construído até agora, pra qualquer pessoa (ou sessão de
-IA) que continue esse projeto sem ter acompanhado o histórico da conversa.
+Resumo do que existe hoje, para qualquer pessoa (ou sessão de IA) que continue
+o projeto sem ter acompanhado o histórico.
+
+> **Atualizado em 24/08/2026.** Este arquivo estava severamente desatualizado:
+> descrevia o projeto como "frontend puro Vite + React, sem backend", com
+> "login fake" e "sem banco de dados". Nada disso é verdade desde a Fase 1.
+> Se você leu a versão antiga, esqueça-a.
+
+**Comece por [`docs/VISAO_GERAL.md`](docs/VISAO_GERAL.md)** — é a visão
+completa do sistema, escrita em linguagem acessível.
+
+---
 
 ## O que é o projeto
 
-Painel web de monitoramento de impressoras da Elgin: status (online/
-offline/atenção), níveis de toner por canal, alertas, contadores mensais
-de páginas impressas e histórico por unidade/departamento. Frontend puro
-(Vite + React + TypeScript + Tailwind v4), sem backend — os dados vêm de
-arquivos JSON estáticos em `public/data/`, gerados por scripts PowerShell
-que rodam na rede da empresa.
+Sistema de monitoramento da frota de impressoras: status
+(online/offline/atenção), níveis de toner por canal, alertas, contadores
+mensais de páginas e histórico por unidade/departamento.
 
-## Arquitetura de dados: 3 modos
+**Duas peças:**
 
-1. **Demo** (padrão, sem nenhuma configuração) — dados fixos de
-   `src/data/printers.ts`, extraídos de uma planilha real de levantamento
-   de impressões (`Levantamento_impressões`). É o que roda em `npm run dev`
-   do zero.
-2. **Real** — `scripts/Coletar-Impressoras.ps1` (status/toner via SNMP +
-   servidores de impressão) e `scripts/Relatorio-Mensal.ps1` (contador
-   mensal, calculado por diff de duas leituras do contador SNMP
-   acumulativo — não existe OID de "páginas do mês"). Só funciona de
-   dentro da rede da Elgin/VPN.
-3. **Simulado** — `scripts/Simular-Ambiente.ps1` (novo). Gera os mesmos
-   dois arquivos JSON com dados fictícios, sem nenhuma chamada de rede,
-   pra testar o sistema inteiro de casa. Ver README.md, seção "Dados: demo,
-   real e simulado".
+- **Backend** — FastAPI (Python) + SQLite + SQLModel + APScheduler. Roda numa
+  máquina Windows dentro da rede da empresa. Fala com os Print Servers via
+  PowerShell (`Get-Printer`/`Get-PrinterPort`) e com as impressoras via SNMP.
+- **Frontend** — Next.js 16 + React 19 + TypeScript, CSS Modules, Recharts,
+  Lucide. Hospedado na Vercel. Não guarda dado nenhum: consome a API.
 
-O app decide o modo automaticamente: tenta buscar `/data/printers.json` e
-`/data/monthly-report.json`; se não existirem ou forem inválidos, cai no
-demo. O rodapé do painel sempre mostra qual modo está ativo.
+A ponte entre os dois, em produção, será um **Cloudflare Tunnel** — ainda não
+ativado.
 
-## O que existe hoje (visão geral das telas)
+---
 
-- **Dashboard** — cards de status, alertas em destaque, tabela de
-  impressoras (versão compacta), níveis de toner globais, gráficos de
-  consumo/impressões/alertas, "última verificação + verificar agora".
-- **Impressoras** — tabela completa (todas as colunas), busca, filtros,
-  paginação, visão lista/grade.
-- **Suprimentos** (novo) — monitoramento de toner dedicado: contagem
-  crítico/baixo/normal/sem comunicação, tabela com todos os canais de
-  toner por impressora, filtros, busca, "atualizar agora".
-- **Alertas** — lista completa, filtro por severidade (crítico/atenção).
-- **Relatórios** — resumo da frota, contadores mensais (cards com
-  variação % mês a mês), ranking (impressoras que mais/menos imprimem),
-  consumo por departamento, impressoras devolvidas/fora de operação,
-  exportar CSV.
-- **Histórico** — matriz completa impressora × mês, agrupada por
-  site/unidade, com subtotais e total geral (reproduz a planilha
-  original).
-- **Login** — autenticação fake (duas contas hardcoded em
-  `src/data/accounts.ts`, sem backend real), tela com identidade visual
-  Elgin.
-- **Modo claro/escuro** — toggle no topo, paleta vibrante no escuro,
-  persistido em localStorage.
+## Os três ambientes
 
-Tudo em `src/components/`, com header-comment em cada arquivo explicando
-dependências externas/locais.
+Controlados por `ENVIRONMENT` no `backend/.env`:
 
-## Limitações conhecidas / dívida técnica
+| Ambiente | Simulação | Comportamento |
+|---|---|---|
+| `development` | liberada | Padrão da máquina de quem desenvolve |
+| `demo` | esperada | Faixa permanente "dados de demonstração" no painel |
+| `production` | **proibida** | O backend **recusa subir** com configuração simulada |
 
-- **Login não é autenticação real** — é só uma checagem client-side contra
-  uma lista fixa de contas. Não usar como controle de acesso de verdade
-  sem trocar por um backend real.
-- **Logo da Elgin é um redesenho à mão**, não o arquivo vetorial oficial —
-  o ambiente onde a IA rodou não tem acesso a imagens coladas no chat, só
-  uploads de arquivo. Pra trocar pelo arquivo real: suba um `.svg`/`.png`
-  em `public/` e troque o conteúdo de `src/components/ElginLogo.tsx` por
-  um `<img>`.
-- **`Coletar-Impressoras.ps1` e `Relatorio-Mensal.ps1` nunca rodaram de
-  verdade** — foram escritos/revisados sem um interpretador PowerShell
-  disponível no ambiente de desenvolvimento. `Simular-Ambiente.ps1` foi
-  validado indiretamente (mesma lógica portada pra Node e testada contra o
-  app real), mas os dois scripts originais que batem em SNMP/servidores de
-  impressão de verdade ainda precisam de um primeiro teste em campo.
-- **`departmentUsage` e `decommissionedPrinters`** (Consumo por
-  Departamento, Impressoras Devolvidas) só existem no modo demo — nenhum
-  script gera essas duas listas a partir de dados reais, elas vêm direto
-  da planilha original importada uma vez.
-- **Sem backend/banco de dados** — combinado internamente que a migração
-  pra FastAPI (Python) + Next.js + banco de dados fica pra uma conversa
-  futura; nada disso foi iniciado.
+O painel descobre o ambiente perguntando ao backend (`GET /health`), e não por
+uma variável do build — a variável descreveria o bundle, não o servidor a que
+ele acabou se conectando.
+
+**Não confundir com o fallback do frontend:** quando o backend não responde, o
+painel exibe o conjunto de demonstração de `src/data/` com faixa de aviso, em
+vez de uma tela vazia. Isso é independente do `ENVIRONMENT` do backend.
+
+---
+
+## O que existe hoje
+
+**Backend** — autenticação JWT com três papéis (viewer/operator/admin), gestão
+de usuários, cadastro de impressoras, descoberta e sincronização de múltiplos
+Print Servers, coleta SNMP manual e agendada, motor de alertas com
+deduplicação e resolução automática, webhook para Teams, notificações
+internas, perfil e troca de senha, `/health` com diagnóstico, logs em arquivo
+com redação de segredos, backup online do SQLite, e instalação como tarefa
+agendada do Windows.
+
+**Frontend** — Dashboard, Impressoras, Suprimentos (toner), Alertas,
+Relatórios, Histórico, Mapeamento de Rede, e as telas administrativas
+(Usuários, Notificações, Integrações, Configurações). Tema claro/escuro,
+preferências de acessibilidade, badges de dados de demonstração, diálogos de
+confirmação para as operações destrutivas.
+
+O inventário completo, tela a tela e com quem pode o quê, está na seção 3 de
+[`docs/VISAO_GERAL.md`](docs/VISAO_GERAL.md).
+
+---
+
+## Dívida técnica
+
+**Está toda em [`docs/TECHNICAL_DEBT.md`](docs/TECHNICAL_DEBT.md) (D1–D13).**
+Não mantenha uma segunda lista aqui — foi exatamente assim que este arquivo
+passou meses afirmando que o projeto não tinha backend.
+
+As armadilhas que mais custam tempo a quem chega agora:
+
+- **D1** — não ligue `PRAGMA foreign_keys=ON`. Derruba toda a coleta.
+- **D6** — `python app/main.py` sobe em `0.0.0.0` com reload. Em produção use
+  `python -m uvicorn app.main:app --host 127.0.0.1 --port 8000`.
+- **D8/D9** — `tests_fleet.py` e `tests_printers_crud.py` falham por
+  esperarem 73 impressoras (o banco tem 79); `tests_collect_api.py` não roda
+  por falta de `requests`. **Não são regressões suas.**
+
+---
+
+## Coisas que já não são verdade (e constavam aqui)
+
+| Dizia | É |
+|---|---|
+| "Frontend puro Vite + React, sem backend" | Next.js 16 + FastAPI + SQLite |
+| "Dados vêm de JSON estático em `public/data/`" | Vêm da API; JSON estático é só fallback |
+| "Login não é autenticação real, contas em `src/data/accounts.ts`" | JWT real, contas no banco, três papéis, argon2 |
+| "Sem backend/banco — fica para conversa futura" | Feito desde a Fase 1 |
+| "`SECRET_KEY` padrão não é apropriado para produção" | Produção **recusa subir** com ela |
+| "CORS é apenas local" | Por ambiente, com validação de produção |
+| "Push para o GitHub bloqueado (403); fluxo é entregar `.zip`" | Push funciona; o fluxo é commit local + push |
+
+Os scripts PowerShell em `scripts/` (`Coletar-Impressoras.ps1`,
+`Relatorio-Mensal.ps1`, `Simular-Ambiente.ps1`) são da era anterior ao
+backend. `Servico-PrinterControl.ps1` é atual e faz parte do deploy.
+
+---
 
 ## Como continuar
 
-- `npm run dev` pra desenvolver, `npm run build` pra validar antes de
-  qualquer entrega.
-- Pra testar como se tivesse dados reais sem estar na rede da empresa:
-  `pwsh scripts/Simular-Ambiente.ps1` e depois `npm run dev`.
-- O push direto pro GitHub a partir do ambiente de IA está bloqueado (403,
-  permissão do GitHub App) — o fluxo até agora tem sido: a IA commita
-  local e entrega um `.zip` do projeto pra você aplicar manualmente
-  (`git apply`/substituir arquivos/etc.) ou resolver a permissão do App no
-  GitHub.
+**Frontend** (da raiz):
+
+```powershell
+npm run dev      # desenvolver
+npm run lint     # oxlint
+npm run build    # validar antes de qualquer entrega
+```
+
+**Backend** (de dentro de `backend/`):
+
+```powershell
+.\venv\Scripts\python.exe -m uvicorn app.main:app --reload   # desenvolver
+.\venv\Scripts\python.exe tests_environment.py               # uma suíte
+.\venv\Scripts\python.exe seed.py                            # semear o banco
+```
+
+O venv é gerenciado por `uv`; para instalar dependências:
+`uv pip install --python venv/Scripts/python.exe -r requirements.txt`
+
+**Depois de mexer no código**, rode `graphify update .` para manter o grafo de
+conhecimento em `graphify-out/` atualizado.
+
+---
+
+## Documentação
+
+| Arquivo | Para quê |
+|---|---|
+| [`docs/VISAO_GERAL.md`](docs/VISAO_GERAL.md) | **Comece aqui.** Visão completa, em linguagem acessível. |
+| [`docs/TECHNICAL_DEBT.md`](docs/TECHNICAL_DEBT.md) | Registro único da dívida técnica. |
+| [`docs/OPERATIONS.md`](docs/OPERATIONS.md) | Runbook de produção. |
+| [`docs/DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md) | Para mexer no código. |
+| [`docs/API_MAP.md`](docs/API_MAP.md) | Todas as rotas. |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Arquitetura em detalhe. |
+| [`docs/DATA_FLOW.md`](docs/DATA_FLOW.md) | Caminho do dado, da impressora ao painel. |
+| [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) | Uso do painel. |
+| [`docs/FEATURE_MATRIX.md`](docs/FEATURE_MATRIX.md) | O que é funcional e o que é maquete. |
+| [`docs/DEPLOYMENT_ARCHITECTURE.md`](docs/DEPLOYMENT_ARCHITECTURE.md) | Plano de exposição externa. |

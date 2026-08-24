@@ -287,6 +287,26 @@ class Settings(BaseSettings):
     def collection_printer_id_list(self) -> list[int]:
         return [int(p) for p in self.collection_printer_ids.split(",") if p.strip()]
 
+    # ------------------------------------------------------------------
+    # Limite de tentativas de login (Fase 10) — ver services/rate_limit.py.
+    #
+    # 5 em 15 minutos por IP E por e-mail. O numero e folgado para quem erra
+    # a senha e apertado para quem varre uma lista: 5 tentativas a cada 15
+    # min sao 480 por dia, contra as milhares por minuto que um login sem
+    # limite permite.
+    # ------------------------------------------------------------------
+    login_max_attempts: int = 5
+    login_window_seconds: int = 900
+
+    # Confiar em X-Forwarded-For para identificar o IP de origem.
+    #
+    # Falso por padrao, e nao por conservadorismo: com o backend acessivel
+    # direto, qualquer cliente pode inventar esse cabecalho e trocar de
+    # "IP" a cada tentativa, o que ANULA o limite por IP. Ligue apenas
+    # quando houver um proxy de confianca na frente (Cloudflare Tunnel,
+    # nginx) que reescreva o cabecalho.
+    trust_proxy_headers: bool = False
+
     # API
     api_prefix: str = "/api"
 

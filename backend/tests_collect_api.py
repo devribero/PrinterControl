@@ -4,6 +4,7 @@ Teste ponta a ponta dos endpoints /api/collect com os cenarios simulados.
 Requer o backend rodando em http://127.0.0.1:8000.
 Uso:  python tests_collect_api.py
 """
+import os
 import sqlite3
 
 import requests
@@ -11,6 +12,12 @@ import requests
 BASE = "http://127.0.0.1:8000"
 DB = "printer_control.db"
 _falhas = []
+
+# Credenciais pelo ambiente (Fase 10): a senha das contas semeadas deixou de
+# ser fixa — seed.py agora gera uma aleatoria ou usa SEED_ADMIN_PASSWORD.
+#     set TEST_ADMIN_PASSWORD=<senha>
+ADMIN_EMAIL = os.environ.get("TEST_ADMIN_EMAIL", "mateus.vicentino@example.com")
+ADMIN_PASSWORD = os.environ.get("TEST_ADMIN_PASSWORD") or os.environ.get("SEED_ADMIN_PASSWORD", "")
 
 
 def check(nome, obtido, esperado):
@@ -26,9 +33,16 @@ def main():
     print("TESTE DOS ENDPOINTS /api/collect (modo mock)")
     print("=" * 70)
 
+    if not ADMIN_PASSWORD:
+        raise SystemExit(
+            f"Defina TEST_ADMIN_PASSWORD (ou SEED_ADMIN_PASSWORD) com a senha de "
+            f"{ADMIN_EMAIL}. Ela e mostrada uma unica vez por seed.py; para gerar "
+            "outra: python seed.py --resetar-senhas"
+        )
+
     login = requests.post(
         f"{BASE}/api/auth/login",
-        json={"email": "mateus.vicentino@example.com", "password": "123"},
+        json={"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD},
         timeout=5,
     )
     token = login.json()["access_token"]

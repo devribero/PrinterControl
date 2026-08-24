@@ -29,6 +29,7 @@ from app.config import ENVIRONMENTS, Settings  # noqa: E402
 from app.database import create_db_and_tables, engine  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models.print_server import PrintServer  # noqa: E402
+from app.models.printer import Printer  # noqa: E402
 from app.models.user import Role, User  # noqa: E402
 from app.services.auth import hash_password  # noqa: E402
 
@@ -214,6 +215,96 @@ check_true("nenhum valor parece um secret", all(SECRET_VALIDO not in str(v) for 
 
 with ambiente("demo"):
     check("health reflete demo", client.get("/health").json()["is_demo"], True)
+
+print("\n[13] POST /api/printers/{id}/readings: a porta dos fundos da Fase 9")
+# Ate aqui esta rota era o unico caminho de ESCRITA de leitura que nao
+# passava por guarda nenhuma: /api/collect recusa simulacao em producao, mas
+# quem tivesse token de operator gravava a mesma leitura ficticia por aqui.
+with Session(engine) as s:
+    s.add(Printer(server="srv-real", ip="10.150.6.99", name="Impressora Teste", model="Teste", department="TI"))
+    s.commit()
+    impressora_id = s.exec(select(Printer).where(Printer.ip == "10.150.6.99")).first().id
+
+LEITURA_VALIDA = {"status": "online", "page_count": 1000, "toner_k": 50}
+
+with ambiente("production"):
+    r = client.post(f"/api/printers/{impressora_id}/readings", headers=H, json=LEITURA_VALIDA)
+    check("gravacao manual de leitura em producao", r.status_code, 409)
+    check_true(
+        "mensagem aponta a coleta como origem legitima",
+        "collect" in r.text.lower(),
+        r.text[:120],
+    )
+
+with ambiente("development"):
+    r = client.post(f"/api/printers/{impressora_id}/readings", headers=H, json=LEITURA_VALIDA)
+    check("fora de producao a gravacao manual continua disponivel", r.status_code, 200)
+
+print("\n[14] Campos de PrinterReadingCreate sao validados (422)")
+# Sem isto, um unico registro invalido corrompe as tres coisas que consomem
+# leitura: o badge do painel, o relatorio mensal (que subtrai contadores) e
+# o motor de alertas (que compara o toner com os limiares).
+PAYLOADS_INVALIDOS = [
+    ("status inventado", {"status": "bombando", "page_count": 10}),
+    ("status vazio", {"status": "", "page_count": 10}),
+    ("status de severidade de alerta", {"status": "critical", "page_count": 10}),
+    ("page_count negativo", {"status": "online", "page_count": -1}),
+    ("page_count muito negativo", {"status": "online", "page_count": -999999}),
+    ("toner_k acima de 100", {"status": "online", "page_count": 10, "toner_k": 101}),
+    ("toner_k absurdo", {"status": "online", "page_count": 10, "toner_k": 5000}),
+    ("toner_k negativo", {"status": "online", "page_count": 10, "toner_k": -1}),
+    ("toner_c fora da faixa", {"status": "online", "page_count": 10, "toner_c": 200}),
+    ("toner_m fora da faixa", {"status": "online", "page_count": 10, "toner_m": -5}),
+    ("toner_y fora da faixa", {"status": "online", "page_count": 10, "toner_y": 101}),
+]
+
+with ambiente("development"):
+    for rotulo, payload in PAYLOADS_INVALIDOS:
+        r = client.post(f"/api/printers/{impressora_id}/readings", headers=H, json=payload)
+        check(f"recusa {rotulo}", r.status_code, 422)
+
+    # Os limites da faixa sao VALIDOS — a validacao nao pode recusar leitura real.
+    for rotulo, payload in [
+        ("toner em 0 (vazio de verdade)", {"status": "online", "page_count": 0, "toner_k": 0}),
+        ("toner em 100 (cheio)", {"status": "online", "page_count": 1, "toner_k": 100}),
+        ("status atencao", {"status": "atencao", "page_count": 2, "toner_k": 8}),
+        ("status offline", {"status": "offline", "page_count": 0}),
+        ("caixa alta normalizada", {"status": "ONLINE", "page_count": 3}),
+        ("sem toner algum (mono)", {"status": "online", "page_count": 4}),
+    ]:
+        r = client.post(f"/api/printers/{impressora_id}/readings", headers=H, json=payload)
+        check(f"aceita {rotulo}", r.status_code, 200)
+
+    check(
+        "status e normalizado para minusculas",
+        client.post(
+            f"/api/printers/{impressora_id}/readings",
+            headers=H,
+            json={"status": "Atencao", "page_count": 5},
+        ).json()["status"],
+        "atencao",
+    )
+
+print("\n[15] Teto de paginacao nas rotas de leitura")
+with ambiente("development"):
+    for rota in (
+        f"/api/printers/{impressora_id}/readings?limit=100000",
+        "/api/printers?limit=100000",
+        "/api/printers/with-status?limit=100000",
+        "/api/alerts?limit=100000",
+        "/api/printers/monthly-report?months=999",
+    ):
+        check(f"limite absurdo recusado: {rota.split('?')[1]} em {rota.split('?')[0]}",
+              client.get(rota, headers=H).status_code, 422)
+
+    for rota in (
+        f"/api/printers/{impressora_id}/readings?limit=500",
+        "/api/printers?limit=500&offset=0",
+        "/api/printers/with-status?limit=500",
+        "/api/alerts?limit=500&offset=0",
+        "/api/printers/monthly-report?months=12",
+    ):
+        check(f"limite no teto aceito: {rota}", client.get(rota, headers=H).status_code, 200)
 
 print("\n" + "=" * 70)
 if _falhas:

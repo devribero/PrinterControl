@@ -9,12 +9,17 @@ Pre-requisito: backend rodando. Passe a URL como argumento se nao for :8000.
     .\\venv\\Scripts\\python.exe tests_printers_crud.py http://127.0.0.1:8000
 """
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000"
-EMAIL, PASSWORD = "mateus.vicentino@example.com", "123"
+# Credenciais pelo ambiente (Fase 10): a senha das contas semeadas deixou de
+# ser fixa — seed.py agora gera uma aleatoria ou usa SEED_ADMIN_PASSWORD.
+#     set TEST_ADMIN_PASSWORD=<senha>   (ou SEED_ADMIN_PASSWORD)
+EMAIL = os.environ.get("TEST_ADMIN_EMAIL", "mateus.vicentino@example.com")
+PASSWORD = os.environ.get("TEST_ADMIN_PASSWORD") or os.environ.get("SEED_ADMIN_PASSWORD", "")
 TEST_IP = "10.255.255.254"  # fora das faixas usadas pelas 73
 
 failures = []
@@ -49,6 +54,13 @@ def request(method, path, body=None, token=None):
 
 
 print("--- 0. login ---")
+if not PASSWORD:
+    raise SystemExit(
+        "Defina TEST_ADMIN_PASSWORD (ou SEED_ADMIN_PASSWORD) com a senha da conta "
+        f"{EMAIL}. Ela e mostrada uma unica vez por seed.py; para gerar outra: "
+        "python seed.py --resetar-senhas"
+    )
+
 status, payload = request("POST", "/api/auth/login", {"email": EMAIL, "password": PASSWORD})
 check("login", status, 200)
 token = payload["access_token"]
