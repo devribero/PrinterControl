@@ -16,11 +16,16 @@ já publica esta API (túnel `Elgin - Impressoras`, conector no Windows
 
 **Frontend em produção na Vercel desde 2026-08-24:**
 `https://printercontrol.vercel.app` (passo a passo em
-[`VERCEL_DEPLOY.md`](VERCEL_DEPLOY.md)). `CORS_ORIGINS` já foi escrito no
-`.env` real com essa origem, mas **o backend ainda precisa ser reiniciado
-para carregar o valor novo** — se você é quem tem acesso à máquina e está
-lendo isto, veja o alerta na seção 5 de `VERCEL_DEPLOY.md` antes de assumir
-que já está valendo.
+[`VERCEL_DEPLOY.md`](VERCEL_DEPLOY.md)). `CORS_ORIGINS` está no `.env` real
+com essa origem, backend reiniciado, e o CORS foi confirmado ao vivo (`GET
+/health` e o preflight de `POST /api/auth/login`, ambos com
+`access-control-allow-origin` correto).
+
+**Nota operacional:** o backend hoje roda num terminal comum, não como
+tarefa agendada — durante o reinício desta fase ele chegou a cair sem
+encerramento limpo e precisou ser subido de novo manualmente. Se isso te
+pegar de surpresa outra vez, veja a seção 2 abaixo (`-Acao instalar`) para
+não depender de alguém lembrar de religar manualmente.
 
 ---
 

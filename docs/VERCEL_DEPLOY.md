@@ -1,27 +1,36 @@
 # Deploy do Frontend na Vercel (Fase 12)
 
-> **✅ Deploy concluído em 2026-08-24.** URL de produção:
-> **`https://printercontrol.vercel.app`**.
+> **✅ Fase 12 concluída em 2026-08-24.** URL de produção:
+> **`https://printercontrol.vercel.app`**, falando com a API através do
+> Cloudflare Tunnel, CORS validado ao vivo.
 >
 > | | |
 > |---|---|
 > | **URL de produção** | `https://printercontrol.vercel.app` |
 > | **`NEXT_PUBLIC_API_URL`** (Vercel) | `https://elginprint.devribero.online` |
-> | **`CORS_ORIGINS`** (`backend/.env`) | `https://printercontrol.vercel.app` — ✅ escrito no arquivo |
-> | **Backend reiniciado com a nova config** | ⬜ **pendente** — feito manualmente por quem tem acesso à máquina (ver nota abaixo) |
-> | **CORS validado ao vivo** (Vercel → API) | ⬜ **pendente**, depende do reinício acima |
+> | **`CORS_ORIGINS`** (`backend/.env`) | `https://printercontrol.vercel.app` — ✅ escrito e ativo |
+> | **Backend reiniciado com a nova config** | ✅ feito (reinício manual — ver nota abaixo) |
+> | **CORS validado ao vivo** (Vercel → API) | ✅ confirmado — `GET /health` e o preflight `OPTIONS /api/auth/login` respondem com `access-control-allow-origin: https://printercontrol.vercel.app` |
 >
-> **Por que o reinício ficou pendente aqui:** a sessão que preparou esta fase
-> não roda como Administrador na máquina Windows (`whoami` confirma um
-> usuário comum) e não conseguiu localizar nem sinalizar o processo real que
-> serve a porta 8000 para reiniciá-lo — ele não aparece em nenhuma consulta
-> de processo sem elevação, o que é consistente com rodar como serviço ou
-> outra conta. Um `fastapi dev main.py` avulso foi encontrado e encerrado
-> durante a investigação, mas ficou confirmado que **não** era o processo
-> que atende o túnel (o `/health` público continuou respondendo sem
-> interrupção, com o uptime subindo, antes e depois). Assim que o backend
-> for reiniciado manualmente, repita a checagem da seção 4 — o cabeçalho
-> `Access-Control-Allow-Origin` deve aparecer na resposta.
+> **O que aconteceu entre preparar isto e confirmar:** a sessão que editou o
+> `.env` não rodava como Administrador na máquina Windows e não conseguiu
+> localizar nem sinalizar o processo real da porta 8000 para reiniciá-lo (um
+> `fastapi dev main.py` avulso e sem relação foi encontrado e encerrado
+> durante a investigação, sem efeito no serviço real). Quem tem acesso à
+> máquina reiniciou o backend manualmente — no meio do caminho o processo
+> chegou a cair sem log de encerramento limpo (provavelmente por ter sido
+> iniciado num terminal comum, não como serviço) e um segundo reinício foi
+> necessário. Com o backend de fato no ar, o CORS foi confirmado por fora,
+> com uma requisição real carregando `Origin: https://printercontrol.vercel.app`
+> contra `https://elginprint.devribero.online` — não é um teste local, é o
+> mesmo caminho que o navegador de um usuário percorre.
+>
+> **Consideração para não repetir isso:** o backend ainda não está instalado
+> como tarefa agendada (`OPERATIONS.md` seção 2) — rodando num terminal
+> comum, uma queda de energia, logoff ou fechamento acidental da janela
+> derruba a API sem ninguém perceber até alguém tentar usá-la. Vale
+> considerar `pwsh .\scripts\Servico-PrinterControl.ps1 -Acao instalar`
+> numa próxima janela de manutenção.
 
 Passo a passo para publicar o painel Next.js na Vercel, usando o domínio
 padrão (`*.vercel.app` — domínio customizado fica para uma fase futura) e
@@ -149,8 +158,9 @@ de uma versão específica, defina em **Project Settings → General → Node.js
 Version**, ou adicione `"engines": {"node": ">=20"}` em `package.json`).
 
 > ✅ Confirmado em 2026-08-24: `https://printercontrol.vercel.app` está no
-> ar. O erro de CORS descrito acima é exatamente o observado — esperado até
-> a seção 5 ser concluída (reinício do backend ainda pendente nesta data).
+> ar. O erro de CORS descrito acima foi exatamente o observado antes da
+> seção 5 ser concluída — depois do reinício do backend, o erro desapareceu
+> (ver confirmação ao vivo na seção 5).
 
 ---
 
@@ -192,27 +202,44 @@ pwsh .\scripts\Servico-PrinterControl.ps1 -Acao iniciar
 > ⚠️ **Isso pressupõe o backend instalado como tarefa agendada** (o caminho
 > documentado em `OPERATIONS.md`). Em 2026-08-24, ao tentar confirmar esse
 > passo, `Get-ScheduledTask -TaskName "PrinterControl*"` não encontrou
-> nenhuma tarefa instalada — o processo real que responde em
-> `elginprint.devribero.online` está rodando por outro caminho (nenhum
-> processo correspondente aparece em consultas sem privilégio de
-> Administrador). Se os comandos acima falharem com "tarefa não instalada",
-> reinicie pelo mecanismo que você sabe que está de fato em uso (terminal
-> elevado, serviço do Windows, etc.) — e considere instalar a tarefa
-> agendada oficial (`-Acao instalar`, `OPERATIONS.md` seção 2) para este
-> tipo de ambiguidade não se repeitir.
+> nenhuma tarefa instalada — o processo real rodava num terminal comum, não
+> como serviço. **Isso se confirmou na prática**: no reinício desta fase, o
+> processo chegou a cair sem log de encerramento limpo no meio do caminho, e
+> foi preciso subir de novo manualmente uma segunda vez até o `/health`
+> responder de novo. Considere instalar a tarefa agendada oficial
+> (`-Acao instalar`, `OPERATIONS.md` seção 2) para este tipo de fragilidade
+> não se repetir.
 
 **Verificação:** volte à URL da Vercel e tente logar de novo. O erro de CORS
 da seção 4 deve ter desaparecido — login, `/api/auth/me` e o resto do painel
-devem funcionar através do domínio público. Pode confirmar também por fora,
-sem navegador:
+devem funcionar através do domínio público. Confirmado também por fora, sem
+navegador, em 2026-08-24:
 
-```powershell
-curl.exe -i -H "Origin: https://printercontrol.vercel.app" https://elginprint.devribero.online/health
+```
+$ curl -i -H "Origin: https://printercontrol.vercel.app" https://elginprint.devribero.online/health
+HTTP/1.1 200 OK
+access-control-allow-origin: https://printercontrol.vercel.app
+vary: Origin
+Strict-Transport-Security: max-age=15552000
+...
 ```
 
-A resposta deve trazer um cabeçalho `Access-Control-Allow-Origin:
-https://printercontrol.vercel.app`. Sem esse cabeçalho, o backend ainda não
-recarregou o `.env` novo.
+E o preflight que o navegador dispara antes de um `POST /api/auth/login`
+(corpo JSON, então exige `OPTIONS` primeiro):
+
+```
+$ curl -i -X OPTIONS https://elginprint.devribero.online/api/auth/login \
+    -H "Origin: https://printercontrol.vercel.app" \
+    -H "Access-Control-Request-Method: POST" \
+    -H "Access-Control-Request-Headers: content-type"
+HTTP/1.1 200 OK
+access-control-allow-methods: GET, POST, PATCH, OPTIONS
+access-control-allow-headers: Accept, Accept-Language, Authorization, Content-Language, Content-Type
+access-control-allow-origin: https://printercontrol.vercel.app
+```
+
+Os dois confirmam: não é só o `GET /health` público que funciona — o login
+de verdade (POST com corpo JSON) também passa pelo preflight sem erro.
 
 Nada disso exige um novo deploy do frontend — é só configuração do backend.
 
@@ -245,15 +272,19 @@ precisa reverter commit nem esperar um novo build.
 
 ---
 
-## 7. Resumo do que fica pendente até alguém com acesso executar
+## 7. Resumo — Fase 12 concluída
 
 | Item | Onde | Status |
 |---|---|---|
 | Criar o projeto na Vercel e configurar `NEXT_PUBLIC_API_URL` | Painel da Vercel | ✅ feito — `https://printercontrol.vercel.app` |
 | Primeiro deploy | Painel da Vercel | ✅ feito |
 | Anotar a URL de Production | Painel da Vercel | ✅ feito |
-| `CORS_ORIGINS` no `backend/.env` | Máquina Windows | ✅ feito (arquivo editado, valor correto) |
-| Reiniciar o backend para carregar o `.env` novo | Máquina Windows | ⬜ **pendente** — precisa de acesso elevado à máquina; ver nota no topo do documento |
-| Validar CORS ao vivo (`Access-Control-Allow-Origin` na resposta) | — | ⬜ **pendente**, depende do item acima |
+| `CORS_ORIGINS` no `backend/.env` | Máquina Windows | ✅ feito |
+| Reiniciar o backend para carregar o `.env` novo | Máquina Windows | ✅ feito (manual — dois reinícios, ver seção 5) |
+| Validar CORS ao vivo (`Access-Control-Allow-Origin` na resposta) | — | ✅ confirmado — `GET /health` e preflight `OPTIONS /api/auth/login` |
+| HSTS com `max-age` correto (Fase 11) | Painel Cloudflare | ✅ corrigido para 6 meses (estava `max-age=0`, que na prática desliga o HSTS) |
 
-Nada disso exige alterar código deste repositório.
+Nada disso exigiu alterar código deste repositório. Único item que ficou
+como sugestão para uma próxima janela de manutenção: instalar o backend
+como tarefa agendada (ver nota da seção 5) — hoje ele roda num terminal
+comum e não sobrevive a uma queda sozinho.
