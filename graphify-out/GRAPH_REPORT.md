@@ -1,7 +1,7 @@
 # Graph Report - PrinterControl  (2026-08-24)
 
 ## Corpus Check
-- 158 files · ~131,849 words
+- 158 files · ~132,104 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5b3f1a81`
+- Built from commit: `5e556477`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -227,7 +227,7 @@ Nodes (18): 1. Antes do primeiro deploy, 2. Instalar, 3. Dia a dia, 4. Diagnóst
 
 ### Community 31 - "Deploy do Frontend na Vercel (Fase 12)"
 Cohesion: 0.25
-Nodes (8): 1. O projeto já está pronto para este deploy, 2. Variáveis de ambiente para configurar na Vercel, 3. Conectar o repositório e fazer o primeiro deploy, 4. Validar, 5. Depois do deploy — atualizar o CORS do backend, 6. Redeploy — quando o código mudar, 7. Resumo do que fica pendente até alguém com acesso executar, Deploy do Frontend na Vercel (Fase 12)
+Nodes (8): 1. O projeto já está pronto para este deploy, 2. Variáveis de ambiente para configurar na Vercel, 3. Conectar o repositório e fazer o primeiro deploy, 4. Validar, 5. Depois do deploy — atualizar o CORS do backend, 6. Redeploy — quando o código mudar, 7. Resumo — Fase 12 concluída, Deploy do Frontend na Vercel (Fase 12)
 
 ### Community 32 - "printer_sync.py"
 Cohesion: 0.20
