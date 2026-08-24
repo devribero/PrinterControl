@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 from app.database import get_session
-from app.dependencies import require_admin, require_operator, require_user
+from app.dependencies import require_active_user, require_admin, require_operator
 from app.models.user import User
 from datetime import datetime
 
@@ -24,7 +24,7 @@ from typing import List
 router = APIRouter(
     prefix="/printers",
     tags=["printers"],
-    dependencies=[Depends(require_user)],
+    dependencies=[Depends(require_active_user)],
 )
 
 

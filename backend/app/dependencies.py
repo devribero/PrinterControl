@@ -4,11 +4,12 @@ Dependencias compartilhadas pelas rotas.
 Autorizacao (Fase 1) fica CENTRALIZADA aqui — nenhuma rota deve comparar
 `user.role` por conta propria:
 
-    require_user      -> qualquer conta autenticada e ativa
-    require_viewer    -> leitura autenticada (hoje == require_user)
-    require_operator  -> operacao do dia a dia (operator ou admin)
-    require_admin     -> operacao administrativa/perigosa
-    require_roles(...) -> fabrica generica, para casos novos
+    require_user         -> qualquer conta autenticada e ativa
+    require_active_user  -> require_user + sem troca de senha pendente
+    require_viewer       -> leitura autenticada (hoje == require_active_user)
+    require_operator     -> operacao do dia a dia (operator ou admin)
+    require_admin        -> operacao administrativa/perigosa
+    require_roles(...)   -> fabrica generica, para casos novos
 
 Fase 2: as rotas GET de printers e alerts deixaram de ser publicas. O painel
 Next.js so busca dados depois de confirmar a sessao em GET /api/auth/me, entao
@@ -16,6 +17,11 @@ sempre ha token para enviar. A exigencia esta declarada no proprio APIRouter
 (printers e alerts), para que nenhuma rota nova nasca publica por esquecimento.
 
 Continuam publicas apenas: POST /api/auth/login, GET / e GET /health.
+
+Troca de senha obrigatoria: `require_active_user` bloqueia com 403 toda conta
+com `must_change_password=True`. As DUAS excecoes (GET /api/auth/me e POST
+/api/auth/change-password) usam `require_user` direto, nao esta fabrica —
+sao a unica saida de uma conta trancada.
 """
 from collections.abc import Callable
 
@@ -69,14 +75,51 @@ def require_user(
     return user
 
 
+#: Mensagem devolvida pelo 403 de must_change_password. String fixa (nao um
+#: HTTPException global) para que routes/auth.py possa comparar `detail` e
+#: decidir, no login, se deve orientar o cliente a trocar a senha — ver
+#: docstring de require_active_user.
+MUST_CHANGE_PASSWORD_DETAIL = (
+    "Troca de senha obrigatoria antes de continuar. "
+    "Use POST /api/auth/change-password."
+)
+
+
+def require_active_user(user: User = Depends(require_user)) -> User:
+    """
+    `require_user` + bloqueio de conta com troca de senha pendente.
+
+    Toda rota do sistema passa por aqui, EXCETO as duas que uma conta
+    trancada ainda precisa alcançar para se destrancar sozinha:
+    `GET /api/auth/me` (o frontend usa para saber que a troca esta
+    pendente) e `POST /api/auth/change-password` (a propria troca). As duas
+    continuam usando `require_user` direto em routes/auth.py.
+
+    403 e nao 401: a sessao e valida e a senha esta certa (json a passou por
+    /login) — o que falta e uma acao da propria pessoa, nao uma nova
+    autenticacao. Um 401 faria o frontend deslogar quem so precisa trocar a
+    senha.
+    """
+    if user.must_change_password:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=MUST_CHANGE_PASSWORD_DETAIL,
+        )
+    return user
+
+
 def require_roles(*roles: str) -> Callable[..., User]:
     """
     Fabrica de dependencia: exige que o usuario tenha (ou herde) um dos
     papeis informados. admin herda operator e viewer — ver ROLE_IMPLIES.
+
+    Base e `require_active_user`, nao `require_user`: nenhuma rota criada com
+    esta fabrica deve ficar acessivel enquanto a troca de senha obrigatoria
+    estiver pendente.
     """
     allowed = tuple(roles)
 
-    def dependency(user: User = Depends(require_user)) -> User:
+    def dependency(user: User = Depends(require_active_user)) -> User:
         if not user.has_role(*allowed):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

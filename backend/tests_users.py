@@ -93,7 +93,10 @@ def main():
     lista = r.json()
     check("4 contas semeadas", len(lista), 4)
     check_true("campos esperados",
-               set(lista[0]) == {"id", "email", "name", "role", "is_active", "created_at"},
+               set(lista[0]) == {
+                   "id", "email", "username", "name", "role", "is_active",
+                   "must_change_password", "created_at",
+               },
                str(sorted(lista[0])))
     check_true("password_hash ausente na listagem",
                all("password_hash" not in u and "password" not in u for u in lista))

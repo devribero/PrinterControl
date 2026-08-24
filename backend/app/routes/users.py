@@ -80,6 +80,9 @@ def create_user(user_data: UserCreate, session: Session = Depends(get_session)):
 
     A senha vem em texto claro e e gravada apenas como hash Argon2, pelo mesmo
     `hash_password()` usado no login. Sem papel explicito a conta nasce viewer.
+
+    Nasce com `must_change_password=True`: quem definiu esta senha foi o
+    admin que preencheu o formulario, nao a pessoa dona da conta.
     """
     existing = session.exec(select(User).where(User.email == user_data.email)).first()
     if existing:
@@ -88,11 +91,23 @@ def create_user(user_data: UserCreate, session: Session = Depends(get_session)):
             detail=f"Ja existe uma conta com o e-mail {user_data.email}.",
         )
 
+    if user_data.username is not None:
+        existing_username = session.exec(
+            select(User).where(User.username == user_data.username)
+        ).first()
+        if existing_username:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Ja existe uma conta com o nome de usuario {user_data.username}.",
+            )
+
     user = User(
         email=user_data.email,
+        username=user_data.username,
         password_hash=hash_password(user_data.password),
         name=user_data.name,
         role=Role(user_data.role).value,
+        must_change_password=True,
     )
     session.add(user)
     session.commit()
@@ -108,11 +123,15 @@ def update_user(
     _admin: User = Depends(require_admin),
 ):
     """
-    Altera nome, papel, ativacao e/ou senha de uma conta.
+    Altera nome, username, papel, ativacao e/ou senha de uma conta.
 
     Desativar aqui basta para cortar o acesso: `require_user` rele o usuario a
     cada requisicao, entao o JWT que a pessoa ja tem passa a receber 403 na
     hora (Fase 1) — sem lista de revogacao.
+
+    Redefinir a senha aqui liga `must_change_password`: quem digitou a nova
+    senha foi o admin, nao o dono da conta, entao a proxima entrada exige a
+    troca — mesma regra de `create_user`.
     """
     user = session.get(User, user_id)
     if not user:
@@ -122,10 +141,23 @@ def update_user(
 
     data = update.model_dump(exclude_unset=True)
 
+    if "username" in data:
+        username = data["username"]
+        if username is not None:
+            existing_username = session.exec(
+                select(User).where(User.username == username, User.id != user_id)
+            ).first()
+            if existing_username:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"Ja existe uma conta com o nome de usuario {username}.",
+                )
+
     if "password" in data:
         password = data.pop("password")
         if password is not None:
             user.password_hash = hash_password(password)
+            user.must_change_password = True
 
     if data.get("role") is not None:
         user.role = Role(data.pop("role")).value

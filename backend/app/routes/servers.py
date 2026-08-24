@@ -22,7 +22,7 @@ from sqlmodel import Session, func, select
 
 from app.config import settings
 from app.database import get_session
-from app.dependencies import require_admin, require_user
+from app.dependencies import require_active_user, require_admin
 from app.models.print_server import (
     STATUS_ERROR,
     STATUS_ONLINE,
@@ -282,7 +282,7 @@ def _executar_discover(server_host: str, mode: str) -> DiscoverResponse:
 # ─────────────────────────────────────────────────────────────────────────
 
 @router.get("/current", response_model=ServerStatus)
-def get_current_server(_user: User = Depends(require_user)):
+def get_current_server(_user: User = Depends(require_active_user)):
     """
     Print Server padrao (`PRINT_SERVER_HOST`) e o modo global.
 
@@ -293,7 +293,7 @@ def get_current_server(_user: User = Depends(require_user)):
 
 
 @router.get("", response_model=list[PrintServerResponse])
-def list_servers(session: Session = Depends(get_session), _user: User = Depends(require_user)):
+def list_servers(session: Session = Depends(get_session), _user: User = Depends(require_active_user)):
     """Servidores registrados, com a contagem de impressoras de cada um."""
     servers = session.exec(select(PrintServer).order_by(PrintServer.host)).all()
     return [_to_response(session, s) for s in servers]
