@@ -28,6 +28,39 @@ esquecimento.
 
 Rotas públicas restantes: `POST /api/auth/login`, `GET /` e `GET /health`.
 
+### `GET /health`
+
+- Arquivo: `backend/app/main.py`
+- Função: `health_check`
+- Auth: **pública** (sem token)
+- Frontend: `fetchBackendEnvironment()` em `src/lib/api.ts`, consumido por `AppShell.tsx`
+- Estado: funcional (Fase 9)
+- Retorno: `status`, `environment` (`development` | `demo` | `production`), `is_demo`,
+  `is_production`, `mock_collect_enabled`, `print_server_mode`
+- É daqui que o painel descobre o ambiente — **não** de uma `NEXT_PUBLIC_*`. Uma variável
+  de build descreveria o bundle, não o servidor a que ele acabou se conectando: um painel
+  compilado como "production" apontado para o backend de demonstração mentiria
+- Continua pública porque a tela de login de uma instância de demonstração já precisa se
+  anunciar como tal. Por isso o retorno não traz secret, host de banco nem caminho —
+  apenas o nome do ambiente e se a simulação está habilitada
+
+### Bloqueio de simulação em produção (Fase 9)
+
+Com `ENVIRONMENT=production`, estas operações respondem **409 Conflict**:
+
+| Rota | Condição |
+|---|---|
+| `POST /api/collect/printers/{id}` | `mode="mock"` |
+| `POST /api/collect/fleet` | sempre (só existe simulada) |
+| `POST /api/servers` | `mode="mock"`, inclusive por omissão (o default do campo é `mock`) |
+| `PATCH /api/servers/{id}` | `mode="mock"` |
+| `POST /api/servers/discover` e `/{id}/discover` | servidor em modo `mock` |
+| `POST /api/servers/sync` e `/{id}/sync` | servidor em modo `mock` |
+
+409, e não 403: não é falta de permissão — nem um admin pode fazer isso, e apresentar
+como permissão sugeriria falsamente que outra conta poderia. O conflito é com o estado
+do ambiente. Implementado em `app/services/environment_guard.py`.
+
 ### `GET /api/auth/me`
 
 - Arquivo: `backend/app/routes/auth.py`

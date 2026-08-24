@@ -54,8 +54,49 @@ param(
     [string]$MonthlyOutFile  = (Join-Path $PSScriptRoot "..\public\data\monthly-report.json"),
     [int]$Seed = 0,
     [switch]$SoPrinters,
-    [switch]$Silencioso
+    [switch]$Silencioso,
+    # Pula a confirmacao. Existe para CI e para quem roda o script em laco;
+    # nao use para "economizar um Enter" numa maquina que tambem acessa a
+    # rede da empresa.
+    [switch]$Force
 )
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Confirmacao (Fase 9 — Mock e Demo Seguros)
+#
+#  Este script SOBRESCREVE public/data/printers.json e monthly-report.json,
+#  que sao exatamente os arquivos que Coletar-Impressoras.ps1 e
+#  Relatorio-Mensal.ps1 produzem com dados REAIS da frota. Rodado por engano
+#  numa maquina que tem acesso a rede da Elgin, ele troca a coleta real pela
+#  simulada sem avisar — e o painel exibe a frota ficticia como se fosse a
+#  coleta do dia.
+#
+#  A confirmacao e interativa de proposito: quem digita o nome do script sabe
+#  o que quer, mas quem recuperou a linha do historico do terminal nem sempre.
+# ─────────────────────────────────────────────────────────────────────────────
+$arquivosExistentes = @($PrintersOutFile, $MonthlyOutFile) | Where-Object { Test-Path $_ }
+
+if (-not $Force) {
+    Write-Host ""
+    Write-Host "  ATENCAO — gerador de dados FICTICIOS" -ForegroundColor Yellow
+    Write-Host "  Este script escreve dados simulados em:" -ForegroundColor Yellow
+    Write-Host "    $PrintersOutFile"
+    if (-not $SoPrinters) { Write-Host "    $MonthlyOutFile" }
+
+    if ($arquivosExistentes.Count -gt 0) {
+        Write-Host ""
+        Write-Host "  Ja existem $($arquivosExistentes.Count) arquivo(s) nesses caminhos." -ForegroundColor Red
+        Write-Host "  Se vieram de uma coleta REAL, eles serao PERDIDOS." -ForegroundColor Red
+    }
+
+    Write-Host ""
+    $resposta = Read-Host "  Digite SIMULAR para continuar (qualquer outra coisa cancela)"
+    if ($resposta -cne "SIMULAR") {
+        Write-Host "  Cancelado. Nenhum arquivo foi alterado." -ForegroundColor Gray
+        exit 1
+    }
+    Write-Host ""
+}
 
 function Write-Log {
     param([string]$Message, [ValidateSet("Info", "Warning", "Error", "Success")] [string]$Level = "Info")

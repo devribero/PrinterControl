@@ -19,6 +19,7 @@ from app.models.printer import Printer
 from app.models.user import Role, User
 from app.services.printer_collector import PrinterCollector
 from app.services.scheduler import scheduler_status
+from app.services.environment_guard import bloquear_mock_em_producao
 from app.services.snmp_mock import SCENARIOS
 
 router = APIRouter(prefix="/collect", tags=["collect"])
@@ -74,6 +75,12 @@ def collect_printer(
     desenvolvimento, entao exige admin alem do ALLOW_MOCK_COLLECT.
     """
     if request.mode == "mock":
+        # Antes de qualquer checagem de papel: em producao nao existe conta
+        # autorizada a gravar leitura ficticia no banco real.
+        bloquear_mock_em_producao(
+            "A coleta simulada",
+            "Use mode='real' para coletar esta impressora via SNMP.",
+        )
         if not user.has_role(Role.ADMIN.value):
             raise HTTPException(
                 status_code=403,
@@ -131,6 +138,11 @@ def collect_fleet(
     E manual de proposito: o scheduler continua com a sua propria configuracao
     no .env e nao e afetado por esta rota.
     """
+    bloquear_mock_em_producao(
+        "A coleta simulada de frota",
+        "Ela existe para teste local e nao tem equivalente real nesta rota.",
+    )
+
     if not settings.allow_mock_collect:
         raise HTTPException(
             status_code=403,
