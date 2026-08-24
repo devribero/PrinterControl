@@ -1,0 +1,383 @@
+/* Configurações (Fase 8).
+
+   Duas famílias visuais numa página só: cartões pessoais (neutros) e o
+   cartão de administração, que ganha uma faixa lateral para a separação ser
+   perceptível sem depender de ler o cabeçalho do grupo. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 52rem;
+}
+
+/* ── Cabeçalho de grupo (Pessoal / Administração) ────────────────────── */
+
+.groupHeader {
+  padding: 0.5rem 0.25rem 0;
+}
+
+.groupHeader:not(:first-child) {
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 1.75rem;
+}
+
+.groupTitle {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.groupSubtitle {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--color-ink-faint);
+}
+
+/* ── Cartão ──────────────────────────────────────────────────────────── */
+
+.card {
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+/* Administração: faixa lateral. O sinal não depende de cor sozinha nem de
+   ter lido o título do grupo — vale para quem chegou rolando a página. */
+.cardAdmin {
+  box-shadow: inset 4px 0 0 var(--color-warning), var(--shadow-xs);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+  padding: 1.125rem 1.5rem;
+}
+
+.cardIcon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  color: var(--color-brand);
+}
+
+.cardIconAdmin {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  color: var(--color-warning);
+}
+
+.cardTitle {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.cardSubtitle {
+  margin-top: 0.1875rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-ink-faint);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  padding: 0.875rem 1.5rem;
+}
+
+/* ── Campos ──────────────────────────────────────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1rem;
+}
+
+.label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--color-brand);
+}
+
+.input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.input::placeholder {
+  color: var(--color-ink-faint);
+}
+
+.hint {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-ink-faint);
+}
+
+.hint a {
+  color: var(--color-brand);
+  font-weight: 500;
+}
+
+.hint a:hover {
+  text-decoration: underline;
+}
+
+.note {
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-ink-soft);
+}
+
+.formError {
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-critical);
+  background: var(--color-critical-tint);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  color: var(--color-critical);
+}
+
+.roleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.roleBadge {
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  padding: 0.1875rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+
+.code {
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-sunken);
+  padding: 0.375rem 0.625rem;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 0.75rem;
+  color: var(--color-ink-soft);
+  overflow-wrap: anywhere;
+}
+
+/* ── Grade de opções (tema, escala) ──────────────────────────────────── */
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.625rem;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  padding: 0.875rem;
+  text-align: left;
+  color: var(--color-ink-soft);
+  transition: all 0.15s;
+}
+
+.option:hover {
+  border-color: var(--color-brand);
+}
+
+/* Selecionado: borda + anel + fundo. Três sinais somados, porque um anel de
+   cor sozinho é frágil para quem não distingue matizes. */
+.optionActive {
+  border-color: var(--color-brand);
+  background: var(--color-brand-tint);
+  box-shadow: 0 0 0 1px var(--color-brand);
+  color: var(--color-brand-700);
+}
+
+.optionLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.optionActive .optionLabel {
+  color: var(--color-brand-700);
+}
+
+.optionHint {
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: var(--color-ink-faint);
+}
+
+/* Amostra "Aa" da escala de texto. Em rem de propósito: ela cresce junto
+   com a preferência aplicada, então o botão mostra o efeito real. */
+.escalaAmostra {
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+
+/* ── Interruptores ───────────────────────────────────────────────────── */
+
+.switchRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  padding: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.switchRow:hover {
+  border-color: var(--color-brand);
+}
+
+.checkbox {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-brand);
+  cursor: pointer;
+}
+
+.switchBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+}
+
+.switchLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+/* ── Atalhos administrativos ─────────────────────────────────────────── */
+
+.linkGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.625rem;
+}
+
+.adminLink {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  padding: 0.875rem;
+  transition: all 0.15s;
+}
+
+.adminLink:hover {
+  border-color: var(--color-brand);
+  background: var(--color-brand-tint);
+}
+
+.adminLinkIcon {
+  color: var(--color-ink-soft);
+}
+
+.adminLinkTitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+/* ── Botões ──────────────────────────────────────────────────────────── */
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.primaryButton {
+  border: 1px solid transparent;
+  background: var(--color-brand);
+  font-weight: 600;
+  color: #fff;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--color-brand-700);
+}
+
+.secondaryButton {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-weight: 500;
+  color: var(--color-ink-soft);
+}
+
+.secondaryButton:hover:not(:disabled) {
+  border-color: var(--color-brand);
+  color: var(--color-ink);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

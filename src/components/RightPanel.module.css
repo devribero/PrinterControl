@@ -13,7 +13,7 @@
 }
 
 .cardTitle {
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: var(--color-ink);
 }
@@ -104,7 +104,7 @@
 }
 
 .criticalLabel {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -142,7 +142,7 @@
 
 .quickActionsTitle {
   margin-bottom: 0.5rem;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: var(--color-ink);
 }
@@ -188,7 +188,7 @@
   border-radius: 999px;
   background: var(--color-critical);
   padding: 0 0.25rem;
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   color: #fff;
 }

@@ -108,7 +108,7 @@
 
 .theadRow {
   text-align: left;
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -192,7 +192,7 @@
 }
 
 .siteTitle {
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: var(--color-ink);
 }

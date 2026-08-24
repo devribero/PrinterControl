@@ -39,6 +39,11 @@
 
 html {
   color-scheme: light;
+  /* Escala de texto (Fase 8). Base em % — e nao 16px — para respeitar o
+     tamanho de fonte configurado no navegador em vez de sobrescreve-lo.
+     Toda medida tipografica do painel e rem, entao este multiplicador
+     escala a interface inteira; lib/preferences.tsx grava a variavel. */
+  font-size: calc(100% * var(--font-scale, 1));
 }
 
 html.dark {
@@ -189,6 +194,26 @@ textarea {
 }
 .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
+/* Preferencia declarada no SISTEMA OPERACIONAL. */
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Preferencia declarada NO PAINEL (Configuracoes > Acessibilidade). Existe
+   separada da media query de proposito: nem todo mundo pode ou quer mexer na
+   configuracao do sistema — em maquina corporativa compartilhada, muitas
+   vezes nem ha permissao. As duas se somam; nenhuma desliga a outra. */
+html.reduce-motion * {
+  animation-duration: 0.01ms !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Realce de foco reforcado. O :focus-visible padrao acima ja existe; este
+   engrossa o anel e acrescenta um halo, para quem navega por teclado nao
+   perder o cursor em telas densas como a tabela de impressoras. */
+html.strong-focus :focus-visible {
+  outline-width: 3px;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--color-brand-tint);
 }

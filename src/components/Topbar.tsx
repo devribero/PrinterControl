@@ -190,14 +190,18 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
                 <p className={styles.menuAccountRole}>{ROLE_LABELS[account.role]}</p>
               </div>
               <div className={styles.menuList}>
-                <button className={styles.menuItem}>
+                {/* Eram botões sem onClick desde sempre. A Fase 8 (perfil e
+                    configurações) deu
+                    destino aos dois: /settings reúne perfil, senha,
+                    aparência e acessibilidade. */}
+                <Link href="/settings" onClick={() => setMenuOpen(false)} className={styles.menuItem}>
                   <User size={15} className={styles.menuItemIcon} />
                   Meu perfil
-                </button>
-                <button className={styles.menuItem}>
+                </Link>
+                <Link href="/settings" onClick={() => setMenuOpen(false)} className={styles.menuItem}>
                   <Settings size={15} className={styles.menuItemIcon} />
                   Configurações
-                </button>
+                </Link>
                 <button onClick={handleLogout} className={cn(styles.menuItem, styles.menuItemDanger)}>
                   <LogOut size={15} />
                   Sair
