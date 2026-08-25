@@ -2,11 +2,14 @@
  * Dependências: nenhuma lib externa — só `fetch` nativo do browser e o tipo
  * `MonthlyReport` (src/types.ts). Sem imports de outros módulos locais.
  *
- * Carrega o relatório mensal real gerado por scripts/Relatorio-Mensal.ps1
- * (deployado em /data/monthly-report.json, ao lado do /data/printers.json
- * de Coletar-Impressoras.ps1). Enquanto esse script não estiver agendado em
- * produção, o fetch simplesmente falha/retorna null e a UI usa os números
- * extraídos da planilha (src/data/printers.ts) como demonstração.
+ * `loadMonthlyReport()` é o fallback de ÚLTIMA instância, usado só quando a
+ * API está fora do ar (ver lib/app-data.tsx) — tenta ler um
+ * /data/monthly-report.json estático que, hoje, nada gera mais (os antigos
+ * scripts PowerShell de coleta foram removidos; a fonte real é o backend,
+ * GET /api/printers/monthly-report). Na prática este fetch sempre falha
+ * (404) e cai direto nos números extraídos da planilha (src/data/printers.ts)
+ * como demonstração — mantido porque a falha já era tratada como esperada,
+ * não um bug a corrigir.
  */
 import type { MonthlyReport } from "../types";
 

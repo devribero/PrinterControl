@@ -103,9 +103,11 @@ As armadilhas que mais custam tempo a quem chega agora:
 | "CORS é apenas local" | Por ambiente, com validação de produção |
 | "Push para o GitHub bloqueado (403); fluxo é entregar `.zip`" | Push funciona; o fluxo é commit local + push |
 
-Os scripts PowerShell em `scripts/` (`Coletar-Impressoras.ps1`,
-`Relatorio-Mensal.ps1`, `Simular-Ambiente.ps1`) são da era anterior ao
-backend. `Servico-PrinterControl.ps1` é atual e faz parte do deploy.
+Os scripts PowerShell da era anterior ao backend (`Coletar-Impressoras.ps1`,
+`Relatorio-Mensal.ps1`, `Simular-Ambiente.ps1`) foram removidos de
+`scripts/` — a coleta SNMP, o relatório mensal e o modo demonstração são
+todos feitos pelo backend Python hoje. `Servico-PrinterControl.ps1` é o
+único que resta ali, é atual e faz parte do deploy.
 
 ---
 

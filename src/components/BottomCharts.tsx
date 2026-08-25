@@ -4,8 +4,8 @@
  * Dependências externas: recharts (AreaChart/PieChart — os dois gráficos
  * deste arquivo) e lucide-react (ícones de tendência/seta). `monthlyUsage`
  * chega via prop agora (antes vinha fixo de src/data/printers.ts) para que
- * App.tsx possa injetar o relatório mensal REAL (scripts/Relatorio-Mensal.ps1
- * → /data/monthly-report.json) quando ele existir, sem precisar tocar aqui.
+ * App.tsx possa injetar o relatório mensal REAL, vindo do backend
+ * (GET /api/printers/monthly-report), sem precisar tocar aqui.
  * Cores dos gráficos vêm de lib/chartColors.ts (útil porque recharts recebe
  * cor como string literal, não enxerga os tokens CSS do tema escuro/claro).
  */
@@ -44,7 +44,7 @@ function PagesConsumedCard({
       <div className={styles.card}>
         <h3 className={styles.title}>Consumo de páginas (mês)</h3>
         <p className={styles.emptyText}>
-          Ainda sem histórico mensal. Rode scripts/Relatorio-Mensal.ps1 por dois meses seguidos para o primeiro ponto aparecer aqui.
+          Ainda sem histórico mensal. O relatório se acumula sozinho a partir das leituras coletadas pelo backend — volte em alguns meses para o primeiro ponto aparecer aqui.
         </p>
       </div>
     );

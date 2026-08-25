@@ -135,19 +135,13 @@ Isso exige Windows, PowerShell, PrintManagement, RPC, DNS e permissões na rede 
 
 ## Scripts PowerShell
 
-Comandos encontrados:
-
-```powershell
-pwsh .\scripts\Coletar-Impressoras.ps1
-pwsh .\scripts\Relatorio-Mensal.ps1
-pwsh .\scripts\Simular-Ambiente.ps1
-```
-
-- `Coletar-Impressoras.ps1` consulta Print Server/SNMP e grava JSON.
-- `Relatorio-Mensal.ps1` grava histórico e relatório mensal.
-- `Simular-Ambiente.ps1` grava dados fictícios locais.
-
-Não executar esses scripts em ambiente operacional sem confirmar os caminhos de saída e a autorização para escrita.
+`scripts/` hoje só tem `Servico-PrinterControl.ps1` (instalar/parar/iniciar
+o backend como tarefa agendada — ver `OPERATIONS.md`). Os scripts
+pré-backend (`Coletar-Impressoras.ps1`, `Relatorio-Mensal.ps1`,
+`Simular-Ambiente.ps1`) foram removidos: a coleta SNMP, o relatório mensal e
+o modo de demonstração são todos feitos pelo próprio backend Python hoje
+(`backend/app/services/snmp.py`, `GET /api/printers/monthly-report`,
+`ENVIRONMENT=demo`).
 
 ## Testes
 
