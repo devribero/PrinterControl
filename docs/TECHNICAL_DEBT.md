@@ -318,6 +318,75 @@ benefício/custo.
 
 ---
 
+## D14 — `httpx` sem teto de versão quebrava todas as suítes que usam `TestClient`
+
+**Impacto:** `requirements.txt` não fixa `httpx`. Um `pip install -r
+requirements.txt` em venv limpo instalou `httpx 0.28.1`, que removeu o
+parâmetro `app=` do `Client.__init__` — e `starlette==0.35.1` (fixo) ainda
+depende dele em `TestClient`. Resultado: **11 das 18 suítes de teste** (as que
+sobem `TestClient(app)`) quebravam com `TypeError` no import, antes de rodar
+um único caso.
+
+Verificado nesta sessão (24/08/2026): `pip install "httpx<0.28"` resolveu as
+11 suítes imediatamente, sem tocar em código.
+
+**Bloqueia produção?** Não — é dependência de teste, não de runtime do
+servidor. Mas **bloqueia detectar regressão real**: um venv recriado do zero
+(como o desta sessão) começa com 11 suítes vermelhas por um motivo que não é
+bug de aplicação, o mesmo padrão de "aprender a ignorar vermelho" do D8.
+**Custo:** baixo — adicionar `httpx<0.28` (ou atualizar para uma starlette
+que suporte a nova API) em `requirements.txt`.
+
+---
+
+## D15 — `requirements.txt` está em UTF-16
+
+**Impacto:** o arquivo é `UTF-16 little-endian` com CRLF, não UTF-8. `pip
+install -r requirements.txt` funciona normalmente (pip lê o BOM), mas
+qualquer ferramenta de texto Unix (`cat`, `grep`, editores que assumem UTF-8)
+mostra bytes nulos entre cada caractere. Provável causa: gerado por
+`pip freeze > requirements.txt` num PowerShell com `$OutputEncoding`/
+`Out-File` padrão UTF-16.
+
+**Bloqueia produção?** Não. **Custo:** trivial — reescrever o arquivo em
+UTF-8 (`Get-Content -Encoding Unicode requirements.txt | Set-Content
+-Encoding utf8 requirements.txt` ou equivalente).
+
+---
+
+## D16 — `backend/.env` em produção estava configurado como `demo`/`mock`, não `production`
+
+**Impacto:** ao verificar a saúde do backend nesta sessão (24/08/2026),
+`https://elginprint.devribero.online/health` respondeu **502** (processo
+fora do ar — ver nota em `OPERATIONS.md` sobre o backend não estar mais
+rodando como tarefa agendada). Ao subir o processo manualmente para
+diagnosticar, `backend/.env` **na máquina de produção** continha:
+
+```
+ENVIRONMENT=demo
+PRINT_SERVER_MODE=mock
+ALLOW_MOCK_COLLECT=true
+```
+
+Isso contradiz `OPERATIONS.md`, que documenta a configuração de produção como
+`ENVIRONMENT=production` / `PRINT_SERVER_MODE=real`. Ou o `.env` foi trocado
+para teste local em algum momento e nunca revertido, ou a instância de
+produção nunca teve os valores que a documentação descreve.
+
+**O processo foi encerrado imediatamente** nesta sessão, sem restaurar os
+valores de produção — restaurar exige `SECRET_KEY` própria e confirmação de
+que é seguro apontar para o Print Server real, decisão que não deve ser
+tomada sem quem opera o ambiente. **O backend de produção ficou fora do ar ao
+final desta sessão**, no mesmo estado 502 em que foi encontrado.
+
+**Bloqueia produção?** **Sim, até ser corrigido.** Ver roteiro de reativação
+em `docs/GUIA_RAPIDO.md` §2 antes de subir o serviço de novo.
+**Custo:** baixo se os valores de produção corretos estiverem anotados em
+algum lugar seguro; alto (gerar nova `SECRET_KEY`, confirmar `CORS_ORIGINS`,
+confirmar acesso real ao Print Server) se não estiverem.
+
+---
+
 # Resolvido na Fase 10 (24/08/2026)
 
 Registrado aqui para que estes itens **não voltem** às listas de pendências
