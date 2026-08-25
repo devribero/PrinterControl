@@ -28,7 +28,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Elgin Impressoras · Painel de Monitoramento",
   description: "Painel de monitoramento de impressoras em rede — status, toner, alertas e relatórios em tempo real.",
-  icons: { icon: "/favicon.svg" },
+  icons: { icon: "/favicon.png" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
