@@ -8,7 +8,7 @@
 
 import { useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { Mail, MessageCircle, LifeBuoy, TriangleAlert, FlaskConical } from "lucide-react";
+import { Mail, MessageCircle, TriangleAlert, FlaskConical } from "lucide-react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import PrinterDetailsModal from "./PrinterDetailsModal";
@@ -158,12 +158,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <p className={styles.helpItemSubtitle}>Em breve</p>
             </div>
           </button>
-          <div className={styles.helpNote}>
-            <LifeBuoy size={18} className={styles.helpNoteIcon} />
-            <p className={styles.helpNoteText}>
-              Script de coleta e documentação em <code className={styles.helpCode}>scripts/Coletar-Impressoras.ps1</code>.
-            </p>
-          </div>
         </div>
       </Modal>
     </div>
