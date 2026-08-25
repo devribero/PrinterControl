@@ -1,8 +1,8 @@
 /**
- * Contratos de dados compartilhados entre frontend e os coletores PowerShell
- * (scripts/Coletar-Impressoras.ps1 e scripts/Relatorio-Mensal.ps1). Mudar um
- * campo aqui exige mudar o `ConvertTo-*Json` correspondente no script — são
- * a mesma "API" só que sem servidor no meio (arquivo JSON estático).
+ * Contratos de dados compartilhados entre frontend e backend. Mudar um campo
+ * aqui costuma exigir mudar o schema Pydantic correspondente
+ * (backend/app/schemas/) — são a mesma "API", só que descrita duas vezes,
+ * uma em cada linguagem.
  */
 export type PrinterStatus = "online" | "offline" | "atencao";
 
@@ -127,9 +127,9 @@ export interface MonthlyUsageEntry extends MonthlyUsage {
 }
 
 /**
- * Shape written by scripts/Relatorio-Mensal.ps1 to public/data/monthly-report.json.
- * Optional/real: only present once that script has been deployed and scheduled —
- * see src/lib/fetchMonthlyReport.ts for the loader and its mock fallback.
+ * Shape of GET /api/printers/monthly-report (backend). Optional/real: only
+ * present once the backend has enough readings accumulated — see
+ * src/lib/fetchMonthlyReport.ts for the loader and its demo fallback.
  */
 export interface MonthlyReport {
   generatedAt: string;

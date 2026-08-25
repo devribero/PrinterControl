@@ -5,7 +5,7 @@ import type { MonthlyUsageEntry, Printer, TonerLevel } from "../types";
  * cobrindo as unidades Vila Olímpia, MC, Itajaí, Manaus 1/2/3, Jundiaí e Cabo de Santo Agostinho.
  * Cada impressora traz o contador de páginas mês a mês (monthlyPages), igual ao relatório original.
  * Status e níveis de toner são simulados a partir dos contadores (o relatório não traz telemetria
- * de toner em tempo real) — a integração real por SNMP é feita via scripts/Coletar-Impressoras.ps1.
+ * de toner em tempo real) — a integração real por SNMP é feita pelo backend (backend/app/services/snmp.py).
  *
  * `server: ""` é proposital: esta frota é fictícia e não vem de nenhum Print
  * Server. É a mesma convenção do backend para registros sem servidor associado.

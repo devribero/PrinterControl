@@ -72,9 +72,9 @@ Não há nada para ajustar no código antes de publicar — checado nesta fase:
   (`PrinterTable.tsx`, `PrinterDetailsModal.tsx`), que apontam para o IP de
   cada impressora na rede — não têm relação com onde o painel está
   hospedado.
-- **`public/data/*.json` não existe no repositório** (gitignorado de
-  propósito — são dados gerados localmente por
-  `scripts/Relatorio-Mensal.ps1`). Isso é esperado: `fetchMonthlyReport.ts`
+- **`public/data/*.json` não existe no repositório** (era gitignorado de
+  propósito — gerado por scripts PowerShell legados, hoje removidos, já que
+  o backend cobre a mesma função). Isso é esperado: `fetchMonthlyReport.ts`
   já trata a ausência desse arquivo (404) como sinal para cair no próximo
   nível de fallback. Não é um erro a corrigir antes do deploy — é o
   comportamento pretendido rodando fora da rede da empresa.

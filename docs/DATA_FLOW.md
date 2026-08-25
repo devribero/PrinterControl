@@ -174,9 +174,7 @@ Os pontos de entrada fictícios são:
 - `src/data/printers.ts`;
 - `backend/app/services/snmp_mock.py`;
 - `backend/app/services/snmp_fleet_mock.py`;
-- `_mock_discover()` em `print_server.py`;
-- `scripts/Simular-Ambiente.ps1`;
-- `public/data/*.json` gerados localmente.
+- `_mock_discover()` em `print_server.py`.
 
 O modo mock do Print Server é padrão na configuração atual. O modo mock de coleta exige
 `ALLOW_MOCK_COLLECT=true`.

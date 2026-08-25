@@ -5,8 +5,8 @@
  * no gráfico) e lucide-react (ícones). Dependências locais: Modal (casca
  * genérica), PrinterStatusBadge, lib/tonerColor (cores por canal/nível).
  * O bloco "Impressões por mês" lê printer.monthlyPages — populado a partir
- * da planilha em modo demo, ou de /data/monthly-report.json em produção
- * (ver lib/fetchMonthlyReport.ts e scripts/Relatorio-Mensal.ps1).
+ * da planilha em modo demo, ou do relatório mensal real do backend em
+ * produção (ver lib/fetchMonthlyReport.ts).
  */
 import { useEffect, useState } from "react";
 import { ExternalLink, FileText, Lightbulb, Printer as PrinterIcon } from "lucide-react";
