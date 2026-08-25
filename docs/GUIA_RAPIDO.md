@@ -121,6 +121,11 @@ GET https://elginprint.devribero.online/health
 backend estava rodando como **processo comum de terminal**, não como tarefa
 agendada — ele já caiu sem encerramento limpo uma vez por esse motivo.
 
+Se o backend responder com `environment` diferente de `production` (ou o
+`.env` estiver com `ENVIRONMENT=demo`/`mock`), o problema não é o processo —
+é configuração. Use `scripts\ConfigurarAmbiente.ps1` para regravar o
+`.env` corretamente (ver [`TECHNICAL_DEBT.md`](TECHNICAL_DEBT.md), D16).
+
 Se o script de serviço estiver instalado:
 ```powershell
 pwsh .\scripts\Servico-PrinterControl.ps1 -Acao status

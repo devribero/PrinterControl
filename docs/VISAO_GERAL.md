@@ -96,7 +96,7 @@ São **duas peças separadas**, que conversam pela internet.
           | https, com o "crachá" (token) em cada pergunta
           v
   +---------------------+
-  |   Cloudflare Tunnel |   A porta de entrada segura. Ainda não ativada.
+  |   Cloudflare Tunnel |   A porta de entrada segura. Ativa desde a Fase 11.
   +---------------------+
           |
           v
@@ -125,9 +125,9 @@ celular, de outra unidade. Por isso ele fica hospedado na Vercel, na internet.
 
 O Cloudflare Tunnel é a ponte: ele deixa o frontend, que está na internet,
 falar com o backend, que está dentro da rede — **sem precisar abrir nenhuma
-porta no firewall da empresa**. O passo a passo para ativá-lo já está
-documentado em [`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md); falta apenas
-alguém com acesso à máquina Windows e ao painel do Cloudflare executá-lo.
+porta no firewall da empresa**. Já está ativo e validado desde a Fase 11 — o
+passo a passo em [`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md) fica como
+referência para reinstalação ou depuração.
 
 ### O que cada tecnologia é, em uma linha
 
