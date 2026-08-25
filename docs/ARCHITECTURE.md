@@ -399,21 +399,25 @@ Corrigir ou revisar antes da exposição:
 
 ## Fases futuras
 
-### FASE 1 — conexão local frontend → backend
+> Roadmap original do projeto (numeração própria). FASES 1–3 e 5–6 já foram
+> concluídas — ver status em cada uma abaixo. Apenas FASE 4, 7 e 8 seguem
+> em aberto.
+
+### FASE 1 — conexão local frontend → backend ✅ concluída
 
 - confirmar URL da API;
 - confirmar CORS local;
 - validar login e GETs existentes;
 - não envolver rede corporativa.
 
-### FASE 2 — descoberta via Print Server
+### FASE 2 — descoberta via Print Server ✅ concluída
 
 - criar contrato de discovery;
 - reutilizar `discover_printers()`;
 - executar somente em modo real na máquina adequada;
 - não gravar no banco.
 
-### FASE 3 — SNMP real
+### FASE 3 — SNMP real ✅ concluída (implementada)
 
 - implementada a camada transitória `services/discovery.py`;
 - reutiliza `SNMPClient` e `SNMPResult`;
@@ -423,14 +427,14 @@ Corrigir ou revisar antes da exposição:
 - modo mock usa `MockSNMPClient` sem rede;
 - nenhum dado é persistido e a validação SNMP corporativa continua pendente.
 
-### FASE 4 — botão Escanear Rede
+### FASE 4 — botão Escanear Rede ⬜ pendente
 
 - criar helper API específico;
 - separar descoberta de refresh;
 - mostrar resultados e estados;
 - manter SQLite inalterado.
 
-### FASE 5 — Cloudflare Tunnel
+### FASE 5 — Cloudflare Tunnel ✅ concluída
 
 - instalar/configurar o Tunnel na máquina autorizada;
 - encaminhar somente para FastAPI;
@@ -440,7 +444,7 @@ Corrigir ou revisar antes da exposição:
 > [`CLOUDFLARE_TUNNEL.md`](CLOUDFLARE_TUNNEL.md) (Fase 11 do projeto —
 > numeração própria, não confundir com esta "FASE 5" do roadmap original).
 
-### FASE 6 — Vercel → Cloudflare → FastAPI
+### FASE 6 — Vercel → Cloudflare → FastAPI ✅ concluída
 
 - configurar `NEXT_PUBLIC_API_URL`;
 - adicionar CORS da Vercel;
@@ -450,13 +454,13 @@ Corrigir ou revisar antes da exposição:
 > [`VERCEL_DEPLOY.md`](VERCEL_DEPLOY.md) (Fase 12 do projeto — numeração
 > própria, não confundir com esta "FASE 6" do roadmap original).
 
-### FASE 7 — máquina na rede corporativa
+### FASE 7 — máquina na rede corporativa ⬜ pendente
 
 - validar Print Server real;
 - validar SNMP real;
 - validar permissões, DNS, RPC e firewall existente;
 - não abrir portas de entrada desnecessárias.
 
-### FASE 8 — sincronização permanente
+### FASE 8 — sincronização permanente ⬜ pendente
 
 Somente após a validação, avaliar se a descoberta deve chamar sincronização. Essa etapa deve ser separada do scan inicial e incluir confirmação, auditoria e política para desativação.

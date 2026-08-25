@@ -11,7 +11,7 @@
 > | **Validado com** | `GET https://elginprint.devribero.online/health` → `200` |
 > | **`TRUST_PROXY_HEADERS`** | `true` em `backend/.env` (o túnel é agora o único caminho de entrada) |
 > | **Cabeçalhos de segurança** | Configurados no painel (seção 6) — HSTS, "Add security headers" e "Remove X-Powered-By headers" |
-> | **`CORS_ORIGINS`** | continua vazio — Fase 12, quando a Vercel tiver URL (ver seção 7) |
+> | **`CORS_ORIGINS`** | `https://printercontrol.vercel.app` — preenchido na Fase 12 (ver [`VERCEL_DEPLOY.md`](VERCEL_DEPLOY.md)) |
 >
 > O passo a passo abaixo fica como referência para reinstalação, uma segunda
 > máquina, ou depuração — não precisa ser repetido para o dia a dia.
@@ -257,28 +257,23 @@ ninguém sabe qual vale.
 
 ---
 
-## 7. CORS — o que falta até a Vercel existir (Fase 12)
+## 7. CORS — preenchido na Fase 12
 
-`CORS_ORIGINS` no `.env` do backend continua **vazio** por enquanto — não há
-o que colocar até o painel ter uma URL na Vercel. Isso é esperado nesta fase:
+`CORS_ORIGINS` no `.env` do backend já aponta para o painel na Vercel:
 
-- Em `ENVIRONMENT=demo` (o valor atual do `.env` real), CORS vazio não
-  impede o backend de subir — a validação estrita só existe para
-  `ENVIRONMENT=production` (ver `app/config.py`, `_validate_production_cors`).
-- Quando a Vercel tiver URL (Fase 12), preencha:
+```env
+CORS_ORIGINS=https://printercontrol.vercel.app
+```
 
-  ```env
-  CORS_ORIGINS=https://SEU-APP.vercel.app
-  ```
+Múltiplas origens (por exemplo, um domínio customizado além do
+`*.vercel.app` de preview) vão separadas por vírgula. O backend recusa
+subir em produção se essa variável estiver vazia, tiver `*`, `localhost`
+ou uma origem sem `https://` — ver `docs/OPERATIONS.md` seção 1.
 
-  Múltiplas origens (por exemplo, um domínio customizado além do
-  `*.vercel.app` de preview) vão separadas por vírgula. O backend recusa
-  subir em produção se essa variável estiver vazia, tiver `*`, `localhost`
-  ou uma origem sem `https://` — ver `docs/OPERATIONS.md` seção 1.
-- **Não é preciso reinstalar nem tocar no túnel** para esse ajuste — só
-  editar o `.env` e reiniciar o processo do backend (`pwsh
-  .\scripts\Servico-PrinterControl.ps1 -Acao parar` seguido de `-Acao
-  iniciar`, ou a tarefa reinicia sozinha se você só matar o processo).
+**Não é preciso reinstalar nem tocar no túnel** para trocar essa origem —
+só editar o `.env` e reiniciar o processo do backend (`pwsh
+.\scripts\Servico-PrinterControl.ps1 -Acao parar` seguido de `-Acao
+iniciar`, ou a tarefa reinicia sozinha se você só matar o processo).
 
 ### `TRUST_PROXY_HEADERS` — ligar agora que o túnel existe
 
@@ -389,7 +384,7 @@ existindo no painel até serem apagados por lá.
 | Painel Cloudflare | Túnel criado, Public Hostname `elginprint.devribero.online → 127.0.0.1:8000` | Seções 2–3 | ✅ feito (`Elgin - Impressoras`, Healthy) |
 | Painel Cloudflare | HSTS ligado, cabeçalhos de segurança via Managed Transform | Seção 6 | ✅ feito (HSTS, "Add security headers", "Remove X-Powered-By headers") |
 | `backend/.env` | `TRUST_PROXY_HEADERS=true` | Seção 7, depois de validar | ✅ feito |
-| `backend/.env` | `CORS_ORIGINS=https://SEU-APP.vercel.app` | Fase 12, quando a URL existir | ⬜ aguardando Fase 12 |
+| `backend/.env` | `CORS_ORIGINS=https://printercontrol.vercel.app` | Fase 12 | ✅ feito |
 
 Nada disso exige alterar código do backend — só configuração de painel e de
 `.env`. Nenhum arquivo de credenciais do túnel deve ir para o repositório.
