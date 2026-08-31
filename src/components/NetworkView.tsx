@@ -33,9 +33,11 @@ import {
   Plus,
   Pencil,
   Power,
+  Trash2,
 } from "lucide-react";
 import {
   createPrintServer,
+  deletePrintServer,
   discoverServer,
   fetchPrintServers,
   syncServer,
@@ -146,6 +148,13 @@ export default function NetworkView() {
   // Ativar/desativar — sensível, nunca em um clique só.
   const [confirmandoAtivacao, setConfirmandoAtivacao] = useState<PrintServer | null>(null);
   const [alternando, setAlternando] = useState(false);
+
+  // Exclusão definitiva — irreversível (apaga impressoras, leituras e
+  // alertas em cascata), por isso exige digitar o host do servidor.
+  const [deleting, setDeleting] = useState<PrintServer | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deletingBusy, setDeletingBusy] = useState(false);
 
   const carregarServidores = useCallback(async () => {
     setLoadingServers(true);
@@ -317,6 +326,40 @@ export default function NetworkView() {
     }
   }
 
+  function abrirExclusao(server: PrintServer) {
+    setDeleting(server);
+    setDeleteConfirmText("");
+    setDeleteError(null);
+  }
+
+  async function confirmarExclusao() {
+    if (!deleting) return;
+    if (deleteConfirmText.trim() !== deleting.host) {
+      setDeleteError("O host digitado não corresponde ao deste Print Server.");
+      return;
+    }
+    setDeletingBusy(true);
+    setDeleteError(null);
+    try {
+      await deletePrintServer(deleting.id, deleteConfirmText.trim());
+      setServers((atuais) => (atuais ?? []).filter((s) => s.id !== deleting.id));
+      if (selectedId === deleting.id) {
+        setSelectedId(null);
+        limparResultados();
+      }
+      push({
+        variant: "success",
+        title: "Print Server excluído",
+        description: `${deleting.host} e suas impressoras foram apagados em definitivo.`,
+      });
+      setDeleting(null);
+    } catch (error) {
+      setDeleteError(relatarErro(error, "Não foi possível excluir"));
+    } finally {
+      setDeletingBusy(false);
+    }
+  }
+
   async function executarDescoberta() {
     if (!selected) return;
     setDiscovering(true);
@@ -475,6 +518,14 @@ export default function NetworkView() {
                       title={server.active ? "Desativar este Print Server" : "Reativar este Print Server"}
                     >
                       <Power size={13} /> {server.active ? "Desativar" : "Reativar"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => abrirExclusao(server)}
+                      className={cn(styles.cardActionButton, styles.cardActionDanger)}
+                      title="Excluir este Print Server em definitivo"
+                    >
+                      <Trash2 size={13} /> Excluir
                     </button>
                   </div>
                 )}
@@ -881,6 +932,49 @@ export default function NetworkView() {
             voltam ao sincronizar com o servidor em modo real.
           </p>
         )}
+      </Modal>
+
+      <Modal
+        open={deleting !== null}
+        onClose={() => (deletingBusy ? undefined : setDeleting(null))}
+        title="Excluir este Print Server em definitivo?"
+        subtitle={deleting?.host}
+        maxWidth="28rem"
+        footer={
+          <div className={styles.dialogFooter}>
+            <button onClick={() => setDeleting(null)} disabled={deletingBusy} className={styles.secondaryButton}>
+              Cancelar
+            </button>
+            <button
+              onClick={() => void confirmarExclusao()}
+              disabled={deletingBusy || deleteConfirmText.trim() !== deleting?.host}
+              className={cn(styles.primaryButton, styles.dangerButton)}
+            >
+              {deletingBusy ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+              Excluir em definitivo
+            </button>
+          </div>
+        }
+      >
+        <p className={styles.confirmText}>
+          Esta ação <strong>não pode ser desfeita</strong>. Diferente de <em>Desativar</em>, o registro
+          some junto com <strong>{deleting?.printerCount ?? 0}</strong> impressora(s) cadastrada(s) neste
+          servidor — e as leituras, alertas e histórico de toner delas.
+        </p>
+        <label className={styles.field}>
+          <span className={styles.label}>
+            Digite <strong>{deleting?.host}</strong> para confirmar
+          </span>
+          <input
+            type="text"
+            value={deleteConfirmText}
+            onChange={(e) => setDeleteConfirmText(e.target.value)}
+            className={styles.input}
+            placeholder={deleting?.host}
+            autoComplete="off"
+          />
+        </label>
+        {deleteError && <p className={styles.formError}>{deleteError}</p>}
       </Modal>
     </div>
   );
