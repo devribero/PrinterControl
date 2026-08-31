@@ -78,6 +78,13 @@ interface AppDataContextValue {
    * consumo inventado ao lado.
    */
   exibindoDadoFicticio: boolean;
+  /**
+   * True quando o ambiente e producao, ha sessao, e o que falta e dado real
+   * (nao mock) — a faixa de aviso troca o texto de "dados de demonstracao"
+   * para "sem dados reais", porque em producao nao ha numero ficticio na
+   * tela para descrever.
+   */
+  semDadoRealEmProducao: boolean;
   initialLoading: boolean;
   /** Mensagem quando a API falhou; null quando os dados vieram do backend. */
   apiError: string | null;
@@ -198,11 +205,25 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Em ambiente de producao, autenticado, sem dado real: mostra vazio em vez
+  // de mockup. Fora de producao (dev/demo) ou antes do login, o mockup
+  // continua normalmente — so em producao um numero ficticio poderia ser
+  // confundido com o estado real da frota.
+  const semDadoRealEmProducao = account !== null && !!backendEnv?.is_production;
+
   // Impressoras de fato usadas pela UI: base (mock ou real) + monthlyPages
   // do relatório mensal real, quando disponível. Derivado (não é estado)
   // para não depender da ordem em que os dois fetches abaixo terminam.
-  const printers = useMemo(() => mergeMonthlyReport(rawPrinters, monthlyReport), [rawPrinters, monthlyReport]);
-  const monthlyUsage = monthlyReport && monthlyReport.monthlyUsage.length > 0 ? monthlyReport.monthlyUsage : mockMonthlyUsage;
+  const printers = useMemo(() => {
+    if (!usingRealData && semDadoRealEmProducao) return [];
+    return mergeMonthlyReport(rawPrinters, monthlyReport);
+  }, [rawPrinters, monthlyReport, usingRealData, semDadoRealEmProducao]);
+  const monthlyUsage =
+    monthlyReport && monthlyReport.monthlyUsage.length > 0
+      ? monthlyReport.monthlyUsage
+      : semDadoRealEmProducao
+        ? []
+        : mockMonthlyUsage;
   const usingRealMonthlyReport = !!monthlyReport && monthlyReport.monthlyUsage.length > 0;
   // Um so dos dois basta para haver numero ficticio na tela. Antes desta fase
   // a faixa olhava apenas usingRealData, entao "frota real + relatorio mensal
@@ -492,6 +513,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     usingRealMonthlyReport,
     backendEnv,
     exibindoDadoFicticio,
+    semDadoRealEmProducao,
     initialLoading,
     apiError,
 
