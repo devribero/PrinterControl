@@ -150,6 +150,16 @@ class UserUpdate(BaseModel):
         return normalizar_username(value)
 
 
+class UserDelete(BaseModel):
+    """
+    Confirmacao exigida para excluir uma conta em definitivo (DELETE
+    /api/users/{id}). Digitar o e-mail da conta e a segunda confirmacao —
+    evita que um clique errado num botao apague um usuario sem volta.
+    """
+
+    confirm_email: str = Field(min_length=1)
+
+
 class UserLogin(BaseModel):
     """
     Credenciais de login.

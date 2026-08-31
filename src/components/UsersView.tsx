@@ -12,8 +12,15 @@
  * (mesmo diálogo do resto do painel), lib/api, lib/permissions, lib/toast.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { UserPlus, Pencil, Search, ShieldCheck, Loader2, RefreshCw } from "lucide-react";
-import { createUser, fetchUsers, updateUser, type ApiUser, type UserUpdateInput } from "../lib/api";
+import { UserPlus, Pencil, Search, ShieldCheck, Loader2, RefreshCw, Trash2 } from "lucide-react";
+import {
+  createUser,
+  deleteUser,
+  fetchUsers,
+  updateUser,
+  type ApiUser,
+  type UserUpdateInput,
+} from "../lib/api";
 import { useApiErrorReporter } from "../lib/apiErrors";
 import { ROLES, ROLE_LABELS, parseRole, type Role } from "../lib/permissions";
 import { useAppData } from "../lib/app-data";
@@ -72,6 +79,13 @@ export default function UsersView() {
   // Confirmação de ativar/desativar — ação sensível, nunca em um clique só.
   const [confirming, setConfirming] = useState<ApiUser | null>(null);
   const [toggling, setToggling] = useState(false);
+
+  // Exclusão definitiva — irreversível, por isso exige digitar o e-mail da
+  // conta (segunda confirmação, além do próprio diálogo).
+  const [deleting, setDeleting] = useState<ApiUser | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deletingBusy, setDeletingBusy] = useState(false);
 
   const carregar = useCallback(async () => {
     setLoading(true);
@@ -208,7 +222,34 @@ export default function UsersView() {
     }
   }
 
+  function abrirExclusao(user: ApiUser) {
+    setDeleting(user);
+    setDeleteConfirmText("");
+    setDeleteError(null);
+  }
+
+  async function confirmarExclusao() {
+    if (!deleting) return;
+    if (deleteConfirmText.trim().toLowerCase() !== deleting.email.toLowerCase()) {
+      setDeleteError("O e-mail digitado não corresponde ao da conta.");
+      return;
+    }
+    setDeletingBusy(true);
+    setDeleteError(null);
+    try {
+      await deleteUser(deleting.id, deleteConfirmText.trim());
+      setUsers((atuais) => (atuais ?? []).filter((u) => u.id !== deleting.id));
+      push({ variant: "success", title: "Usuário excluído", description: `${deleting.name} foi apagado em definitivo.` });
+      setDeleting(null);
+    } catch (error) {
+      setDeleteError(relatarErro(error, "Não foi possível excluir"));
+    } finally {
+      setDeletingBusy(false);
+    }
+  }
+
   const editandoASiMesmo = editing !== null && account !== null && editing.id === account.id;
+  const excluindoASiMesmo = deleting !== null && account !== null && deleting.id === account.id;
 
   return (
     <div className={styles.card}>
@@ -313,6 +354,18 @@ export default function UsersView() {
                           }
                         >
                           {user.is_active ? "Desativar" : "Ativar"}
+                        </button>
+                        <button
+                          onClick={() => abrirExclusao(user)}
+                          disabled={ehUltimoAdmin(user)}
+                          className={styles.actionButton}
+                          title={
+                            ehUltimoAdmin(user)
+                              ? "É o único administrador ativo — promova outro antes de excluir"
+                              : "Excluir usuário em definitivo"
+                          }
+                        >
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </td>
@@ -450,6 +503,51 @@ export default function UsersView() {
             </>
           )}
         </p>
+      </Modal>
+
+      <Modal
+        open={deleting !== null}
+        onClose={() => (deletingBusy ? undefined : setDeleting(null))}
+        title="Excluir usuário em definitivo?"
+        subtitle={deleting?.email}
+        maxWidth="28rem"
+        footer={
+          <div className={styles.dialogFooter}>
+            <button onClick={() => setDeleting(null)} disabled={deletingBusy} className={styles.secondaryButton}>
+              Cancelar
+            </button>
+            <button
+              onClick={() => void confirmarExclusao()}
+              disabled={deletingBusy || deleteConfirmText.trim().toLowerCase() !== deleting?.email.toLowerCase()}
+              className={cn(styles.primaryButton, styles.dangerButton)}
+            >
+              {deletingBusy ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+              Excluir em definitivo
+            </button>
+          </div>
+        }
+      >
+        <p className={styles.confirmText}>
+          Esta ação <strong>não pode ser desfeita</strong>: a conta de <strong>{deleting?.name}</strong> é
+          apagada do banco, não apenas desativada. Notificações desta conta são apagadas junto.
+        </p>
+        {excluindoASiMesmo && (
+          <p className={styles.warning}>Você está excluindo a própria conta. Ao confirmar, perde o acesso imediatamente.</p>
+        )}
+        <label className={styles.field}>
+          <span className={styles.label}>
+            Digite <strong>{deleting?.email}</strong> para confirmar
+          </span>
+          <input
+            type="text"
+            value={deleteConfirmText}
+            onChange={(e) => setDeleteConfirmText(e.target.value)}
+            className={styles.input}
+            placeholder={deleting?.email}
+            autoComplete="off"
+          />
+        </label>
+        {deleteError && <p className={styles.formError}>{deleteError}</p>}
       </Modal>
     </div>
   );

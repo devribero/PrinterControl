@@ -262,6 +262,8 @@ export const api = {
     apiRequest<T>(path, { ...options, method: "POST", body }),
   patch: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "method" | "body">) =>
     apiRequest<T>(path, { ...options, method: "PATCH", body }),
+  delete: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, "method" | "body">) =>
+    apiRequest<T>(path, { ...options, method: "DELETE", body }),
 };
 
 /* ── Endpoints usados pelo painel ────────────────────────────────────────── */
@@ -418,6 +420,16 @@ export const createPrintServer = (data: PrintServerCreateInput) =>
 export const updatePrintServer = (serverId: number, data: PrintServerUpdateInput) =>
   api.patch<ApiPrintServer>(`/api/servers/${serverId}`, data);
 
+/**
+ * Apaga o Print Server em definitivo, em cascata: impressoras deste
+ * servidor e tudo que pertence so a elas (leituras, contadores mensais,
+ * alertas, historico de toner). Diferente de `updatePrintServer(id, {active:
+ * false})`, que so desativa e preserva tudo. Exige confirmar o host exato
+ * (`PrintServerDelete` no backend); 400 se nao bater. Exige admin.
+ */
+export const deletePrintServer = (serverId: number, confirmHost: string) =>
+  api.delete<void>(`/api/servers/${serverId}`, { confirm_host: confirmHost });
+
 /* -- Notificacoes internas (/api/notifications) --------------------------- */
 
 /** Referencia ao alerta de origem, quando houver (`AlertRef` no backend). */
@@ -486,3 +498,12 @@ export const createUser = (data: UserCreateInput) => api.post<ApiUser>("/api/use
 
 export const updateUser = (userId: number, data: UserUpdateInput) =>
   api.patch<ApiUser>(`/api/users/${userId}`, data);
+
+/**
+ * Apaga a conta em definitivo — diferente de `updateUser(id, {is_active:
+ * false})`, que so desativa. Exige confirmar o e-mail exato da conta
+ * (`UserDelete` no backend); 400 se nao bater, 409 se for o ultimo admin
+ * ativo. Exige admin.
+ */
+export const deleteUser = (userId: number, confirmEmail: string) =>
+  api.delete<void>(`/api/users/${userId}`, { confirm_email: confirmEmail });

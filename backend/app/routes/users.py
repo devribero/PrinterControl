@@ -5,18 +5,20 @@ Todas as rotas exigem `require_admin` — declarado no proprio APIRouter, para
 que nenhuma rota nova nasca sem protecao. A autorizacao continua vindo das
 dependencias centralizadas da Fase 1; nada de comparar `user.role` aqui.
 
-Nao existe DELETE de proposito: desativar (`is_active=False`) e a exclusao
-deste sistema. Apagar a linha quebraria o historico (alertas e leituras nao
-apontam para usuarios hoje, mas `created_at`/autoria futura sim) e, pior,
-liberaria o e-mail para um cadastro novo herdar a identidade do antigo.
+Desativar (`is_active=False`) continua sendo o caminho normal de "remover"
+uma conta: preserva o historico e nao libera o e-mail para um cadastro novo
+herdar a identidade do antigo. DELETE /api/users/{id} existe a parte, para
+quando a exclusao definitiva e mesmo a intencao (ex.: conta de teste, erro de
+cadastro) — exige confirmar o e-mail da conta no corpo do pedido.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, func, select
 
 from app.database import get_session
 from app.dependencies import require_admin
+from app.models.notification import Notification
 from app.models.user import Role, User
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from app.schemas.user import UserCreate, UserDelete, UserResponse, UserUpdate
 from app.services.auth import hash_password
 
 router = APIRouter(
@@ -172,3 +174,47 @@ def update_user(
     session.commit()
     session.refresh(user)
     return user
+
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(
+    user_id: int,
+    payload: UserDelete,
+    session: Session = Depends(get_session),
+):
+    """
+    Apaga a conta em definitivo. Diferente de PATCH `is_active=False`, aqui a
+    linha some — e por isso exige confirmar o e-mail exato da conta no corpo
+    do pedido, para que a exclusao nao dependa so de um clique.
+
+    Notificacoes desta conta sao apagadas junto: `notifications.user_id` e
+    obrigatorio (nao aceita null), entao nao ha o que anonimizar nelas — sao
+    a caixa pessoal de alguem que deixou de existir no sistema.
+    """
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario nao encontrado")
+
+    if payload.confirm_email.strip().lower() != user.email.lower():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="O e-mail de confirmacao nao corresponde ao da conta.",
+        )
+
+    era_admin_ativo = user.role == Role.ADMIN.value and user.is_active
+    if era_admin_ativo and _active_admin_count(session) <= 1:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                "Esta e a ultima conta de administrador ativa. Promova ou ative "
+                "outro administrador antes de excluir esta."
+            ),
+        )
+
+    for notification in session.exec(
+        select(Notification).where(Notification.user_id == user_id)
+    ).all():
+        session.delete(notification)
+
+    session.delete(user)
+    session.commit()

@@ -23,13 +23,15 @@ from sqlmodel import Session, func, select
 from app.config import settings
 from app.database import get_session
 from app.dependencies import require_active_user, require_admin
+from app.models.alert import Alert, TonerHistory
+from app.models.notification import Notification
 from app.models.print_server import (
     STATUS_ERROR,
     STATUS_ONLINE,
     VALID_MODES,
     PrintServer,
 )
-from app.models.printer import Printer
+from app.models.printer import Printer, PrinterMonthly, PrinterReading
 from app.services.environment_guard import bloquear_mock_em_producao
 from app.models.user import User
 from app.services.discovery import enrich_discovered_printers
@@ -100,6 +102,12 @@ class PrintServerCreate(BaseModel):
         if value not in VALID_MODES:
             raise ValueError(f"modo invalido: {value!r} (use {' ou '.join(VALID_MODES)})")
         return value
+
+
+class PrintServerDelete(BaseModel):
+    """Confirmacao exigida para excluir um Print Server em definitivo."""
+
+    confirm_host: str = Field(min_length=1)
 
 
 class PrintServerUpdate(BaseModel):
@@ -366,6 +374,63 @@ def update_server(
     session.commit()
     session.refresh(server)
     return _to_response(session, server)
+
+
+@router.delete("/{server_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_server(
+    server_id: int,
+    payload: PrintServerDelete,
+    session: Session = Depends(get_session),
+    _admin: User = Depends(require_admin),
+):
+    """
+    Apaga o Print Server em definitivo, em cascata: impressoras deste
+    servidor, e tudo que pertence so a elas (leituras, contadores mensais,
+    alertas, historico de toner, notificacoes que citavam esses alertas).
+
+    Diferente de `active=False` (PATCH), aqui nao sobra rastro — por isso
+    exige confirmar o host exato do servidor no corpo do pedido.
+
+    Impressoras sao identificadas pela FK (`print_server_id`) OU pela chave
+    natural (`server == host`), porque registros anteriores a Fase 4 podem
+    ainda nao ter passado por um sync que preenche a FK.
+    """
+    server = _get_or_404(session, server_id)
+
+    if payload.confirm_host.strip() != server.host:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="O host de confirmacao nao corresponde ao deste Print Server.",
+        )
+
+    printers = session.exec(
+        select(Printer).where(
+            (Printer.print_server_id == server_id) | (Printer.server == server.host)
+        )
+    ).all()
+    printer_ids = [p.id for p in printers]
+
+    if printer_ids:
+        alert_ids = session.exec(
+            select(Alert.id).where(Alert.printer_id.in_(printer_ids))
+        ).all()
+        if alert_ids:
+            for notification in session.exec(
+                select(Notification).where(Notification.alert_id.in_(alert_ids))
+            ).all():
+                session.delete(notification)
+
+        for model in (Alert, TonerHistory, PrinterReading, PrinterMonthly):
+            for row in session.exec(
+                select(model).where(model.printer_id.in_(printer_ids))
+            ).all():
+                session.delete(row)
+
+        for printer in printers:
+            session.delete(printer)
+
+    session.delete(server)
+    session.commit()
 
 
 # ─────────────────────────────────────────────────────────────────────────

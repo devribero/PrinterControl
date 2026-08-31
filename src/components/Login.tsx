@@ -190,7 +190,7 @@ export default function Login({ onSuccess }: LoginProps) {
             <Wifi size={19} />
           </div>
           <div>
-            <p className={styles.statusTitle}>85 impressoras monitoradas</p>
+            <p className={styles.statusTitle}>100+ impressoras monitoradas</p>
             <p className={styles.statusSubtitle}>8 unidades · atualizado em tempo real</p>
           </div>
         </div>
@@ -294,7 +294,7 @@ export default function Login({ onSuccess }: LoginProps) {
           </form>
         </div>
 
-        <p className={styles.footer}>© 2026 Elgin Impressoras · Painel de Monitoramento</p>
+        <p className={styles.footer}>© 2026 Pedro Ribeiro - Elgin</p>
       </div>
     </div>
   );
