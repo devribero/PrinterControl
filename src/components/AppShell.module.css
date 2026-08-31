@@ -8,6 +8,13 @@
   display: flex;
   min-height: 100vh;
   flex: 1;
+  /* Sem isto, um item flex nunca encolhe abaixo da largura intrinseca do
+     que tem dentro — uma unica tabela larga (ex.: NetworkView, UsersView,
+     DecommissionedList, todas com overflow-x:auto na propria tabela) fazia
+     a PAGINA INTEIRA esticar em vez de so a tabela ganhar scroll interno.
+     Confirmado visualmente: sem isto a pagina renderizava 885-1005px de
+     largura mesmo com viewport de 375px (celular). */
+  min-width: 0;
   flex-direction: column;
 }
 
