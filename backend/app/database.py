@@ -87,6 +87,7 @@ def create_db_and_tables():
     _migrate_printer_schema()
     SQLModel.metadata.create_all(engine)
     _migrate_alert_type()
+    _migrate_alert_value()
     _migrate_reading_uptime()
     _migrate_user_rbac()
     _migrate_user_login_fields()
@@ -101,6 +102,24 @@ def _migrate_alert_type():
         cols = {row[1] for row in conn.execute(text("PRAGMA table_info(alerts)"))}
         if cols and "alert_type" not in cols:
             conn.execute(text("ALTER TABLE alerts ADD COLUMN alert_type VARCHAR"))
+            conn.commit()
+
+
+def _migrate_alert_value():
+    """
+    Adiciona alerts.value em bancos criados antes da escada de re-alerta de
+    toner. Puramente aditiva e idempotente, mesmo padrao de
+    _migrate_alert_type(): so roda ALTER TABLE se a coluna ainda nao existe.
+    Alertas antigos ficam com value=NULL — o alert_engine trata isso como
+    "sem referencia anterior", entao o proximo alerta de toner dessa
+    impressora dispara normalmente.
+    """
+    from sqlalchemy import text
+
+    with engine.connect() as conn:
+        cols = {row[1] for row in conn.execute(text("PRAGMA table_info(alerts)"))}
+        if cols and "value" not in cols:
+            conn.execute(text("ALTER TABLE alerts ADD COLUMN value INTEGER"))
             conn.commit()
 
 

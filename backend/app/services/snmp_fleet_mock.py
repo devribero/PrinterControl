@@ -62,9 +62,9 @@ def _toner_percent(printer_id: int, profile: str, color: str) -> int:
     """
     spread = (printer_id * 13 + ord(color)) % 7  # 0..6
     if profile == "critico":
-        return 3 + spread % 6          # 3..8   -> <=10, dispara critical
+        return 3 + spread % 6          # 3..8   -> <=10, dispara alerta (alert_engine.TONER_ALERT_THRESHOLD)
     if profile == "baixo":
-        return 12 + spread % 8         # 12..19 -> <=20, dispara warning
+        return 12 + spread % 8         # 12..19 -> acima do limiar, nao dispara nada
     return 35 + (printer_id * 17 + ord(color)) % 60  # 35..94, saudavel
 
 

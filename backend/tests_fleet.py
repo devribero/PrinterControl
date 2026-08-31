@@ -108,11 +108,15 @@ with Session(engine) as s:
     active_alerts = s.exec(select(Alert).where(Alert.resolved_at == None)).all()  # noqa: E711
     offline_alerts = [a for a in active_alerts if a.alert_type == "offline"]
     critical = [a for a in active_alerts if a.alert_type.startswith("toner") and a.severity == "critical"]
-    warning = [a for a in active_alerts if a.alert_type.startswith("toner") and a.severity == "warning"]
-    print(f"     ativos={len(active_alerts)} offline={len(offline_alerts)} critical={len(critical)} warning={len(warning)}")
+    print(f"     ativos={len(active_alerts)} offline={len(offline_alerts)} critical={len(critical)}")
     check_true("gerou alertas de offline", len(offline_alerts) > 0)
     check_true("gerou alertas de toner critico", len(critical) > 0)
-    check_true("gerou alertas de toner baixo", len(warning) > 0)
+    # Fase 11: zona unica de alerta a partir de 10% — o bucket BAIXO_BUCKETS
+    # do mock (12-19%) fica ACIMA do limiar de proposito, para confirmar que
+    # toner nessa faixa nao gera alerta nenhum (nao existe mais "warning").
+    baixo_ids = {p for p in s.exec(select(Printer.id)) if profile_for(p) == "baixo"}
+    alertas_no_bucket_baixo = [a for a in active_alerts if a.printer_id in baixo_ids and a.alert_type.startswith("toner")]
+    check("toner 12-19% nao gera alerta (acima do limiar de 10%)", len(alertas_no_bucket_baixo), 0)
 
     offline_with_toner = [
         a for a in active_alerts

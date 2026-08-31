@@ -117,20 +117,22 @@ with mock.patch.object(webhook_notifier.httpx, "post") as post_mock:
 check("acao toner:K = created", actions["toner:K"], "created")
 check("1 chamada de webhook", post_mock.call_count, 1)
 
-print("\n=== 3. escalated (warning -> critical) + toner critical -> 1 chamada ===")
+print("\n=== 3. Fase 11: toner continua caindo (10% -> 5%) -> re-alerta, 1 chamada por degrau ===")
 with Session(engine) as s:
-    # primeiro warning, sem mock (webhook so dispara em critical, entao nao chama nada aqui)
-    with mock.patch.object(webhook_notifier.httpx, "post") as warn_mock:
-        r1 = make_reading(k=15)  # warning
+    reset_alerts_and_readings(s)
+    with mock.patch.object(webhook_notifier.httpx, "post") as first_mock:
+        first_mock.return_value = mock.Mock(status_code=200)
+        r1 = make_reading(k=10)  # entra na zona critica
         s.add(r1)
         s.commit()
         s.refresh(r1)
-        alert_engine.evaluate_reading(s, PRINTER_ID, r1)
-    check("warning nao chama webhook", warn_mock.call_count, 0)
+        actions_first = alert_engine.evaluate_reading(s, PRINTER_ID, r1)
+    check("acao toner:K = created (10%)", actions_first["toner:K"], "created")
+    check("1 chamada de webhook ao entrar na zona", first_mock.call_count, 1)
 
     with mock.patch.object(webhook_notifier.httpx, "post") as esc_mock:
         esc_mock.return_value = mock.Mock(status_code=200)
-        r2 = make_reading(k=5)  # escala para critical
+        r2 = make_reading(k=5)  # caiu mais -> re-alerta
         s.add(r2)
         s.commit()
         s.refresh(r2)
@@ -138,11 +140,11 @@ with Session(engine) as s:
 check("acao toner:K = escalated", actions_esc["toner:K"], "escalated")
 check("1 chamada de webhook na escalada", esc_mock.call_count, 1)
 
-print("\n=== 4. kept -> nenhuma chamada ===")
+print("\n=== 4. kept (mesmo nivel, nao caiu mais) -> nenhuma chamada ===")
 with Session(engine) as s:
     with mock.patch.object(webhook_notifier.httpx, "post") as kept_mock:
         kept_mock.return_value = mock.Mock(status_code=200)
-        r3 = make_reading(k=4)  # continua critico
+        r3 = make_reading(k=5)  # mesmo nivel do ultimo alerta (5%)
         s.add(r3)
         s.commit()
         s.refresh(r3)
@@ -163,7 +165,7 @@ with Session(engine) as s:
 check("alerta offline criado", actions_off["offline"], "created")
 check("offline nao dispara webhook", off_mock.call_count, 0)
 
-print("\n=== 6. toner nao-critical (warning) -> nenhuma chamada automatica ===")
+print("\n=== 6. Fase 11: toner acima do limiar (15%, fora da zona critica) -> nenhum alerta, nenhuma chamada ===")
 with Session(engine) as s:
     reset_alerts_and_readings(s)
     with mock.patch.object(webhook_notifier.httpx, "post") as warn2_mock:
@@ -173,8 +175,8 @@ with Session(engine) as s:
         s.commit()
         s.refresh(r5)
         actions_w = alert_engine.evaluate_reading(s, PRINTER_ID, r5)
-check("acao toner:K = created (warning)", actions_w["toner:K"], "created")
-check("warning nao dispara webhook automatico", warn2_mock.call_count, 0)
+check("acao toner:K = none (acima do limiar)", actions_w["toner:K"], "none")
+check("nenhum webhook fora da zona critica", warn2_mock.call_count, 0)
 
 print("\n=== 7. erro HTTP -> evaluate_reading continua normalmente ===")
 with Session(engine) as s:
