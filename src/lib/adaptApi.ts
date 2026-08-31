@@ -132,6 +132,11 @@ interface ApiMonthlyReport {
     department: string;
     monthly_pages: { month: string; pages: number; period: string }[];
   }[];
+  department_usage: {
+    department: string;
+    monthly: { month: string; pages: number; period: string }[];
+    total: number;
+  }[];
 }
 
 /**
@@ -153,6 +158,7 @@ export async function loadMonthlyReportFromApi(): Promise<MonthlyReport | null> 
         department: p.department,
         monthlyPages: p.monthly_pages,
       })),
+      departmentUsage: data.department_usage,
     };
   } catch {
     return null;

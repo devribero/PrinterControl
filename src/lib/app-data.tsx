@@ -15,7 +15,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import {
   printers as mockPrinters,
   monthlyUsage as mockMonthlyUsage,
-  departmentUsage,
+  departmentUsage as mockDepartmentUsage,
   decommissionedPrinters,
 } from "../data/printers";
 import { logout as clearSession, restoreSession, type Account } from "./auth";
@@ -61,7 +61,7 @@ interface AppDataContextValue {
 
   printers: Printer[];
   monthlyUsage: typeof mockMonthlyUsage;
-  departmentUsage: typeof departmentUsage;
+  departmentUsage: typeof mockDepartmentUsage;
   decommissionedPrinters: typeof decommissionedPrinters;
   usingRealData: boolean;
   usingRealMonthlyReport: boolean;
@@ -224,6 +224,14 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       : semDadoRealEmProducao
         ? []
         : mockMonthlyUsage;
+  // Mesma regra do monthlyUsage: departamento real (Fase 12, backend) quando
+  // disponivel, vazio em producao sem dado, mockup nos demais casos.
+  const departmentUsage =
+    monthlyReport && monthlyReport.departmentUsage.length > 0
+      ? monthlyReport.departmentUsage
+      : semDadoRealEmProducao
+        ? []
+        : mockDepartmentUsage;
   const usingRealMonthlyReport = !!monthlyReport && monthlyReport.monthlyUsage.length > 0;
   // Um so dos dois basta para haver numero ficticio na tela. Antes desta fase
   // a faixa olhava apenas usingRealData, entao "frota real + relatorio mensal
