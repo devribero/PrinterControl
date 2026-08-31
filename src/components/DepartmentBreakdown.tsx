@@ -1,15 +1,15 @@
 /**
  * Sem libs externas — barras horizontais em CSS puro (sem recharts aqui,
- * dataset pequeno e fixo). Dados vêm de data/printers.ts → departmentUsage,
- * extraído da aba "Área gráficos" da planilha (consumo agregado por
- * departamento, todas as unidades juntas, Jan–Jun).
+ * dataset pequeno). Dados vêm do backend (Fase 12, GET /api/printers/
+ * monthly-report → department_usage, real) quando disponível, senão do
+ * conjunto de demonstração (data/printers.ts). Cada mês já carrega seu
+ * próprio rótulo (`month`) — não há mais um array de meses fixo, porque a
+ * janela real cresce mês a mês em vez de ficar travada em Jan–Jun.
  */
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Building2 } from "lucide-react";
-import type { DepartmentUsage } from "../data/printers";
+import type { DepartmentUsage } from "../types";
 import styles from "./DepartmentBreakdown.module.css";
-
-const MONTHS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"];
 
 interface DepartmentBreakdownProps {
   data: DepartmentUsage[];
@@ -29,7 +29,7 @@ export default function DepartmentBreakdown({ data }: DepartmentBreakdownProps) 
         </div>
         <div>
           <h2 className={styles.title}>Consumo por Departamento</h2>
-          <p className={styles.subtitle}>Total de páginas por área, Janeiro a Junho — todas as unidades.</p>
+          <p className={styles.subtitle}>Total de páginas por área, todas as unidades.</p>
         </div>
       </div>
 
@@ -37,7 +37,7 @@ export default function DepartmentBreakdown({ data }: DepartmentBreakdownProps) 
         {sorted.map((d) => {
           const pct = grandTotal > 0 ? Math.round((d.total / grandTotal) * 100) : 0;
           const isOpen = expanded === d.department;
-          const maxMonth = Math.max(...d.monthly);
+          const maxMonth = Math.max(1, ...d.monthly.map((m) => m.pages));
           return (
             <div key={d.department} className={styles.row}>
               <button
@@ -62,14 +62,14 @@ export default function DepartmentBreakdown({ data }: DepartmentBreakdownProps) 
 
               {isOpen && (
                 <div className={styles.monthly}>
-                  {d.monthly.map((pages, i) => (
-                    <div key={MONTHS[i]} className={styles.monthCol}>
-                      <span className={styles.monthValue}>{pages.toLocaleString("pt-BR")}</span>
+                  {d.monthly.map((m) => (
+                    <div key={m.period} className={styles.monthCol}>
+                      <span className={styles.monthValue}>{m.pages.toLocaleString("pt-BR")}</span>
                       <div
                         className={styles.monthBar}
-                        style={{ height: `${8 + (pages / maxMonth) * 56}px` }}
+                        style={{ height: `${8 + (m.pages / maxMonth) * 56}px` }}
                       />
-                      <span className={styles.monthLabel}>{MONTHS[i]}</span>
+                      <span className={styles.monthLabel}>{m.month}</span>
                     </div>
                   ))}
                 </div>

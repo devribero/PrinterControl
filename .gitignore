@@ -18,6 +18,12 @@ dist-ssr
 # pertence ao repositório.
 public/data/*.json
 
+# Planilhas de levantamento/histórico (Fase 12, import_historico_planilha.py)
+# — dado interno real da empresa (IP, departamento, contagem de páginas por
+# impressora). Fica só na máquina de quem roda a importação, nunca no repo.
+*.xlsx
+*.xls
+
 # Next.js build output
 .next/
 

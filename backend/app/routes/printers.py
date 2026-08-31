@@ -5,8 +5,9 @@ from app.dependencies import require_active_user, require_admin, require_operato
 from app.models.user import User
 from datetime import datetime
 
-from app.models.printer import Printer, PrinterReading
+from app.models.printer import Printer, PrinterMonthly, PrinterReading
 from app.services.environment_guard import bloquear_mock_em_producao
+from app.services.monthly_report import month_bounds, month_label, month_period, pages_from_readings
 from app.schemas.printer import (
     PrinterCreate,
     PrinterUpdate,
@@ -50,8 +51,6 @@ def list_printers(
 
 
 TONER_LABELS = {"K": "Preto", "C": "Ciano", "M": "Magenta", "Y": "Amarelo"}
-
-MONTH_LABELS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
 
 
 def _inicio_da_janela(months: int) -> datetime:
@@ -138,55 +137,87 @@ def monthly_report(
     session: Session = Depends(get_session),
 ):
     """
-    Contagem mensal por impressora, derivada de PrinterReading.
+    Contagem mensal por impressora, por mes e por departamento.
 
-    Paginas do mes = maior contador do mes - menor contador do mes, ou seja o
-    incremento REALMENTE observado nas leituras daquele mes. Nada e estimado:
-    impressora com uma unica leitura no mes fica com 0, e mes sem leitura nao
-    aparece. Sem leituras no banco, devolve listas vazias e o painel segue
-    exibindo o relatorio de demonstracao (sinalizado no cabecalho).
+    Fase 12: mes ja FECHADO (existe em PrinterMonthly — importado de
+    planilha historica ou congelado pelo fechamento automatico do
+    scheduler no ultimo dia do mes) usa o numero oficial gravado la. O mes
+    EM ANDAMENTO (o mes atual, que ainda ninguem fechou) e calculado ao
+    vivo a partir de PrinterReading, como sempre foi: maior contador do mes
+    menos o menor, o incremento REALMENTE observado. PrinterMonthly tem
+    prioridade quando os dois existirem para o mesmo (impressora, mes) —
+    nao deveria acontecer no uso normal, mas evita numero duplicado/errado
+    se um fechamento manual for reaplicado sobre um mes que a coleta ao
+    vivo tambem ve.
+
+    Sem nenhum dos dois, devolve listas vazias e o painel segue exibindo o
+    relatorio de demonstracao (sinalizado no cabecalho).
 
     `months` recorta quantos meses para tras entram na conta (padrao 12).
     """
     inicio = _inicio_da_janela(months)
-    readings = session.exec(
-        select(PrinterReading)
-        .where(PrinterReading.timestamp >= inicio)
-        .order_by(PrinterReading.timestamp)
-    ).all()
-    if not readings:
-        return {"generated_at": datetime.utcnow().isoformat(), "monthly_usage": [], "printers": []}
-
     printers = {p.id: p for p in session.exec(select(Printer))}
 
-    # (printer_id, period) -> [menor contador, maior contador]
-    bounds: dict[tuple[int, str], list[int]] = {}
-    for r in readings:
-        # Leitura sem contador valido (impressora offline) nao entra na conta.
-        if not r.page_count:
-            continue
-        key = (r.printer_id, r.timestamp.strftime("%Y-%m"))
-        if key not in bounds:
-            bounds[key] = [r.page_count, r.page_count]
-        else:
-            bounds[key][0] = min(bounds[key][0], r.page_count)
-            bounds[key][1] = max(bounds[key][1], r.page_count)
+    # (printer_id, period) -> paginas. PrinterMonthly primeiro (autoridade),
+    # depois o mes em andamento so preenche o que ainda nao esta la.
+    por_impressora_periodo: dict[tuple[int, str], int] = {}
+
+    fechados = session.exec(
+        select(PrinterMonthly).where(PrinterMonthly.month_start >= inicio)
+    ).all()
+    for row in fechados:
+        por_impressora_periodo[(row.printer_id, row.month)] = row.pages_printed
+
+    hoje = datetime.utcnow()
+    periodo_atual = month_period(hoje)
+    if periodo_atual >= month_period(inicio):
+        mes_ini, mes_fim = month_bounds(hoje)
+        for printer_id, pages in pages_from_readings(session, mes_ini, mes_fim).items():
+            por_impressora_periodo.setdefault((printer_id, periodo_atual), pages)
+
+    if not por_impressora_periodo:
+        return {
+            "generated_at": datetime.utcnow().isoformat(),
+            "monthly_usage": [],
+            "printers": [],
+            "department_usage": [],
+        }
 
     per_printer: dict[int, list[dict]] = {}
     per_month: dict[str, int] = {}
-    for (printer_id, period), (lowest, highest) in sorted(bounds.items(), key=lambda kv: kv[0][1]):
-        pages = highest - lowest
+    # departamento -> periodo -> paginas
+    per_department: dict[str, dict[str, int]] = {}
+
+    for (printer_id, period), pages in sorted(por_impressora_periodo.items(), key=lambda kv: kv[0][1]):
+        printer = printers.get(printer_id)
+        if not printer:
+            continue
         per_printer.setdefault(printer_id, []).append(
-            {"month": MONTH_LABELS[int(period[5:]) - 1], "pages": pages, "period": period}
+            {"month": month_label(period), "pages": pages, "period": period}
         )
         per_month[period] = per_month.get(period, 0) + pages
 
-    month_label = {m["period"]: m["month"] for months in per_printer.values() for m in months}
+        departamento = printer.department or "Sem departamento"
+        per_department.setdefault(departamento, {})
+        per_department[departamento][period] = per_department[departamento].get(period, 0) + pages
+
+    department_usage = [
+        {
+            "department": departamento,
+            "monthly": [
+                {"month": month_label(period), "pages": pages, "period": period}
+                for period, pages in sorted(periodos.items())
+            ],
+            "total": sum(periodos.values()),
+        }
+        for departamento, periodos in per_department.items()
+    ]
+    department_usage.sort(key=lambda d: -d["total"])
 
     return {
         "generated_at": datetime.utcnow().isoformat(),
         "monthly_usage": [
-            {"month": month_label.get(period, period), "pages": pages, "period": period}
+            {"month": month_label(period), "pages": pages, "period": period}
             for period, pages in sorted(per_month.items())
         ],
         "printers": [
@@ -197,8 +228,8 @@ def monthly_report(
                 "monthly_pages": months,
             }
             for pid, months in per_printer.items()
-            if pid in printers
         ],
+        "department_usage": department_usage,
     }
 
 

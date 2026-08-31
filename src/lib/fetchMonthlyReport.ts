@@ -16,7 +16,12 @@ import type { MonthlyReport } from "../types";
 function isValidReport(value: unknown): value is MonthlyReport {
   if (typeof value !== "object" || value === null) return false;
   const r = value as Record<string, unknown>;
-  return typeof r.generatedAt === "string" && Array.isArray(r.monthlyUsage) && Array.isArray(r.printers);
+  return (
+    typeof r.generatedAt === "string" &&
+    Array.isArray(r.monthlyUsage) &&
+    Array.isArray(r.printers) &&
+    Array.isArray(r.departmentUsage)
+  );
 }
 
 /**

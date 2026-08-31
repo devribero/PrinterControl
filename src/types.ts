@@ -140,4 +140,12 @@ export interface MonthlyReport {
     department: string;
     monthlyPages: MonthlyPageCount[];
   }[];
+  departmentUsage: DepartmentUsage[];
+}
+
+/** Consumo por departamento — real (backend, Fase 12) ou de demonstração (data/printers.ts). */
+export interface DepartmentUsage {
+  department: string;
+  monthly: MonthlyPageCount[];
+  total: number;
 }

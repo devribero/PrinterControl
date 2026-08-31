@@ -1,4 +1,4 @@
-import type { MonthlyUsageEntry, Printer, TonerLevel } from "../types";
+import type { DepartmentUsage, MonthlyUsageEntry, Printer, TonerLevel } from "../types";
 
 /**
  * Dados extraídos do levantamento real de impressão da Elgin (relatório mensal de contadores),
@@ -1221,21 +1221,24 @@ export const monthlyUsage: MonthlyUsageEntry[] = [
 ];
 
 export const networkHistory = [420, 460, 440, 500, 480, 520, 510, 540];
-export interface DepartmentUsage {
-  department: string;
-  monthly: number[]; // Jan..Jun, mesma ordem de monthlyUsage
-  total: number;
+
+// Mesmos 6 períodos de `monthlyUsage`, reaproveitados para não repetir a
+// string de período em cada linha de departamento abaixo.
+const DEPARTMENT_PERIODS = monthlyUsage.map((m) => ({ month: m.month, period: m.period }));
+
+function departmentMonthly(pages: number[]): DepartmentUsage["monthly"] {
+  return DEPARTMENT_PERIODS.map((p, i) => ({ ...p, pages: pages[i] }));
 }
 
 // "Área gráficos" da planilha: consumo agregado por departamento (todas as unidades juntas).
 export const departmentUsage: DepartmentUsage[] = [
-  { department: "Logística", monthly: [85632, 73499, 91896, 59542, 83068, 82876], total: 476513 },
-  { department: "RH", monthly: [4284, 3754, 4584, 3645, 7191, 12216], total: 35674 },
-  { department: "Refrigeração", monthly: [1463, 212, 368, 128, 443, 164], total: 2778 },
-  { department: "Automação", monthly: [7635, 6495, 7675, 7167, 10698, 8008], total: 47678 },
-  { department: "HDB Mogi", monthly: [23738, 21844, 30750, 21894, 31119, 47339], total: 176684 },
-  { department: "ADM Geral", monthly: [10350, 11114, 14538, 12480, 14330, 7983], total: 70795 },
-  { department: "Outros Departamentos", monthly: [32528, 21200, 32163, 24975, 39022, 32932], total: 182820 },
+  { department: "Logística", monthly: departmentMonthly([85632, 73499, 91896, 59542, 83068, 82876]), total: 476513 },
+  { department: "RH", monthly: departmentMonthly([4284, 3754, 4584, 3645, 7191, 12216]), total: 35674 },
+  { department: "Refrigeração", monthly: departmentMonthly([1463, 212, 368, 128, 443, 164]), total: 2778 },
+  { department: "Automação", monthly: departmentMonthly([7635, 6495, 7675, 7167, 10698, 8008]), total: 47678 },
+  { department: "HDB Mogi", monthly: departmentMonthly([23738, 21844, 30750, 21894, 31119, 47339]), total: 176684 },
+  { department: "ADM Geral", monthly: departmentMonthly([10350, 11114, 14538, 12480, 14330, 7983]), total: 70795 },
+  { department: "Outros Departamentos", monthly: departmentMonthly([32528, 21200, 32163, 24975, 39022, 32932]), total: 182820 },
 ];
 
 export interface DecommissionedPrinter {
