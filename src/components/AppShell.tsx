@@ -25,6 +25,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
     usingRealData,
     usingRealMonthlyReport,
     exibindoDadoFicticio,
+    semDadoRealEmProducao,
     backendEnv,
     sessionVerified,
     apiError,
@@ -75,7 +76,20 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <div className={styles.demoBanner} role="status">
               <TriangleAlert size={16} className={styles.demoBannerIcon} />
               <p className={styles.demoBannerText}>
-                {!usingRealData ? (
+                {semDadoRealEmProducao ? (
+                  !usingRealData ? (
+                    <>
+                      <strong>Sem dados reais.</strong>{" "}
+                      {apiError ?? "Não foi possível carregar a frota real do backend."}
+                    </>
+                  ) : (
+                    <>
+                      <strong>Relatório mensal vazio.</strong> A frota exibida é real, mas o
+                      servidor ainda não tem leituras suficientes para fechar o mês — o consumo
+                      mensal e os gráficos de histórico ficam vazios até haver dado suficiente.
+                    </>
+                  )
+                ) : !usingRealData ? (
                   <>
                     <strong>Dados de demonstração.</strong>{" "}
                     {apiError ?? "Os números abaixo são fictícios e não vêm da sua frota."}
