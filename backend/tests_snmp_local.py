@@ -319,6 +319,41 @@ def main():
     check("reachable", r.reachable, False)
     check("snmp_responded", r.snmp_responded, False)
 
+    # 11. Colorida adivinhada errado como mono (Fase 14) — GETBULK ja
+    # descobre as 4 cores (nao e limitado pelo palpite is_color); o palpite
+    # errado nao pode fazer _select_toners descartar 3 delas so porque o
+    # modelo/nome nao continha "color" (ex.: "Kyocera M5021cdn").
+    print("\n[11] Colorida com is_color=False (palpite errado no nome do modelo)")
+    agent = FakeAgent(supplies=[
+        (1, 7200, 10000, "Black Toner"),
+        (2, 5800, 10000, "Cyan Toner"),
+        (3, 6100, 10000, "Magenta Toner"),
+        (4, 5500, 10000, "Yellow Toner"),
+    ])
+    agent.start()
+    time.sleep(0.2)
+    cli = LocalSNMPClient(agent.port)
+    r = cli.collect("127.0.0.1", is_color=False)  # palpite errado de proposito
+    check("qtd toners (as 4 cores, mesmo com palpite errado)", len(r.toners), 4)
+    check("ordem C,M,Y,K", [t.color for t in r.toners], ["C", "M", "Y", "K"])
+    agent.stop()
+
+    # 12. Mono de verdade continua escolhendo so 1, mesmo com is_color=True
+    # por engano (nao regride: sem cor distinta nos candidatos, mantem so
+    # o de maior capacidade).
+    print("\n[12] Mono de verdade nao vira colorida por engano")
+    agent = FakeAgent(supplies=[
+        (1, 500, 1000, "Maintenance Kit"),
+        (2, 9000, 20000, "Black Toner"),
+    ])
+    agent.start()
+    time.sleep(0.2)
+    cli = LocalSNMPClient(agent.port)
+    r = cli.collect("127.0.0.1", is_color=False)
+    check("qtd toners (so 1, cores nao distintas)", len(r.toners), 1)
+    check("escolheu maior capacidade", r.toners[0].maximum, 20000)
+    agent.stop()
+
     print("\n" + "=" * 70)
     if _falhas:
         print(f"{FAIL} {len(_falhas)} verificacao(oes) falharam: {_falhas}")
