@@ -65,10 +65,10 @@ um modelo não faz nada no banco já criado, e o erro só aparece em runtime.
 depois que houver dados reais que importem.
 **Custo:** médio (adotar Alembic, gerar a baseline do schema atual).
 
-**Menor, do mesmo tipo:** `COLLECTION_PRINTER_IDS` e `SNMP_RETRIES` existem em
-`config.py` e no `.env.example` mas **não são lidos por nada** — o scheduler
-coleta a frota ativa inteira, e `snmp.py` não implementa retry. Configuração
-morta que parece viva.
+**Menor, do mesmo tipo:** `COLLECTION_PRINTER_IDS` existe em `config.py` e no
+`.env.example` mas **não é lido por nada** — o scheduler coleta a frota ativa
+inteira. Configuração morta que parece viva. (`SNMP_RETRIES` estava na mesma
+situação; passou a ter efeito de verdade na Fase 17 — ver `snmp.py:_exchange`.)
 
 ---
 

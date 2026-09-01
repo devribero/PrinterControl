@@ -46,7 +46,7 @@ class FakeAgent(threading.Thread):
 
     daemon = True
 
-    def __init__(self, supplies, page_count=123456, uptime=500000, support_bulk=True, mute=False):
+    def __init__(self, supplies, page_count=123456, uptime=500000, support_bulk=True, mute=False, drop_first=0):
         super().__init__()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(("127.0.0.1", 0))
@@ -56,6 +56,12 @@ class FakeAgent(threading.Thread):
         self.uptime = uptime
         self.support_bulk = support_bulk
         self.mute = mute
+        # Simula pacote perdido: ignora os N primeiros pedidos recebidos (nao
+        # responde nada, como se o UDP tivesse comido o pacote), responde
+        # normalmente dali em diante — para testar que o RETRY do cliente
+        # recupera do que seria, sem ele, um falso "sem resposta".
+        self.drop_first = drop_first
+        self._dropped = 0
         self.running = True
         self._c = SNMPClient()
 
@@ -130,6 +136,9 @@ class FakeAgent(threading.Thread):
                 return
             if self.mute:
                 continue
+            if self._dropped < self.drop_first:
+                self._dropped += 1
+                continue
             try:
                 pdu_tag, oids = self._request_oids(data)
                 values = self.values()
@@ -176,12 +185,21 @@ class LocalSNMPClient(SNMPClient):
         return True
 
     def _exchange(self, sock, ip, packet):
-        try:
-            sock.sendto(packet, ("127.0.0.1", self.port))
-            resp, _ = sock.recvfrom(8192)
-            return resp
-        except (socket.timeout, OSError):
-            return None
+        """Mesma logica de retry do SNMPClient real (ver snmp.py), so
+        redirecionando o destino para o agente falso em 127.0.0.1."""
+        tentativas = 1 + self.retries
+        for tentativa in range(tentativas):
+            try:
+                sock.sendto(packet, ("127.0.0.1", self.port))
+                resp, _ = sock.recvfrom(8192)
+                return resp
+            except socket.timeout:
+                if tentativa + 1 < tentativas:
+                    continue
+                return None
+            except OSError:
+                return None
+        return None
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -336,6 +354,39 @@ def main():
     r = cli.collect("127.0.0.1", is_color=False)  # palpite errado de proposito
     check("qtd toners (as 4 cores, mesmo com palpite errado)", len(r.toners), 4)
     check("ordem C,M,Y,K", [t.color for t in r.toners], ["C", "M", "Y", "K"])
+    agent.stop()
+
+    # 11b. Retry (Fase 17): 1 pacote perdido, retries=1 -> recupera na
+    # segunda tentativa em vez de virar "sem resposta".
+    print("\n[11b] Retry recupera de 1 pacote perdido (SNMP_RETRIES=1)")
+    agent = FakeAgent(supplies=[(1, 4500, 10000, "Black Toner")], drop_first=1)
+    agent.start()
+    time.sleep(0.2)
+    cli = LocalSNMPClient(agent.port, timeout=0.3, retries=1)
+    r = cli.collect("127.0.0.1", is_color=False)
+    check("snmp_responded (recuperou do pacote perdido)", r.snmp_responded, True)
+    check("qtd toners", len(r.toners), 1)
+    check("percentual correto apesar do pacote perdido", r.toners[0].percent, 45)
+    agent.stop()
+
+    # 11c. Perdas alem do que o retry cobre: continua falhando (nao trava
+    # tentando pra sempre, e nao finge sucesso). Testa _get_numeric()
+    # isolado (nao collect() inteiro) porque collect() consulta varios
+    # campos — cada um com seu proprio orcamento de retry — e um agente com
+    # "drop_first" global misturaria o orcamento de um campo com o de outro.
+    print("\n[11c] Perdas alem do limite de retry (consulta isolada): continua reportando falha")
+    agent = FakeAgent(supplies=[(1, 4500, 10000, "Black Toner")], drop_first=2)
+    agent.start()
+    time.sleep(0.2)
+    cli = LocalSNMPClient(agent.port, timeout=0.2, retries=1)
+    sock2 = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock2.settimeout(2)
+    check(
+        "None apos esgotar as 2 tentativas (1 inicial + 1 retry)",
+        cli._get_numeric(sock2, "127.0.0.1", SNMPClient.OID_UPTIME),
+        None,
+    )
+    sock2.close()
     agent.stop()
 
     # 12. Mono de verdade continua escolhendo so 1, mesmo com is_color=True

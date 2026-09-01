@@ -46,8 +46,22 @@ def pages_from_readings(
 ) -> dict[int, int]:
     """
     Paginas impressas por impressora dentro de [month_start, month_end),
-    derivado do MAIOR contador observado menos o MENOR — o incremento
-    realmente medido nas leituras daquele mes, nunca estimado.
+    somando o incremento POSITIVO entre leituras consecutivas (ordenadas por
+    id — mesma ordem de insercao/coleta).
+
+    Fase 17: antes disto era "maior contador observado menos o menor". Isso
+    assume que o contador so cresce dentro do mes — quebra quando ele
+    RESETA (troca de placa formatadora, reset de fabrica; o proprio projeto
+    ja simula esse cenario em snmp_fleet_mock.counter_reset). Com reset no
+    meio do mes, "maior menos menor" pega o pico ANTES do reset e o vale
+    DEPOIS dele, superestimando o total de forma grosseira (contador vai de
+    50000 para 12, o calculo antigo relataria ~50238 paginas em vez das
+    ~538 realmente impressas).
+
+    Somar so os saltos POSITIVOS entre leituras consecutivas da o mesmo
+    resultado no caso normal (contador sempre subindo — a soma telescopa
+    exatamente para maior-menor) e ignora corretamente o salto para tras de
+    um reset, em vez de subtrair errado.
 
     Leitura sem contador valido (impressora offline no momento) nao entra
     na conta. Impressora sem nenhuma leitura no periodo nao aparece no
@@ -57,19 +71,24 @@ def pages_from_readings(
         select(PrinterReading)
         .where(PrinterReading.timestamp >= month_start)
         .where(PrinterReading.timestamp < month_end)
+        .order_by(PrinterReading.printer_id, PrinterReading.id)
     ).all()
 
-    bounds: dict[int, list[int]] = {}
+    total: dict[int, int] = {}
+    ultimo_contador: dict[int, int] = {}
     for r in readings:
         if not r.page_count:
             continue
-        if r.printer_id not in bounds:
-            bounds[r.printer_id] = [r.page_count, r.page_count]
-        else:
-            bounds[r.printer_id][0] = min(bounds[r.printer_id][0], r.page_count)
-            bounds[r.printer_id][1] = max(bounds[r.printer_id][1], r.page_count)
+        anterior = ultimo_contador.get(r.printer_id)
+        if anterior is not None and r.page_count > anterior:
+            total[r.printer_id] = total.get(r.printer_id, 0) + (r.page_count - anterior)
+        elif r.printer_id not in total:
+            # Primeira leitura valida da impressora no mes: ainda nao ha
+            # "salto" para somar, so o registro do ponto de partida.
+            total[r.printer_id] = 0
+        ultimo_contador[r.printer_id] = r.page_count
 
-    return {pid: highest - lowest for pid, (lowest, highest) in bounds.items()}
+    return total
 
 
 def upsert_printer_monthly(

@@ -47,6 +47,7 @@ class PrinterCollector:
             self.client = SNMPClient(
                 community=settings.snmp_community,
                 timeout=settings.snmp_timeout,
+                retries=settings.snmp_retries,
             )
 
     # ─────────────────────────────────────────────────────────────────────
