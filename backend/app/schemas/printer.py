@@ -86,6 +86,11 @@ class PrinterResponse(BaseModel):
     active: bool
     last_seen_at: Optional[datetime] = None
     created_at: datetime
+    # Fase 18: exposto especificamente para "quando esta impressora ficou
+    # inativa" — o sync grava `updated_at = now()` no exato momento em que
+    # marca active=False (ver printer_sync.py). Sem isto, a tela de
+    # impressoras inativas nao tinha nenhuma data real pra mostrar.
+    updated_at: datetime
 
     class Config:
         from_attributes = True
