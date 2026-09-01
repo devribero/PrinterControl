@@ -3,6 +3,7 @@ from .printer import Printer, PrinterReading, PrinterMonthly
 from .print_server import PrintServer
 from .alert import Alert, TonerHistory
 from .notification import Notification
+from .audit_log import AuditLog
 
 __all__ = [
     "User",
@@ -13,4 +14,5 @@ __all__ = [
     "Alert",
     "TonerHistory",
     "Notification",
+    "AuditLog",
 ]

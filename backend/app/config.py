@@ -298,6 +298,23 @@ class Settings(BaseSettings):
     login_max_attempts: int = 5
     login_window_seconds: int = 900
 
+    # ------------------------------------------------------------------
+    # Limite de acoes de rede (Fase 16) — descobrir/sincronizar Print
+    # Server, coletar impressora individual. Sem isto, qualquer conta
+    # autenticada podia chamar essas rotas sem limite, gerando carga
+    # desnecessaria de PowerShell/SNMP contra a frota real repetidamente.
+    #
+    # Por USUARIO (nao por IP: sao acoes autenticadas, o e-mail ja
+    # identifica quem esta chamando) e por ACAO (discover/sync/collect tem
+    # orcamentos independentes — usar um nao consome o dos outros).
+    #
+    # 10 em 60s e folgado para uso normal (ninguem clica "sincronizar" mais
+    # que isso por minuto de proposito) e aperta quem automatiza chamadas
+    # repetidas.
+    # ------------------------------------------------------------------
+    network_action_max_attempts: int = 10
+    network_action_window_seconds: int = 60
+
     # Confiar em X-Forwarded-For para identificar o IP de origem.
     #
     # Falso por padrao, e nao por conservadorismo: com o backend acessivel

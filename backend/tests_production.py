@@ -169,10 +169,22 @@ sensiveis = [
     ("snmp_community", "consultando snmp_community=publico-interno", "publico-interno"),
     ("webhook_url", "webhook_url=https://outlook.office.com/webhook/AAA-BBB", "AAA-BBB"),
     ("password_hash", "user password_hash=$argon2id$v=19$m=65536", "argon2id"),
+    # Fase 16 (LGPD): dado pessoal no log de bloqueio de rate-limit do login.
+    ("conta (e-mail)", "Login bloqueado | conta=pedro.ribeiro@elgin.com.br | retry_after=60s", "pedro.ribeiro@elgin.com.br"),
+    ("origem (IP)", "Login bloqueado | conta=x | origem=192.168.1.42 | retry_after=60s", "192.168.1.42"),
 ]
 for nome, mensagem, segredo in sensiveis:
     saida = redigir(mensagem)
     check_true(f"{nome} redigido", segredo not in saida, saida[:70])
+
+print("\n[5b] Mensagem real de bloqueio de login: e-mail E IP redigidos juntos")
+saida = redigir(
+    "Login bloqueado por excesso de tentativas | conta=%s | origem=%s | retry_after=%ss",
+    "pedro.ribeiro@elgin.com.br", "10.0.0.5", 60,
+)
+check_true("e-mail ausente", "pedro.ribeiro@elgin.com.br" not in saida, saida)
+check_true("IP ausente", "10.0.0.5" not in saida, saida)
+check_true("retry_after (nao e PII) continua legivel", "60s" in saida, saida)
 
 print("\n[6] A redacao alcanca args de terceiros (uvicorn, sqlalchemy)")
 # Bibliotecas logam com %s; se a redacao rodasse antes da formatacao, o

@@ -41,6 +41,17 @@ _PADROES_SENSIVEIS = [
         r"(?i)[\"']?\b(secret_key|secret|password|senha|passwd|token|authorization|api_key|"
         r"snmp_community|webhook_url|password_hash)\b[\"']?\s*[=:]\s*[\"']?([^\s,;\"'}\])]+)"
     ),
+    # LGPD (Fase 16): dado pessoal, nao segredo tecnico — mas o mesmo raciocinio
+    # de "nunca deveria sobreviver no arquivo de log" se aplica. Alvo especifico:
+    # o log de bloqueio de rate-limit do login (routes/auth.py), que grava
+    # e-mail e IP em texto claro toda vez que alguem erra a senha demais vezes.
+    # Escopado aos rotulos "conta=" e "origem=" (nao "qualquer coisa que
+    # pareca e-mail em qualquer log") de proposito: um filtro de e-mail
+    # generico redigiria identificadores uteis em outras mensagens
+    # operacionais (ex.: "usuario X criado por Y"), reduzindo o valor de
+    # depuracao sem ganho de privacidade correspondente — aqui o campo e
+    # sempre PII (conta/IP de quem tentou logar), nunca outra coisa.
+    re.compile(r"(?i)\b(conta|origem)=([^\s|]+)"),
 ]
 
 _MASCARA = "***REDIGIDO***"

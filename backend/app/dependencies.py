@@ -29,9 +29,11 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlmodel import Session, select
 
+from app.config import settings
 from app.database import get_session
 from app.models.user import Role, User
 from app.services.auth import decode_token
+from app.services.rate_limit import RateLimiter
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -144,3 +146,50 @@ require_operator = require_roles(Role.OPERATOR.value)
 #: Operacoes administrativas/perigosas: usuarios, cadastro de impressoras,
 #: discovery/sync do Print Server, coleta simulada, estado do agendador.
 require_admin = require_roles(Role.ADMIN.value)
+
+
+# ---------------------------------------------------------------------------
+#  Limite de acoes de rede (Fase 16) — ver config.py, NETWORK_ACTION_*.
+# ---------------------------------------------------------------------------
+#: Uma instancia por processo, mesmo padrao do login_limiter em routes/auth.py.
+_network_action_limiter = RateLimiter(
+    max_tentativas=settings.network_action_max_attempts,
+    janela_segundos=settings.network_action_window_seconds,
+)
+
+
+def rate_limited_action(action: str, require: Callable[..., User] = require_admin) -> Callable[..., User]:
+    """
+    Fabrica de dependencia: limita quantas vezes UM usuario pode disparar
+    UMA acao de rede (discover, sync, coleta de impressora individual) por
+    janela de tempo. Composta sobre `require`, o parametro existe porque
+    nem toda rota de rede exige admin — `collect_printer` e `require_operator`,
+    por exemplo, e usar `require_admin` aqui por padrao teria elevado essa
+    rota sem querer. Roda depois da autorizacao: 403 continua vindo primeiro
+    para quem nem deveria estar aqui.
+
+    Por e-mail, nao por IP: sao rotas autenticadas, a identidade ja e
+    conhecida e mais confiavel que IP (que atras de um tunel e o mesmo
+    para todo mundo — ver docstring de services/rate_limit.py).
+    """
+
+    def dependency(user: User = Depends(require)) -> User:
+        chave = f"{action}:{user.email}"
+        resultado = _network_action_limiter.verificar([chave])
+        if resultado.bloqueado:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=(
+                    f"Muitas chamadas a esta acao em pouco tempo. "
+                    f"Tente novamente em {resultado.retry_after}s."
+                ),
+                headers={"Retry-After": str(resultado.retry_after)},
+            )
+        # Nome do metodo e do caso de uso original (login: so falha conta).
+        # Aqui e diferente de proposito: TODA chamada consome credito, com
+        # sucesso ou sem — o objetivo e limitar a frequencia da acao em si,
+        # nao punir erro.
+        _network_action_limiter.registrar_falha([chave])
+        return user
+
+    return dependency
