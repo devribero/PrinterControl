@@ -160,6 +160,11 @@ async function loadFromApi(): Promise<LoadResult> {
 const OFFLINE_MESSAGE = "Não foi possível conectar ao servidor. Exibindo dados de demonstração.";
 const ANONYMOUS_MESSAGE = "Faça login para ver os dados reais da frota. Exibindo dados de demonstração.";
 
+// Fase 13: atualizacao automatica em segundo plano. Mais frequente que o
+// ciclo de coleta do backend (5min por padrao) para sempre pegar a leitura
+// mais nova sem precisar clicar em nada ao trocar de aba.
+const AUTO_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
+
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<Account | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
@@ -326,6 +331,58 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     });
     return () => {
       cancelled = true;
+    };
+  }, [sessionLoading, accountKey]);
+
+  /**
+   * Fase 13: atualizacao automatica — antes so "Verificar agora" (clique
+   * manual) re-buscava os dados; sem ele, uma aba aberta ficava com o que
+   * carregou no login ate a pessoa lembrar de atualizar. Ao contrario do
+   * clique manual, este ciclo fica em SILENCIO de proposito:
+   *
+   *   - sem toast, sem spinner — ninguem quer aviso a cada 2 minutos;
+   *   - uma falha passageira MANTEM o ultimo dado bom, nao cai para o
+   *     mockup — um unico ciclo de rede ruim nao pode virar o painel
+   *     inteiro em modo demonstracao sozinho (isso so acontece na carga
+   *     inicial ou no "Verificar agora" manual, onde faz sentido avisar);
+   *   - pausa quando a aba esta em segundo plano (nao gasta requisicao a
+   *     toa com a tela fechada) e atualiza na hora ao voltar o foco, caso
+   *     tenha passado mais tempo que o intervalo.
+   */
+  useEffect(() => {
+    if (sessionLoading || !accountKey) return;
+
+    let cancelled = false;
+
+    async function tick() {
+      if (cancelled || document.hidden) return;
+      const result = await loadFromApi();
+      if (cancelled) return;
+
+      if (result.ok) {
+        setRawPrinters(result.printers);
+        setApiAlerts(result.alerts);
+        setMonthlyReport(result.monthlyReport);
+        setUsingRealData(true);
+        setApiError(null);
+        setSessionVerified(true);
+        setLastChecked(new Date());
+      } else if (result.reason === "unauthorized") {
+        expireSession();
+      }
+      // "offline": fica quieto, mantem o ultimo dado bom na tela.
+    }
+
+    const intervalId = window.setInterval(() => void tick(), AUTO_REFRESH_INTERVAL_MS);
+    function handleVisibilityChange() {
+      if (!document.hidden) void tick();
+    }
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [sessionLoading, accountKey]);
 
