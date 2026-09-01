@@ -183,10 +183,17 @@ class SNMPClient:
     MAX_CONSECUTIVE_FAILS = 3  # PS1: if ($falhasConsecutivas -ge 3) { break }
     BULK_MAX_REPETITIONS = 15  # PS1: -MaxRepetitions 15
 
-    def __init__(self, community: str = "public", timeout: float = 1.5, ping_timeout_ms: int = 400):
+    def __init__(
+        self, community: str = "public", timeout: float = 1.5, ping_timeout_ms: int = 400, retries: int = 1
+    ):
         self.community = community
         self.timeout = timeout
         self.ping_timeout_ms = ping_timeout_ms
+        # Fase 17: SNMP_RETRIES existia em config.py mas nada usava — cada
+        # troca era feita uma unica vez. UDP nao garante entrega; um pacote
+        # perdido virava "sem resposta" mesmo com a impressora saudavel.
+        # Ver _exchange() para onde isto de fato reenvia.
+        self.retries = max(0, retries)
 
     # ─────────────────────────────────────────────────────────────────────
     #  Fluxo principal
@@ -495,17 +502,31 @@ class SNMPClient:
             return None
 
     def _exchange(self, sock: socket.socket, ip: str, packet: bytes) -> Optional[bytes]:
-        """Envia um pacote e aguarda a resposta (UDP/161)."""
-        try:
-            sock.sendto(packet, (ip, 161))
-            response, _addr = sock.recvfrom(8192)
-            return response
-        except socket.timeout:
-            self._last_network_error = "snmp_timeout"
-            return None
-        except OSError:
-            self._last_network_error = "snmp_socket_error"
-            return None
+        """
+        Envia um pacote e aguarda a resposta (UDP/161).
+
+        Reenvia em TIMEOUT (ate `self.retries` vezes) — UDP nao garante
+        entrega, um pacote perdido no meio do caminho nao deveria virar
+        "sem resposta" se a proxima tentativa passar. Nao reenvia em outro
+        tipo de erro de socket (ex.: rede inalcancavel): esse e um problema
+        persistente, nao passageiro, e tentar de novo so soma latencia sem
+        chance real de sucesso.
+        """
+        tentativas = 1 + self.retries
+        for tentativa in range(tentativas):
+            try:
+                sock.sendto(packet, (ip, 161))
+                response, _addr = sock.recvfrom(8192)
+                return response
+            except socket.timeout:
+                self._last_network_error = "snmp_timeout"
+                if tentativa + 1 < tentativas:
+                    continue
+                return None
+            except OSError:
+                self._last_network_error = "snmp_socket_error"
+                return None
+        return None
 
     # ─────────────────────────────────────────────────────────────────────
     #  Codificacao BER dos pedidos
