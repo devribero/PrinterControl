@@ -89,6 +89,10 @@ pwsh .\scripts\Servico-PrinterControl.ps1 -Acao instalar
 Cria duas tarefas agendadas: `PrinterControl-Backend` (sobe no boot, reinicia
 em falha) e `PrinterControl-Backup` (a cada 6h, mantendo 14 cópias).
 
+Em produção, informe também `-BackupDir` apontando para um disco **diferente**
+do banco — sem isso o backup fica vulnerável ao mesmo disco que ele deveria
+proteger contra. Ver seção 5, "Backup fora do disco de produção".
+
 ### A escolha da conta — leia se a coleta falhar
 
 O padrão é **SYSTEM**: sobe sem ninguém logado e não exige senha guardada.
@@ -170,6 +174,30 @@ estão no arquivo `-wal`.
 
 Cada backup passa por `integrity_check` na hora da geração e é colapsado num
 **arquivo único** (sem `-wal`/`-shm` ao lado).
+
+### Backup fora do disco de produção
+
+Por padrão (`-BackupDir` não informado ao instalar o serviço, ver seção 2), o
+backup fica em `backend\backups` — **o mesmo disco** do `printer_control.db`
+de produção. Isso é um ponto único de falha: se o disco falhar, backup e
+banco falham juntos, e o backup não serviu pra nada.
+
+Numa instalação de produção de verdade, sempre informe `-BackupDir` apontando
+para outro disco (rede ou externo) ao instalar o serviço:
+
+```powershell
+pwsh .\scripts\Servico-PrinterControl.ps1 -Acao instalar -BackupDir "\\servidor\backups\printercontrol"
+```
+
+Sem isso, o próprio instalador avisa (texto amarelo) que o backup vai ficar
+no disco local — não é um erro que impede a instalação, porque em ambiente
+de teste/demonstração isso não importa, mas em produção **precisa** ser
+corrigido antes de contar com o backup para alguma coisa.
+
+Criptografia em repouso: o arquivo gerado não é cifrado. Se o destino for uma
+pasta de rede ou disco externo compartilhado, a proteção depende de quem
+controla o acesso àquele local (permissões de pasta, criptografia do próprio
+disco/servidor) — este projeto não cifra o arquivo `.db` em si.
 
 ### Restaurar
 

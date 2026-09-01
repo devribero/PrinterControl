@@ -19,7 +19,20 @@ from app.dependencies import require_admin
 from app.models.notification import Notification
 from app.models.user import Role, User
 from app.schemas.user import UserCreate, UserDelete, UserResponse, UserUpdate
+from app.services import audit_log
 from app.services.auth import hash_password
+
+
+def _snapshot_user(user: User) -> dict:
+    """Campos seguros para a trilha de auditoria — NUNCA password_hash."""
+    return {
+        "email": user.email,
+        "username": user.username,
+        "name": user.name,
+        "role": user.role,
+        "is_active": user.is_active,
+        "must_change_password": user.must_change_password,
+    }
 
 router = APIRouter(
     prefix="/users",
@@ -74,7 +87,11 @@ def list_users(session: Session = Depends(get_session)):
 
 
 @router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-def create_user(user_data: UserCreate, session: Session = Depends(get_session)):
+def create_user(
+    user_data: UserCreate,
+    session: Session = Depends(get_session),
+    admin: User = Depends(require_admin),
+):
     """
     Cria uma conta. Substitui o antigo `POST /api/auth/register` (Fase 1), que
     ja era administrativo — o caminho mudou para o recurso a que pertence, sem
@@ -112,6 +129,8 @@ def create_user(user_data: UserCreate, session: Session = Depends(get_session)):
         must_change_password=True,
     )
     session.add(user)
+    session.flush()  # atribui o id sem commitar, para o registro de auditoria abaixo
+    audit_log.record(session, admin, "user.create", "user", user.id, after=_snapshot_user(user))
     session.commit()
     session.refresh(user)
     return user
@@ -122,7 +141,7 @@ def update_user(
     user_id: int,
     update: UserUpdate,
     session: Session = Depends(get_session),
-    _admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin),
 ):
     """
     Altera nome, username, papel, ativacao e/ou senha de uma conta.
@@ -140,6 +159,7 @@ def update_user(
         raise HTTPException(status_code=404, detail="Usuario nao encontrado")
 
     _ensure_not_last_admin(session, user, update)
+    before = _snapshot_user(user)
 
     data = update.model_dump(exclude_unset=True)
 
@@ -171,6 +191,7 @@ def update_user(
             setattr(user, field, value)
 
     session.add(user)
+    audit_log.record(session, admin, "user.update", "user", user.id, before=before, after=_snapshot_user(user))
     session.commit()
     session.refresh(user)
     return user
@@ -181,6 +202,7 @@ def delete_user(
     user_id: int,
     payload: UserDelete,
     session: Session = Depends(get_session),
+    admin: User = Depends(require_admin),
 ):
     """
     Apaga a conta em definitivo. Diferente de PATCH `is_active=False`, aqui a
@@ -216,5 +238,6 @@ def delete_user(
     ).all():
         session.delete(notification)
 
+    audit_log.record(session, admin, "user.delete", "user", user.id, before=_snapshot_user(user))
     session.delete(user)
     session.commit()

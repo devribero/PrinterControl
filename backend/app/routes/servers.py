@@ -22,7 +22,7 @@ from sqlmodel import Session, func, select
 
 from app.config import settings
 from app.database import get_session
-from app.dependencies import require_active_user, require_admin
+from app.dependencies import rate_limited_action, require_active_user, require_admin
 from app.models.alert import Alert, TonerHistory
 from app.models.notification import Notification
 from app.models.print_server import (
@@ -32,6 +32,7 @@ from app.models.print_server import (
     PrintServer,
 )
 from app.models.printer import Printer, PrinterMonthly, PrinterReading
+from app.services import audit_log
 from app.services.environment_guard import bloquear_mock_em_producao
 from app.models.user import User
 from app.services.discovery import enrich_discovered_printers
@@ -311,7 +312,7 @@ def list_servers(session: Session = Depends(get_session), _user: User = Depends(
 def create_server(
     data: PrintServerCreate,
     session: Session = Depends(get_session),
-    _admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin),
 ):
     """Registra um Print Server. O host e unico — e a chave natural."""
     existente = session.exec(select(PrintServer).where(PrintServer.host == data.host)).first()
@@ -331,6 +332,11 @@ def create_server(
 
     server = PrintServer(host=data.host, name=data.name or data.host, mode=data.mode)
     session.add(server)
+    session.flush()  # atribui o id sem commitar, para o registro de auditoria abaixo
+    audit_log.record(
+        session, admin, "server.create", "print_server", server.id,
+        after={"host": server.host, "name": server.name, "mode": server.mode},
+    )
     session.commit()
     session.refresh(server)
 
@@ -353,10 +359,11 @@ def update_server(
     server_id: int,
     update: PrintServerUpdate,
     session: Session = Depends(get_session),
-    _admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin),
 ):
     """Altera rotulo, modo e ativacao. `host` nao muda (ver PrintServerUpdate)."""
     server = _get_or_404(session, server_id)
+    before = {"host": server.host, "name": server.name, "mode": server.mode, "active": server.active}
 
     data = update.model_dump(exclude_unset=True)
     if data.get("mode") == "mock":
@@ -371,6 +378,11 @@ def update_server(
 
     server.updated_at = datetime.utcnow()
     session.add(server)
+    audit_log.record(
+        session, admin, "server.update", "print_server", server.id,
+        before=before,
+        after={"host": server.host, "name": server.name, "mode": server.mode, "active": server.active},
+    )
     session.commit()
     session.refresh(server)
     return _to_response(session, server)
@@ -381,7 +393,7 @@ def delete_server(
     server_id: int,
     payload: PrintServerDelete,
     session: Session = Depends(get_session),
-    _admin: User = Depends(require_admin),
+    admin: User = Depends(require_admin),
 ):
     """
     Apaga o Print Server em definitivo, em cascata: impressoras deste
@@ -429,6 +441,10 @@ def delete_server(
         for printer in printers:
             session.delete(printer)
 
+    audit_log.record(
+        session, admin, "server.delete", "print_server", server.id,
+        before={"host": server.host, "name": server.name, "mode": server.mode, "printer_count": len(printer_ids)},
+    )
     session.delete(server)
     session.commit()
 
@@ -438,7 +454,7 @@ def delete_server(
 # ─────────────────────────────────────────────────────────────────────────
 
 @router.post("/discover", response_model=DiscoverResponse)
-def discover(_user: User = Depends(require_admin)):
+def discover(_user: User = Depends(rate_limited_action("discover"))):
     """
     Descobre as impressoras do servidor PADRAO (equivalente a Get-Printer +
     Get-PrinterPort do Main.ps1). Nao grava nada no banco.
@@ -453,7 +469,7 @@ def discover(_user: User = Depends(require_admin)):
 
 
 @router.post("/sync", response_model=SyncResponse)
-def sync(session: Session = Depends(get_session), _user: User = Depends(require_admin)):
+def sync(session: Session = Depends(get_session), _user: User = Depends(rate_limited_action("sync"))):
     """
     Descobre e sincroniza o servidor PADRAO com o banco (Etapa 4): cria as
     novas, atualiza as existentes, marca como inativas as que sumiram.
@@ -477,7 +493,7 @@ def sync(session: Session = Depends(get_session), _user: User = Depends(require_
 def discover_server(
     server_id: int,
     session: Session = Depends(get_session),
-    _admin: User = Depends(require_admin),
+    _admin: User = Depends(rate_limited_action("discover_server")),
 ):
     """Descoberta de UM servidor registrado, no modo configurado nele."""
     server = _get_or_404(session, server_id)
@@ -501,7 +517,7 @@ def discover_server(
 def sync_server(
     server_id: int,
     session: Session = Depends(get_session),
-    _admin: User = Depends(require_admin),
+    _admin: User = Depends(rate_limited_action("sync_server")),
 ):
     """
     Sincroniza UM servidor registrado. O escopo por servidor ja era garantido

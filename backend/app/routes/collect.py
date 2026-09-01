@@ -14,7 +14,7 @@ from sqlmodel import Session, select
 
 from app.config import settings
 from app.database import get_session
-from app.dependencies import require_admin, require_operator
+from app.dependencies import rate_limited_action, require_admin, require_operator
 from app.models.printer import Printer
 from app.models.user import Role, User
 from app.services.printer_collector import PrinterCollector
@@ -65,7 +65,7 @@ def collect_printer(
     printer_id: int,
     request: CollectRequest,
     session: Session = Depends(get_session),
-    user: User = Depends(require_operator),
+    user: User = Depends(rate_limited_action("collect_printer", require=require_operator)),
 ):
     """
     Coleta uma impressora e persiste a leitura.
@@ -126,7 +126,7 @@ class FleetCollectResponse(BaseModel):
 @router.post("/fleet", response_model=FleetCollectResponse)
 def collect_fleet(
     session: Session = Depends(get_session),
-    _user: User = Depends(require_admin),
+    _user: User = Depends(rate_limited_action("collect_fleet")),
 ):
     """
     Coleta simulada de TODAS as impressoras cadastradas, em uma chamada.

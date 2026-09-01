@@ -58,7 +58,14 @@ param(
 
     # Backups por dia. 0 desliga a tarefa de backup.
     [int]$BackupHoras = 6,
-    [int]$BackupManter = 14
+    [int]$BackupManter = 14,
+
+    # Fase 16: vazio (padrao) grava em backend\backups — MESMO disco do
+    # banco de producao, ponto unico de falha se o disco falhar. Aponte
+    # para um disco de rede ou externo (ex.: "\\servidor\backups\printercontrol"
+    # ou "D:\backups") sempre que a maquina servir producao de verdade.
+    # Ver docs\OPERATIONS.md, secao "Backup fora do disco de producao".
+    [string]$BackupDir = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -147,7 +154,16 @@ function Instalar-Backup {
     }
 
     $script = Join-Path $BackendDir "backup_db.py"
-    $acao = New-ScheduledTaskAction -Execute $PythonExe -Argument "`"$script`" --keep $BackupManter" -WorkingDirectory $BackendDir
+    $argumentos = "`"$script`" --keep $BackupManter"
+    if ($BackupDir -ne "") {
+        $argumentos += " --dir `"$BackupDir`""
+    }
+    else {
+        Escrever "AVISO: -BackupDir nao informado — backup vai ficar no MESMO disco do banco de producao (backend\backups)." "Yellow"
+        Escrever "       Isso e um ponto unico de falha: se o disco falhar, backup e banco falham juntos." "Yellow"
+        Escrever "       Use -BackupDir '\\servidor\backups\printercontrol' (ou outro disco) numa instalacao de producao." "Yellow"
+    }
+    $acao = New-ScheduledTaskAction -Execute $PythonExe -Argument $argumentos -WorkingDirectory $BackendDir
 
     # StartWhenAvailable cobre a maquina desligada na hora marcada: o backup
     # roda assim que ela voltar, em vez de simplesmente pular o dia.
@@ -158,7 +174,8 @@ function Instalar-Backup {
     $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
 
     Register-ScheduledTask -TaskName $NomeTarefaBackup -Action $acao -Trigger $gatilho -Settings $config -Principal $principal | Out-Null
-    Escrever "Tarefa '$NomeTarefaBackup' criada (a cada $BackupHoras h, mantendo $BackupManter)." "Green"
+    $destino = if ($BackupDir -ne "") { $BackupDir } else { "$BackendDir\backups (mesmo disco do banco)" }
+    Escrever "Tarefa '$NomeTarefaBackup' criada (a cada $BackupHoras h, mantendo $BackupManter, destino: $destino)." "Green"
 }
 
 function Remover {
