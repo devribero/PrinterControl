@@ -418,11 +418,24 @@ class SNMPClient:
         PS1 colorida: um por cor (primeiro de cada grupo), ordem C, M, Y, K.
         PS1 mono: apenas o de maior capacidade — evita devolver o kit de
         manutencao no lugar do cartucho principal.
+
+        `is_color` e so um palpite (regex em modelo/nome — ver
+        PrinterCollector.is_color_printer). O GETBULK nao e limitado por
+        esse palpite e frequentemente encontra as 4 cores mesmo quando a
+        impressora foi adivinhada como mono (modelo sem "color" no nome,
+        ex.: "Kyocera M5021cdn"). Corrige aqui pela cor de verdade: se os
+        proprios candidatos ja trazem mais de uma cor distinta (via
+        descricao do consumivel, ex.: "Cyan Toner Cartridge"), trata como
+        colorida e mantem todas — em vez de descartar 3 das 4 cores por
+        causa de um palpite errado no nome do modelo.
         """
         if not candidates:
             return []
 
-        if not is_color:
+        cores_distintas = {t.color for t in candidates}
+        e_colorida_de_verdade = is_color or len(cores_distintas) > 1
+
+        if not e_colorida_de_verdade:
             return [max(candidates, key=lambda t: t.maximum)]
 
         by_color: dict[str, TonerInfo] = {}

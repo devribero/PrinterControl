@@ -52,8 +52,25 @@ class PrinterCollector:
     # ─────────────────────────────────────────────────────────────────────
     @staticmethod
     def is_color_printer(printer: Printer) -> bool:
-        """Deduz se a impressora e colorida a partir do modelo/nome (regra do PS1)."""
-        return bool(COLOR_RE.search(printer.model or "") or COLOR_RE.search(printer.name or ""))
+        """
+        Deduz se a impressora e colorida — so um PALPITE inicial, usado para
+        decidir a profundidade da busca SNMP quando o GETBULK falha (ver
+        SNMPClient._supplies_via_get). Nao precisa ser perfeito: quando o
+        GETBULK funciona (a maioria dos casos), SNMPClient._select_toners
+        corrige pela cor de verdade encontrada nos consumiveis, mesmo se
+        este palpite errar.
+
+        Regra original do PS1 (regex em modelo/nome) erra pra modelos que
+        nao tem "color" no nome (ex.: "Kyocera M5021cdn", "Ricoh IM C400").
+        O campo `department` frequentemente carrega esse sinal de forma
+        mais confiavel (ex.: "Diretoria (Colorida)"), entao passa a contar
+        tambem.
+        """
+        return bool(
+            COLOR_RE.search(printer.model or "")
+            or COLOR_RE.search(printer.name or "")
+            or COLOR_RE.search(printer.department or "")
+        )
 
     @staticmethod
     def is_label_printer(printer: Printer) -> bool:
