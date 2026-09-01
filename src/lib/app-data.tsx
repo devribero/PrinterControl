@@ -16,7 +16,7 @@ import {
   printers as mockPrinters,
   monthlyUsage as mockMonthlyUsage,
   departmentUsage as mockDepartmentUsage,
-  decommissionedPrinters,
+  decommissionedPrinters as mockDecommissionedPrinters,
 } from "../data/printers";
 import { logout as clearSession, restoreSession, type Account } from "./auth";
 import {
@@ -62,7 +62,7 @@ interface AppDataContextValue {
   printers: Printer[];
   monthlyUsage: typeof mockMonthlyUsage;
   departmentUsage: typeof mockDepartmentUsage;
-  decommissionedPrinters: typeof decommissionedPrinters;
+  decommissionedPrinters: typeof mockDecommissionedPrinters;
   usingRealData: boolean;
   usingRealMonthlyReport: boolean;
   /**
@@ -237,6 +237,16 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       : semDadoRealEmProducao
         ? []
         : mockDepartmentUsage;
+  // Fase 18: nao precisa de outro fetch — "inativa" ja e Printer.active,
+  // que ja esta em `printers`. Derivado do mesmo array, sem round-trip novo.
+  const decommissionedPrinters = useMemo(() => {
+    if (usingRealData) {
+      return printers
+        .filter((p) => !p.active)
+        .map((p) => ({ ip: p.ip, model: p.model, department: p.department, deactivatedAt: p.updatedAt ?? null }));
+    }
+    return semDadoRealEmProducao ? [] : mockDecommissionedPrinters;
+  }, [printers, usingRealData, semDadoRealEmProducao]);
   const usingRealMonthlyReport = !!monthlyReport && monthlyReport.monthlyUsage.length > 0;
   // Um so dos dois basta para haver numero ficticio na tela. Antes desta fase
   // a faixa olhava apenas usingRealData, entao "frota real + relatorio mensal

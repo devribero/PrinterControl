@@ -60,6 +60,7 @@ export function adaptPrinter(p: ApiPrinterWithStatus): Printer {
     department: p.department,
     server: p.server ?? "",
     active: p.active !== false,
+    updatedAt: p.updated_at,
     status: toStatus(p.status),
     toner: toToner(p.toner),
     pagesPrinted: p.page_count ?? 0,

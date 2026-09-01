@@ -28,6 +28,12 @@ export interface Printer {
   server: string;
   /** false = sumiu do Print Server no ultimo sync; o registro e preservado. */
   active: boolean;
+  /**
+   * Atualizado no momento em que `active` vira false — "desde quando"
+   * ficou inativa. Opcional: o conjunto de demonstração (data/printers.ts)
+   * não carrega esse campo, só o real (backend) o preenche.
+   */
+  updatedAt?: string;
   status: PrinterStatus;
   toner: TonerLevel[] | null;
   pagesPrinted: number;
@@ -148,4 +154,18 @@ export interface DepartmentUsage {
   department: string;
   monthly: MonthlyPageCount[];
   total: number;
+}
+
+/**
+ * Impressora inativa — real (Printer.active=false, Fase 18) ou de
+ * demonstração (data/printers.ts). Sem `serial`: o cadastro real nunca
+ * coletou número de série (não vem do Print Server); mostrar essa coluna
+ * sempre vazia pra dado real seria pior que não ter a coluna.
+ */
+export interface DecommissionedPrinter {
+  ip: string;
+  model: string;
+  department: string;
+  /** Quando ficou inativa (Printer.updatedAt) — null só no conjunto de demonstração antigo. */
+  deactivatedAt: string | null;
 }

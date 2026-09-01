@@ -188,6 +188,8 @@ export interface ApiPrinterWithStatus {
   /** false = sumiu do Print Server no ultimo sync (nunca e apagada). */
   active: boolean;
   created_at: string;
+  /** Atualizado no exato momento em que active vira false (ver printer_sync.py). */
+  updated_at: string;
   status: string;
   page_count: number;
   toner: ApiTonerLevel[] | null;

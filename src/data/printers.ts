@@ -1,4 +1,4 @@
-import type { DepartmentUsage, MonthlyUsageEntry, Printer, TonerLevel } from "../types";
+import type { DecommissionedPrinter, DepartmentUsage, MonthlyUsageEntry, Printer, TonerLevel } from "../types";
 
 /**
  * Dados extraídos do levantamento real de impressão da Elgin (relatório mensal de contadores),
@@ -1241,40 +1241,34 @@ export const departmentUsage: DepartmentUsage[] = [
   { department: "Outros Departamentos", monthly: departmentMonthly([32528, 21200, 32163, 24975, 39022, 32932]), total: 182820 },
 ];
 
-export interface DecommissionedPrinter {
-  ip: string;
-  model: string;
-  serial: string;
-  department: string;
-  date: string | null;
-}
-
-// Aba "Devolvidas" da planilha: impressoras retiradas/backup/fora de operação.
+// Aba "Devolvidas" da planilha: impressoras retiradas/backup/fora de
+// operação. Sem serial — dado real (Printer.active=false) nunca coletou
+// número de série, então o tipo (types.ts) nem tem esse campo mais.
 export const decommissionedPrinters: DecommissionedPrinter[] = [
-  { ip: "10.10.1.56", model: "Kyocera M2035", serial: "LZK6767381", department: "Importação", date: "15/09/2023" },
-  { ip: "10.10.1.51", model: "Kyocera M2035", serial: "LZK5434716", department: "Refrigeração", date: "15/09/2023" },
-  { ip: "10.10.1.53", model: "Kyocera M2035", serial: "LZK5434753", department: "Diretoria", date: "15/09/2023" },
-  { ip: "10.10.1.61", model: "Kyocera M2035", serial: "LZK5434761", department: "Serviços (Depeças)", date: "15/09/2023" },
-  { ip: "Estoque", model: "Kyocera M2035", serial: "LZK5744906", department: "-", date: null },
-  { ip: "Será retirada", model: "Kyocera M3040", serial: "LSD6213832", department: "Logística (ADM)", date: "28/10/2023" },
-  { ip: "10.22.2.17", model: "Kyocera M2035", serial: "LZK5537297", department: "Backup TI", date: null },
-  { ip: "10.20.3.21", model: "Kyocera M2035", serial: "LZK5434717", department: "Recebimento (Frente)", date: null },
-  { ip: "RICOH", model: "M 320F", serial: "5852ZC12239", department: "N/A", date: null },
-  { ip: "10.20.6.245", model: "Kyocera FS-4020", serial: "XVK1631037", department: "Logística (Delog 3)", date: null },
-  { ip: "N/A", model: "P2135", serial: "LVK4306681", department: "N/A", date: null },
-  { ip: "Estoque", model: "Kyocera M2035", serial: "LZN5405934", department: "Serviços", date: null },
-  { ip: "Estoque", model: "Kyocera M2035", serial: "LZK5743072", department: "Backup", date: null },
-  { ip: "10.22.2.16", model: "Kyocera M2035", serial: "LZK5539311", department: "Backup TI", date: null },
-  { ip: "N/A", model: "Kyocera M5521cdn", serial: "VDW9901561", department: "N/A", date: null },
-  { ip: "10.22.0.6", model: "Kyocera M5021cdn", serial: "VDG9X02372", department: "N/A", date: null },
-  { ip: "192.168.30.31", model: "Kyocera M2040", serial: "LZK5434778", department: "Logística (ADM) Joinville", date: null },
-  { ip: "192.168.30.32", model: "Kyocera M2035", serial: "LZK5949566", department: "Adequação", date: null },
-  { ip: "10.20.7.164", model: "Kyocera P2135", serial: "LVK5936113", department: "Depeças Refrigeração", date: null },
-  { ip: "10.2.0.251", model: "Kyocera P2135", serial: "LVK6X53947", department: "Operação Solar (galpão 12)", date: null },
-  { ip: "Estoque", model: "Ricoh M320F\t", serial: "5852Z110925", department: "Backup TI", date: null },
-  { ip: "Estoque", model: "Kyocera M2035", serial: "LZK4920945", department: "Backup TI", date: null },
-  { ip: "10.20.3.2", model: "Kyocera M2035", serial: "LZK5434934", department: "HDB - PISO SUPERIOR", date: null },
-  { ip: "10.2.0.254", model: "Ricoh MC251fw", serial: "5822P801512", department: "Logística Jundiaí", date: null },
-  { ip: "10.21.0.20", model: "Kyocera FS4200dn", serial: "LPD3900945", department: "Depeças Refrigeração", date: null },
-  { ip: "10.21.0.123", model: "Kyocera M2040", serial: "VR98Z51739", department: "Entreposto/Delog 2 (Logística)", date: null },
+  { ip: "10.10.1.56", model: "Kyocera M2035", department: "Importação", deactivatedAt: "2023-09-15T00:00:00" },
+  { ip: "10.10.1.51", model: "Kyocera M2035", department: "Refrigeração", deactivatedAt: "2023-09-15T00:00:00" },
+  { ip: "10.10.1.53", model: "Kyocera M2035", department: "Diretoria", deactivatedAt: "2023-09-15T00:00:00" },
+  { ip: "10.10.1.61", model: "Kyocera M2035", department: "Serviços (Depeças)", deactivatedAt: "2023-09-15T00:00:00" },
+  { ip: "Estoque", model: "Kyocera M2035", department: "-", deactivatedAt: null },
+  { ip: "Será retirada", model: "Kyocera M3040", department: "Logística (ADM)", deactivatedAt: "2023-10-28T00:00:00" },
+  { ip: "10.22.2.17", model: "Kyocera M2035", department: "Backup TI", deactivatedAt: null },
+  { ip: "10.20.3.21", model: "Kyocera M2035", department: "Recebimento (Frente)", deactivatedAt: null },
+  { ip: "RICOH", model: "M 320F", department: "N/A", deactivatedAt: null },
+  { ip: "10.20.6.245", model: "Kyocera FS-4020", department: "Logística (Delog 3)", deactivatedAt: null },
+  { ip: "N/A", model: "P2135", department: "N/A", deactivatedAt: null },
+  { ip: "Estoque", model: "Kyocera M2035", department: "Serviços", deactivatedAt: null },
+  { ip: "Estoque", model: "Kyocera M2035", department: "Backup", deactivatedAt: null },
+  { ip: "10.22.2.16", model: "Kyocera M2035", department: "Backup TI", deactivatedAt: null },
+  { ip: "N/A", model: "Kyocera M5521cdn", department: "N/A", deactivatedAt: null },
+  { ip: "10.22.0.6", model: "Kyocera M5021cdn", department: "N/A", deactivatedAt: null },
+  { ip: "192.168.30.31", model: "Kyocera M2040", department: "Logística (ADM) Joinville", deactivatedAt: null },
+  { ip: "192.168.30.32", model: "Kyocera M2035", department: "Adequação", deactivatedAt: null },
+  { ip: "10.20.7.164", model: "Kyocera P2135", department: "Depeças Refrigeração", deactivatedAt: null },
+  { ip: "10.2.0.251", model: "Kyocera P2135", department: "Operação Solar (galpão 12)", deactivatedAt: null },
+  { ip: "Estoque", model: "Ricoh M320F\t", department: "Backup TI", deactivatedAt: null },
+  { ip: "Estoque", model: "Kyocera M2035", department: "Backup TI", deactivatedAt: null },
+  { ip: "10.20.3.2", model: "Kyocera M2035", department: "HDB - PISO SUPERIOR", deactivatedAt: null },
+  { ip: "10.2.0.254", model: "Ricoh MC251fw", department: "Logística Jundiaí", deactivatedAt: null },
+  { ip: "10.21.0.20", model: "Kyocera FS4200dn", department: "Depeças Refrigeração", deactivatedAt: null },
+  { ip: "10.21.0.123", model: "Kyocera M2040", department: "Entreposto/Delog 2 (Logística)", deactivatedAt: null },
 ];
