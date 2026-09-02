@@ -1,10 +1,14 @@
 .shell {
+  position: relative;
+  overflow: hidden;
   display: flex;
   min-height: 100vh;
   background: var(--color-canvas);
 }
 
 .main {
+  position: relative;
+  z-index: 1;
   display: flex;
   min-height: 100vh;
   flex: 1;
@@ -222,4 +226,44 @@
   border-color: var(--color-success-border, var(--color-border-strong));
   background: var(--color-success-tint, transparent);
   color: var(--color-success, var(--color-ink));
+}
+
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.auroraBlobA,
+.auroraBlobB,
+.auroraBlobC {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(10px);
+}
+
+.auroraBlobA {
+  top: -14%;
+  left: -8%;
+  width: 48rem;
+  height: 48rem;
+  background: radial-gradient(circle, color-mix(in srgb, var(--link) 34%, transparent) 0%, transparent 70%);
+}
+
+.auroraBlobB {
+  bottom: -20%;
+  right: -10%;
+  width: 50rem;
+  height: 50rem;
+  background: radial-gradient(circle, color-mix(in srgb, var(--navy) 30%, transparent) 0%, transparent 70%);
+}
+
+.auroraBlobC {
+  top: 22%;
+  right: 8%;
+  width: 34rem;
+  height: 34rem;
+  background: radial-gradient(circle, color-mix(in srgb, var(--link-hover) 20%, transparent) 0%, transparent 70%);
 }
