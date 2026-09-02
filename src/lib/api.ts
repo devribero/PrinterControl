@@ -4,7 +4,7 @@
  * Resolve a URL base, serializa/desserializa JSON, anexa o JWT quando existe
  * e normaliza erros em ApiError. Todo fetch para a API deve passar por aqui.
  */
-export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL?.trim() || "http://127.0.0.1:8000").replace(/\/$/, "");
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL?.trim() || "").replace(/\/$/, "");
 
 const TOKEN_KEY = "elgin_auth_token";
 
