@@ -1,8 +1,38 @@
 .page {
+  --login-bg-page: #f6f3ee;
+  --login-bg-surface: #fff;
+  --login-border: #e7dfd2;
+  --login-text-primary: #26211c;
+  --login-text-secondary: #6f6459;
+  --login-text-muted: #a79b8b;
+  --login-link: #0a6a9c;
+  --login-link-hover: #0098e0;
+  --login-accent-tint: #eaf6fb;
+  --login-success: #3f8f5f;
+  --login-success-bg: #e7f3ec;
+  --login-danger: #c1503d;
+  --login-danger-bg: #fbeae6;
+
   position: relative;
   display: flex;
   min-height: 100vh;
-  background: var(--color-canvas);
+  background: var(--login-bg-page);
+}
+
+:global(html.dark) .page {
+  --login-bg-page: #16181b;
+  --login-bg-surface: #1e2124;
+  --login-border: #34383c;
+  --login-text-primary: #ece9e3;
+  --login-text-secondary: #a5a19a;
+  --login-text-muted: #74716a;
+  --login-link: #4ab3e8;
+  --login-link-hover: #7cc9ef;
+  --login-accent-tint: #101c24;
+  --login-success: #5cb37f;
+  --login-success-bg: #1e3129;
+  --login-danger: #e2776a;
+  --login-danger-bg: #2a1b19;
 }
 
 /* ---------- Left / branded hero panel ---------- */
@@ -197,7 +227,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--color-surface);
+  background: var(--login-bg-surface);
   padding: 3rem 1.5rem;
 }
 
@@ -229,15 +259,15 @@
   margin-top: 0.125rem;
   font-size: 0.6875rem;
   font-weight: 500;
-  color: var(--color-ink-faint);
+  color: var(--login-text-muted);
 }
 
 .card {
   width: 100%;
   max-width: 400px;
   border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--login-border);
+  background: var(--login-bg-surface);
   padding: 2rem;
   box-shadow: var(--shadow-lg);
   transition: transform 0.2s;
@@ -274,8 +304,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 0.75rem;
-  background: var(--color-brand-tint);
-  color: var(--color-brand-700);
+  background: var(--login-accent-tint);
+  color: var(--login-link);
 }
 
 .cardTitle {
@@ -283,13 +313,13 @@
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--color-ink);
+  color: var(--login-text-primary);
 }
 
 .cardSubtitle {
   margin-top: 0.375rem;
   font-size: 0.875rem;
-  color: var(--color-ink-faint);
+  color: var(--login-text-muted);
 }
 
 .form {
@@ -308,7 +338,7 @@
 .label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-ink-soft);
+  color: var(--login-text-secondary);
 }
 
 .labelRow {
@@ -320,11 +350,11 @@
 .forgotLink {
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--color-brand-700);
+  color: var(--login-link);
 }
 
 .forgotLink:hover {
-  color: var(--color-brand-600);
+  color: var(--login-link-hover);
   text-decoration: underline;
 }
 
@@ -333,32 +363,32 @@
   align-items: center;
   gap: 0.625rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-canvas);
+  border: 1px solid var(--login-border);
+  background: var(--login-bg-page);
   padding: 0.75rem 0.875rem;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .inputWrap:focus-within {
-  border-color: color-mix(in srgb, var(--color-brand) 50%, transparent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brand) 15%, transparent);
+  border-color: color-mix(in srgb, var(--login-link-hover) 50%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--login-link-hover) 15%, transparent);
 }
 
 .inputIcon {
   flex-shrink: 0;
-  color: var(--color-ink-faint);
+  color: var(--login-text-muted);
 }
 
 .input {
   width: 100%;
   background: transparent;
   font-size: 0.9375rem;
-  color: var(--color-ink);
+  color: var(--login-text-primary);
   border-color: transparent;
 }
 
 .input::placeholder {
-  color: var(--color-ink-faint);
+  color: var(--login-text-muted);
 }
 
 .input:focus {
@@ -367,11 +397,11 @@
 
 .togglePassword {
   flex-shrink: 0;
-  color: var(--color-ink-faint);
+  color: var(--login-text-muted);
 }
 
 .togglePassword:hover {
-  color: var(--color-ink);
+  color: var(--login-text-primary);
 }
 
 .errorBox {
@@ -379,11 +409,11 @@
   align-items: flex-start;
   gap: 0.625rem;
   border-radius: 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--color-critical) 25%, transparent);
-  background: var(--color-critical-tint);
+  border: 1px solid color-mix(in srgb, var(--login-danger) 25%, transparent);
+  background: var(--login-danger-bg);
   padding: 0.75rem 0.875rem;
   font-size: 0.875rem;
-  color: var(--color-critical);
+  color: var(--login-danger);
 }
 
 .errorIcon {
@@ -396,7 +426,7 @@
   align-items: center;
   gap: 0.625rem;
   font-size: 0.875rem;
-  color: var(--color-ink-soft);
+  color: var(--login-text-secondary);
   user-select: none;
 }
 
@@ -404,8 +434,8 @@
   height: 1rem;
   width: 1rem;
   border-radius: 0.25rem;
-  border: 1px solid var(--color-border-strong);
-  accent-color: #0098e0;
+  border: 1px solid var(--login-border);
+  accent-color: var(--login-link-hover);
 }
 
 .submitButton {
@@ -415,7 +445,7 @@
   justify-content: center;
   gap: 0.5rem;
   border-radius: 0.75rem;
-  background: var(--color-brand);
+  background: var(--login-link);
   padding: 0.75rem 0;
   font-size: 0.9375rem;
   font-weight: 600;
@@ -425,7 +455,7 @@
 }
 
 .submitButton:hover {
-  background: var(--color-brand-600);
+  background: var(--login-link-hover);
 }
 
 .submitButton:disabled {
@@ -437,5 +467,5 @@
   margin-top: 2rem;
   text-align: center;
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--login-text-muted);
 }
