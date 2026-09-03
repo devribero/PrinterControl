@@ -53,7 +53,7 @@ export default function RightPanel({ alertCount, globalToner = mockGlobalToner, 
 
   return (
     <div className={styles.root}>
-      <div className={styles.card}>
+      <div className={styles.tonerCard}>
         <h3 className={styles.cardTitle}>Níveis de toner</h3>
         <div className={styles.tonerList}>
           {globalToner.map((t) => (
@@ -101,7 +101,7 @@ export default function RightPanel({ alertCount, globalToner = mockGlobalToner, 
         </div>
       )}
 
-      <div className={styles.card}>
+      <div className={styles.quickActionsCard}>
         <h3 className={styles.quickActionsTitle}>Ações rápidas</h3>
         <div className={styles.quickActionsList}>
           <QuickAction icon={<FileBarChart2 size={17} />} label="Relatório de Impressoras" onClick={() => onNavigate("reports")} />
