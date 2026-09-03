@@ -6,6 +6,7 @@
 
 import { useRouter } from "next/navigation";
 import { RefreshCw } from "lucide-react";
+import PageHeader from "../components/PageHeader";
 import StatCards from "../components/StatCards";
 import AlertBanner from "../components/AlertBanner";
 import PrinterTable from "../components/PrinterTable";
@@ -39,15 +40,22 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className={styles.scanBar}>
-        <p>
-          Última verificação: <span className={styles.scanBarStrong}>{lastChecked.toLocaleTimeString("pt-BR")}</span>
-        </p>
-        <button onClick={handleRefresh} disabled={scanning} className={styles.scanButton}>
-          <RefreshCw size={13} className={scanning ? "animate-spin" : ""} />
-          {scanning ? "Verificando..." : "Verificar agora"}
-        </button>
-      </div>
+      <PageHeader
+        section="Monitoramento"
+        title="Visão geral"
+        subtitle="Estado consolidado da frota, suprimentos e consumo de páginas."
+        actions={
+          <div className={styles.scanBar}>
+            <p>
+              Última verificação: <span className={styles.scanBarStrong}>{lastChecked.toLocaleTimeString("pt-BR")}</span>
+            </p>
+            <button onClick={handleRefresh} disabled={scanning} className={styles.scanButton}>
+              <RefreshCw size={13} className={scanning ? "animate-spin" : ""} />
+              {scanning ? "Verificando..." : "Verificar agora"}
+            </button>
+          </div>
+        }
+      />
 
       {initialLoading ? (
         <div className={styles.statsSkeletonGrid}>
