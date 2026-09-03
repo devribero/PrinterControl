@@ -51,7 +51,7 @@ function PagesConsumedCard({
   }
   return (
     <div className={styles.card}>
-      <div className={styles.headerRow}>
+      <div className={styles.pagesHeaderRow}>
         <h3 className={styles.title}>Consumo de páginas (mês)</h3>
         <DemoDataBadge
           ficticio={monthlyFicticio}
