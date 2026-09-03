@@ -1,9 +1,8 @@
 .shell {
   position: relative;
-  overflow: hidden;
   display: flex;
   min-height: 100vh;
-  background: var(--color-canvas);
+  background: var(--bg-page, var(--color-canvas));
 }
 
 .main {

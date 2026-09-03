@@ -13,14 +13,20 @@
   height: 60px;
 }
 
+@media (max-width: 1023px) {
+  .header {
+    padding: 0 1.25rem;
+  }
+}
+
 .menuButton {
-  border-radius: 0.5rem;
+  border-radius: 6px;
   padding: 0.5rem;
   color: var(--color-ink-soft);
 }
 
 .menuButton:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 @media (min-width: 1024px) {
@@ -70,13 +76,12 @@
 }
 
 .searchWrap {
-  order: 3;
-  width: 100%;
+  display: none;
 }
 
 @media (min-width: 1024px) {
   .searchWrap {
-    order: 0;
+    display: block;
     margin-left: 1rem;
     margin-right: 1rem;
     max-width: 28rem;
@@ -300,14 +305,12 @@
 }
 
 .scanButton {
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border-radius: 6px;
   color: var(--color-ink);
-  box-shadow: var(--shadow-xs);
 }
 
 .scanButton:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .scanButton:disabled {
@@ -319,16 +322,13 @@
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border-radius: 6px;
   padding: 0.375rem 0.625rem 0.375rem 0.375rem;
-  box-shadow: var(--shadow-xs);
   transition: background-color 0.15s;
 }
 
 .accountButton:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .avatar {
