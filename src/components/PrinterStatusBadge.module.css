@@ -14,14 +14,31 @@
   border-radius: 999px;
 }
 
-.dotSuccess { background: var(--color-success); }
-.dotFaint { background: var(--color-ink-faint); }
-.dotWarning { background: var(--color-warning); }
+.dotSuccess {
+  background: var(--success);
+  animation: soft-pulse 3s ease-in-out infinite;
+}
 
-.textSuccess { color: var(--color-success); }
-.textSoft { color: var(--color-ink-soft); }
-.textWarning { color: var(--color-warning); }
+.dotFaint {
+  background: var(--text-muted);
+}
 
-.bgSuccess { background: var(--color-success-tint); }
-.bgSurface { background: var(--color-surface-2); }
-.bgWarning { background: var(--color-warning-tint); }
+.dotWarning {
+  background: var(--warning);
+}
+
+.textSuccess {
+  color: var(--success);
+}
+
+.textSoft {
+  color: var(--text-secondary);
+}
+
+.textWarning {
+  color: var(--warning);
+}
+
+.bgWarning {
+  background: var(--tint-warning);
+}
