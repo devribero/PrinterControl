@@ -1,17 +1,19 @@
 .root {
   min-width: 0;
   overflow: hidden;
-  border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  background: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
 }
 
 .headerRow {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   padding: 1.5rem;
 }
 
@@ -26,12 +28,12 @@
 .title {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .subtitle {
   font-size: 0.8125rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .controls {
@@ -46,10 +48,10 @@
   align-items: center;
   gap: 0.5rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.625rem 0.875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
   flex: 1;
   min-width: 200px;
 }
@@ -64,14 +66,14 @@
   flex: 1;
   min-width: 0;
   background: transparent;
-  color: var(--color-ink);
+  color: var(--text-primary);
   border: none;
   outline: none;
   font-size: 0.875rem;
 }
 
 .searchInput::placeholder {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .filterButton {
@@ -79,33 +81,33 @@
   align-items: center;
   gap: 0.5rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.625rem 0.875rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   transition: all 0.15s;
   white-space: nowrap;
 }
 
 .filterButton:hover {
-  background: var(--color-surface-sunken);
-  color: var(--color-ink);
+  background: var(--glass-hover);
+  color: var(--text-primary);
 }
 
 .filterButtonActive {
-  border-color: var(--color-brand);
-  background: var(--color-brand-tint);
-  color: var(--color-brand-700);
+  border-color: var(--link-hover);
+  background: var(--tint-link);
+  color: var(--link);
 }
 
 .filterButtonActive:hover {
-  background: var(--color-brand-tint);
+  background: var(--tint-link);
 }
 
 .filterButtonInactive {
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .viewToggle {
@@ -113,34 +115,34 @@
   align-items: center;
   gap: 0.25rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.25rem;
 }
 
 .viewButton {
   border-radius: 0.5rem;
   padding: 0.5rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
   transition: all 0.15s;
 }
 
 .viewButton:hover {
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .viewButtonActive {
-  background: var(--color-brand);
+  background: var(--link-hover);
   color: white;
 }
 
 .viewButtonActive:hover {
   color: white;
-  background: var(--color-brand-600);
+  background: var(--link-hover);
 }
 
 .viewButtonInactive {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .filtersPanel {
@@ -148,8 +150,8 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-surface-2) 40%, transparent);
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--divider) 40%, transparent);
   padding: 1rem 1.5rem;
 }
 
@@ -165,7 +167,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .filterPillRow {
@@ -176,33 +178,33 @@
 
 .filterPill {
   border-radius: 999px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   padding: 0.375rem 0.875rem;
   font-size: 0.8125rem;
   font-weight: 500;
-  background: var(--color-surface);
-  color: var(--color-ink-soft);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
   transition: all 0.15s;
 }
 
 .filterPill:hover {
-  background: var(--color-surface-sunken);
-  color: var(--color-ink);
+  background: var(--glass-hover);
+  color: var(--text-primary);
 }
 
 .filterPillActive {
-  border-color: var(--color-brand);
-  background: var(--color-brand);
+  border-color: var(--link-hover);
+  background: var(--link-hover);
   color: white;
 }
 
 .filterPillActive:hover {
-  background: var(--color-brand-600);
-  border-color: var(--color-brand-600);
+  background: var(--link-hover);
+  border-color: var(--link-hover);
 }
 
 .filterPillInactive {
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .tableWrap {
@@ -225,8 +227,8 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-ink-faint);
-  background: var(--color-surface-2);
+  color: var(--text-muted);
+  background: var(--divider);
 }
 
 .thFirst {
@@ -240,12 +242,12 @@
 
 .row {
   cursor: pointer;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border);
   transition: background-color 0.15s;
 }
 
 .row:hover {
-  background: var(--color-surface-2);
+  background: var(--glass-hover);
 }
 
 .tdFirst {
@@ -292,13 +294,13 @@
   align-items: center;
   justify-content: center;
   border-radius: 0.75rem;
-  background: var(--color-brand-tint);
-  color: var(--color-brand-700);
+  background: var(--tint-link);
+  color: var(--link);
 }
 
 .nameText {
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .tonerRow {
@@ -316,12 +318,13 @@
 }
 
 .tonerPercent {
+  font-family: var(--font-mono);
   font-size: 0.875rem;
   font-weight: 600;
 }
 
 .naText {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
@@ -329,19 +332,19 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .actionButton {
   border-radius: 0.5rem;
   padding: 0.5rem;
   transition: all 0.15s;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .actionButton:hover {
-  background: var(--color-surface-sunken);
-  color: var(--color-brand);
+  background: var(--track);
+  color: var(--link-hover);
 }
 
 .gridView {
@@ -365,17 +368,16 @@
 
 .gridCard {
   border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-canvas);
+  border: 1px solid var(--border);
+  background: var(--bg-page);
   padding: 1.25rem;
   text-align: left;
-  transition: all 0.2s;
+  transition: border-color 0.12s ease-out;
   cursor: pointer;
 }
 
 .gridCard:hover {
-  border-color: var(--color-brand);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brand) 15%, transparent);
+  border-color: var(--link-hover);
 }
 
 .gridCardHead {
@@ -401,14 +403,14 @@
   align-items: center;
   justify-content: center;
   border-radius: 0.75rem;
-  background: var(--color-brand-tint);
-  color: var(--color-brand-700);
+  background: var(--tint-link);
+  color: var(--link);
 }
 
 .gridCardName {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -420,7 +422,7 @@
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .gridCardToner {
@@ -432,7 +434,7 @@
   width: 100%;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--color-surface-sunken);
+  background: var(--track);
 }
 
 .gridCardTonerFill {
@@ -444,13 +446,13 @@
   margin-top: 0.375rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .emptyState {
   padding: 3rem 1.5rem;
   text-align: center;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .pagination {
@@ -459,7 +461,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border);
   padding: 1rem 1.5rem;
 }
 
@@ -471,7 +473,7 @@
 
 .paginationInfo {
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .paginationControls {
@@ -484,25 +486,25 @@
 
 .pageSizeSelect {
   border-radius: 0.5rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   padding: 0.375rem 0.625rem;
   font-size: 0.875rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   outline: none;
   transition: all 0.15s;
 }
 
 .pageSizeSelect:hover {
-  border-color: var(--color-brand);
-  background: var(--color-surface-2);
+  border-color: var(--link-hover);
+  background: var(--divider);
 }
 
 .pageArrow {
   border-radius: 0.5rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   padding: 0.5rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   transition: all 0.15s;
   display: flex;
   align-items: center;
@@ -510,8 +512,8 @@
 }
 
 .pageArrow:hover:not(:disabled) {
-  background: var(--color-surface-2);
-  color: var(--color-brand);
+  background: var(--divider);
+  color: var(--link-hover);
 }
 
 .pageArrow:disabled {
@@ -520,29 +522,30 @@
 }
 
 .pageNumber {
+  font-family: var(--font-mono);
   min-width: 2rem;
   height: 2rem;
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-ink-soft);
-  transition: all 0.15s;
+  color: var(--text-secondary);
+  transition: background-color 0.12s ease-out;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .pageNumber:hover {
-  background: var(--color-surface-2);
-  color: var(--color-ink);
+  background: var(--divider);
+  color: var(--text-primary);
 }
 
 .pageNumberActive {
-  background: var(--color-brand);
+  background: var(--link-hover);
   color: white;
   font-weight: 600;
 }
 
 .pageNumberActive:hover {
-  background: var(--color-brand-600);
+  background: var(--link-hover);
 }
