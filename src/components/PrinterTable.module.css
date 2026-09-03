@@ -343,7 +343,7 @@
 }
 
 .actionButton:hover {
-  background: var(--track);
+  background: var(--glass-hover);
   color: var(--link-hover);
 }
 
@@ -497,7 +497,7 @@
 
 .pageSizeSelect:hover {
   border-color: var(--link-hover);
-  background: var(--divider);
+  background: var(--glass-hover);
 }
 
 .pageArrow {
@@ -512,7 +512,7 @@
 }
 
 .pageArrow:hover:not(:disabled) {
-  background: var(--divider);
+  background: var(--glass-hover);
   color: var(--link-hover);
 }
 
@@ -536,7 +536,7 @@
 }
 
 .pageNumber:hover {
-  background: var(--divider);
+  background: var(--glass-hover);
   color: var(--text-primary);
 }
 
