@@ -169,8 +169,8 @@
 }
 
 .badgeActive {
-  background: color-mix(in srgb, #fff 25%, transparent);
-  color: #fff;
+  background: color-mix(in srgb, var(--link-hover) 18%, transparent);
+  color: var(--link-hover);
 }
 
 .badgeInactive {
