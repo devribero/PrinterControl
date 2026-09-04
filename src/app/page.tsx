@@ -5,8 +5,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { RefreshCw } from "lucide-react";
 import PageHeader from "../components/PageHeader";
+import ScanBar from "../components/ScanBar";
 import VitalsStrip from "../components/VitalsStrip";
 import PrinterTable from "../components/PrinterTable";
 import RightPanel from "../components/RightPanel";
@@ -43,17 +43,7 @@ export default function DashboardPage() {
         section="Monitoramento"
         title="Visão geral"
         subtitle="Estado consolidado da frota, suprimentos e consumo de páginas."
-        actions={
-          <div className={styles.scanBar}>
-            <p>
-              Última verificação: <span className={styles.scanBarStrong}>{lastChecked.toLocaleTimeString("pt-BR")}</span>
-            </p>
-            <button onClick={handleRefresh} disabled={scanning} className={styles.scanButton}>
-              <RefreshCw size={13} className={scanning ? "animate-spin" : ""} />
-              {scanning ? "Verificando..." : "Verificar agora"}
-            </button>
-          </div>
-        }
+        actions={<ScanBar lastChecked={lastChecked} scanning={scanning} onRefresh={handleRefresh} />}
       />
 
       {initialLoading ? (
