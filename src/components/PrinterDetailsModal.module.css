@@ -3,14 +3,14 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .factValue {
   margin-top: 0.125rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .footerButton {
@@ -18,16 +18,16 @@
   align-items: center;
   gap: 0.5rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   padding: 0.625rem 1rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
   transition: background-color 0.15s;
 }
 
 .footerButton:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .footerLinkPrimary {
@@ -35,7 +35,7 @@
   align-items: center;
   gap: 0.5rem;
   border-radius: 0.75rem;
-  background: var(--color-brand);
+  background: var(--link-hover);
   padding: 0.625rem 1rem;
   font-size: 0.875rem;
   font-weight: 600;
@@ -45,7 +45,7 @@
 }
 
 .footerLinkPrimary:hover {
-  background: var(--color-brand-600);
+  background: var(--link-hover);
 }
 
 .infoCard {
@@ -53,7 +53,7 @@
   align-items: center;
   gap: 0.75rem;
   border-radius: 0.75rem;
-  background: var(--color-surface-2);
+  background: var(--divider);
   padding: 1rem;
 }
 
@@ -65,8 +65,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 0.75rem;
-  background: var(--color-brand-tint);
-  color: var(--color-brand-700);
+  background: var(--tint-link);
+  color: var(--link);
 }
 
 .infoText {
@@ -80,12 +80,12 @@
   white-space: nowrap;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .infoDept {
   font-size: 0.8125rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .factsGrid {
@@ -104,8 +104,8 @@
 .monthlyBlock {
   margin-top: 1.25rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 1rem;
 }
 
@@ -120,22 +120,22 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .monthlyBadge {
   border-radius: 999px;
-  background: var(--color-brand-tint);
+  background: var(--tint-link);
   padding: 0.25rem 0.625rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-brand-700);
+  color: var(--link);
 }
 
 .monthlyPeriod {
   margin-top: 0.25rem;
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .monthlyBars {
@@ -159,11 +159,11 @@
 }
 
 .monthlyBarValueActive {
-  color: var(--color-brand-700);
+  color: var(--link);
 }
 
 .monthlyBarValueInactive {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .monthlyBar {
@@ -173,15 +173,15 @@
 }
 
 .monthlyBarActive {
-  background: var(--color-brand);
+  background: var(--link-hover);
 }
 
 .monthlyBarInactive {
-  background: var(--color-surface-sunken);
+  background: var(--track);
 }
 
 .monthlyBarInactive:hover {
-  background: var(--color-border-strong);
+  background: var(--border-strong);
 }
 
 .monthlyBarLabel {
@@ -190,11 +190,11 @@
 }
 
 .monthlyBarLabelActive {
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .monthlyBarLabelInactive {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .tonerBlock {
@@ -206,7 +206,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .tonerBlockList {
@@ -225,7 +225,7 @@
 }
 
 .tonerRowLabel {
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .tonerRowPercent {
@@ -237,7 +237,7 @@
   width: 100%;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--color-surface-sunken);
+  background: var(--track);
 }
 
 .tonerFill {
@@ -251,26 +251,26 @@
   align-items: flex-start;
   gap: 0.75rem;
   border-radius: 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--color-warning) 25%, transparent);
-  background: var(--color-warning-tint);
+  border: 1px solid color-mix(in srgb, var(--warning) 25%, transparent);
+  background: var(--tint-warning);
   padding: 1rem;
 }
 
 .recommendationIcon {
   margin-top: 0.125rem;
   flex-shrink: 0;
-  color: var(--color-warning);
+  color: var(--warning);
 }
 
 .recommendationTitle {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .recommendationText {
   margin-top: 0.125rem;
   font-size: 0.8125rem;
   line-height: 1.6;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }

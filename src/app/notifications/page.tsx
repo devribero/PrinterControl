@@ -1,3 +1,4 @@
+import PageHeader from "../../components/PageHeader";
 import NotificationsView from "../../components/NotificationsView";
 
 /**
@@ -14,5 +15,15 @@ import NotificationsView from "../../components/NotificationsView";
  * forma.
  */
 export default function NotificationsPage() {
-  return <NotificationsView />;
+  return (
+    <>
+      <PageHeader
+        section="Administração"
+        title="Notificações"
+        subtitle="Sua caixa pessoal de mensagens dirigidas, com leitura individual."
+      />
+
+      <NotificationsView />
+    </>
+  );
 }

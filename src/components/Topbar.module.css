@@ -22,7 +22,7 @@
 .menuButton {
   border-radius: 6px;
   padding: 0.5rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .menuButton:hover {
@@ -52,7 +52,7 @@
   white-space: nowrap;
   font-size: 1.125rem;
   font-weight: 800;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 @media (min-width: 640px) {
@@ -72,7 +72,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .searchWrap {
@@ -109,30 +109,30 @@
 
 .searchIcon {
   flex-shrink: 0;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .searchInput {
   width: 100%;
   background: transparent;
-  color: var(--color-ink);
+  color: var(--text-primary);
   border: none;
   outline: none;
 }
 
 .searchInput::placeholder {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .searchKbd {
   display: none;
   flex-shrink: 0;
   border-radius: 0.375rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   padding: 0.125rem 0.375rem;
   font-size: 0.6875rem;
   font-weight: 500;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 @media (min-width: 640px) {
@@ -182,11 +182,11 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: var(--color-critical);
+  background: var(--danger);
   font-size: 0.6875rem;
   font-weight: 700;
   color: #fff;
-  box-shadow: 0 0 0 2px var(--color-canvas);
+  box-shadow: 0 0 0 2px var(--bg-page);
 }
 
 .dropdownAnchor {
@@ -199,8 +199,8 @@
   top: calc(100% + 8px);
   overflow: hidden;
   border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   box-shadow: var(--shadow-lg);
 }
 
@@ -213,14 +213,14 @@
 }
 
 .dropdownHeader {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   padding: 0.75rem 1rem;
 }
 
 .dropdownHeaderTitle {
   font-size: 0.875rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .notifList {
@@ -232,7 +232,7 @@
   padding: 1.5rem 1rem;
   text-align: center;
   font-size: 0.875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .notifItem {
@@ -240,7 +240,7 @@
   width: 100%;
   align-items: flex-start;
   gap: 0.625rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   padding: 0.75rem 1rem;
   text-align: left;
 }
@@ -250,7 +250,7 @@
 }
 
 .notifItem:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .notifIcon {
@@ -258,8 +258,8 @@
   flex-shrink: 0;
 }
 
-.textCritical { color: var(--color-critical); }
-.textWarning { color: var(--color-warning); }
+.textCritical { color: var(--danger); }
+.textWarning { color: var(--warning); }
 
 .notifBody {
   min-width: 0;
@@ -268,13 +268,13 @@
 .notifMessage {
   font-size: 0.8125rem;
   line-height: 1.35;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .notifTimestamp {
   margin-top: 0.125rem;
   font-size: 0.6875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .textButton {
@@ -295,18 +295,18 @@
 }
 
 .exportButton {
-  background: var(--color-brand);
+  background: var(--link-hover);
   color: #fff;
   box-shadow: var(--shadow-sm);
 }
 
 .exportButton:hover {
-  background: var(--color-brand-600);
+  background: var(--link-hover);
 }
 
 .scanButton {
   border-radius: 6px;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .scanButton:hover {
@@ -360,17 +360,17 @@
 .accountName {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .accountEmail {
   font-size: 0.6875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .chevron {
   display: none;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
   transition: transform 0.15s;
 }
 
@@ -387,12 +387,12 @@
 .menuAccountName {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .menuAccountEmail {
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 /* Papel do usuário (RBAC) no cabeçalho do menu da conta. */
@@ -400,11 +400,11 @@
   margin-top: 0.25rem;
   display: inline-block;
   border-radius: 9999px;
-  background: var(--color-brand-tint);
+  background: var(--tint-link);
   padding: 0.125rem 0.5rem;
   font-size: 0.6875rem;
   font-weight: 600;
-  color: var(--color-brand-700);
+  color: var(--link);
 }
 
 .menuList {
@@ -421,22 +421,22 @@
   padding: 0.5rem 0.75rem;
   text-align: left;
   font-size: 0.875rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .menuItem:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .menuItemIcon {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .menuItemDanger {
   font-weight: 500;
-  color: var(--color-critical);
+  color: var(--danger);
 }
 
 .menuItemDanger:hover {
-  background: var(--color-critical-tint);
+  background: var(--danger-bg);
 }

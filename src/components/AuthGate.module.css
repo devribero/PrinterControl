@@ -6,21 +6,21 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  background: var(--color-canvas);
+  background: var(--bg-page);
 }
 
 .spinner {
   height: 2rem;
   width: 2rem;
   border-radius: 9999px;
-  border: 2px solid var(--color-border-strong);
-  border-top-color: var(--color-brand-700);
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--link);
   animation: authGateSpin 0.7s linear infinite;
 }
 
 .text {
   font-size: 0.875rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 @keyframes authGateSpin {

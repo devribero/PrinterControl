@@ -5,8 +5,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 1rem;
-  border: 1px dashed var(--color-border-strong);
-  background: var(--color-surface);
+  border: 1px dashed var(--border-strong);
+  background: var(--bg-surface);
   padding: 5rem 1.5rem;
   text-align: center;
   box-shadow: var(--shadow-sm);
@@ -19,26 +19,26 @@
   align-items: center;
   justify-content: center;
   border-radius: 1rem;
-  background: var(--color-brand-tint);
-  color: var(--color-brand-700);
+  background: var(--tint-link);
+  color: var(--link);
 }
 
 .title {
   margin-top: 1.25rem;
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .text {
   margin-top: 0.5rem;
   max-width: 26rem;
   font-size: 0.875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .hint {
   margin-top: 0.75rem;
   font-size: 0.8125rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }

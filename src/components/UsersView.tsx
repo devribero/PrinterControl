@@ -254,12 +254,9 @@ export default function UsersView() {
   return (
     <div className={styles.card}>
       <div className={styles.header}>
-        <div>
-          <h2 className={styles.title}>Usuários</h2>
-          <p className={styles.subtitle}>
-            {users ? `${users.length} conta(s) cadastrada(s) · ${adminsAtivos} administrador(es) ativo(s)` : "Carregando contas..."}
-          </p>
-        </div>
+        <p className={styles.subtitle}>
+          {users ? `${users.length} conta(s) cadastrada(s) · ${adminsAtivos} administrador(es) ativo(s)` : "Carregando contas..."}
+        </p>
 
         <div className={styles.controls}>
           <div className={styles.searchBox}>
