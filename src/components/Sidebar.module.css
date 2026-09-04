@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 40;
-  background: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  background: color-mix(in srgb, var(--text-primary) 40%, transparent);
   backdrop-filter: blur(4px);
 }
 
@@ -62,17 +62,17 @@
   margin-top: 0.125rem;
   font-size: 0.6875rem;
   font-weight: 500;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .closeButton {
   border-radius: 0.5rem;
   padding: 0.375rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .closeButton:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 @media (min-width: 1024px) {
@@ -93,7 +93,7 @@
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .sectionLabelSpaced {
@@ -129,7 +129,7 @@
 }
 
 .navItemInactive {
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .navItemInactive:hover {
@@ -142,13 +142,13 @@
 }
 
 .navIconInactive {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
   display: flex;
   transition: color 0.15s;
 }
 
 .navItemInactive:hover .navIconInactive {
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .navLabel {
@@ -174,7 +174,7 @@
 }
 
 .badgeInactive {
-  background: var(--color-critical);
+  background: var(--danger);
   color: #fff;
 }
 
@@ -194,17 +194,17 @@
 }
 
 .pillActive {
-  background: var(--color-brand);
+  background: var(--link-hover);
   color: #fff;
 }
 
 .pillInactive {
-  background: var(--color-surface-2);
-  color: var(--color-ink-soft);
+  background: var(--divider);
+  color: var(--text-secondary);
 }
 
 .pillInactive:hover {
-  background: var(--color-surface-sunken);
+  background: var(--track);
 }
 
 .departmentsToggle {
@@ -217,7 +217,7 @@
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .departmentsList {
@@ -233,27 +233,27 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border);
   padding: 1rem;
 }
 
 .networkCard {
   border-radius: 1rem;
-  background: var(--color-surface-2);
+  background: var(--divider);
   padding: 1rem;
 }
 
 .networkTitle {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-brand-700);
+  color: var(--link);
 }
 
 .networkValue {
   margin-top: 0.25rem;
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .sparkWrap {
@@ -267,11 +267,11 @@
   flex-direction: column;
   gap: 0.125rem;
   font-size: 0.6875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .networkMetaSoft {
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .helpButton {
@@ -280,15 +280,15 @@
   justify-content: center;
   gap: 0.5rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   padding: 0.625rem 0;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   transition: background-color 0.15s;
 }
 
 .helpButton:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }

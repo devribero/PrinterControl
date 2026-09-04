@@ -9,8 +9,8 @@
   min-width: 0;
   overflow: hidden;
   border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   box-shadow: var(--shadow-sm);
 }
 
@@ -20,19 +20,19 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   padding: 1.25rem 1.5rem;
 }
 
 .cardTitle {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .cardSubtitle {
   font-size: 0.8125rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 /* ── Seleção de servidor ────────────────────────────────────────────────── */
@@ -51,8 +51,8 @@
   display: flex;
   flex-direction: column;
   border-radius: 0.875rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   overflow: hidden;
   transition: all 0.15s;
 }
@@ -67,13 +67,13 @@
 }
 
 .serverCard:hover {
-  border-color: var(--color-brand);
+  border-color: var(--link-hover);
 }
 
 .serverCardActive {
-  border-color: var(--color-brand);
-  background: var(--color-brand-tint);
-  box-shadow: 0 0 0 1px var(--color-brand);
+  border-color: var(--link-hover);
+  background: var(--tint-link);
+  box-shadow: 0 0 0 1px var(--link-hover);
 }
 
 .serverCardTop {
@@ -83,14 +83,14 @@
 }
 
 .serverIcon {
-  color: var(--color-brand-700);
+  color: var(--link);
   flex-shrink: 0;
 }
 
 .serverHost {
   font-size: 0.875rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -98,7 +98,7 @@
 
 .serverName {
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .serverTags {
@@ -121,33 +121,33 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  background: var(--color-surface-sunken);
-  color: var(--color-ink-soft);
+  background: var(--track);
+  color: var(--text-secondary);
 }
 
 .tagReal {
-  background: var(--color-brand-tint);
-  color: var(--color-brand-700);
+  background: var(--tint-link);
+  color: var(--link);
 }
 
 .tagOk {
-  background: var(--color-success-tint);
-  color: var(--color-success);
+  background: var(--tint-success);
+  color: var(--success);
 }
 
 .tagErro {
-  background: var(--color-critical-tint);
-  color: var(--color-critical);
+  background: var(--danger-bg);
+  color: var(--danger);
 }
 
 .tagOff {
-  background: var(--color-critical-tint);
-  color: var(--color-critical);
+  background: var(--danger-bg);
+  color: var(--danger);
 }
 
 .serverCounts {
   font-size: 0.75rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .serverMeta {
@@ -155,7 +155,7 @@
   align-items: center;
   gap: 0.25rem;
   font-size: 0.6875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 /* ── Ações: descobrir x sincronizar ─────────────────────────────────────── */
@@ -177,19 +177,19 @@
   flex-direction: column;
   gap: 0.75rem;
   border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   padding: 1.25rem 1.5rem;
   box-shadow: var(--shadow-sm);
 }
 
 /* A borda superior é o sinal mais forte de que são operações diferentes. */
 .actionDiscover {
-  border-top: 3px solid var(--color-ink-faint);
+  border-top: 3px solid var(--text-muted);
 }
 
 .actionSync {
-  border-top: 3px solid var(--color-brand);
+  border-top: 3px solid var(--link-hover);
 }
 
 .actionHeader {
@@ -199,17 +199,17 @@
 }
 
 .actionIconDiscover {
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .actionIconSync {
-  color: var(--color-brand-700);
+  color: var(--link);
 }
 
 .actionTitle {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .badgeSafe,
@@ -223,19 +223,19 @@
 }
 
 .badgeSafe {
-  background: var(--color-surface-sunken);
-  color: var(--color-ink-soft);
+  background: var(--track);
+  color: var(--text-secondary);
 }
 
 .badgeWrite {
-  background: var(--color-warning-tint);
-  color: var(--color-warning);
+  background: var(--tint-warning);
+  color: var(--warning);
 }
 
 .actionText {
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .discoverButton,
@@ -255,35 +255,35 @@
 }
 
 .discoverButton {
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-surface-2);
-  color: var(--color-ink);
+  border: 1px solid var(--border-strong);
+  background: var(--divider);
+  color: var(--text-primary);
 }
 
 .discoverButton:hover:not(:disabled) {
-  border-color: var(--color-brand);
+  border-color: var(--link-hover);
 }
 
 .syncButton {
   border: 1px solid transparent;
-  background: var(--color-brand);
+  background: var(--link-hover);
   color: #fff;
 }
 
 .syncButton:hover:not(:disabled) {
-  background: var(--color-brand-700);
+  background: var(--link);
 }
 
 .secondaryButton {
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
-  color: var(--color-ink-soft);
+  border: 1px solid var(--border);
+  background: var(--divider);
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .secondaryButton:hover:not(:disabled) {
-  border-color: var(--color-brand);
-  color: var(--color-ink);
+  border-color: var(--link-hover);
+  color: var(--text-primary);
 }
 
 .discoverButton:disabled,
@@ -298,7 +298,7 @@
   align-items: center;
   gap: 0.375rem;
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 /* ── Resultados ─────────────────────────────────────────────────────────── */
@@ -317,23 +317,23 @@
   align-items: center;
   gap: 0.125rem;
   border-radius: 0.875rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   padding: 0.875rem;
 }
 
 .statusOnline {
-  color: var(--color-success);
-  background: var(--color-success-tint);
+  color: var(--success);
+  background: var(--tint-success);
 }
 
 .statusAtencao {
-  color: var(--color-warning);
-  background: var(--color-warning-tint);
+  color: var(--warning);
+  background: var(--tint-warning);
 }
 
 .statusOffline {
-  color: var(--color-critical);
-  background: var(--color-critical-tint);
+  color: var(--danger);
+  background: var(--danger-bg);
 }
 
 .statusValue {
@@ -355,8 +355,8 @@
   align-items: center;
   gap: 0.125rem;
   border-radius: 0.875rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.875rem;
 }
 
@@ -364,7 +364,7 @@
   font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.1;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .resultLabel {
@@ -372,33 +372,33 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .footnote {
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border);
   padding: 0.875rem 1.5rem;
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .errorBox {
   border-radius: 0.875rem;
-  border: 1px solid var(--color-critical);
-  background: var(--color-critical-tint);
+  border: 1px solid var(--danger);
+  background: var(--danger-bg);
   padding: 0.875rem 1rem;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: var(--color-critical);
+  color: var(--danger);
 }
 
 .warnBox {
   border-radius: 0.875rem;
-  border: 1px solid var(--color-warning);
-  background: var(--color-warning-tint);
+  border: 1px solid var(--warning);
+  background: var(--tint-warning);
   padding: 0.875rem 1rem;
   font-size: 0.8125rem;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 /* ── Tabela de impressoras do servidor ──────────────────────────────────── */
@@ -420,8 +420,8 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-ink-faint);
-  background: var(--color-surface-2);
+  color: var(--text-muted);
+  background: var(--divider);
 }
 
 .thFirst {
@@ -433,22 +433,22 @@
 }
 
 .row {
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border);
 }
 
 .row:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .tdFirst {
   padding: 0.875rem 1.5rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .td {
   padding: 0.875rem 0.75rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .pill {
@@ -457,33 +457,33 @@
   padding: 0.125rem 0.5rem;
   font-size: 0.6875rem;
   font-weight: 600;
-  background: var(--color-surface-sunken);
-  color: var(--color-ink-soft);
+  background: var(--track);
+  color: var(--text-secondary);
 }
 
 .pillOnline {
-  background: var(--color-success-tint);
-  color: var(--color-success);
+  background: var(--tint-success);
+  color: var(--success);
 }
 
 .pillAtencao {
-  background: var(--color-warning-tint);
-  color: var(--color-warning);
+  background: var(--tint-warning);
+  color: var(--warning);
 }
 
 .pillOffline {
-  background: var(--color-critical-tint);
-  color: var(--color-critical);
+  background: var(--danger-bg);
+  color: var(--danger);
 }
 
 .pillAtivo {
-  background: var(--color-success-tint);
-  color: var(--color-success);
+  background: var(--tint-success);
+  color: var(--success);
 }
 
 .pillInativo {
-  background: var(--color-surface-sunken);
-  color: var(--color-ink-faint);
+  background: var(--track);
+  color: var(--text-muted);
 }
 
 .emptyState {
@@ -493,7 +493,7 @@
   gap: 0.5rem;
   padding: 2.5rem 1.5rem;
   text-align: center;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 /* ── Diálogo ────────────────────────────────────────────────────────────── */
@@ -507,7 +507,7 @@
 .confirmText {
   font-size: 0.875rem;
   line-height: 1.5;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .confirmText + .confirmText {
@@ -518,12 +518,12 @@
 .confirmWarn {
   margin-top: 0.875rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-warning);
-  background: var(--color-warning-tint);
+  border: 1px solid var(--warning);
+  background: var(--tint-warning);
   padding: 0.75rem 0.875rem;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 /* ── Fase 6: registro e edicao de Print Server ────────────────────────── */
@@ -543,7 +543,7 @@
   align-self: flex-start;
   border-radius: 0.75rem;
   border: 1px solid transparent;
-  background: var(--color-brand);
+  background: var(--link-hover);
   padding: 0.625rem 1rem;
   font-size: 0.875rem;
   font-weight: 600;
@@ -552,17 +552,17 @@
   transition: all 0.15s;
 }
 .primaryButton:hover:not(:disabled) {
-  background: var(--color-brand-700);
+  background: var(--link);
 }
 .primaryButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 .dangerButton {
-  background: var(--color-critical);
+  background: var(--danger);
 }
 .dangerButton:hover:not(:disabled) {
-  background: var(--color-critical);
+  background: var(--danger);
   filter: brightness(0.92);
 }
 
@@ -570,7 +570,7 @@
 .serverActions {
   display: flex;
   gap: 0.25rem;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border);
   padding: 0.375rem 0.5rem;
 }
 .cardActionButton {
@@ -581,15 +581,15 @@
   padding: 0.3125rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   transition: all 0.15s;
 }
 .cardActionButton:hover {
-  background: var(--color-surface-sunken);
-  color: var(--color-brand);
+  background: var(--track);
+  color: var(--link-hover);
 }
 .cardActionDanger:hover {
-  color: var(--color-critical);
+  color: var(--danger);
 }
 
 /* Formulario do dialogo — mesmas medidas do UsersView, para as duas telas
@@ -607,48 +607,48 @@
 .label {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 .input,
 .select {
   width: 100%;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.625rem 0.875rem;
   font-size: 0.875rem;
-  color: var(--color-ink);
+  color: var(--text-primary);
   outline: none;
   transition: border-color 0.15s;
 }
 .input:focus,
 .select:focus {
-  border-color: var(--color-brand);
+  border-color: var(--link-hover);
 }
 .input:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }
 .input::placeholder {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 .hint {
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 .warning {
   border-radius: 0.75rem;
-  border: 1px solid var(--color-warning);
-  background: var(--color-warning-tint);
+  border: 1px solid var(--warning);
+  background: var(--tint-warning);
   padding: 0.625rem 0.875rem;
   font-size: 0.8125rem;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 .formError {
   border-radius: 0.75rem;
-  border: 1px solid var(--color-critical);
-  background: var(--color-critical-tint);
+  border: 1px solid var(--danger);
+  background: var(--danger-bg);
   padding: 0.625rem 0.875rem;
   font-size: 0.8125rem;
-  color: var(--color-critical);
+  color: var(--danger);
 }
