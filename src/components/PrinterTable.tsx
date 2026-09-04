@@ -5,8 +5,14 @@
  * (ícones). Dependências locais: PrinterStatusBadge, lib/tonerColor,
  * lib/filterPrinters (tipo do estado de filtro, controlado pelo pai),
  * lib/printerType (pills "Tipo"). Paginação e visão lista/grade são estado
- * PRÓPRIO deste componente (não sobem para App.tsx) — só os filtros globais
- * (busca/status/tipo/departamento) vêm de fora via props.
+ * PRÓPRIO deste componente (não sobem para o AppDataProvider) — só os filtros
+ * globais (busca/status/tipo/departamento) vêm de fora via props.
+ *
+ * Duas apresentações do mesmo componente (handoff `PrinterControl v2.dc.html`):
+ * - completa (rota /printers, L392-479): abas de status no cabeçalho;
+ * - `compact` (card embutido no Dashboard, L220-300): título + busca curta.
+ * O corpo da tabela e a paginação são idênticos nas duas no handoff, então
+ * ficam compartilhados aqui.
  */
 import { useMemo, useState } from "react";
 import {
@@ -18,7 +24,6 @@ import {
   Globe,
   Printer as PrinterIcon,
   Settings,
-  TriangleAlert,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -36,6 +41,10 @@ import styles from "./PrinterTable.module.css";
 interface PrinterTableProps {
   printers: Printer[];
   totalCount: number;
+  /** Contagens da frota INTEIRA (não da lista filtrada) — alimentam as abas de
+   * status, que precisam continuar mostrando o total de cada status mesmo
+   * quando um filtro está ativo. Ausente no modo compact, que não tem abas. */
+  statusCounts?: { online: number; offline: number; atencao: number };
   filters: PrinterFilters;
   onFilterChange: <K extends keyof PrinterFilters>(key: K, value: PrinterFilters[K]) => void;
   onOpenDetails: (printer: Printer) => void;
@@ -47,7 +56,15 @@ interface PrinterTableProps {
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
-export default function PrinterTable({ printers, totalCount, filters, onFilterChange, onOpenDetails, compact = false }: PrinterTableProps) {
+export default function PrinterTable({
+  printers,
+  totalCount,
+  statusCounts,
+  filters,
+  onFilterChange,
+  onOpenDetails,
+  compact = false,
+}: PrinterTableProps) {
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [view, setView] = useState<"list" | "grid">("list");
@@ -77,11 +94,11 @@ export default function PrinterTable({ printers, totalCount, filters, onFilterCh
     push({ variant: "info", title: "Gerenciamento remoto", description: `Configurações avançadas de ${p.name} chegam em breve.` });
   }
 
-  const statusOptions: { label: string; value: "Todos" | PrinterStatus }[] = [
-    { label: "Todos", value: "Todos" },
-    { label: "Online", value: "online" },
-    { label: "Offline", value: "offline" },
-    { label: "Atenção", value: "atencao" },
+  const statusTabs: { label: string; value: "Todos" | PrinterStatus; count: number; tone: string }[] = [
+    { label: "Todas", value: "Todos", count: totalCount, tone: styles.tabToneNeutral },
+    { label: "Online", value: "online", count: statusCounts?.online ?? 0, tone: styles.tabToneOnline },
+    { label: "Offline", value: "offline", count: statusCounts?.offline ?? 0, tone: styles.tabToneOffline },
+    { label: "Atenção", value: "atencao", count: statusCounts?.atencao ?? 0, tone: styles.tabToneAttention },
   ];
   const typeOptions: { label: string; value: "Todos" | PrinterType }[] = [
     { label: "Todos", value: "Todos" },
@@ -90,76 +107,84 @@ export default function PrinterTable({ printers, totalCount, filters, onFilterCh
     { label: "Portátil", value: "Portatil" },
   ];
 
+  function selectStatus(value: "Todos" | PrinterStatus) {
+    onFilterChange("status", value);
+    setPage(1);
+  }
+
+  const searchBox = (
+    <div className={cn(styles.searchBox, compact && styles.searchBoxCompact)}>
+      <Search size={14} />
+      <input
+        value={filters.query}
+        onChange={(e) => {
+          onFilterChange("query", e.target.value);
+          setPage(1);
+        }}
+        placeholder={compact ? "Buscar..." : "Nome, IP ou modelo"}
+        className={styles.searchInput}
+      />
+    </div>
+  );
+
+  const filtersButton = (
+    <button
+      onClick={() => setShowFilters((s) => !s)}
+      className={cn(styles.filterButton, (showFilters || filters.type !== "Todos") && styles.filterButtonActive)}
+    >
+      <SlidersHorizontal size={14} />
+      Filtros
+    </button>
+  );
+
   return (
     <div className={styles.root}>
-      <div className={styles.headerRow}>
-        <div>
-          <h3 className={styles.title}>Impressoras</h3>
-          <p className={styles.subtitle}>
-            {printers.length} de {totalCount} resultados
-          </p>
-        </div>
+      <div className={cn(styles.headerRow, compact && styles.headerRowCompact)}>
+        {compact ? (
+          <div className={styles.titleBlock}>
+            <h3 className={styles.title}>Frota de impressoras</h3>
+            <span className={styles.titleCount}>{totalCount} equipamentos</span>
+          </div>
+        ) : (
+          <div className={styles.tabs}>
+            {statusTabs.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => selectStatus(tab.value)}
+                className={cn(styles.tab, filters.status === tab.value ? styles.tabActive : tab.tone)}
+              >
+                {tab.label} <span className={styles.tabCount}>{tab.count}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className={styles.controls}>
-          <div className={styles.searchBox}>
-            <Search size={15} />
-            <input
-              value={filters.query}
-              onChange={(e) => {
-                onFilterChange("query", e.target.value);
-                setPage(1);
-              }}
-              placeholder="Pesquisar..."
-              className={styles.searchInput}
-            />
-          </div>
-          <button
-            onClick={() => setShowFilters((s) => !s)}
-            className={cn(
-              styles.filterButton,
-              showFilters || filters.status !== "Todos" || filters.type !== "Todos"
-                ? styles.filterButtonActive
-                : styles.filterButtonInactive
-            )}
-          >
-            <SlidersHorizontal size={15} />
-            Filtros
-          </button>
-          <div className={styles.viewToggle}>
-            <button
-              onClick={() => setView("list")}
-              className={cn(styles.viewButton, view === "list" ? styles.viewButtonActive : styles.viewButtonInactive)}
-            >
-              <Rows3 size={16} />
-            </button>
-            <button
-              onClick={() => setView("grid")}
-              className={cn(styles.viewButton, view === "grid" ? styles.viewButtonActive : styles.viewButtonInactive)}
-            >
-              <LayoutGrid size={16} />
-            </button>
-          </div>
+          {searchBox}
+          {filtersButton}
+          {!compact && (
+            <div className={styles.viewToggle}>
+              <button
+                onClick={() => setView("list")}
+                className={cn(styles.viewButton, view === "list" && styles.viewButtonActive)}
+                title="Visão em lista"
+              >
+                <Rows3 size={15} />
+              </button>
+              <button
+                onClick={() => setView("grid")}
+                className={cn(styles.viewButton, view === "grid" && styles.viewButtonActive)}
+                title="Visão em grade"
+              >
+                <LayoutGrid size={15} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {showFilters && (
         <div className={styles.filtersPanel}>
-          <div className={styles.filterGroup}>
-            <span className={styles.filterLabel}>Status</span>
-            <div className={styles.filterPillRow}>
-              {statusOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => {
-                    onFilterChange("status", opt.value);
-                    setPage(1);
-                  }}
-                  className={cn(styles.filterPill, filters.status === opt.value ? styles.filterPillActive : styles.filterPillInactive)}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
           <div className={styles.filterGroup}>
             <span className={styles.filterLabel}>Tipo</span>
             <div className={styles.filterPillRow}>
@@ -170,7 +195,7 @@ export default function PrinterTable({ printers, totalCount, filters, onFilterCh
                     onFilterChange("type", opt.value);
                     setPage(1);
                   }}
-                  className={cn(styles.filterPill, filters.type === opt.value ? styles.filterPillActive : styles.filterPillInactive)}
+                  className={cn(styles.filterPill, filters.type === opt.value && styles.filterPillActive)}
                 >
                   {opt.label}
                 </button>
@@ -185,65 +210,62 @@ export default function PrinterTable({ printers, totalCount, filters, onFilterCh
           <table className={cn(styles.table, compact && styles.tableCompact)}>
             <thead>
               <tr className={styles.theadRow}>
-                <th className={styles.thFirst}>Nome</th>
-                <th className={styles.th}>IP</th>
+                <th className={styles.thFirst}>Impressora</th>
+                <th className={styles.th}>Endereço</th>
                 {!compact && <th className={styles.th}>Modelo</th>}
                 <th className={styles.th}>Departamento</th>
-                <th className={styles.th}>Toner</th>
+                <th className={cn(styles.th, styles.thRight)}>Toner</th>
                 <th className={styles.th}>Status</th>
-                {!compact && <th className={styles.th}>Ações</th>}
+                {!compact && <th className={cn(styles.thLast, styles.thRight)}>Ações</th>}
               </tr>
             </thead>
             <tbody>
               {pageItems.map((p) => (
                 <tr key={p.id} onClick={() => onOpenDetails(p)} className={styles.row}>
-                  <td className={styles.tdFirst}>
-                    <div className={styles.nameCell}>
-                      <div className={styles.iconWrap}>
-                        <PrinterIcon size={16} />
-                      </div>
-                      <span className={styles.nameText}>{p.name}</span>
-                    </div>
-                  </td>
-                  <td className={styles.td}>{p.ip}</td>
+                  <td className={styles.tdFirst}>{p.name}</td>
+                  <td className={cn(styles.td, styles.tdIp)}>{p.ip}</td>
                   {!compact && (
-                    <td className={styles.tdModel} title={p.model}>
+                    <td className={cn(styles.td, styles.tdModel)} title={p.model}>
                       {p.model}
                     </td>
                   )}
-                  <td className={cn(styles.tdDept, compact ? styles.tdDeptCompact : styles.tdDeptFull)} title={p.department}>
+                  <td className={cn(styles.td, styles.tdDept, compact ? styles.tdDeptCompact : styles.tdDeptFull)} title={p.department}>
                     {p.department}
                   </td>
-                  <td className={styles.td}>
+                  <td className={cn(styles.td, styles.tdRight)}>
                     {p.toner ? (
-                      <div className={styles.tonerRow} title={`${p.toner[0].label}: ${p.toner[0].percent}%`}>
-                        <span className={styles.tonerDot} style={{ backgroundColor: tonerChannelColor(p.toner[0].color, theme) }} />
+                      <div className={styles.tonerCell} title={`${p.toner[0].label}: ${p.toner[0].percent}%`}>
+                        <div className={styles.tonerTrack}>
+                          <div
+                            className={styles.tonerFill}
+                            style={{ width: `${p.toner[0].percent}%`, backgroundColor: tonerLevelColor(p.toner[0].percent) }}
+                          />
+                        </div>
                         <span className={styles.tonerPercent} style={{ color: tonerLevelColor(p.toner[0].percent) }}>
                           {p.toner[0].percent}%
                         </span>
-                        {p.toner[0].percent <= 20 && <TriangleAlert size={12} style={{ color: tonerLevelColor(p.toner[0].percent) }} />}
                       </div>
                     ) : (
-                      <span className={styles.naText}>N/A</span>
+                      <span className={styles.naText}>—</span>
                     )}
                   </td>
                   <td className={styles.td}>
                     <PrinterStatusBadge status={p.status} />
                   </td>
                   {!compact && (
-                    <td className={styles.td}>
+                    <td className={cn(styles.tdLast, styles.tdRight)}>
                       <div className={styles.actionsRow}>
                         <button onClick={() => onOpenDetails(p)} className={styles.actionButton} title="Detalhes">
-                          <FileText size={15} />
+                          <FileText size={14} />
                         </button>
                         <button onClick={(e) => handleWebAccess(p, e)} className={styles.actionButton} title="Acessar via web">
-                          <Globe size={15} />
+                          <Globe size={14} />
                         </button>
                         <button onClick={(e) => handleTestPage(p, e)} className={styles.actionButton} title="Imprimir teste">
-                          <PrinterIcon size={15} />
+                          <PrinterIcon size={14} />
                         </button>
                         <button onClick={(e) => handleSettings(p, e)} className={styles.actionButton} title="Configurações">
-                          <Settings size={15} />
+                          <Settings size={14} />
                         </button>
                       </div>
                     </td>
@@ -266,16 +288,13 @@ export default function PrinterTable({ printers, totalCount, filters, onFilterCh
             <button key={p.id} onClick={() => onOpenDetails(p)} className={styles.gridCard}>
               <div className={styles.gridCardHead}>
                 <div className={styles.gridCardHeadLeft}>
-                  <div className={styles.gridCardIcon}>
-                    <PrinterIcon size={16} />
-                  </div>
                   <p className={styles.gridCardName}>{p.name}</p>
                 </div>
                 <PrinterStatusBadge status={p.status} />
               </div>
               <div className={styles.gridCardMeta}>
                 <p>
-                  {p.ip} · {p.model}
+                  <span className={styles.gridCardIp}>{p.ip}</span> · {p.model}
                 </p>
                 <p>{p.department}</p>
               </div>
@@ -300,12 +319,15 @@ export default function PrinterTable({ printers, totalCount, filters, onFilterCh
 
       <div className={styles.pagination}>
         <p className={styles.paginationInfo}>
-          Mostrando {printers.length === 0 ? 0 : (currentPage - 1) * pageSize + 1} a{" "}
-          {Math.min(currentPage * pageSize, printers.length)} de {printers.length} impressoras
+          Exibindo{" "}
+          <span className={styles.paginationNum}>
+            {printers.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, printers.length)}
+          </span>{" "}
+          de <span className={styles.paginationNum}>{printers.length}</span>
         </p>
         <div className={styles.paginationControls}>
           <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className={styles.pageArrow}>
-            <ChevronLeft size={16} />
+            <ChevronLeft size={14} />
           </button>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
             <button
@@ -321,7 +343,7 @@ export default function PrinterTable({ printers, totalCount, filters, onFilterCh
             disabled={currentPage === totalPages}
             className={styles.pageArrow}
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={14} />
           </button>
           <select
             value={pageSize}
@@ -333,7 +355,7 @@ export default function PrinterTable({ printers, totalCount, filters, onFilterCh
           >
             {PAGE_SIZE_OPTIONS.map((n) => (
               <option key={n} value={n}>
-                {n} por página
+                {n} / página
               </option>
             ))}
           </select>
