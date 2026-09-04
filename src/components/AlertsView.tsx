@@ -1,5 +1,8 @@
 // Dependência externa: react (useState), lucide-react (ícones). Tela cheia
-// de alertas (rota "alerts") — mesma fonte de dados que AlertBanner.
+// de alertas (rota "alerts") — mesma fonte de dados que a VitalsStrip do
+// Dashboard. Layout do handoff `PrinterControl v2.dc.html` L560-583: abas de
+// severidade com contagem mono no cabeçalho e lista com trilho colorido por
+// linha. O título da página fica no PageHeader da rota.
 import { useMemo, useState } from "react";
 import { TriangleAlert, CheckCircle2 } from "lucide-react";
 import { cn } from "../lib/cn";
@@ -23,39 +26,27 @@ export default function AlertsView({ alerts, printers, onSelectPrinter }: Alerts
 
   const visible = severityFilter === "todos" ? alerts : alerts.filter((a) => a.severity === severityFilter);
 
+  const tabs: { value: "todos" | Alert["severity"]; label: string; count: number; tone: string; active: string }[] = [
+    { value: "todos", label: "Todos", count: alerts.length, tone: styles.tabNeutral, active: styles.tabNeutralActive },
+    { value: "critical", label: "Crítico", count: counts.critical, tone: styles.tabCritical, active: styles.tabCriticalActive },
+    { value: "warning", label: "Atenção", count: counts.warning, tone: styles.tabWarning, active: styles.tabWarningActive },
+  ];
+
   return (
     <div className={styles.card}>
       <div className={styles.header}>
-        <div>
-          <h2 className={styles.title}>Alertas</h2>
-          <p className={styles.subtitle}>{alerts.length} alerta(s) ativo(s) na sua rede</p>
+        <div className={styles.tabs}>
+          {tabs.map((t) => (
+            <button
+              key={t.value}
+              onClick={() => setSeverityFilter(t.value)}
+              className={cn(styles.tab, t.tone, severityFilter === t.value && t.active)}
+            >
+              {t.label} <span className={styles.tabCount}>{t.count}</span>
+            </button>
+          ))}
         </div>
-        <div className={styles.filters}>
-          <button
-            onClick={() => setSeverityFilter("todos")}
-            className={cn(styles.filterBtn, severityFilter === "todos" && styles.filterBtnActive)}
-          >
-            Todos ({alerts.length})
-          </button>
-          <button
-            onClick={() => setSeverityFilter("critical")}
-            className={cn(
-              styles.filterBtnCritical,
-              severityFilter === "critical" && styles.filterBtnCriticalActive
-            )}
-          >
-            Crítico ({counts.critical})
-          </button>
-          <button
-            onClick={() => setSeverityFilter("warning")}
-            className={cn(
-              styles.filterBtnWarning,
-              severityFilter === "warning" && styles.filterBtnWarningActive
-            )}
-          >
-            Atenção ({counts.warning})
-          </button>
-        </div>
+        <p className={styles.headerNote}>Derivados automaticamente das leituras da frota</p>
       </div>
 
       {alerts.length === 0 ? (
@@ -72,32 +63,19 @@ export default function AlertsView({ alerts, printers, onSelectPrinter }: Alerts
         <ul className={styles.list}>
           {visible.map((a) => {
             const printer = printers.find((p) => p.id === a.printerId);
+            const critical = a.severity === "critical";
             return (
-              <li key={a.id} className={styles.listItem}>
-                <button
-                  onClick={() => printer && onSelectPrinter(printer)}
-                  disabled={!printer}
-                  className={styles.alertBtn}
-                >
-                  <div
-                    className={cn(
-                      styles.alertIcon,
-                      a.severity === "critical" ? styles.alertIconCritical : styles.alertIconWarning
-                    )}
-                  >
-                    <TriangleAlert size={16} />
-                  </div>
-                  <div className={styles.alertBody}>
-                    <p className={styles.alertMessage}>{a.message}</p>
-                    <p className={styles.alertTimestamp}>{a.timestamp}</p>
-                  </div>
-                  <span
-                    className={cn(
-                      styles.alertBadge,
-                      a.severity === "critical" ? styles.alertBadgeCritical : styles.alertBadgeWarning
-                    )}
-                  >
-                    {a.severity === "critical" ? "Crítico" : "Atenção"}
+              <li key={a.id} className={cn(styles.listItem, critical ? styles.railCritical : styles.railWarning)}>
+                <button onClick={() => printer && onSelectPrinter(printer)} disabled={!printer} className={styles.alertBtn}>
+                  <span className={cn(styles.alertIcon, critical ? styles.toneCritical : styles.toneWarning)}>
+                    <TriangleAlert size={15} />
+                  </span>
+                  <span className={styles.alertBody}>
+                    <span className={styles.alertMessage}>{a.message}</span>
+                  </span>
+                  <span className={styles.alertTimestamp}>{a.timestamp}</span>
+                  <span className={cn(styles.alertBadge, critical ? styles.toneCritical : styles.toneWarning)}>
+                    {critical ? "Crítico" : "Atenção"}
                   </span>
                 </button>
               </li>
