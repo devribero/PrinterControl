@@ -1,0 +1,35 @@
+.scanBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.value {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-weight: 600;
+  color: var(--link);
+  transition: background-color 0.12s ease-out, color 0.12s ease-out;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--glass-hover);
+  color: var(--link-hover);
+}
+
+.button:disabled {
+  opacity: 0.6;
+}
