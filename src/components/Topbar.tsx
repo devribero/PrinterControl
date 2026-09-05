@@ -49,7 +49,6 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
 
   if (!account) return null;
 
-  const firstName = account.name.split(" ")[0];
   const initials = account.name.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
   const emailDisplay = `${account.email}@elgin.com`;
 
@@ -63,11 +62,6 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
       <button onClick={onOpenMobileMenu} className={styles.menuButton}>
         <Menu size={20} />
       </button>
-
-      <div className={styles.greeting}>
-        <h1 className={styles.greetingTitle}>Olá, {firstName}</h1>
-        <p className={styles.greetingSubtitle}>Aqui está o status das impressoras da sua rede</p>
-      </div>
 
       <div className={styles.searchWrap}>
         <div className={styles.searchBox}>

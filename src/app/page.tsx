@@ -5,9 +5,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { RefreshCw } from "lucide-react";
-import StatCards from "../components/StatCards";
-import AlertBanner from "../components/AlertBanner";
+import PageHeader from "../components/PageHeader";
+import ScanBar from "../components/ScanBar";
+import VitalsStrip from "../components/VitalsStrip";
 import PrinterTable from "../components/PrinterTable";
 import RightPanel from "../components/RightPanel";
 import BottomCharts from "../components/BottomCharts";
@@ -39,35 +39,28 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className={styles.scanBar}>
-        <p>
-          Última verificação: <span className={styles.scanBarStrong}>{lastChecked.toLocaleTimeString("pt-BR")}</span>
-        </p>
-        <button onClick={handleRefresh} disabled={scanning} className={styles.scanButton}>
-          <RefreshCw size={13} className={scanning ? "animate-spin" : ""} />
-          {scanning ? "Verificando..." : "Verificar agora"}
-        </button>
-      </div>
+      <PageHeader
+        section="Monitoramento"
+        title="Visão geral"
+        subtitle="Estado consolidado da frota, suprimentos e consumo de páginas."
+        actions={<ScanBar lastChecked={lastChecked} scanning={scanning} onRefresh={handleRefresh} />}
+      />
 
       {initialLoading ? (
-        <div className={styles.statsSkeletonGrid}>
-          {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className={cn(styles.skeletonCard, styles.skeletonCardStats, "animate-pulse")} />
-          ))}
-        </div>
+        <div className={cn(styles.skeletonCard, styles.skeletonCardStrip, "animate-pulse")} />
       ) : (
-        <StatCards
+        <VitalsStrip
           total={stats.total}
           online={stats.online}
           offline={stats.offline}
           attention={stats.attention}
           activeStatus={filters.status === "Todos" ? "Todos" : filters.status}
           onSelectStatus={(s) => updateFilter("status", s)}
+          topAlert={alerts[0] ?? null}
+          alertsRest={Math.max(alerts.length - 1, 0)}
+          onViewAlerts={() => router.push("/alerts")}
+          onSelectAlert={handleAlertSelect}
         />
-      )}
-
-      {!initialLoading && alerts.length > 0 && (
-        <AlertBanner alerts={alerts} onViewAll={() => router.push("/alerts")} onSelectAlert={handleAlertSelect} />
       )}
 
       <div className={styles.mainGrid}>

@@ -3,30 +3,30 @@
   top: 0;
   z-index: 30;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
-  border-bottom: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-canvas) 90%, transparent);
-  padding: 1rem 1.25rem;
-  backdrop-filter: blur(12px);
+  gap: 1.5rem;
+  border-bottom: 1px solid var(--glass-border);
+  background: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  padding: 0 2.5rem;
+  height: 60px;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 1023px) {
   .header {
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding: 0 1.25rem;
   }
 }
 
 .menuButton {
-  border-radius: 0.5rem;
+  border-radius: 6px;
   padding: 0.5rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .menuButton:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 @media (min-width: 1024px) {
@@ -52,7 +52,7 @@
   white-space: nowrap;
   font-size: 1.125rem;
   font-weight: 800;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 @media (min-width: 640px) {
@@ -72,17 +72,16 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .searchWrap {
-  order: 3;
-  width: 100%;
+  display: none;
 }
 
 @media (min-width: 1024px) {
   .searchWrap {
-    order: 0;
+    display: block;
     margin-left: 1rem;
     margin-right: 1rem;
     max-width: 28rem;
@@ -94,47 +93,46 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  padding: 0.625rem 0.875rem;
-  font-size: 0.875rem;
-  color: var(--color-ink-faint);
-  box-shadow: var(--shadow-xs);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-page);
+  padding: 0.4375rem 0.625rem;
+  width: 22rem;
+  max-width: 32vw;
+  color: var(--text-muted);
+  transition: border-color 0.12s ease-out;
 }
 
 .searchBox:focus-within {
-  border-color: color-mix(in srgb, var(--color-brand) 50%, transparent);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-brand) 15%, transparent);
+  border-color: var(--link-hover);
 }
 
 .searchIcon {
   flex-shrink: 0;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .searchInput {
   width: 100%;
   background: transparent;
-  color: var(--color-ink);
+  color: var(--text-primary);
   border: none;
   outline: none;
 }
 
 .searchInput::placeholder {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .searchKbd {
   display: none;
   flex-shrink: 0;
   border-radius: 0.375rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   padding: 0.125rem 0.375rem;
   font-size: 0.6875rem;
   font-weight: 500;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 @media (min-width: 640px) {
@@ -157,22 +155,17 @@
 }
 
 .iconButton {
-  /* inline-flex tambem para quando o .iconButton e um <a> (o atalho da caixa
-     pessoal): um <a> nasce inline e o padding/badge sairiam tortos. */
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  padding: 0.625rem;
-  color: var(--color-ink-soft);
-  box-shadow: var(--shadow-xs);
-  transition: background-color 0.15s;
+  border-radius: 6px;
+  padding: 0.4375rem;
+  color: var(--text-secondary);
+  transition: background-color 0.12s ease-out;
 }
 
 .iconButton:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .relative {
@@ -189,11 +182,11 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: var(--color-critical);
+  background: var(--danger);
   font-size: 0.6875rem;
   font-weight: 700;
   color: #fff;
-  box-shadow: 0 0 0 2px var(--color-canvas);
+  box-shadow: 0 0 0 2px var(--bg-page);
 }
 
 .dropdownAnchor {
@@ -206,8 +199,8 @@
   top: calc(100% + 8px);
   overflow: hidden;
   border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   box-shadow: var(--shadow-lg);
 }
 
@@ -220,14 +213,14 @@
 }
 
 .dropdownHeader {
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   padding: 0.75rem 1rem;
 }
 
 .dropdownHeaderTitle {
   font-size: 0.875rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .notifList {
@@ -239,7 +232,7 @@
   padding: 1.5rem 1rem;
   text-align: center;
   font-size: 0.875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .notifItem {
@@ -247,7 +240,7 @@
   width: 100%;
   align-items: flex-start;
   gap: 0.625rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   padding: 0.75rem 1rem;
   text-align: left;
 }
@@ -257,7 +250,7 @@
 }
 
 .notifItem:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .notifIcon {
@@ -265,8 +258,8 @@
   flex-shrink: 0;
 }
 
-.textCritical { color: var(--color-critical); }
-.textWarning { color: var(--color-warning); }
+.textCritical { color: var(--danger); }
+.textWarning { color: var(--warning); }
 
 .notifBody {
   min-width: 0;
@@ -275,13 +268,13 @@
 .notifMessage {
   font-size: 0.8125rem;
   line-height: 1.35;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .notifTimestamp {
   margin-top: 0.125rem;
   font-size: 0.6875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .textButton {
@@ -302,24 +295,22 @@
 }
 
 .exportButton {
-  background: var(--color-brand);
+  background: var(--link-hover);
   color: #fff;
   box-shadow: var(--shadow-sm);
 }
 
 .exportButton:hover {
-  background: var(--color-brand-600);
+  background: var(--link-hover);
 }
 
 .scanButton {
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-ink);
-  box-shadow: var(--shadow-xs);
+  border-radius: 6px;
+  color: var(--text-primary);
 }
 
 .scanButton:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .scanButton:disabled {
@@ -331,29 +322,27 @@
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border-radius: 6px;
   padding: 0.375rem 0.625rem 0.375rem 0.375rem;
-  box-shadow: var(--shadow-xs);
   transition: background-color 0.15s;
 }
 
 .accountButton:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .avatar {
   display: flex;
-  height: 2rem;
-  width: 2rem;
+  height: 1.75rem;
+  width: 1.75rem;
   align-items: center;
   justify-content: center;
-  border-radius: 0.5rem;
-  background: var(--color-brand);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #fff;
+  border-radius: 4px;
+  background: var(--link);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--bg-surface);
 }
 
 .accountText {
@@ -371,17 +360,17 @@
 .accountName {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .accountEmail {
   font-size: 0.6875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .chevron {
   display: none;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
   transition: transform 0.15s;
 }
 
@@ -398,12 +387,12 @@
 .menuAccountName {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .menuAccountEmail {
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 /* Papel do usuário (RBAC) no cabeçalho do menu da conta. */
@@ -411,11 +400,11 @@
   margin-top: 0.25rem;
   display: inline-block;
   border-radius: 9999px;
-  background: var(--color-brand-tint);
+  background: var(--tint-link);
   padding: 0.125rem 0.5rem;
   font-size: 0.6875rem;
   font-weight: 600;
-  color: var(--color-brand-700);
+  color: var(--link);
 }
 
 .menuList {
@@ -432,22 +421,22 @@
   padding: 0.5rem 0.75rem;
   text-align: left;
   font-size: 0.875rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .menuItem:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .menuItemIcon {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .menuItemDanger {
   font-weight: 500;
-  color: var(--color-critical);
+  color: var(--danger);
 }
 
 .menuItemDanger:hover {
-  background: var(--color-critical-tint);
+  background: var(--danger-bg);
 }

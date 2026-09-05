@@ -3,7 +3,7 @@
 /**
  * Dependências externas: react (useMemo/useState), lucide-react (ícones).
  * Dependências locais: PrinterStatusBadge, lib/tonerColor (cor por canal e
- * por faixa de nível), lib/theme (canal K muda de tom no escuro), lib/toast.
+ * por faixa de nível), lib/theme (canal K muda de tom no escuro).
  *
  * Área dedicada ao propósito central do sistema: acompanhar o nível de toner
  * de toda a frota num único lugar, com classificação (crítico/baixo/normal),
@@ -11,9 +11,14 @@
  * precisar abrir impressora por impressora. As faixas usam os mesmos limiares
  * de lib/tonerColor.tonerLevelColor (≤15% crítico, ≤35% baixo) pra bater com
  * a cor mostrada em qualquer outro lugar do app.
+ *
+ * Layout do handoff (`PrinterControl v2.dc.html` L482-553): faixa inline de
+ * severidade ("Precisam de intervenção agora") + tabela de suprimentos com
+ * barras por canal. O título da página e o controle de verificação ficam no
+ * PageHeader da rota, não aqui.
  */
 import { useMemo, useState } from "react";
-import { AlertTriangle, CircleCheck, Droplet, RefreshCw, Search, WifiOff } from "lucide-react";
+import { CircleCheck, Droplet, Search, TriangleAlert, WifiOff } from "lucide-react";
 import type { Printer, TonerLevel } from "../types";
 import PrinterStatusBadge from "./PrinterStatusBadge";
 import { tonerChannelColor, tonerLevelColor } from "../lib/tonerColor";
@@ -31,51 +36,12 @@ function classify(toner: TonerLevel[] | null): TonerClass {
   return "normal";
 }
 
-const FILTERS: { value: "todos" | TonerClass; label: string }[] = [
-  { value: "todos", label: "Todos" },
-  { value: "critical", label: "Crítico" },
-  { value: "warning", label: "Baixo" },
-  { value: "normal", label: "Normal" },
-  { value: "none", label: "Sem dados" },
-];
-
-interface SummaryCardProps {
-  label: string;
-  value: number;
-  icon: React.ReactNode;
-  tone: "critical" | "warning" | "success" | "faint";
-  active: boolean;
-  onClick: () => void;
-}
-
-const TONE = {
-  critical: styles.toneCritical,
-  warning: styles.toneWarning,
-  success: styles.toneSuccess,
-  faint: styles.toneFaint,
-};
-
-function SummaryCard({ label, value, icon, tone, active, onClick }: SummaryCardProps) {
-  return (
-    <button onClick={onClick} className={cn(styles.summaryCard, active && styles.summaryCardActive)}>
-      <div className={cn(styles.summaryIcon, TONE[tone])}>{icon}</div>
-      <div className={styles.summaryTextWrap}>
-        <p className={styles.summaryValue}>{value}</p>
-        <p className={styles.summaryLabel}>{label}</p>
-      </div>
-    </button>
-  );
-}
-
 interface TonerMonitoringProps {
   printers: Printer[];
   onOpenDetails: (printer: Printer) => void;
-  lastChecked: Date;
-  onRefresh: () => void;
-  refreshing: boolean;
 }
 
-export default function TonerMonitoring({ printers, onOpenDetails, lastChecked, onRefresh, refreshing }: TonerMonitoringProps) {
+export default function TonerMonitoring({ printers, onOpenDetails }: TonerMonitoringProps) {
   const { theme } = useTheme();
   const [filter, setFilter] = useState<"todos" | TonerClass>("todos");
   const [query, setQuery] = useState("");
@@ -104,84 +70,65 @@ export default function TonerMonitoring({ printers, onOpenDetails, lastChecked, 
       });
   }, [classified, filter, query]);
 
+  /** Faixa de severidade: os três primeiros itens alternam o filtro; "Sem
+   * comunicação" conta impressoras offline, que não são uma faixa de toner e
+   * portanto não filtram a tabela (mesmo comportamento da versão anterior). */
+  const severity: { key: TonerClass | "offline"; label: string; value: number; icon: React.ReactNode; tone: string }[] = [
+    { key: "critical", label: "Crítico ≤15%", value: counts.critical, icon: <TriangleAlert size={14} />, tone: styles.toneCritical },
+    { key: "warning", label: "Baixo ≤35%", value: counts.warning, icon: <Droplet size={14} />, tone: styles.toneWarning },
+    { key: "normal", label: "Normal >35%", value: counts.normal, icon: <CircleCheck size={14} />, tone: styles.toneSuccess },
+    { key: "offline", label: "Sem comunicação", value: offlineCount, icon: <WifiOff size={14} />, tone: styles.toneFaint },
+  ];
+
+  const pills: { value: "todos" | TonerClass; label: string }[] = [
+    { value: "todos", label: "Todos" },
+    { value: "critical", label: `Crítico · ${counts.critical}` },
+    { value: "warning", label: `Baixo · ${counts.warning}` },
+    { value: "normal", label: `Normal · ${counts.normal}` },
+    { value: "none", label: `Sem dados · ${counts.none}` },
+  ];
+
   return (
     <div className={styles.page}>
-      <div className={styles.headerCard}>
-        <div className={styles.headerLeft}>
-          <div className={styles.headerIcon}>
-            <Droplet size={20} />
-          </div>
-          <div>
-            <h2 className={styles.headerTitle}>Monitoramento de Toner</h2>
-            <p className={styles.headerSubtitle}>Nível de suprimento de toda a frota, atualizado em tempo real.</p>
-          </div>
-        </div>
-        <div className={styles.headerRight}>
-          <p className={styles.lastChecked}>
-            Última verificação: <span className={styles.lastCheckedValue}>{lastChecked.toLocaleTimeString("pt-BR")}</span>
-          </p>
-          <button onClick={onRefresh} disabled={refreshing} className={styles.refreshButton}>
-            <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
-            {refreshing ? "Verificando..." : "Atualizar agora"}
+      <div className={styles.severityStrip}>
+        <p className={styles.severityLead}>Precisam de intervenção agora:</p>
+        {severity.map((s) => (
+          <button
+            key={s.key}
+            onClick={() => s.key !== "offline" && setFilter(filter === s.key ? "todos" : (s.key as TonerClass))}
+            disabled={s.key === "offline"}
+            className={cn(
+              styles.severityItem,
+              s.key === "critical" && styles.severityItemCritical,
+              filter === s.key && styles.severityItemActive
+            )}
+          >
+            <span className={cn(styles.severityIcon, s.tone)}>{s.icon}</span>
+            <span className={styles.severityValue}>{s.value}</span>
+            <span className={styles.severityLabel}>{s.label}</span>
           </button>
-        </div>
-      </div>
-
-      <div className={styles.summaryGrid}>
-        <SummaryCard
-          label="Toner crítico (≤15%)"
-          value={counts.critical}
-          icon={<AlertTriangle size={19} />}
-          tone="critical"
-          active={filter === "critical"}
-          onClick={() => setFilter(filter === "critical" ? "todos" : "critical")}
-        />
-        <SummaryCard
-          label="Toner baixo (≤35%)"
-          value={counts.warning}
-          icon={<Droplet size={19} />}
-          tone="warning"
-          active={filter === "warning"}
-          onClick={() => setFilter(filter === "warning" ? "todos" : "warning")}
-        />
-        <SummaryCard
-          label="Normal (>35%)"
-          value={counts.normal}
-          icon={<CircleCheck size={19} />}
-          tone="success"
-          active={filter === "normal"}
-          onClick={() => setFilter(filter === "normal" ? "todos" : "normal")}
-        />
-        <SummaryCard
-          label="Sem comunicação"
-          value={offlineCount}
-          icon={<WifiOff size={19} />}
-          tone="faint"
-          active={false}
-          onClick={() => {}}
-        />
+        ))}
       </div>
 
       <div className={styles.tableCard}>
         <div className={styles.filterBar}>
           <div className={styles.filterPills}>
-            {FILTERS.map((f) => (
+            {pills.map((p) => (
               <button
-                key={f.value}
-                onClick={() => setFilter(f.value)}
-                className={cn(styles.filterPill, filter === f.value ? styles.filterPillActive : styles.filterPillInactive)}
+                key={p.value}
+                onClick={() => setFilter(p.value)}
+                className={cn(styles.filterPill, filter === p.value && styles.filterPillActive)}
               >
-                {f.label}
-                {f.value !== "todos" && ` (${counts[f.value]})`}
+                {p.label}
               </button>
             ))}
           </div>
           <div className={styles.searchBox}>
-            <Search size={15} />
+            <Search size={14} />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar por nome ou IP..."
+              placeholder="Nome ou IP"
               className={styles.searchInput}
             />
           </div>
@@ -192,38 +139,40 @@ export default function TonerMonitoring({ printers, onOpenDetails, lastChecked, 
             <thead>
               <tr className={styles.theadRow}>
                 <th className={styles.thFirst}>Impressora</th>
-                <th className={styles.th}>IP</th>
+                <th className={styles.th}>Endereço</th>
                 <th className={styles.th}>Status</th>
-                <th className={styles.th}>Níveis de toner</th>
-                <th className={styles.th}>Última atividade</th>
+                <th className={styles.th}>Níveis por canal</th>
+                <th className={cn(styles.thLast, styles.thRight)}>Atividade</th>
               </tr>
             </thead>
             <tbody>
               {rows.map(({ printer: p, cls }) => (
-                <tr key={p.id} onClick={() => onOpenDetails(p)} className={styles.row}>
+                <tr
+                  key={p.id}
+                  onClick={() => onOpenDetails(p)}
+                  className={cn(styles.row, cls === "critical" && styles.rowCritical)}
+                >
                   <td className={styles.tdFirst}>
-                    <div className={styles.nameCell}>
-                      {cls === "critical" && <AlertTriangle size={14} className={styles.criticalIcon} />}
-                      <div>
-                        <p className={styles.printerName}>{p.name}</p>
-                        <p className={styles.printerDept}>{p.department}</p>
-                      </div>
-                    </div>
+                    <p className={styles.printerName}>{p.name}</p>
+                    <p className={styles.printerDept}>{p.department}</p>
                   </td>
-                  <td className={styles.tdSoft}>{p.ip}</td>
+                  <td className={cn(styles.td, styles.tdIp)}>{p.ip}</td>
                   <td className={styles.td}>
                     <PrinterStatusBadge status={p.status} />
                   </td>
                   <td className={styles.td}>
                     {p.toner && p.toner.length > 0 ? (
-                      <div className={styles.tonerList}>
+                      <div className={styles.channelList}>
                         {p.toner.map((t) => (
-                          <div key={t.color} className={styles.tonerItem} title={`${t.label}: ${t.percent}%`}>
-                            <span className={styles.tonerDot} style={{ backgroundColor: tonerChannelColor(t.color, theme) }} />
-                            <div className={styles.tonerBarTrack}>
-                              <div className={styles.tonerBarFill} style={{ width: `${t.percent}%`, backgroundColor: tonerChannelColor(t.color, theme) }} />
+                          <div key={t.color} className={styles.channelItem} title={`${t.label}: ${t.percent}%`}>
+                            <span className={styles.channelDot} style={{ backgroundColor: tonerChannelColor(t.color, theme) }} />
+                            <div className={styles.channelTrack}>
+                              <div
+                                className={styles.channelFill}
+                                style={{ width: `${t.percent}%`, backgroundColor: tonerChannelColor(t.color, theme) }}
+                              />
                             </div>
-                            <span className={styles.tonerPercent} style={{ color: tonerLevelColor(t.percent) }}>
+                            <span className={styles.channelPercent} style={{ color: tonerLevelColor(t.percent) }}>
                               {t.percent}%
                             </span>
                           </div>
@@ -233,7 +182,7 @@ export default function TonerMonitoring({ printers, onOpenDetails, lastChecked, 
                       <span className={styles.noToner}>Sem leitura de toner</span>
                     )}
                   </td>
-                  <td className={styles.tdSoft}>{p.lastSeen}</td>
+                  <td className={cn(styles.tdLast, styles.tdRight)}>{p.lastSeen}</td>
                 </tr>
               ))}
               {rows.length === 0 && (
@@ -248,7 +197,8 @@ export default function TonerMonitoring({ printers, onOpenDetails, lastChecked, 
         </div>
 
         <div className={styles.footer}>
-          Mostrando {rows.length} de {printers.length} impressoras
+          Exibindo <span className={styles.footerNum}>{rows.length}</span> de{" "}
+          <span className={styles.footerNum}>{printers.length}</span> impressoras · ordenadas por criticidade
         </div>
       </div>
     </div>

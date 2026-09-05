@@ -1,89 +1,54 @@
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
-}
-
-@media (min-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.card {
-  border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  padding: 1.25rem;
-  box-shadow: var(--shadow-sm);
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
+  gap: 0.5rem;
+  padding-bottom: 0.625rem;
+  border-bottom: 1px solid var(--border);
 }
 
-.iconWrap {
+.icon {
   display: flex;
-  height: 2.25rem;
-  width: 2.25rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.75rem;
 }
 
-.iconWrapBrand {
-  background: var(--color-brand-tint);
-  color: var(--color-brand-700);
+.iconBrand {
+  color: var(--link);
 }
 
-.iconWrapFaint {
-  background: var(--color-surface-2);
-  color: var(--color-ink-faint);
+.iconFaint {
+  color: var(--text-muted);
 }
 
 .title {
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .list {
-  margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  padding-top: 0.375rem;
 }
 
 .item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  border-radius: 0.75rem;
-  padding: 0.375rem 0.5rem;
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0;
   text-align: left;
-  transition: background-color 0.15s;
+  transition: opacity 0.12s ease-out;
 }
 
 .item:hover {
-  background: var(--color-surface-2);
+  opacity: 0.75;
 }
 
-.rank {
-  width: 1rem;
-  flex-shrink: 0;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--color-ink-faint);
-}
-
-.info {
-  min-width: 0;
-  flex: 1;
-}
-
-.infoTop {
+.itemTop {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -91,46 +56,46 @@
 }
 
 .name {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--color-ink);
+  font-size: 0.8125rem;
+  color: var(--text-primary);
 }
 
 .total {
   flex-shrink: 0;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
 }
 
 .barTrack {
-  margin-top: 0.25rem;
-  height: 0.375rem;
+  display: block;
+  margin-top: 0.3125rem;
+  height: 2px;
   width: 100%;
+  border-radius: 1px;
+  background: var(--track);
   overflow: hidden;
-  border-radius: 999px;
-  background: var(--color-surface-sunken);
 }
 
 .barFill {
+  display: block;
   height: 100%;
-  border-radius: 999px;
 }
 
 .barFillBrand {
-  background: var(--color-brand);
+  background: var(--link-hover);
 }
 
 .barFillFaint {
-  background: var(--color-ink-faint);
+  background: var(--border-strong);
 }
 
 .empty {
-  padding: 1rem 0;
-  text-align: center;
-  font-size: 0.875rem;
-  color: var(--color-ink-faint);
+  padding: 0.75rem 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }

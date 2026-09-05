@@ -1,60 +1,61 @@
 .card {
-  border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  background: var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  overflow: hidden;
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-}
-
-.iconWrap {
-  display: flex;
-  height: 2.25rem;
-  width: 2.25rem;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.75rem;
-  background: var(--color-brand-tint);
-  color: var(--color-brand-700);
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding: 0.875rem 1.25rem;
 }
 
 .title {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--color-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-.subtitle {
-  font-size: 0.875rem;
-  color: var(--color-ink-faint);
+.headerNote {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 .list {
-  margin-top: 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
 }
 
 .row {
-  border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-canvas);
-  padding: 1rem;
+  border-bottom: 1px solid var(--divider);
+}
+
+.row:last-child {
+  border-bottom: none;
 }
 
 .rowButton {
   display: flex;
   width: 100%;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
+  padding: 0.8125rem 1.25rem;
   text-align: left;
+  transition: background-color 0.12s ease-out;
+}
+
+.rowButton:hover {
+  background: var(--glass-hover);
 }
 
 .deptName {
@@ -63,103 +64,103 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-ink);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
 .barTrack {
-  height: 0.625rem;
+  display: block;
+  height: 4px;
   flex: 1;
+  min-width: 2rem;
+  border-radius: 1px;
+  background: var(--track);
   overflow: hidden;
-  border-radius: 999px;
-  background: var(--color-surface-sunken);
 }
 
 .barFill {
+  display: block;
   height: 100%;
-  border-radius: 999px;
-  background: var(--color-brand);
+  background: var(--link-hover);
 }
 
 .total {
-  width: 6rem;
+  width: 5.5rem;
   flex-shrink: 0;
   text-align: right;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
 .pct {
   width: 2.5rem;
   flex-shrink: 0;
   text-align: right;
-  font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--text-muted);
 }
 
 .chevron {
   flex-shrink: 0;
-  color: var(--color-ink-faint);
+  display: flex;
+  color: var(--border-strong);
 }
 
-/* Fase 12: nomes reais de departamento (ate 69 valores distintos, mais
-   longos que as 7 categorias do antigo mockup) expuseram que esta linha
-   nunca teve tratamento pra tela estreita — deptName(12rem) + total(6rem)
-   + pct(2.5rem) + gaps ja somam ~25.5rem, mais largo que um cartao de
-   celular inteiro. barTrack (decorativo, o numero de total ja informa o
-   mesmo) some; deptName vira flexivel em vez de largura fixa. */
-@media (max-width: 639px) {
+@media (max-width: 767px) {
+  .rowButton {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
   .deptName {
-    width: auto;
-    flex: 1 1 0;
-    min-width: 0;
+    width: 100%;
   }
 
   .barTrack {
-    display: none;
-  }
-
-  .total {
-    width: auto;
-  }
-
-  .pct {
-    display: none;
+    flex: 1 1 6rem;
   }
 }
 
+/* ---------- Detalhamento mês a mês (funcionalidade do app) ---------- */
+
 .monthly {
-  margin-top: 1rem;
   display: flex;
   align-items: flex-end;
-  gap: 0.5rem;
-  border-top: 1px solid var(--color-border);
-  padding-top: 1rem;
+  gap: 1.25rem;
+  overflow-x: auto;
+  border-top: 1px solid var(--divider);
+  background: color-mix(in srgb, var(--divider) 40%, transparent);
+  padding: 1rem 1.25rem;
 }
 
 .monthCol {
   display: flex;
-  flex: 1;
   flex-direction: column;
   align-items: center;
   gap: 0.375rem;
+  min-width: 3.5rem;
 }
 
 .monthValue {
+  font-family: var(--font-mono);
   font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .monthBar {
-  width: 100%;
-  border-radius: 0.375rem 0.375rem 0 0;
-  background: color-mix(in srgb, var(--color-brand) 70%, transparent);
+  width: 1.25rem;
+  border-radius: 2px;
+  background: var(--link-hover);
 }
 
 .monthLabel {
-  font-size: 0.6875rem;
-  color: var(--color-ink-faint);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }

@@ -1,3 +1,4 @@
+import PageHeader from "../../components/PageHeader";
 import SettingsView from "../../components/SettingsView";
 
 /**
@@ -14,5 +15,15 @@ import SettingsView from "../../components/SettingsView";
  * /network, onde as ações vivem e o backend as autoriza.
  */
 export default function SettingsPage() {
-  return <SettingsView />;
+  return (
+    <>
+      <PageHeader
+        section="Administração"
+        title="Configurações"
+        subtitle="Perfil, segurança, aparência e acessibilidade."
+      />
+
+      <SettingsView />
+    </>
+  );
 }

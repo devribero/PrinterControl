@@ -3,8 +3,8 @@
   min-width: 0;
   overflow: hidden;
   border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   box-shadow: var(--shadow-sm);
 }
 
@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   padding: 1.5rem;
 }
 
@@ -27,12 +27,12 @@
 .title {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .subtitle {
   font-size: 0.8125rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .controls {
@@ -47,10 +47,10 @@
   align-items: center;
   gap: 0.5rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.625rem 0.875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
   flex: 1;
   min-width: 200px;
 }
@@ -59,14 +59,14 @@
   flex: 1;
   min-width: 0;
   background: transparent;
-  color: var(--color-ink);
+  color: var(--text-primary);
   border: none;
   outline: none;
   font-size: 0.875rem;
 }
 
 .searchInput::placeholder {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .primaryButton {
@@ -75,7 +75,7 @@
   gap: 0.5rem;
   border-radius: 0.75rem;
   border: 1px solid transparent;
-  background: var(--color-brand);
+  background: var(--link-hover);
   padding: 0.625rem 1rem;
   font-size: 0.875rem;
   font-weight: 600;
@@ -85,7 +85,7 @@
 }
 
 .primaryButton:hover:not(:disabled) {
-  background: var(--color-brand-700);
+  background: var(--link);
 }
 
 .primaryButton:disabled,
@@ -95,11 +95,11 @@
 }
 
 .dangerButton {
-  background: var(--color-critical);
+  background: var(--danger);
 }
 
 .dangerButton:hover:not(:disabled) {
-  background: var(--color-critical);
+  background: var(--danger);
   filter: brightness(0.92);
 }
 
@@ -108,19 +108,19 @@
   align-items: center;
   gap: 0.5rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.625rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   white-space: nowrap;
   transition: all 0.15s;
 }
 
 .secondaryButton:hover:not(:disabled) {
-  border-color: var(--color-brand);
-  color: var(--color-ink);
+  border-color: var(--link-hover);
+  color: var(--text-primary);
 }
 
 .loadError {
@@ -129,11 +129,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-warning-tint);
+  border-bottom: 1px solid var(--border);
+  background: var(--tint-warning);
   padding: 1rem 1.5rem;
   font-size: 0.875rem;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 /* ── Tabela ─────────────────────────────────────────────────────────────── */
@@ -155,8 +155,8 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-ink-faint);
-  background: var(--color-surface-2);
+  color: var(--text-muted);
+  background: var(--divider);
 }
 
 .thFirst {
@@ -169,12 +169,12 @@
 }
 
 .row {
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border);
   transition: background-color 0.15s;
 }
 
 .row:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .tdFirst {
@@ -184,19 +184,19 @@
 .td {
   padding: 1rem 0.75rem;
   vertical-align: middle;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .tdMuted {
   padding: 1rem 0.75rem;
   vertical-align: middle;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
   white-space: nowrap;
 }
 
 .userName {
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .lastAdminTag {
@@ -205,13 +205,13 @@
   gap: 0.25rem;
   margin-left: 0.5rem;
   border-radius: 9999px;
-  background: var(--color-brand-tint);
+  background: var(--tint-link);
   padding: 0.125rem 0.5rem;
   font-size: 0.625rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--color-brand-700);
+  color: var(--link);
   vertical-align: middle;
 }
 
@@ -224,18 +224,18 @@
 }
 
 .role_admin {
-  background: var(--color-brand-tint);
-  color: var(--color-brand-700);
+  background: var(--tint-link);
+  color: var(--link);
 }
 
 .role_operator {
-  background: var(--color-warning-tint);
-  color: var(--color-warning);
+  background: var(--tint-warning);
+  color: var(--warning);
 }
 
 .role_viewer {
-  background: var(--color-surface-sunken);
-  color: var(--color-ink-soft);
+  background: var(--track);
+  color: var(--text-secondary);
 }
 
 .statusBadge {
@@ -247,13 +247,13 @@
 }
 
 .statusOn {
-  background: var(--color-success-tint);
-  color: var(--color-success);
+  background: var(--tint-success);
+  color: var(--success);
 }
 
 .statusOff {
-  background: var(--color-surface-sunken);
-  color: var(--color-ink-faint);
+  background: var(--track);
+  color: var(--text-muted);
 }
 
 .actionsRow {
@@ -265,34 +265,34 @@
 .actionButton {
   border-radius: 0.5rem;
   padding: 0.5rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   transition: all 0.15s;
 }
 
 .actionButton:hover {
-  background: var(--color-surface-sunken);
-  color: var(--color-brand);
+  background: var(--track);
+  color: var(--link-hover);
 }
 
 .toggleButton {
   border-radius: 0.5rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   padding: 0.375rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   white-space: nowrap;
   transition: all 0.15s;
 }
 
 .toggleButton:hover:not(:disabled) {
-  border-color: var(--color-brand);
-  color: var(--color-ink);
+  border-color: var(--link-hover);
+  color: var(--text-primary);
 }
 
 .toggleButtonDanger:hover:not(:disabled) {
-  border-color: var(--color-critical);
-  color: var(--color-critical);
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 .toggleButton:disabled {
@@ -303,7 +303,7 @@
 .emptyState {
   padding: 3rem 1.25rem;
   text-align: center;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 /* ── Formulário do diálogo ──────────────────────────────────────────────── */
@@ -323,25 +323,25 @@
 .label {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .input,
 .select {
   width: 100%;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.625rem 0.875rem;
   font-size: 0.875rem;
-  color: var(--color-ink);
+  color: var(--text-primary);
   outline: none;
   transition: border-color 0.15s;
 }
 
 .input:focus,
 .select:focus {
-  border-color: var(--color-brand);
+  border-color: var(--link-hover);
 }
 
 .input:disabled {
@@ -350,30 +350,30 @@
 }
 
 .input::placeholder {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .hint {
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .warning {
   border-radius: 0.75rem;
-  border: 1px solid var(--color-warning);
-  background: var(--color-warning-tint);
+  border: 1px solid var(--warning);
+  background: var(--tint-warning);
   padding: 0.625rem 0.875rem;
   font-size: 0.8125rem;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .formError {
   border-radius: 0.75rem;
-  border: 1px solid var(--color-critical);
-  background: var(--color-critical-tint);
+  border: 1px solid var(--danger);
+  background: var(--danger-bg);
   padding: 0.625rem 0.875rem;
   font-size: 0.8125rem;
-  color: var(--color-critical);
+  color: var(--danger);
 }
 
 .dialogFooter {
@@ -385,5 +385,5 @@
 .confirmText {
   font-size: 0.875rem;
   line-height: 1.5;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }

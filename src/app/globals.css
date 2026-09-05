@@ -5,36 +5,52 @@
   --font-serif: var(--font-source-serif), Georgia, serif;
   --font-mono: var(--font-ibm-plex-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --color-canvas: #f6f3ee;
-  --color-surface: #ffffff;
-  --color-surface-2: #f2ede5;
-  --color-surface-sunken: #ece5da;
 
-  --color-border: #e7dfd2;
-  --color-border-strong: #d8cdb9;
 
-  --color-ink: #26211c;
-  --color-ink-soft: #6f6459;
-  --color-ink-faint: #a79b8b;
 
-  --color-brand: #0098e0;
-  --color-brand-600: #0082c2;
-  --color-brand-700: #0a6a9c;
-  --color-brand-tint: #e3f4fc;
 
-  --color-success: #3f8f5f;
-  --color-success-tint: #e7f3ec;
-  --color-warning: #c8862e;
-  --color-warning-tint: #faf0dd;
-  --color-critical: #c1503d;
-  --color-critical-tint: #fbeae6;
-  --color-info: #4d7ea8;
-  --color-info-tint: #e9f1f7;
 
   --shadow-xs: 0 1px 2px rgba(38, 33, 28, 0.06);
   --shadow-sm: 0 1px 2px rgba(38, 33, 28, 0.05), 0 4px 10px -4px rgba(38, 33, 28, 0.08);
   --shadow-md: 0 2px 4px rgba(38, 33, 28, 0.04), 0 12px 28px -10px rgba(38, 33, 28, 0.14);
   --shadow-lg: 0 8px 16px rgba(38, 33, 28, 0.06), 0 24px 48px -16px rgba(38, 33, 28, 0.22);
+
+  /* Fase de redesign glassmorphism (handoff design_handoff_printercontrol/).
+     Tokens NOVOS, adicionados ao lado dos --color-* existentes — nao
+     substituem nada ainda. Telas migradas passam a usar estes; telas nao
+     migradas continuam com --color-* ate a fase delas. */
+  --bg-page: #f6f3ee;
+  --bg-surface: #fff;
+  --border: #e7dfd2;
+  --divider: #f2ede5;
+  --track: #ece5da;
+  --border-strong: #d8cdb9;
+  --text-primary: #26211c;
+  --text-secondary: #6f6459;
+  --text-muted: #a79b8b;
+  --link: #0a6a9c;
+  --link-hover: #0098e0;
+  --success: #3f8f5f;
+  --warning: #c8862e;
+  --danger: #c1503d;
+  --danger-bg: #fbeae6;
+  --navy: #0a4b6e;
+  --navy-text: #0a4b6e;
+  --sidebar-bg: #f3efe6;
+
+  --tint-success: #eaf5ee;
+  --tint-warning: #faf0dd;
+  --tint-link: #eaf6fb;
+  --tint-plum: #faf0dd;
+
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.86);
+  --glass-bg-floating: rgba(255, 255, 255, 0.94);
+  --glass-border: rgba(20, 30, 45, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.45);
+  --glass-shadow: 0 20px 50px -28px rgba(20, 30, 45, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  --glass-hover: rgba(20, 30, 45, 0.05);
+  --glass-blur: blur(18px) saturate(140%);
 }
 
 html {
@@ -54,36 +70,48 @@ html.dark {
    azul de marca e as cores semânticas (sucesso/atenção/crítico/info) mais
    saturadas e claras para "pop" contra o fundo escuro, como pedido. */
 html.dark {
-  --color-canvas: #16130f;
-  --color-surface: #1e1a14;
-  --color-surface-2: #26211a;
-  --color-surface-sunken: #2f2921;
 
-  --color-border: #3a3327;
-  --color-border-strong: #4a4234;
 
-  --color-ink: #f5f0e6;
-  --color-ink-soft: #c9c0ae;
-  --color-ink-faint: #8f8672;
 
-  --color-brand: #22b3ff;
-  --color-brand-600: #52c4ff;
-  --color-brand-700: #7dd3ff;
-  --color-brand-tint: #123a52;
 
-  --color-success: #34d399;
-  --color-success-tint: #113828;
-  --color-warning: #fbbf24;
-  --color-warning-tint: #3d2e0d;
-  --color-critical: #f87171;
-  --color-critical-tint: #3d1a16;
-  --color-info: #60a5fa;
-  --color-info-tint: #17293d;
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 10px -4px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3), 0 12px 28px -10px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.35), 0 24px 48px -16px rgba(0, 0, 0, 0.6);
+
+  --bg-page: #060607;
+  --bg-surface: #101012;
+  --border: #26272a;
+  --divider: #1c1d1f;
+  --track: #26272a;
+  --border-strong: #3a3b3e;
+  --text-primary: #f2f0ec;
+  --text-secondary: #a8a5a0;
+  --text-muted: #6f6c68;
+  --link: #4ab3e8;
+  --link-hover: #7cc9ef;
+  --success: #5cb37f;
+  --warning: #d9a34f;
+  --danger: #e2776a;
+  --danger-bg: #2a1b19;
+  --navy: #123a54;
+  --navy-text: #6fb8dd;
+  --sidebar-bg: #000000;
+
+  --tint-success: #10201a;
+  --tint-warning: #221c10;
+  --tint-link: #101c24;
+  --tint-plum: rgba(104, 45, 86, 0.26);
+
+  --glass-bg: rgba(20, 21, 23, 0.55);
+  --glass-bg-elevated: rgba(16, 16, 18, 0.78);
+  --glass-bg-floating: rgba(14, 14, 16, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.07);
+  --glass-highlight: rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 20px 55px -26px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --glass-hover: rgba(255, 255, 255, 0.05);
+  --glass-blur: blur(20px) saturate(130%);
 }
 
 *,
@@ -99,8 +127,8 @@ body {
 
 body {
   margin: 0;
-  background: var(--color-canvas);
-  color: var(--color-ink);
+  background: var(--bg-page);
+  color: var(--text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -139,21 +167,21 @@ textarea {
 }
 
 * {
-  scrollbar-color: var(--color-border-strong) transparent;
+  scrollbar-color: var(--border-strong) transparent;
   scrollbar-width: thin;
 }
 
 ::-webkit-scrollbar { width: 9px; height: 9px; }
-::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 999px; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
 ::selection {
-  background: var(--color-brand-tint);
-  color: var(--color-brand-700);
+  background: var(--tint-link);
+  color: var(--link);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-brand);
+  outline: 2px solid var(--link-hover);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -194,6 +222,17 @@ textarea {
 }
 .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
+@keyframes soft-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+}
+
 /* Preferencia declarada no SISTEMA OPERACIONAL. */
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -215,5 +254,5 @@ html.reduce-motion * {
 html.strong-focus :focus-visible {
   outline-width: 3px;
   outline-offset: 3px;
-  box-shadow: 0 0 0 5px var(--color-brand-tint);
+  box-shadow: 0 0 0 5px var(--tint-link);
 }

@@ -25,7 +25,7 @@ export function tonerChannelColor(channel: TonerLevel["color"], theme: "light" |
 }
 
 export function tonerLevelColor(percent: number): string {
-  if (percent <= 15) return "var(--color-critical)";
-  if (percent <= 35) return "var(--color-warning)";
-  return "var(--color-success)";
+  if (percent <= 15) return "var(--danger)";
+  if (percent <= 35) return "var(--warning)";
+  return "var(--success)";
 }

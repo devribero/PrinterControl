@@ -5,9 +5,14 @@
  * IP/Modelo/Departamento + coluna por mês, agrupada por unidade) dentro do
  * painel — é a visão "Histórico" completa, impressora a impressora, mês a
  * mês. Dependência local: lib/site.ts (separa "Depto — Unidade").
+ *
+ * Layout do handoff (`PrinterControl v2.dc.html` L668-762): linha de resumo
+ * com total mono e os controles de expandir/recolher, tabela de totais por
+ * mês e um card sanfona por unidade. O título da página fica no PageHeader
+ * da rota.
  */
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Maximize2, Minimize2, History as HistoryIcon } from "lucide-react";
+import { ChevronDown, ChevronRight, Maximize2, Minimize2 } from "lucide-react";
 import type { Printer } from "../types";
 import { getPrinterSite, getDepartmentLabel } from "../lib/site";
 import styles from "./HistoryMatrix.module.css";
@@ -39,20 +44,12 @@ export default function HistoryMatrix({ printers }: HistoryMatrixProps) {
     });
   }
 
-  function expandAll() {
-    setOpenSites(new Set(sites));
-  }
-  function collapseAll() {
-    setOpenSites(new Set());
-  }
-
   const grandTotals = months.map((_, i) => withHistory.reduce((sum, p) => sum + (p.monthlyPages?.[i]?.pages ?? 0), 0));
   const grandTotal = grandTotals.reduce((a, b) => a + b, 0);
 
   if (months.length === 0) {
     return (
       <div className={styles.emptyCard}>
-        <h2 className={styles.emptyTitle}>Histórico</h2>
         <p className={styles.emptyText}>Ainda sem contadores mensais para exibir.</p>
       </div>
     );
@@ -60,51 +57,48 @@ export default function HistoryMatrix({ printers }: HistoryMatrixProps) {
 
   return (
     <div className={styles.root}>
-      <div className={styles.summaryCard}>
-        <div className={styles.summaryHeader}>
-          <div className={styles.summaryLeft}>
-            <div className={styles.iconBox}>
-              <HistoryIcon size={17} />
-            </div>
-            <div>
-              <h2 className={styles.summaryTitle}>Histórico de Impressões</h2>
-              <p className={styles.summarySubtitle}>
-                {withHistory.length} impressoras · {sites.length} unidades · {months[0]}–{months[months.length - 1]}
-              </p>
-            </div>
-          </div>
-          <div className={styles.actionsRow}>
-            <button onClick={expandAll} className={styles.actionButton}>
-              <Maximize2 size={13} />
-              Expandir tudo
-            </button>
-            <button onClick={collapseAll} className={styles.actionButton}>
-              <Minimize2 size={13} />
-              Recolher tudo
-            </button>
-          </div>
+      <div className={styles.summaryRow}>
+        <div className={styles.summaryLeft}>
+          <h2 className={styles.summaryTitle}>Histórico de impressão</h2>
+          <span className={styles.summaryMeta}>
+            {grandTotal.toLocaleString("pt-BR")} páginas · {months.length} meses · {sites.length} unidades
+          </span>
         </div>
+        <div className={styles.actionsRow}>
+          <button onClick={() => setOpenSites(new Set(sites))} className={styles.actionButton}>
+            <Maximize2 size={13} />
+            Expandir tudo
+          </button>
+          <button onClick={() => setOpenSites(new Set())} className={styles.actionButton}>
+            <Minimize2 size={13} />
+            Recolher
+          </button>
+        </div>
+      </div>
 
+      <div className={styles.card}>
         <div className={styles.tableWrap}>
-          <table className={styles.summaryTable}>
+          <table className={styles.table}>
             <thead>
               <tr className={styles.theadRow}>
-                <th className={styles.th}>Total geral</th>
+                <th className={styles.thFirst}>Período</th>
                 {months.map((m) => (
-                  <th key={m} className={styles.thRight}>{m}</th>
+                  <th key={m} className={styles.thMonth}>
+                    {m}
+                  </th>
                 ))}
                 <th className={styles.thTotal}>Total</th>
               </tr>
             </thead>
             <tbody>
-              <tr className={styles.summaryBodyRow}>
-                <td className={styles.td}>Todas as unidades</td>
+              <tr>
+                <td className={styles.tdLabel}>Páginas impressas</td>
                 {grandTotals.map((t, i) => (
-                  <td key={i} className={styles.tdRightMono}>{t.toLocaleString("pt-BR")}</td>
+                  <td key={i} className={styles.tdMonth}>
+                    {t.toLocaleString("pt-BR")}
+                  </td>
                 ))}
-                <td className={styles.tdTotalMono}>
-                  {grandTotal.toLocaleString("pt-BR")}
-                </td>
+                <td className={styles.tdGrandTotal}>{grandTotal.toLocaleString("pt-BR")}</td>
               </tr>
             </tbody>
           </table>
@@ -118,16 +112,16 @@ export default function HistoryMatrix({ printers }: HistoryMatrixProps) {
         const siteTotal = siteMonthTotals.reduce((a, b) => a + b, 0);
 
         return (
-          <div key={site} className={styles.siteCard}>
+          <div key={site} className={styles.card}>
             <button onClick={() => toggleSite(site)} className={styles.siteToggle}>
-              <div className={styles.siteToggleLeft}>
-                {isOpen ? <ChevronDown size={16} className={styles.chevronIcon} /> : <ChevronRight size={16} className={styles.chevronIcon} />}
-                <h3 className={styles.siteTitle}>{site}</h3>
-                <span className={styles.countBadge}>
+              <span className={styles.siteToggleLeft}>
+                <span className={styles.chevron}>{isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</span>
+                <span className={styles.siteTitle}>{site}</span>
+                <span className={styles.siteCount}>
                   {sitePrinters.length} impressora{sitePrinters.length !== 1 ? "s" : ""}
                 </span>
-              </div>
-              <span className={styles.siteTotalLabel}>{siteTotal.toLocaleString("pt-BR")} páginas</span>
+              </span>
+              <span className={styles.siteTotal}>{siteTotal.toLocaleString("pt-BR")} páginas</span>
             </button>
 
             {isOpen && (
@@ -135,13 +129,15 @@ export default function HistoryMatrix({ printers }: HistoryMatrixProps) {
                 <table className={styles.siteTable}>
                   <thead>
                     <tr className={styles.theadRow}>
-                      <th className={styles.th}>Nome</th>
-                      <th className={styles.th}>IP</th>
+                      <th className={styles.thFirst}>Impressora</th>
+                      <th className={styles.th}>Endereço</th>
                       <th className={styles.th}>Departamento</th>
                       {months.map((m) => (
-                        <th key={m} className={styles.thSiteMonth}>{m}</th>
+                        <th key={m} className={styles.thMonth}>
+                          {m}
+                        </th>
                       ))}
-                      <th className={styles.thSiteTotal}>Total</th>
+                      <th className={styles.thTotalPlain}>Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -159,16 +155,18 @@ export default function HistoryMatrix({ printers }: HistoryMatrixProps) {
                               {m.pages.toLocaleString("pt-BR")}
                             </td>
                           ))}
-                          <td className={styles.totalCell}>
-                            {total.toLocaleString("pt-BR")}
-                          </td>
+                          <td className={styles.rowTotalCell}>{total.toLocaleString("pt-BR")}</td>
                         </tr>
                       );
                     })}
                     <tr className={styles.subtotalRow}>
-                      <td className={styles.subtotalLabelCell} colSpan={3}>Subtotal — {site}</td>
+                      <td className={styles.subtotalLabelCell} colSpan={3}>
+                        Subtotal
+                      </td>
                       {siteMonthTotals.map((t, i) => (
-                        <td key={i} className={styles.subtotalMonthCell}>{t.toLocaleString("pt-BR")}</td>
+                        <td key={i} className={styles.subtotalMonthCell}>
+                          {t.toLocaleString("pt-BR")}
+                        </td>
                       ))}
                       <td className={styles.subtotalTotalCell}>{siteTotal.toLocaleString("pt-BR")}</td>
                     </tr>

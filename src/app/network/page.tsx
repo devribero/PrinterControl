@@ -1,3 +1,4 @@
+import PageHeader from "../../components/PageHeader";
 import NetworkView from "../../components/NetworkView";
 
 /**
@@ -9,5 +10,15 @@ import NetworkView from "../../components/NetworkView";
  * escondidas para os demais papéis — o backend também as recusa (403).
  */
 export default function NetworkPage() {
-  return <NetworkView />;
+  return (
+    <>
+      <PageHeader
+        section="Monitoramento"
+        title="Mapeamento de rede"
+        subtitle="Print Servers registrados, descoberta de filas e sincronização do cadastro."
+      />
+
+      <NetworkView />
+    </>
+  );
 }
