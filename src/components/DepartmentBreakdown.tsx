@@ -5,9 +5,14 @@
  * conjunto de demonstração (data/printers.ts). Cada mês já carrega seu
  * próprio rótulo (`month`) — não há mais um array de meses fixo, porque a
  * janela real cresce mês a mês em vez de ficar travada em Jan–Jun.
+ *
+ * Layout do handoff (`PrinterControl v2.dc.html` L599-613): card de vidro
+ * dominante, uma linha por departamento com barra fina, total e percentual
+ * em monospace; o detalhamento mês a mês (expansão) é funcionalidade do app
+ * e continua aqui, ausente do handoff.
  */
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Building2 } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import type { DepartmentUsage } from "../types";
 import styles from "./DepartmentBreakdown.module.css";
 
@@ -19,18 +24,13 @@ export default function DepartmentBreakdown({ data }: DepartmentBreakdownProps) 
   const [expanded, setExpanded] = useState<string | null>(null);
   const sorted = [...data].sort((a, b) => b.total - a.total);
   const grandTotal = sorted.reduce((sum, d) => sum + d.total, 0);
-  const maxTotal = Math.max(...sorted.map((d) => d.total));
+  const maxTotal = Math.max(1, ...sorted.map((d) => d.total));
 
   return (
     <div className={styles.card}>
       <div className={styles.header}>
-        <div className={styles.iconWrap}>
-          <Building2 size={17} />
-        </div>
-        <div>
-          <h2 className={styles.title}>Consumo por Departamento</h2>
-          <p className={styles.subtitle}>Total de páginas por área, todas as unidades.</p>
-        </div>
+        <h3 className={styles.title}>Consumo por departamento</h3>
+        <span className={styles.headerNote}>Todas as unidades</span>
       </div>
 
       <div className={styles.list}>
@@ -40,24 +40,16 @@ export default function DepartmentBreakdown({ data }: DepartmentBreakdownProps) 
           const maxMonth = Math.max(1, ...d.monthly.map((m) => m.pages));
           return (
             <div key={d.department} className={styles.row}>
-              <button
-                onClick={() => setExpanded(isOpen ? null : d.department)}
-                className={styles.rowButton}
-              >
-                <div className={styles.deptName} title={d.department}>
+              <button onClick={() => setExpanded(isOpen ? null : d.department)} className={styles.rowButton}>
+                <span className={styles.deptName} title={d.department}>
                   {d.department}
-                </div>
-                <div className={styles.barTrack}>
-                  <div
-                    className={styles.barFill}
-                    style={{ width: `${(d.total / maxTotal) * 100}%` }}
-                  />
-                </div>
-                <div className={styles.total}>
-                  {d.total.toLocaleString("pt-BR")}
-                </div>
-                <div className={styles.pct}>{pct}%</div>
-                {isOpen ? <ChevronUp size={16} className={styles.chevron} /> : <ChevronDown size={16} className={styles.chevron} />}
+                </span>
+                <span className={styles.barTrack}>
+                  <span className={styles.barFill} style={{ width: `${(d.total / maxTotal) * 100}%` }} />
+                </span>
+                <span className={styles.total}>{d.total.toLocaleString("pt-BR")}</span>
+                <span className={styles.pct}>{pct}%</span>
+                <span className={styles.chevron}>{isOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</span>
               </button>
 
               {isOpen && (
@@ -65,10 +57,7 @@ export default function DepartmentBreakdown({ data }: DepartmentBreakdownProps) 
                   {d.monthly.map((m) => (
                     <div key={m.period} className={styles.monthCol}>
                       <span className={styles.monthValue}>{m.pages.toLocaleString("pt-BR")}</span>
-                      <div
-                        className={styles.monthBar}
-                        style={{ height: `${8 + (m.pages / maxMonth) * 56}px` }}
-                      />
+                      <div className={styles.monthBar} style={{ height: `${8 + (m.pages / maxMonth) * 56}px` }} />
                       <span className={styles.monthLabel}>{m.month}</span>
                     </div>
                   ))}

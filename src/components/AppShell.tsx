@@ -36,6 +36,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className={styles.shell}>
+      <div className={styles.aurora} aria-hidden="true">
+        <div className={styles.auroraBlobA} />
+        <div className={styles.auroraBlobB} />
+        <div className={styles.auroraBlobC} />
+      </div>
+
       <Sidebar
         mobileOpen={mobileMenuOpen}
         onCloseMobile={() => setMobileMenuOpen(false)}

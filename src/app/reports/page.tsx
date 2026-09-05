@@ -1,6 +1,12 @@
 "use client";
 
+/**
+ * Rota "/reports" — Relatórios. Estrutura do handoff (`PrinterControl
+ * v2.dc.html` L586-666): faixa mensal → consumo por departamento (dominante)
+ * + rankings na coluna lateral → tabela de impressoras inativas.
+ */
 import { Download } from "lucide-react";
+import PageHeader from "../../components/PageHeader";
 import MonthlyCounters from "../../components/MonthlyCounters";
 import PrinterRanking from "../../components/PrinterRanking";
 import DepartmentBreakdown from "../../components/DepartmentBreakdown";
@@ -13,7 +19,6 @@ import styles from "./page.module.css";
 export default function ReportsPage() {
   const {
     printers,
-    stats,
     monthlyUsage,
     usingRealMonthlyReport,
     departmentUsage,
@@ -24,12 +29,11 @@ export default function ReportsPage() {
 
   return (
     <>
-      <div className={styles.summaryCard}>
-        <div className={styles.summaryHeader}>
-          <div>
-            <h2 className={styles.summaryTitle}>Relatório de Impressoras</h2>
-            <p className={styles.summarySubtitle}>Resumo da frota — {printers.length} equipamentos monitorados.</p>
-          </div>
+      <PageHeader
+        section="Monitoramento"
+        title="Relatórios"
+        subtitle="Contadores mensais, ranking de uso e consumo por departamento."
+        actions={
           <button
             onClick={() => {
               exportPrintersCsv(printers);
@@ -37,33 +41,19 @@ export default function ReportsPage() {
             }}
             className={styles.exportButton}
           >
-            <Download size={16} />
+            <Download size={14} />
             Exportar relatório (CSV)
           </button>
-        </div>
-        <div className={styles.summaryGrid}>
-          <div className={styles.summaryStat}>
-            <p className={styles.summaryStatLabel}>TOTAL</p>
-            <p className={styles.summaryStatValue}>{stats.total}</p>
-          </div>
-          <div className={`${styles.summaryStat} ${styles.summaryStatSuccess}`}>
-            <p className={styles.summaryStatLabelSuccess}>ONLINE</p>
-            <p className={styles.summaryStatValue}>{stats.online}</p>
-          </div>
-          <div className={styles.summaryStat}>
-            <p className={styles.summaryStatLabel}>OFFLINE</p>
-            <p className={styles.summaryStatValue}>{stats.offline}</p>
-          </div>
-          <div className={`${styles.summaryStat} ${styles.summaryStatWarning}`}>
-            <p className={styles.summaryStatLabelWarning}>ATENÇÃO</p>
-            <p className={styles.summaryStatValue}>{stats.attention}</p>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       <MonthlyCounters data={monthlyUsage} ficticio={!usingRealMonthlyReport} />
-      <PrinterRanking printers={printers} onOpenDetails={setSelectedPrinter} />
-      <DepartmentBreakdown data={departmentUsage} />
+
+      <div className={styles.mainGrid}>
+        <DepartmentBreakdown data={departmentUsage} />
+        <PrinterRanking printers={printers} onOpenDetails={setSelectedPrinter} />
+      </div>
+
       <DecommissionedList data={decommissionedPrinters} />
     </>
   );

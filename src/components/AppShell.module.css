@@ -1,10 +1,13 @@
 .shell {
+  position: relative;
   display: flex;
   min-height: 100vh;
-  background: var(--color-canvas);
+  background: var(--bg-page, var(--bg-page));
 }
 
 .main {
+  position: relative;
+  z-index: 1;
   display: flex;
   min-height: 100vh;
   flex: 1;
@@ -42,10 +45,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border);
   padding: 1.25rem;
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 @media (min-width: 640px) {
@@ -74,8 +77,8 @@
   border-radius: 999px;
 }
 
-.statusDotOn { background: var(--color-success); }
-.statusDotOff { background: var(--color-ink-faint); }
+.statusDotOn { background: var(--success); }
+.statusDotOff { background: var(--text-muted); }
 
 .helpList {
   display: flex;
@@ -88,13 +91,13 @@
   align-items: center;
   gap: 0.75rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--border);
   padding: 1rem;
   transition: background-color 0.15s;
 }
 
 .helpItem:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 .helpItemButton {
@@ -103,18 +106,18 @@
 }
 
 .helpIcon {
-  color: var(--color-brand-700);
+  color: var(--link);
 }
 
 .helpItemTitle {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .helpItemSubtitle {
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .helpNote {
@@ -122,22 +125,22 @@
   align-items: center;
   gap: 0.75rem;
   border-radius: 0.75rem;
-  background: var(--color-surface-2);
+  background: var(--divider);
   padding: 1rem;
 }
 
 .helpNoteIcon {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .helpNoteText {
   font-size: 0.75rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .helpCode {
   border-radius: 0.25rem;
-  background: var(--color-surface-sunken);
+  background: var(--track);
   padding: 0.125rem 0.25rem;
 }
 
@@ -149,21 +152,21 @@
   gap: 0.625rem;
   margin-bottom: 1rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-warning-border, var(--color-border-strong));
-  background: var(--color-warning-tint, var(--color-surface));
+  border: 1px solid var(--border-strong, var(--border-strong));
+  background: var(--tint-warning, var(--bg-surface));
   padding: 0.75rem 1rem;
 }
 
 .demoBannerIcon {
   flex-shrink: 0;
   margin-top: 0.125rem;
-  color: var(--color-warning, var(--color-ink-soft));
+  color: var(--warning, var(--text-secondary));
 }
 
 .demoBannerText {
   font-size: 0.8125rem;
   line-height: 1.4;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 /* Faixa de AMBIENTE de demonstração (Fase 9).
@@ -180,22 +183,22 @@
   gap: 0.625rem;
   margin-bottom: 1rem;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-brand-border, var(--color-border-strong));
-  border-left: 4px solid var(--color-brand, var(--color-ink));
-  background: var(--color-brand-tint, var(--color-surface));
+  border: 1px solid var(--border-strong, var(--border-strong));
+  border-left: 4px solid var(--link-hover, var(--text-primary));
+  background: var(--tint-link, var(--bg-surface));
   padding: 0.75rem 1rem;
 }
 
 .demoEnvBannerIcon {
   flex-shrink: 0;
   margin-top: 0.125rem;
-  color: var(--color-brand, var(--color-ink-soft));
+  color: var(--link-hover, var(--text-secondary));
 }
 
 .demoEnvBannerText {
   font-size: 0.8125rem;
   line-height: 1.4;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 /* Rótulo do ambiente no rodapé. Sempre presente quando o backend responde,
@@ -208,18 +211,58 @@
   font-weight: 600;
   padding: 0.0625rem 0.375rem;
   border-radius: 0.25rem;
-  border: 1px solid var(--color-border-strong);
-  color: var(--color-ink-soft);
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
 }
 
 .envTagDemo {
-  border-color: var(--color-brand-border, var(--color-border-strong));
-  background: var(--color-brand-tint, transparent);
-  color: var(--color-brand, var(--color-ink));
+  border-color: var(--border-strong, var(--border-strong));
+  background: var(--tint-link, transparent);
+  color: var(--link-hover, var(--text-primary));
 }
 
 .envTagProduction {
-  border-color: var(--color-success-border, var(--color-border-strong));
-  background: var(--color-success-tint, transparent);
-  color: var(--color-success, var(--color-ink));
+  border-color: var(--border-strong, var(--border-strong));
+  background: var(--tint-success, transparent);
+  color: var(--success, var(--text-primary));
+}
+
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.auroraBlobA,
+.auroraBlobB,
+.auroraBlobC {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(10px);
+}
+
+.auroraBlobA {
+  top: -14%;
+  left: -8%;
+  width: 48rem;
+  height: 48rem;
+  background: radial-gradient(circle, color-mix(in srgb, var(--link) 34%, transparent) 0%, transparent 70%);
+}
+
+.auroraBlobB {
+  bottom: -20%;
+  right: -10%;
+  width: 50rem;
+  height: 50rem;
+  background: radial-gradient(circle, color-mix(in srgb, var(--navy) 30%, transparent) 0%, transparent 70%);
+}
+
+.auroraBlobC {
+  top: 22%;
+  right: 8%;
+  width: 34rem;
+  height: 34rem;
+  background: radial-gradient(circle, color-mix(in srgb, var(--link-hover) 20%, transparent) 0%, transparent 70%);
 }

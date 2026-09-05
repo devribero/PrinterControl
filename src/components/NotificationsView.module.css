@@ -12,8 +12,8 @@
 
 .card {
   border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   box-shadow: var(--shadow-xs);
   overflow: hidden;
 }
@@ -24,20 +24,20 @@
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   padding: 1.25rem 1.5rem;
 }
 
 .cardTitle {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .cardSubtitle {
   margin-top: 0.25rem;
   font-size: 0.8125rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .headerActions {
@@ -52,7 +52,7 @@
   align-items: center;
   gap: 0.4375rem;
   font-size: 0.8125rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   cursor: pointer;
   user-select: none;
 }
@@ -60,7 +60,7 @@
 .checkbox {
   width: 0.9375rem;
   height: 0.9375rem;
-  accent-color: var(--color-brand);
+  accent-color: var(--link-hover);
   cursor: pointer;
 }
 
@@ -75,7 +75,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   padding: 0.9375rem 1.5rem;
   transition: background-color 0.15s;
 }
@@ -85,14 +85,14 @@
 }
 
 .item:hover {
-  background: var(--color-surface-2);
+  background: var(--divider);
 }
 
 /* Não lida: faixa na lateral. É o único sinal que sobrevive a qualquer
    daltonismo — não depende de distinguir cores. */
 .itemUnread {
-  box-shadow: inset 3px 0 0 var(--color-brand);
-  background: var(--color-brand-tint);
+  box-shadow: inset 3px 0 0 var(--link-hover);
+  background: var(--tint-link);
 }
 
 .itemIcon {
@@ -101,15 +101,15 @@
 }
 
 .iconCritical {
-  color: var(--color-critical);
+  color: var(--danger);
 }
 
 .iconWarning {
-  color: var(--color-warning);
+  color: var(--warning);
 }
 
 .iconInfo {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .itemBody {
@@ -119,13 +119,13 @@
 
 .itemMessage {
   font-size: 0.875rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   overflow-wrap: anywhere;
 }
 
 .itemMessageUnread {
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .itemMeta {
@@ -135,16 +135,16 @@
   flex-wrap: wrap;
   margin-top: 0.3125rem;
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .metaUnread {
   font-weight: 600;
-  color: var(--color-brand);
+  color: var(--link-hover);
 }
 
 .metaRead {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 /* ── Vínculo com alerta ─────────────────────────────────────────────── */
@@ -154,18 +154,18 @@
   align-items: center;
   gap: 0.3125rem;
   border-radius: 0.5rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.125rem 0.4375rem;
   font-size: 0.6875rem;
   font-weight: 500;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   transition: all 0.15s;
 }
 
 .alertLink:hover {
-  border-color: var(--color-brand);
-  color: var(--color-brand);
+  border-color: var(--link-hover);
+  color: var(--link-hover);
 }
 
 .alertState {
@@ -178,18 +178,18 @@
 }
 
 .alertOpen {
-  background: var(--color-warning-tint);
-  color: var(--color-warning);
+  background: var(--tint-warning);
+  color: var(--warning);
 }
 
 .alertResolved {
-  background: var(--color-surface-sunken);
-  color: var(--color-ink-faint);
+  background: var(--track);
+  color: var(--text-muted);
 }
 
 .alertGone {
-  background: var(--color-surface-sunken);
-  color: var(--color-ink-faint);
+  background: var(--track);
+  color: var(--text-muted);
   font-style: italic;
   text-transform: none;
 }
@@ -200,19 +200,19 @@
   gap: 0.375rem;
   flex-shrink: 0;
   border-radius: 0.5rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   padding: 0.3125rem 0.5625rem;
   font-size: 0.75rem;
   font-weight: 500;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   white-space: nowrap;
   transition: all 0.15s;
 }
 
 .readButton:hover:not(:disabled) {
-  border-color: var(--color-brand);
-  color: var(--color-brand);
+  border-color: var(--link-hover);
+  color: var(--link-hover);
 }
 
 .readButton:disabled {
@@ -229,28 +229,28 @@
   gap: 0.5rem;
   padding: 2.5rem 1.5rem;
   font-size: 0.875rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .errorBox {
   margin: 1rem 1.5rem 0;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-critical);
-  background: var(--color-critical-tint);
+  border: 1px solid var(--danger);
+  background: var(--danger-bg);
   padding: 0.625rem 0.875rem;
   font-size: 0.8125rem;
-  color: var(--color-critical);
+  color: var(--danger);
 }
 
 .footnote {
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border);
   padding: 0.875rem 1.5rem;
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .footnote a {
-  color: var(--color-brand);
+  color: var(--link-hover);
   font-weight: 500;
 }
 
@@ -275,25 +275,25 @@
 
 .primaryButton {
   border: 1px solid transparent;
-  background: var(--color-brand);
+  background: var(--link-hover);
   font-weight: 600;
   color: #fff;
 }
 
 .primaryButton:hover:not(:disabled) {
-  background: var(--color-brand-700);
+  background: var(--link);
 }
 
 .secondaryButton {
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   font-weight: 500;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .secondaryButton:hover:not(:disabled) {
-  border-color: var(--color-brand);
-  color: var(--color-ink);
+  border-color: var(--link-hover);
+  color: var(--text-primary);
 }
 
 .primaryButton:disabled,
@@ -325,7 +325,7 @@
 .label {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .input,
@@ -333,11 +333,11 @@
 .textarea {
   width: 100%;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.625rem 0.875rem;
   font-size: 0.875rem;
-  color: var(--color-ink);
+  color: var(--text-primary);
   outline: none;
   transition: border-color 0.15s;
 }
@@ -352,12 +352,12 @@
 .input:focus,
 .select:focus,
 .textarea:focus {
-  border-color: var(--color-brand);
+  border-color: var(--link-hover);
 }
 
 .input::placeholder,
 .textarea::placeholder {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .hint {
@@ -365,7 +365,7 @@
   align-items: center;
   gap: 0.375rem;
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 /* Lista de destinatários: rola quando a base de contas cresce, para o
@@ -376,15 +376,15 @@
   max-height: 11rem;
   overflow-y: auto;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
 }
 
 .recipient {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   padding: 0.5rem 0.75rem;
   font-size: 0.8125rem;
   cursor: pointer;
@@ -395,26 +395,26 @@
 }
 
 .recipient:hover {
-  background: var(--color-surface-sunken);
+  background: var(--track);
 }
 
 .recipientName {
   font-weight: 500;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .recipientEmail {
   margin-left: auto;
   font-size: 0.75rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
   overflow-wrap: anywhere;
 }
 
 .formError {
   border-radius: 0.75rem;
-  border: 1px solid var(--color-critical);
-  background: var(--color-critical-tint);
+  border: 1px solid var(--danger);
+  background: var(--danger-bg);
   padding: 0.625rem 0.875rem;
   font-size: 0.8125rem;
-  color: var(--color-critical);
+  color: var(--danger);
 }

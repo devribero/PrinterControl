@@ -19,28 +19,28 @@
 
 .groupHeader:not(:first-child) {
   margin-top: 1.25rem;
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border);
   padding-top: 1.75rem;
 }
 
 .groupTitle {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .groupSubtitle {
   margin-top: 0.25rem;
   font-size: 0.8125rem;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 /* ── Cartão ──────────────────────────────────────────────────────────── */
 
 .card {
   border-radius: 1rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   box-shadow: var(--shadow-xs);
   overflow: hidden;
 }
@@ -48,40 +48,40 @@
 /* Administração: faixa lateral. O sinal não depende de cor sozinha nem de
    ter lido o título do grupo — vale para quem chegou rolando a página. */
 .cardAdmin {
-  box-shadow: inset 4px 0 0 var(--color-warning), var(--shadow-xs);
+  box-shadow: inset 4px 0 0 var(--warning), var(--shadow-xs);
 }
 
 .cardHeader {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
   padding: 1.125rem 1.5rem;
 }
 
 .cardIcon {
   flex-shrink: 0;
   margin-top: 0.125rem;
-  color: var(--color-brand);
+  color: var(--link-hover);
 }
 
 .cardIconAdmin {
   flex-shrink: 0;
   margin-top: 0.125rem;
-  color: var(--color-warning);
+  color: var(--warning);
 }
 
 .cardTitle {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .cardSubtitle {
   margin-top: 0.1875rem;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .cardBody {
@@ -94,8 +94,8 @@
 .cardFooter {
   display: flex;
   justify-content: flex-end;
-  border-top: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border-top: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.875rem 1.5rem;
 }
 
@@ -116,23 +116,23 @@
 .label {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .input {
   width: 100%;
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.625rem 0.875rem;
   font-size: 0.875rem;
-  color: var(--color-ink);
+  color: var(--text-primary);
   outline: none;
   transition: border-color 0.15s;
 }
 
 .input:focus {
-  border-color: var(--color-brand);
+  border-color: var(--link-hover);
 }
 
 .input:disabled {
@@ -141,17 +141,17 @@
 }
 
 .input::placeholder {
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .hint {
   font-size: 0.75rem;
   line-height: 1.5;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 .hint a {
-  color: var(--color-brand);
+  color: var(--link-hover);
   font-weight: 500;
 }
 
@@ -161,21 +161,21 @@
 
 .note {
   border-radius: 0.75rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.625rem 0.875rem;
   font-size: 0.75rem;
   line-height: 1.5;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .formError {
   border-radius: 0.75rem;
-  border: 1px solid var(--color-critical);
-  background: var(--color-critical-tint);
+  border: 1px solid var(--danger);
+  background: var(--danger-bg);
   padding: 0.625rem 0.875rem;
   font-size: 0.8125rem;
-  color: var(--color-critical);
+  color: var(--danger);
 }
 
 .roleRow {
@@ -187,22 +187,22 @@
 
 .roleBadge {
   border-radius: 999px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.1875rem 0.625rem;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .code {
   border-radius: 0.5rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-sunken);
+  border: 1px solid var(--border);
+  background: var(--track);
   padding: 0.375rem 0.625rem;
   font-family: var(--font-ibm-plex-mono), monospace;
   font-size: 0.75rem;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   overflow-wrap: anywhere;
 }
 
@@ -220,41 +220,41 @@
   align-items: flex-start;
   gap: 0.25rem;
   border-radius: 0.875rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.875rem;
   text-align: left;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
   transition: all 0.15s;
 }
 
 .option:hover {
-  border-color: var(--color-brand);
+  border-color: var(--link-hover);
 }
 
 /* Selecionado: borda + anel + fundo. Três sinais somados, porque um anel de
    cor sozinho é frágil para quem não distingue matizes. */
 .optionActive {
-  border-color: var(--color-brand);
-  background: var(--color-brand-tint);
-  box-shadow: 0 0 0 1px var(--color-brand);
-  color: var(--color-brand-700);
+  border-color: var(--link-hover);
+  background: var(--tint-link);
+  box-shadow: 0 0 0 1px var(--link-hover);
+  color: var(--link);
 }
 
 .optionLabel {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 .optionActive .optionLabel {
-  color: var(--color-brand-700);
+  color: var(--link);
 }
 
 .optionHint {
   font-size: 0.6875rem;
   line-height: 1.45;
-  color: var(--color-ink-faint);
+  color: var(--text-muted);
 }
 
 /* Amostra "Aa" da escala de texto. Em rem de propósito: ela cresce junto
@@ -262,7 +262,7 @@
 .escalaAmostra {
   font-weight: 700;
   line-height: 1.2;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 /* ── Interruptores ───────────────────────────────────────────────────── */
@@ -272,15 +272,15 @@
   align-items: flex-start;
   gap: 0.625rem;
   border-radius: 0.875rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.875rem;
   cursor: pointer;
   transition: border-color 0.15s;
 }
 
 .switchRow:hover {
-  border-color: var(--color-brand);
+  border-color: var(--link-hover);
 }
 
 .checkbox {
@@ -288,7 +288,7 @@
   margin-top: 0.125rem;
   width: 1rem;
   height: 1rem;
-  accent-color: var(--color-brand);
+  accent-color: var(--link-hover);
   cursor: pointer;
 }
 
@@ -301,7 +301,7 @@
 .switchLabel {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 /* ── Atalhos administrativos ─────────────────────────────────────────── */
@@ -317,25 +317,25 @@
   flex-direction: column;
   gap: 0.25rem;
   border-radius: 0.875rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
+  border: 1px solid var(--border);
+  background: var(--divider);
   padding: 0.875rem;
   transition: all 0.15s;
 }
 
 .adminLink:hover {
-  border-color: var(--color-brand);
-  background: var(--color-brand-tint);
+  border-color: var(--link-hover);
+  background: var(--tint-link);
 }
 
 .adminLinkIcon {
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .adminLinkTitle {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--text-primary);
 }
 
 /* ── Botões ──────────────────────────────────────────────────────────── */
@@ -355,25 +355,25 @@
 
 .primaryButton {
   border: 1px solid transparent;
-  background: var(--color-brand);
+  background: var(--link-hover);
   font-weight: 600;
   color: #fff;
 }
 
 .primaryButton:hover:not(:disabled) {
-  background: var(--color-brand-700);
+  background: var(--link);
 }
 
 .secondaryButton {
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
   font-weight: 500;
-  color: var(--color-ink-soft);
+  color: var(--text-secondary);
 }
 
 .secondaryButton:hover:not(:disabled) {
-  border-color: var(--color-brand);
-  color: var(--color-ink);
+  border-color: var(--link-hover);
+  color: var(--text-primary);
 }
 
 .primaryButton:disabled,
