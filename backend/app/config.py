@@ -1,3 +1,4 @@
+from ipaddress import ip_address, ip_network
 from typing import Annotated
 
 from pydantic import field_validator, model_validator
@@ -207,6 +208,52 @@ class Settings(BaseSettings):
             return [item.strip() for item in texto.split(",") if item.strip()]
         return value
 
+    @field_validator("trusted_proxy_ips", mode="before")
+    @classmethod
+    def _proxies_lista(cls, value):
+        """
+        Mesmo tratamento de _cors_lista: aceita "127.0.0.1, ::1" alem de JSON.
+        A validacao do formato de cada entrada NAO acontece aqui — ela e
+        reportada no startup (_validate_trusted_proxies), para que um erro de
+        digitacao apareca como aviso legivel e nao como stack trace de boot.
+        """
+        return cls._cors_lista(value)
+
+    @model_validator(mode="after")
+    def _validate_trusted_proxies(self) -> "Settings":
+        """
+        Avisa (nao derruba) sobre a configuracao de proxy confiavel.
+
+        Nao levanta excecao de proposito: TRUSTED_PROXY_IPS foi introduzido
+        depois de TRUST_PROXY_HEADERS ja estar ligado em producao, e recusar
+        subir por causa dele transformaria uma correcao de seguranca em
+        indisponibilidade no deploy.
+        """
+        import logging
+
+        log = logging.getLogger("printercontrol.config")
+
+        for entrada in self.trusted_proxy_ips:
+            try:
+                ip_network(entrada, strict=False)
+            except ValueError:
+                log.warning(
+                    "TRUSTED_PROXY_IPS: entrada ignorada por formato invalido: %r. "
+                    "Use IP ou CIDR (ex.: 127.0.0.1 ou 10.0.0.0/8).",
+                    entrada,
+                )
+
+        if self.trust_proxy_headers and not self.trusted_proxy_ips:
+            log.warning(
+                "TRUST_PROXY_HEADERS=true sem TRUSTED_PROXY_IPS: X-Forwarded-For "
+                "sera aceito de QUALQUER origem, e um cliente que alcance esta "
+                "porta diretamente consegue escapar do limite de tentativas de "
+                "login trocando o cabecalho. Defina TRUSTED_PROXY_IPS com o "
+                "endereco do proxy (no deploy com cloudflared local: 127.0.0.1,::1)."
+            )
+
+        return self
+
     @model_validator(mode="after")
     def _validate_production_cors(self) -> "Settings":
         """
@@ -324,8 +371,49 @@ class Settings(BaseSettings):
     # nginx) que reescreva o cabecalho.
     trust_proxy_headers: bool = False
 
+    # Enderecos dos quais X-Forwarded-For pode ser acreditado (QA-10).
+    #
+    # `trust_proxy_headers` sozinho nao bastava: ele decide SE o cabecalho e
+    # lido, mas nao DE QUEM. Com a porta do backend alcancavel por fora — o
+    # cenario da auditoria — bastava mandar um XFF diferente por tentativa
+    # para o limitador de login contar cada uma como um IP novo e nunca
+    # chegar ao 429. Esta lista fecha isso: o cabecalho so vale quando a
+    # CONEXAO veio de um destes enderecos.
+    #
+    # Aceita IPs e redes CIDR ("127.0.0.1", "10.0.0.0/8"), em JSON ou
+    # separados por virgula, mesmo tratamento de cors_origins.
+    #
+    # Vazio mantem o comportamento anterior (le o cabecalho de qualquer
+    # origem) para nao derrubar um deploy no meio de um upgrade — mas o
+    # startup avisa. No deploy atual, o cloudflared roda na mesma maquina:
+    #     TRUSTED_PROXY_IPS=127.0.0.1,::1
+    trusted_proxy_ips: Annotated[list[str], NoDecode] = []
+
     # API
     api_prefix: str = "/api"
+
+    def proxy_confiavel(self, ip: str) -> bool:
+        """
+        O peer da conexao esta na lista de proxies confiaveis?
+
+        Lista vazia devolve True (compatibilidade — ver trusted_proxy_ips).
+        IP irreconhecivel devolve False: na duvida, nao acredita no cabecalho.
+        """
+        if not self.trusted_proxy_ips:
+            return True
+        try:
+            endereco = ip_address(ip)
+        except ValueError:
+            return False
+        for entrada in self.trusted_proxy_ips:
+            try:
+                if endereco in ip_network(entrada, strict=False):
+                    return True
+            except ValueError:
+                # Entrada malformada no .env: ignorada aqui e reportada no
+                # startup, para nao transformar erro de digitacao em 500.
+                continue
+        return False
 
     # ------------------------------------------------------------------
     # CORS (Fase 10) — lista EXPLICITA de origens do painel.

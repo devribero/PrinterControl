@@ -50,7 +50,10 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
   if (!account) return null;
 
   const initials = account.name.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
-  const emailDisplay = `${account.email}@elgin.com`;
+  // QA-13: o endereço real da conta. Isto era
+  // `${account.email}@elgin.com`, que fabricava um domínio — as contas são
+  // @elgin.com.br, então o painel exibia um e-mail que não existe.
+  const emailDisplay = account.email;
 
   function onExportCsv() {
     exportPrintersCsv(filteredPrinters);

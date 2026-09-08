@@ -32,6 +32,7 @@ import { permissionsFor, type Permissions } from "./permissions";
 import { adaptAlert, adaptPrinter, loadMonthlyReportFromApi } from "./adaptApi";
 import { loadMonthlyReport, mergeMonthlyReport } from "./fetchMonthlyReport";
 import { deriveAlerts, deriveGlobalToner } from "./deriveFromPrinters";
+import { leituraVelha } from "./adaptApi";
 import { DEFAULT_FILTERS, filterPrinters, type PrinterFilters } from "./filterPrinters";
 import { useToast } from "./toast";
 import type { Alert, DiscoveredPrinter, MonthlyReport, Printer, TonerLevel } from "../types";
@@ -103,7 +104,11 @@ interface AppDataContextValue {
   filteredPrinters: Printer[];
   departments: string[];
 
-  stats: { total: number; online: number; offline: number; attention: number };
+  /** Contagens da frota ATIVA (QA-02). `stale` = com leitura velha demais
+   *  para descrever o presente; não descontado de `online` — ver o cálculo. */
+  stats: { total: number; online: number; offline: number; attention: number; stale: number };
+  /** Frota ativa: `printers` sem as desativadas. Base de `stats` e `filteredPrinters`. */
+  activeFleet: Printer[];
   alerts: Alert[];
   globalToner: TonerLevel[] | undefined;
   worstPrinter: Printer | null;
@@ -418,13 +423,41 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     void refreshUnreadNotifications();
   }, [sessionLoading, refreshUnreadNotifications]);
 
+  /**
+   * A frota que está sendo monitorada AGORA.
+   *
+   * QA-02: `printers` carrega também as impressoras com `active === false`
+   * — as que sumiram do Print Server no último sync e cujo registro é
+   * preservado de propósito (Fase 18). Contá-las junto fazia o painel
+   * anunciar "80 online" onde havia 8 impressoras ativas, usando a última
+   * leitura de cada uma das 72 restantes, algumas de semanas atrás, como se
+   * fosse o estado do momento.
+   *
+   * A separação fica aqui, e não em cada tela, para que contagem e filtro
+   * usem a MESMA base: se `stats` excluísse as inativas mas a listagem não,
+   * a aba "Online 8" abriria uma lista de 80.
+   *
+   * `printers` continua completo para quem precisa do histórico: a lista de
+   * desativadas (relatórios), a matriz de histórico e os alertas.
+   */
+  const activeFleet = useMemo(() => printers.filter((p) => p.active), [printers]);
+
   const stats = useMemo(() => {
-    const total = printers.length;
-    const online = printers.filter((p) => p.status === "online").length;
-    const offline = printers.filter((p) => p.status === "offline").length;
-    const attention = printers.filter((p) => p.status === "atencao").length;
-    return { total, online, offline, attention };
-  }, [printers]);
+    const total = activeFleet.length;
+    const online = activeFleet.filter((p) => p.status === "online").length;
+    const offline = activeFleet.filter((p) => p.status === "offline").length;
+    const attention = activeFleet.filter((p) => p.status === "atencao").length;
+    // Leitura velha demais para descrever o presente. NÃO é descontado de
+    // `online` de propósito: decidir se "sem coleta recente" deve aparecer
+    // como offline, como um quarto estado, ou apenas como aviso muda o que
+    // o painel AFIRMA sobre a frota, e é decisão de produto, não de código.
+    // Exposto aqui para a tela poder sinalizar sem que ninguém precise
+    // recalcular a regra.
+    const stale = activeFleet.filter((p) =>
+      leituraVelha(p.lastSeenAt ?? null, backendEnv?.collection_interval_minutes ?? null),
+    ).length;
+    return { total, online, offline, attention, stale };
+  }, [activeFleet, backendEnv]);
 
   // Alertas reais do backend quando ele responde; senão, os derivados dos
   // dados de demonstração (mesmo comportamento de antes).
@@ -433,7 +466,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     [apiAlerts, printers],
   );
   const globalToner = useMemo(() => deriveGlobalToner(printers) ?? undefined, [printers]);
-  const filteredPrinters = useMemo(() => filterPrinters(printers, filters), [printers, filters]);
+  // Sobre activeFleet, não sobre printers: a listagem precisa bater com as
+  // contagens das abas de status (QA-02).
+  const filteredPrinters = useMemo(() => filterPrinters(activeFleet, filters), [activeFleet, filters]);
   const departments = useMemo(() => Array.from(new Set(printers.map((p) => p.department))).sort(), [printers]);
   const worstPrinter = useMemo(() => {
     const withToner = printers.filter((p) => p.toner && p.toner.length > 0);
@@ -586,6 +621,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     decommissionedPrinters,
     usingRealData,
     usingRealMonthlyReport,
+    activeFleet,
     backendEnv,
     exibindoDadoFicticio,
     semDadoRealEmProducao,

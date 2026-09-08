@@ -25,6 +25,21 @@ def _validate_ip(value: str) -> str:
         raise ValueError(f"IP invalido: {value!r}. Use IPv4 (ex.: 10.150.6.11) ou 'N/A'.")
 
 
+def _recusar_nulo(value: Optional[str], campo: str) -> str:
+    """
+    Null explicito num campo que o banco exige (QA-07).
+
+    Levanta ValueError, que o FastAPI converte em 422 com o nome do campo —
+    em vez do 500 que a violacao de NOT NULL produzia la no fim do UPDATE.
+    """
+    if value is None:
+        raise ValueError(
+            f"O campo '{campo}' nao aceita null. Omita o campo para deixa-lo "
+            f"como esta, ou envie um valor."
+        )
+    return value
+
+
 def _validate_texto(value: str, campo: str) -> str:
     value = value.strip()
     if not value:
@@ -57,6 +72,20 @@ class PrinterCreate(BaseModel):
 
 
 class PrinterUpdate(BaseModel):
+    """
+    Edicao parcial: campo AUSENTE = "nao mexa"; campo com valor = "troque".
+
+    `None` explicito nao e nenhum dos dois e por isso e recusado (QA-07).
+    Todas as quatro colunas sao NOT NULL no banco, entao `{"name": null}`
+    chegava ate o UPDATE e voltava 500 por violacao de constraint — erro de
+    servidor para o que e, na verdade, um pedido invalido do cliente.
+
+    A distincao funciona porque no Pydantic v2 um field_validator so roda
+    para campos PRESENTES na entrada: o default nunca passa por ele. Recusar
+    None dentro do validador atinge apenas quem mandou `null` de proposito, e
+    a rota continua usando `exclude_unset=True` para ignorar os ausentes.
+    """
+
     ip: Optional[str] = None
     name: Optional[str] = None
     model: Optional[str] = None
@@ -64,13 +93,13 @@ class PrinterUpdate(BaseModel):
 
     @field_validator("ip")
     @classmethod
-    def _ip(cls, v: Optional[str]) -> Optional[str]:
-        return None if v is None else _validate_ip(v)
+    def _ip(cls, v: Optional[str]) -> str:
+        return _validate_ip(_recusar_nulo(v, "ip"))
 
     @field_validator("name", "model", "department")
     @classmethod
-    def _obrigatorio(cls, v: Optional[str], info) -> Optional[str]:
-        return None if v is None else _validate_texto(v, info.field_name)
+    def _obrigatorio(cls, v: Optional[str], info) -> str:
+        return _validate_texto(_recusar_nulo(v, info.field_name), info.field_name)
 
 
 class PrinterResponse(BaseModel):
@@ -120,6 +149,13 @@ PRINTER_STATUSES = ("online", "offline", "atencao")
 TONER_MIN = 0
 TONER_MAX = 100
 
+# Maior inteiro que um INTEGER de SQLite (e um BIGINT de PostgreSQL) guarda.
+# Acima disto o driver levanta OverflowError DEPOIS da validacao, ja no
+# momento de gravar, e a resposta vira 500 (QA-08). Como teto de dominio ele
+# tambem e generoso ao extremo: nenhuma impressora chega perto de 9,2e18
+# paginas.
+INT64_MAX = 2**63 - 1
+
 
 class PrinterReadingCreate(BaseModel):
     """
@@ -152,12 +188,19 @@ class PrinterReadingCreate(BaseModel):
 
     @field_validator("page_count")
     @classmethod
-    def _contador_nao_negativo(cls, value: int) -> int:
+    def _contador_no_alcance(cls, value: int) -> int:
         # Contador de paginas e cumulativo e so cresce. Um valor negativo
         # tornaria negativo o "paginas do mes" do relatorio, que e a
         # diferenca entre o maior e o menor contador do periodo.
         if value < 0:
             raise ValueError(f"page_count nao pode ser negativo: {value}.")
+        # QA-08: sem teto, o literal 10**30 passava por aqui e so estourava
+        # no driver do SQLite, virando 500. Curiosamente 1e30 (ponto
+        # flutuante) ja era recusado com 422 — o inteiro e que escapava.
+        if value > INT64_MAX:
+            raise ValueError(
+                f"page_count fora do alcance do banco (maximo {INT64_MAX}): {value}."
+            )
         return value
 
     @field_validator("toner_k", "toner_c", "toner_m", "toner_y")

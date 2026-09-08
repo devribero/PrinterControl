@@ -17,11 +17,17 @@ const TOKEN_KEY = "elgin_auth_token";
  * backend de demonstracao mentiria com toda a confianca.
  */
 export interface BackendEnvironment {
+  /** Versao do BACKEND (APP_VERSION em main.py). Nao e a versao do painel:
+   *  os dois sao publicados separadamente e nao precisam coincidir (QA-14). */
+  version: string | null;
   environment: "development" | "demo" | "production";
   is_demo: boolean;
   is_production: boolean;
   mock_collect_enabled: boolean;
   print_server_mode: "mock" | "real";
+  /** Intervalo do ciclo de coleta, em minutos. Base do limite de "leitura
+   *  velha" — ver STALE_FACTOR em lib/adaptApi.ts (QA-02). */
+  collection_interval_minutes: number | null;
 }
 
 /**
@@ -41,11 +47,16 @@ export async function fetchBackendEnvironment(): Promise<BackendEnvironment | nu
       return null;
     }
     return {
+      version: typeof data.version === "string" ? data.version : null,
       environment: data.environment,
       is_demo: data.is_demo === true,
       is_production: data.is_production === true,
       mock_collect_enabled: data.mock_collect_enabled === true,
       print_server_mode: data.print_server_mode === "real" ? "real" : "mock",
+      collection_interval_minutes:
+        typeof data.collection_interval_minutes === "number" && data.collection_interval_minutes > 0
+          ? data.collection_interval_minutes
+          : null,
     };
   } catch {
     return null;

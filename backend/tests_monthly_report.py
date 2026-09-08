@@ -76,7 +76,7 @@ with Session(engine) as s:
 
     s.commit()
 
-TOKEN = create_access_token({"sub": "mensal.test@example.com"})
+TOKEN = create_access_token({"sub": "mensal.test@example.com", 'ver': 0})
 client = TestClient(app)
 
 resp = client.get("/api/printers/monthly-report?months=12", headers={"Authorization": f"Bearer {TOKEN}"})

@@ -31,12 +31,39 @@ function toToner(levels: ApiTonerLevel[] | null): TonerLevel[] | null {
   return mapped.length > 0 ? mapped : null;
 }
 
+/**
+ * Converte um timestamp da API em `Date`, tratando data sem fuso como UTC.
+ *
+ * QA-09: o backend grava com `datetime.utcnow()`, que produz um datetime
+ * "ingênuo" — sem fuso. Serializado, ele sai como `2026-09-08T12:25:00` sem
+ * o `Z` final, e `new Date(...)` de uma string sem designador de fuso a
+ * interpreta como HORA LOCAL. Em America/Sao_Paulo (UTC-3) isso adiantava
+ * tudo em três horas: uma sincronização das 08:25 aparecia como 11:25, e
+ * uma leitura de uma hora atrás aparecia como "agora".
+ *
+ * A correção é aqui, e não em cada componente, porque o defeito estava na
+ * leitura da string — todo lugar que faz `new Date` em campo vindo da API
+ * tinha o mesmo erro.
+ */
+export function parseApiDate(iso: string | null | undefined): Date | null {
+  if (!iso) return null;
+
+  // Já tem fuso declarado (`Z`, `+03:00`, `-0300`)? Respeita o que veio.
+  // O teste procura o designador DEPOIS do "T", para não confundir com os
+  // hífens da própria data.
+  const parteHora = iso.includes("T") ? iso.slice(iso.indexOf("T")) : "";
+  const temFuso = /(?:Z|[+-]\d{2}:?\d{2})$/.test(parteHora);
+
+  const date = new Date(temFuso ? iso : `${iso}Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 /** "agora", "há 12 min", "há 3 h", "12/08 14:30" — mesmo tom dos dados de demo. */
 export function formatLastSeen(iso: string | null): string {
   if (!iso) return "Nunca coletada";
 
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "Desconhecido";
+  const date = parseApiDate(iso);
+  if (!date) return "Desconhecido";
 
   const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
   if (minutes < 1) return "agora";
@@ -49,6 +76,37 @@ export function formatLastSeen(iso: string | null): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+/**
+ * Quantas vezes o intervalo de coleta uma leitura pode ter antes de ser
+ * considerada velha. 3 dá margem para dois ciclos perdidos (rede instável,
+ * reinício do serviço) sem alarme falso.
+ */
+const STALE_FACTOR = 3;
+
+/** Piso do limite, para intervalos muito curtos (o padrão de demo é 1 min). */
+const STALE_MINIMO_MINUTOS = 15;
+
+/** Limite, em minutos, a partir do qual uma leitura deixa de descrever o presente. */
+export function limiteLeituraVelha(intervaloColetaMinutos: number | null): number {
+  if (!intervaloColetaMinutos || intervaloColetaMinutos <= 0) return STALE_MINIMO_MINUTOS;
+  return Math.max(intervaloColetaMinutos * STALE_FACTOR, STALE_MINIMO_MINUTOS);
+}
+
+/**
+ * A leitura é velha o bastante para não descrever mais o estado atual?
+ *
+ * QA-02: a auditoria encontrou impressoras exibindo "normal, toner 65%" a
+ * partir de uma leitura de 21/08 — o painel reaproveitava a última leitura
+ * conhecida sem nenhuma regra de validade, então um estado antigo era
+ * apresentado com a mesma confiança de um recém-coletado.
+ */
+export function leituraVelha(lastSeenIso: string | null, intervaloColetaMinutos: number | null): boolean {
+  const date = parseApiDate(lastSeenIso);
+  if (!date) return true; // nunca coletada: o estado nunca foi observado
+  const minutos = (Date.now() - date.getTime()) / 60000;
+  return minutos > limiteLeituraVelha(intervaloColetaMinutos);
 }
 
 export function adaptPrinter(p: ApiPrinterWithStatus): Printer {
@@ -64,6 +122,9 @@ export function adaptPrinter(p: ApiPrinterWithStatus): Printer {
     status: toStatus(p.status),
     toner: toToner(p.toner),
     pagesPrinted: p.page_count ?? 0,
+    // ISO cru, além do texto já formatado: só com ele dá para decidir a
+    // idade da leitura mais tarde (QA-02) — `lastSeen` é texto de tela.
+    lastSeenAt: p.last_seen ?? null,
     lastSeen: formatLastSeen(p.last_seen),
   };
 }
@@ -128,6 +189,7 @@ interface ApiMonthlyReport {
   generated_at: string;
   monthly_usage: { month: string; pages: number; period: string }[];
   printers: {
+    id: number;
     ip: string;
     name: string;
     department: string;
@@ -154,6 +216,7 @@ export async function loadMonthlyReportFromApi(): Promise<MonthlyReport | null> 
       generatedAt: data.generated_at,
       monthlyUsage: data.monthly_usage,
       printers: data.printers.map((p) => ({
+        id: p.id === undefined ? undefined : String(p.id),
         ip: p.ip,
         name: p.name,
         department: p.department,

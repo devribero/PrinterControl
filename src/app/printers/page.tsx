@@ -5,7 +5,7 @@ import PrinterTable from "../../components/PrinterTable";
 import { useAppData } from "../../lib/app-data";
 
 export default function PrintersPage() {
-  const { filteredPrinters, printers, stats, filters, updateFilter, setSelectedPrinter } = useAppData();
+  const { filteredPrinters, activeFleet, stats, filters, updateFilter, setSelectedPrinter } = useAppData();
 
   return (
     <>
@@ -17,7 +17,7 @@ export default function PrintersPage() {
 
       <PrinterTable
         printers={filteredPrinters}
-        totalCount={printers.length}
+        totalCount={activeFleet.length}
         statusCounts={{ online: stats.online, offline: stats.offline, atencao: stats.attention }}
         filters={filters}
         onFilterChange={updateFilter}

@@ -203,7 +203,14 @@ def main():
     check("reativar -> 200",
           client.patch(f"/api/users/{novo_id}", json={"is_active": True},
                        headers=h(tokens["admin"])).status_code, 200)
-    check("depois de reativar, /me -> 200", client.get("/api/auth/me", headers=h(token_alvo)).status_code, 200)
+    # QA-04: reativar NAO ressuscita a sessao antiga. Ate a correcao este
+    # check esperava 200 — o token de antes da desativacao voltava a
+    # funcionar junto com a conta, o que anulava a orientacao da tela de
+    # Configuracoes ("desative e reative para encerrar sessoes suspeitas").
+    check("depois de reativar, JWT antigo -> 401", client.get("/api/auth/me", headers=h(token_alvo)).status_code, 401)
+    check("depois de reativar, login novo -> 200",
+          client.post("/api/auth/login",
+                      json={"email": novo["email"], "password": "senha-nova-4567"}).status_code, 200)
 
     print("\n[9] Ultimo admin ativo nao pode perder o proprio acesso")
     admin_id = next(u["id"] for u in client.get("/api/users", headers=h(tokens["admin"])).json()
