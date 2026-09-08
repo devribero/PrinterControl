@@ -98,8 +98,18 @@ with Session(engine) as s:
     )
     check_true("ip original preservado em pelo menos uma", any(p.ip for p in legados))
 
-backups = glob.glob(TEST_DB.replace(".db", ".backup-*.db"))
-check_true("backup do banco foi criado antes da migracao destrutiva", len(backups) == 1, str(backups))
+# Duas migracoes fazem backup, cada uma com seu prefixo: a da Etapa 4
+# (`.backup-<carimbo>.db`, reconstroi `printers`) e a do QA-01
+# (`.backup-fk-<carimbo>.db`, reconstroi as filhas para tirar a FK de
+# `printers_old`). O check antigo exigia exatamente UM arquivo e passou a
+# falhar quando a segunda entrou — o glob pegava as duas.
+todos = glob.glob(TEST_DB.replace(".db", ".backup-*.db"))
+backups_etapa4 = [b for b in todos if ".backup-fk-" not in b]
+backups_fk = [b for b in todos if ".backup-fk-" in b]
+check_true("backup criado antes da migracao destrutiva de printers (Etapa 4)",
+           len(backups_etapa4) == 1, str(backups_etapa4))
+check_true("backup criado antes da reconstrucao das FKs (QA-01)",
+           len(backups_fk) == 1, str(backups_fk))
 
 print("\n=== PARTE B: sincronizacao (criar / atualizar / desativar / reativar) ===\n")
 

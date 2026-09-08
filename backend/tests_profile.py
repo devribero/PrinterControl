@@ -128,19 +128,28 @@ def main():
     r = client.post("/api/auth/change-password",
                     json={"current_password": SENHA, "new_password": NOVA},
                     headers=h(tokens["viewer"]))
-    check("troca -> 204", r.status_code, 204)
+    # QA-04: a rota passou de 204 sem corpo para 200 com um token novo. A
+    # troca agora incrementa User.token_version e invalida TODAS as sessoes
+    # da conta — inclusive a de quem esta trocando, que sem este token novo
+    # seria deslogada pela propria correcao.
+    check("troca -> 200", r.status_code, 200)
+    token_renovado = r.json().get("access_token")
+    check_true("resposta traz um token novo", isinstance(token_renovado, str) and len(token_renovado) > 20)
     check("login com a senha NOVA -> 200", login(client, CONTAS["viewer"][0], NOVA).status_code, 200)
     check("login com a senha ANTIGA -> 401", login(client, CONTAS["viewer"][0], SENHA).status_code, 401)
     check("a senha do admin nao foi tocada", login(client, CONTAS["admin"][0], SENHA).status_code, 200)
 
-    print("\n[7] Limitacao conhecida: o token antigo sobrevive a troca")
-    # Documentada no docstring da rota. O JWT e stateless e nao guarda versao
-    # de senha, entao sessoes abertas antes da troca seguem validas ate
-    # expirarem. Este teste existe para a limitacao ser VISIVEL: se um dia
-    # ela for fechada, ele falha e obriga a atualizar a documentacao.
-    ainda_vale = client.get("/api/auth/me", headers=h(tokens["viewer"]))
-    check_true("token emitido antes da troca continua aceito", ainda_vale.status_code == 200,
-               f"status={ainda_vale.status_code} (se virou 401, a limitacao foi fechada)")
+    print("\n[7] QA-04: o token antigo NAO sobrevive a troca")
+    # Era a limitacao conhecida do JWT stateless: sessoes abertas antes da
+    # troca seguiam validas ate expirar, entao trocar a senha as pressas nao
+    # tirava de circulacao o token de quem ja estivesse dentro. O contador
+    # User.token_version fechou isso — ver o docstring de change_own_password.
+    antigo = client.get("/api/auth/me", headers=h(tokens["viewer"]))
+    check("token emitido antes da troca -> 401", antigo.status_code, 401)
+    renovado = client.get("/api/auth/me", headers=h(token_renovado))
+    check("token devolvido pela troca -> 200", renovado.status_code, 200)
+    # As checagens seguintes usam a sessao do viewer; ela agora e esta.
+    tokens["viewer"] = token_renovado
 
     print("\n[8] A rota administrativa continua existindo e separada")
     # Trocar a propria senha nao substitui o reset por admin da Fase 3.
@@ -149,9 +158,14 @@ def main():
     check("admin ainda redefine senha de terceiro -> 200", r.status_code, 200)
     check("login com a senha redefinida",
           login(client, CONTAS["viewer"][0], "reset-pelo-admin-1").status_code, 200)
+    # O reset acima queimou a sessao do viewer (QA-04: redefinicao de senha
+    # por terceiro invalida os tokens da conta), entao a checagem de
+    # PERMISSAO precisa de uma sessao nova — senao o 401 da credencial
+    # vencida chegaria antes do 403 e o teste deixaria de medir o RBAC.
+    token_viewer = login(client, CONTAS["viewer"][0], "reset-pelo-admin-1").json()["access_token"]
     check("viewer NAO redefine a senha de outro -> 403",
           client.patch(f"/api/users/{ids['admin']}", json={"password": "tentativa123"},
-                       headers=h(tokens["viewer"])).status_code, 403)
+                       headers=h(token_viewer)).status_code, 403)
 
     print("\n" + "=" * 70)
     if _falhas:

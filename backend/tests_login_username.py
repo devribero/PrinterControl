@@ -191,7 +191,9 @@ r_troca = client.post(
     json={"current_password": "senha-provisoria-123", "new_password": "senha-definitiva-1234"},
     headers=h(token_novo),
 )
-check("troca com a senha certa -> 204", r_troca.status_code, 204)
+# QA-04: a troca invalida os tokens anteriores da conta e devolve um novo.
+check("troca com a senha certa -> 200", r_troca.status_code, 200)
+token_novo = r_troca.json()["access_token"]
 
 r_me_depois = client.get("/api/auth/me", headers=h(token_novo))
 check_true("must_change_password desligou", r_me_depois.json()["must_change_password"] is False)

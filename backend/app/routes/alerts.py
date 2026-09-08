@@ -8,6 +8,7 @@ from app.models.printer import Printer
 from app.models.user import User
 from app.services.webhook_notifier import send_toner_alert_webhook
 from typing import List
+from app.schemas.common import RecursoId
 
 # Fase 2: alertas expoem estado da frota — exigem sessao em todas as rotas.
 # As acoes (notify/resolve) continuam declarando require_operator por cima.
@@ -56,7 +57,7 @@ def list_alerts(
 
 
 @router.get("/{alert_id}")
-def get_alert(alert_id: int, session: Session = Depends(get_session)):
+def get_alert(alert_id: RecursoId, session: Session = Depends(get_session)):
     alert = session.get(Alert, alert_id)
     if not alert:
         raise HTTPException(status_code=404, detail="Alerta não encontrado")
@@ -65,7 +66,7 @@ def get_alert(alert_id: int, session: Session = Depends(get_session)):
 
 @router.post("/{alert_id}/notify")
 def notify_alert(
-    alert_id: int,
+    alert_id: RecursoId,
     session: Session = Depends(get_session),
     _user: User = Depends(require_operator),
 ):
@@ -103,7 +104,7 @@ def notify_alert(
 
 @router.patch("/{alert_id}/resolve")
 def resolve_alert(
-    alert_id: int,
+    alert_id: RecursoId,
     session: Session = Depends(get_session),
     _user: User = Depends(require_operator),
 ):

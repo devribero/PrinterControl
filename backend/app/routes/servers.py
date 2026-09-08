@@ -38,6 +38,7 @@ from app.models.user import User
 from app.services.discovery import enrich_discovered_printers
 from app.services.print_server import PrintServerError, discover_printers, validar_host
 from app.services.printer_sync import sync_printers
+from app.schemas.common import RecursoId
 
 router = APIRouter(prefix="/servers", tags=["servers"])
 
@@ -356,7 +357,7 @@ def create_server(
 
 @router.patch("/{server_id}", response_model=PrintServerResponse)
 def update_server(
-    server_id: int,
+    server_id: RecursoId,
     update: PrintServerUpdate,
     session: Session = Depends(get_session),
     admin: User = Depends(require_admin),
@@ -390,7 +391,7 @@ def update_server(
 
 @router.delete("/{server_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_server(
-    server_id: int,
+    server_id: RecursoId,
     payload: PrintServerDelete,
     session: Session = Depends(get_session),
     admin: User = Depends(require_admin),
@@ -491,7 +492,7 @@ def sync(session: Session = Depends(get_session), _user: User = Depends(rate_lim
 
 @router.post("/{server_id}/discover", response_model=DiscoverResponse)
 def discover_server(
-    server_id: int,
+    server_id: RecursoId,
     session: Session = Depends(get_session),
     _admin: User = Depends(rate_limited_action("discover_server")),
 ):
@@ -515,7 +516,7 @@ def discover_server(
 
 @router.post("/{server_id}/sync", response_model=SyncResponse)
 def sync_server(
-    server_id: int,
+    server_id: RecursoId,
     session: Session = Depends(get_session),
     _admin: User = Depends(rate_limited_action("sync_server")),
 ):

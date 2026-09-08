@@ -60,7 +60,7 @@ with Session(engine) as s:
     s.refresh(printer)
     PRINTER_ID = printer.id
 
-TOKEN = create_access_token({"sub": "webhook.test@example.com"})
+TOKEN = create_access_token({"sub": "webhook.test@example.com", 'ver': 0})
 client = TestClient(app)
 
 

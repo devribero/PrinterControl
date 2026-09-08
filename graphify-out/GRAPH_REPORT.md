@@ -1,28 +1,28 @@
-# Graph Report - glassmorphism-redesign-phase0  (2026-09-04)
+# Graph Report - PrinterControl  (2026-09-08)
 
 ## Corpus Check
-- 182 files · ~178,272 words
+- 188 files · ~200,721 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1880 nodes · 3725 edges · 115 communities (102 shown, 13 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 157 edges (avg confidence: 0.51)
+- 1950 nodes · 3714 edges · 127 communities (106 shown, 21 thin omitted)
+- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 148 edges (avg confidence: 0.58)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b585e589`
+- Built from commit: `45da832a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- snmp_fleet_mock.py
+- tests_qa_findings.py
 - package.json
 - Main.ps1
 - Elgin Impressoras (painel de monitoramento)
-- logging_config.py
+- tests_environment.py
 - enrich_discovered_printers
 - compilerOptions
-- User
+- servers.py
 - AUDITORIA COMPLEMENTAR
 - tests_login_hardening.py
 - plugins
@@ -30,13 +30,13 @@
 - graphify (knowledge graph tool)
 - next.config.ts
 - Elgin (Brand)
-- NetworkView.tsx
+- NotificationsView.tsx
 - npm run build
 - npm run dev
 - next-env.d.ts
 - navIds.ts
-- theme.tsx
-- Printer
+- cn
+- printer_fleet.py
 - tests_collect_api.py
 - Cloudflare Tunnel — expor a API sem abrir porta (Fase 11)
 - AUDITORIA MASTER — PrinterControl
@@ -44,32 +44,32 @@
 - SNMPClient
 - Operação em Produção
 - Deploy do Frontend na Vercel (Fase 12)
-- app/page.tsx
-- routes/auth.py
-- hash_password
-- notifications.py
+- PageHeader.tsx
+- models/user.py
+- User
+- create_notifications
 - import_historico_planilha.py
-- types.ts
+- Printer
 - ETAPA FINAL — FECHAMENTO DA AUDITORIA
-- 1. Desenvolvimento (local)
-- tests_rbac.py
+- 2. Produção
+- Settings
 - layout.tsx
-- snmp.py
-- DecommissionedList.tsx
+- Printer
+- sync_server
 - FakeAgent
 - PLANO DE IMPLEMENTAÇÃO — ESCANEAR REDE REAL
 - SECURITY ASSESSMENT — CYBERSECURITY 360°
 - Impressoras
 - Guia de Uso do PrinterControl
 - ConfigurarAmbiente.ps1
-- PrinterReading
+- scheduler.py
 - useAppData
-- preferences.tsx
+- theme.tsx
 - Guia do Desenvolvedor
 - api.ts
-- Role
-- Settings
-- MockSNMPScenarios
+- Handoff: PrinterControl — Glassmorphism UI System
+- login
+- SNMPResult
 - auth.ts
 - Contador mensal calculado por diff de duas leituras SNMP acumulativas (não existe OID de páginas do mês)
 - alert_engine.py
@@ -77,11 +77,11 @@
 - Fluxo de Dados
 - record
 - Dívida técnica — registro único
-- config.py
+- services/print_server.py
 - Autenticação
 - VISAO_GERAL.md
 - 41. Scores, veredito e roadmap
-- UsersView
+- UsersView.tsx
 - Mapa da API
 - Notificações (Fase 7)
 - Alertas
@@ -95,59 +95,70 @@
 - File Structure
 - RODADA G — FECHAMENTO DE LACUNAS RESIDUAIS
 - File Structure
-- dependencies.py
+- tests_rbac.py
 - 6. Subir o sistema em produção hoje
 - Deliberate deviations from the handoff (documented, not silent)
 - PrinterControl — Visão geral do sistema
 - 5. Modo real x modo simulado, e os riscos
-- tests_production.py
-- RecordingThreadPoolExecutor
+- notify_alert
+- 1. Desenvolvimento (local)
 - 2. Como o sistema é montado
-- discovery.py
+- webhook_notifier.py
 - Scripts PowerShell reais nunca rodaram de verdade (sem interpretador PowerShell no ambiente de dev)
-- models/user.py
-- database.py
-- collect.py
-- PrintServerDiscoveryTests
+- tests_fleet.py
+- create_db_and_tables
+- collect_printer
+- tests_print_servers.py
 - Scope decision
 - Glassmorphism Redesign — Phase 3 (Suprimentos / Toner) Implementation Plan
-- seed.py
+- tests_webhook.py
 - C23. Terceiro passe — Frontend real (token/XSS/CSRF) e execução direta dos testes
-- field_validator
+- RateLimiter
 - unhandled_exception_handler
 - Glassmorphism Redesign — Phases 4 & 5 (Alertas, Relatórios)
-- public/data/monthly-report.json
-- tests_profile.py
-- ServerMode
+- scheduler_status
+- update_server
+- tests_login_username.py
 - cybersecurity.agent.md
 - relatorio.agent.md
+- create_server
+- hash_password
 - Migração: Cloudflare Tunnel + Vercel → VM Windows Server própria
+- Correção do acesso por IP em desenvolvimento
+- Path
+- Exception
 - ambiente
-- main.py
-- Ações
+- docs/README.md
+- SQLModel
+- str
+- datetime
+- Printer
+- Notification
+- database.py
+- PrintServer
 
 ## God Nodes (most connected - your core abstractions)
-1. `User` - 82 edges
-2. `Printer` - 58 edges
-3. `create_db_and_tables()` - 38 edges
-4. `cn()` - 38 edges
-5. `SNMPClient` - 37 edges
-6. `useAppData()` - 35 edges
-7. `SNMPResult` - 34 edges
-8. `PrinterReading` - 32 edges
-9. `Role` - 32 edges
-10. `Alert` - 29 edges
+1. `User` - 85 edges
+2. `create_db_and_tables()` - 42 edges
+3. `cn()` - 38 edges
+4. `useAppData()` - 35 edges
+5. `SNMPClient` - 35 edges
+6. `Printer` - 35 edges
+7. `Role` - 34 edges
+8. `SNMPResult` - 30 edges
+9. `hash_password()` - 29 edges
+10. `useToast()` - 29 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `notifications()` --uses--> `Notification`  [INFERRED]
-  backend/tests_alerts.py → backend/app/models/notification.py
+- `create_notifications()` --calls--> `Notification`  [EXTRACTED]
+  backend/app/routes/notifications.py → src/types.ts
+- `create_server()` --calls--> `PrintServer`  [EXTRACTED]
+  backend/app/routes/servers.py → src/types.ts
 - `Lucide` --conceptually_related_to--> `Elgin Impressoras (painel de monitoramento)`  [EXTRACTED]
   README.md → CONTEXTO-DESENVOLVIMENTO.md
 - `React` --conceptually_related_to--> `Elgin Impressoras (painel de monitoramento)`  [EXTRACTED]
   README.md → CONTEXTO-DESENVOLVIMENTO.md
 - `Recharts` --conceptually_related_to--> `Elgin Impressoras (painel de monitoramento)`  [EXTRACTED]
-  README.md → CONTEXTO-DESENVOLVIMENTO.md
-- `Tailwind CSS v4` --conceptually_related_to--> `Elgin Impressoras (painel de monitoramento)`  [EXTRACTED]
   README.md → CONTEXTO-DESENVOLVIMENTO.md
 
 ## Import Cycles
@@ -158,11 +169,11 @@
 - **Stack tecnológico do painel (Vite/React/TS/Tailwind/Recharts/Lucide)** — readme_vite, readme_react, readme_typescript, readme_tailwind_css_v4, readme_recharts, readme_lucide [EXTRACTED 1.00]
 - **Arquitetura de dados de 3 modos (Demo/Real/Simulado)** — contexto_desenvolvimento_elgin_impressoras, contexto_desenvolvimento_modo_demo, contexto_desenvolvimento_modo_real, contexto_desenvolvimento_modo_simulado [EXTRACTED 1.00]
 
-## Communities (115 total, 13 thin omitted)
+## Communities (127 total, 21 thin omitted)
 
-### Community 0 - "snmp_fleet_mock.py"
-Cohesion: 0.23
-Nodes (10): _base_page_count(), _increment(), profile_for(), Simulador de frota — APENAS PARA TESTE LOCAL. Diferenca para snmp_mock.py: la…, Perfil deterministico da impressora: online | offline | snmp_mudo | baixo |…, Contador inicial plausivel para uma impressora que nunca foi lida., Paginas impressas entre duas coletas — fixo por impressora, 5 a 124., Nivel do toner: base do perfil + desvio deterministico por impressora/cor,… (+2 more)
+### Community 0 - "tests_qa_findings.py"
+Cohesion: 0.43
+Nodes (7): check(), check_true(), entrar(), h(), main(), Regressao dos achados da auditoria QA (08/09/2026). Um teste por achado…, semear()
 
 ### Community 1 - "package.json"
 Cohesion: 0.06
@@ -173,56 +184,56 @@ Cohesion: 0.13
 Nodes (29): Atualizar-ImpressorasAsync(), Build-ListaExibicaoAgrupada(), Build-SnmpGet(), Build-SnmpGetBulk(), Convert-SnmpValueBytes(), Get-ImpressorasEmpresa(), Get-TonerSNMP(), Import-Tabela() (+21 more)
 
 ### Community 3 - "Elgin Impressoras (painel de monitoramento)"
-Cohesion: 0.08
-Nodes (24): Tela Alertas, Tela Dashboard, Elgin Impressoras (painel de monitoramento), Tela Histórico, Tela Impressoras, Tela Login, Migração futura para FastAPI (Python) + Next.js + banco de dados, Modo claro/escuro (toggle) (+16 more)
+Cohesion: 0.07
+Nodes (28): Tela Alertas, Tela Dashboard, Elgin Impressoras (painel de monitoramento), Tela Histórico, Tela Impressoras, Tela Login, Migração futura para FastAPI (Python) + Next.js + banco de dados, Modo claro/escuro (toggle) (+20 more)
 
-### Community 4 - "logging_config.py"
-Cohesion: 0.22
-Nodes (9): _caminho_do_log(), Path, Configuracao de log (Fase 10). Por que existe como modulo, e nao como um…, Instala console + arquivo rotativo na raiz do logging. Idempotente: chamar duas…, Substitui valores sensiveis na mensagem antes de ela ser emitida. Fica no…, Resolve settings.log_file. Vazio = so console., RedactSecretsFilter, setup_logging() (+1 more)
+### Community 4 - "tests_environment.py"
+Cohesion: 0.09
+Nodes (14): _caminho_do_log(), Path, Configuracao de log (Fase 10). Por que existe como modulo, e nao como um…, Instala console + arquivo rotativo na raiz do logging. Idempotente: chamar duas…, Substitui valores sensiveis na mensagem antes de ela ser emitida. Fica no…, Resolve settings.log_file. Vazio = so console., RedactSecretsFilter, setup_logging() (+6 more)
 
 ### Community 5 - "enrich_discovered_printers"
-Cohesion: 0.27
-Nodes (7): enrich_discovered_printers(), Enriquece filas em memória; não recebe nem acessa uma sessão SQL., DiscoverySnmpTests, printer(), DiscoveredPrinter, Testes locais do enriquecimento SNMP, sem rede corporativa ou SQLite., result()
+Cohesion: 0.17
+Nodes (17): _empty_result(), enrich_discovered_printers(), EnrichedDiscoveredPrinter, _is_color(), _is_label(), _normalize_ip(), DiscoveredPrinter, Enriquecimento transitório de filas descobertas com telemetria SNMP. (+9 more)
 
 ### Community 6 - "compilerOptions"
 Cohesion: 0.06
 Nodes (30): dom, dom.iterable, esnext, .next/dev/types/**/*.ts, next-env.d.ts, .next/types/**/*.ts, node_modules, **/*.ts (+22 more)
 
-### Community 7 - "User"
-Cohesion: 0.07
-Nodes (52): rate_limited_action(), Fabrica de dependencia: limita quantas vezes UM usuario pode disparar UMA acao…, PrintServer, True se o papel do usuario satisfaz qualquer um dos exigidos., User, create_printer_reading(), Grava uma leitura A MAO. Bloqueada em ENVIRONMENT=production. Esta rota era a…, create_server() (+44 more)
+### Community 7 - "servers.py"
+Cohesion: 0.16
+Nodes (19): discover(), DiscoveredPrinterResponse, DiscoverResponse, _executar_discover(), get_current_server(), list_servers(), PrintServerDelete, PrintServerResponse (+11 more)
 
 ### Community 8 - "AUDITORIA COMPLEMENTAR"
 Cohesion: 0.08
 Nodes (24): AUDITORIA COMPLEMENTAR, C10. Backup e Disaster Recovery — revisão significativa da rodada 1, C11. DevOps / CI-CD, C12. Supply Chain — aprofundamento, C13. PowerShell / Command Execution — reavaliação com evidência forte, C14. Segurança da API — inventário de endpoints (parcial, rotas mais sensíveis), C15. Autenticação — fluxo completo, C16. Banco de dados — schema (+16 more)
 
 ### Community 9 - "tests_login_hardening.py"
-Cohesion: 0.09
-Nodes (16): RateLimiter, Limite de tentativas para o login (Fase 10). POR QUE existe --------------…, Consome credito. So a FALHA conta — login certo nao gasta nada., Zera as contagens apos um login BEM-SUCEDIDO. Sem isto, quem erra a senha…, Esvazia tudo. Existe para os testes; nao ha rota que chegue aqui., Veredito de uma checagem. `retry_after` so faz sentido quando bloqueado., Janela deslizante em memoria, protegida por lock. O lock existe porque o…, Descarta o que saiu da janela e devolve o que restou. (+8 more)
+Cohesion: 0.22
+Nodes (6): medir(), Fase 10 - endurecimento do login. Cobre as duas falhas levantadas na auditoria…, Request minimo: so o que _identificar_origem le., Tentativa com a contagem limpa — isola o caso do limite de tentativas., _Req, tentar()
 
 ### Community 10 - "plugins"
 Cohesion: 0.22
 Nodes (8): plugins, rules, react/only-export-components, react/rules-of-hooks, $schema, oxc, typescript, warn
 
 ### Community 11 - "app-data.tsx"
-Cohesion: 0.08
-Nodes (39): Levantamento_impressões (planilha original), RightPanelProps, decommissionedPrinters, DEPARTMENT_PERIODS, departmentUsage, globalToner, monthlyUsage, printers (+31 more)
+Cohesion: 0.06
+Nodes (46): Levantamento_impressões (planilha original), public/data/monthly-report.json, public/data/printers.json, Arquivos de dados gerados são ignorados pelo git — gerar/apagar localmente nunca afeta o repositório, DepartmentBreakdown(), DepartmentBreakdownProps, DiscoveryResults(), DiscoveryResultsProps (+38 more)
 
 ### Community 12 - "graphify (knowledge graph tool)"
 Cohesion: 0.25
 Nodes (8): graphify (knowledge graph tool), graphify explain command, graphify path command, graphify query command, graphify update command, graphify-out/graph.json, graphify-out/GRAPH_REPORT.md, graphify-out/wiki/index.md
 
-### Community 15 - "NetworkView.tsx"
-Cohesion: 0.09
-Nodes (30): DiscoveryResults(), DiscoveryResultsProps, statusLabel(), adaptDiscovered(), FORM_VAZIO, formatarMomento(), MODOS, NetworkView() (+22 more)
+### Community 15 - "NotificationsView.tsx"
+Cohesion: 0.11
+Nodes (22): Modal(), ModalProps, FORM_VAZIO, formatarMomento(), FormState, ICONE_SEVERIDADE, NotificationsView(), abrirEnvio() (+14 more)
 
-### Community 20 - "theme.tsx"
-Cohesion: 0.07
-Nodes (35): Logo Elgin é redesenho à mão (IA sem acesso a imagens coladas no chat, só uploads), src/components/ (padrão com header-comment por arquivo), AlertsDonutCard(), AlertsDonutCardProps, BottomChartsProps, PagesConsumedCard(), TotalPrintsCard(), DemoDataBadge() (+27 more)
-
-### Community 21 - "Printer"
+### Community 20 - "cn"
 Cohesion: 0.06
-Nodes (46): AsyncIOScheduler, Printer, Etapa 4: identidade e (server, name), NAO ip — o Print Server permite varias…, PrinterCollector, Printer, Session, Converte SNMPResult em PrinterReading. Toner ausente vira NULL (a coluna e…, Coleta uma impressora e grava o resultado como PrinterReading. (+38 more)
+Nodes (44): DashboardPage(), TonerPage(), AlertsDonutCard(), AlertsDonutCardProps, BottomCharts(), BottomChartsProps, PagesConsumedCard(), TotalPrintsCard() (+36 more)
+
+### Community 21 - "printer_fleet.py"
+Cohesion: 0.08
+Nodes (27): PrinterCollector, PrinterReading, Session, Converte SNMPResult em PrinterReading. Toner ausente vira NULL (a coluna e…, Cenarios de teste disponiveis (fonte unica: snmp_mock.SCENARIOS)., Coleta uma impressora e grava o resultado como PrinterReading., Args: mode: "real" (SNMP de verdade), "mock" (cenario fixo) ou "fleet" (frota…, Deduz se a impressora e colorida — so um PALPITE inicial, usado para decidir a… (+19 more)
 
 ### Community 22 - "tests_collect_api.py"
 Cohesion: 0.67
@@ -237,12 +248,12 @@ Cohesion: 0.10
 Nodes (21): 10. Dependências e supply chain, 11. Performance e escalabilidade, 12. Testes, 13. Frontend, 14. LGPD / dados pessoais, 15. Observabilidade / auditoria / logs, 16. Backup / Disaster Recovery, 17. Threat Modeling (STRIDE) — resumo (+13 more)
 
 ### Community 28 - "printers.py"
-Cohesion: 0.07
-Nodes (46): create_printer(), get_printer(), get_printer_readings(), _inicio_da_janela(), list_printers(), list_printers_with_status(), monthly_report(), datetime (+38 more)
+Cohesion: 0.09
+Nodes (35): create_printer(), create_printer_reading(), get_printer(), get_printer_readings(), _inicio_da_janela(), list_printers(), list_printers_with_status(), get (+27 more)
 
 ### Community 29 - "SNMPClient"
-Cohesion: 0.13
-Nodes (11): Cliente SNMP para coleta de impressoras (Printer-MIB, RFC 3805)., Coleta status, contador de paginas e toners de uma impressora. Nunca levanta…, PS1: `if ($ip -match '^\\d')` — descarta 'N/A' e nomes de porta., ICMP ping, equivalente ao `New-Object ...Ping).Send($ip, 400)` do PS1. SNMP…, Escolhe os toners finais. PS1 colorida: um por cor (primeiro de cada grupo),…, GET de uma OCTET STRING., Envia um GET e devolve o primeiro varbind valido da resposta., SNMPv1 GET (PS1: Build-SnmpGet, version 0, PDU 0xA0). (+3 more)
+Cohesion: 0.08
+Nodes (23): parse_varbinds(), Decodifica bytes BER como inteiro sem sinal., Extrai a lista de varbinds de uma resposta SNMP. Percorre a estrutura completa…, Cliente SNMP para coleta de impressoras (Printer-MIB, RFC 3805)., Coleta status, contador de paginas e toners de uma impressora. Nunca levanta…, PS1: `if ($ip -match '^\\d')` — descarta 'N/A' e nomes de porta., ICMP ping, equivalente ao `New-Object ...Ping).Send($ip, 400)` do PS1. SNMP…, Retorna (candidatos, houve_resposta_snmp). (+15 more)
 
 ### Community 30 - "Operação em Produção"
 Cohesion: 0.11
@@ -252,57 +263,57 @@ Nodes (19): 1. Antes do primeiro deploy, 2. Instalar, 3. Dia a dia, 4. Diagnóst
 Cohesion: 0.25
 Nodes (8): 1. O projeto já está pronto para este deploy, 2. Variáveis de ambiente para configurar na Vercel, 3. Conectar o repositório e fazer o primeiro deploy, 4. Validar, 5. Depois do deploy — atualizar o CORS do backend, 6. Redeploy — quando o código mudar, 7. Resumo — Fase 12 concluída, Deploy do Frontend na Vercel (Fase 12)
 
-### Community 32 - "app/page.tsx"
-Cohesion: 0.08
-Nodes (19): HistoryPage(), DashboardPage(), PrintersPage(), TonerPage(), BottomCharts(), ComingSoon(), ComingSoonProps, HistoryMatrix() (+11 more)
-
-### Community 33 - "routes/auth.py"
-Cohesion: 0.11
-Nodes (28): change_own_password(), _identificar_origem(), login(), get, patch, post, Request, Session (+20 more)
-
-### Community 34 - "hash_password"
+### Community 32 - "PageHeader.tsx"
 Cohesion: 0.12
-Nodes (18): create_access_token(), hash_password(), Hash de senha e emissao/validacao do JWT. POR QUE PyJWT E NAO python-jose (Fase…, verify_password(), Fase 16 - trilha de auditoria administrativa. Cobre: criar/editar/excluir…, Fase 16 - limite de taxa em acoes de rede (discover/sync/coleta), alem do…, Etapa 12 - CRUD de impressoras contra o servidor rodando. Usa o banco REAL,…, Devolve (status, payload). (+10 more)
+Nodes (9): AlertsPage(), PrintersPage(), AlertsView(), AlertsViewProps, ComingSoon(), ComingSoonProps, PageHeader(), PageHeaderProps (+1 more)
 
-### Community 35 - "notifications.py"
-Cohesion: 0.10
-Nodes (31): Notification, SQLModel, Notificacoes internas (Fase 7). Por que uma tabela separada de `alerts`…, AlertRef, create_notifications(), list_notifications(), mark_all_as_read(), mark_as_read() (+23 more)
+### Community 33 - "models/user.py"
+Cohesion: 0.07
+Nodes (45): RBAC minimo (Fase 1). Tres papeis cobrem todas as rotas existentes hoje: -…, Role, _active_admin_count(), create_user(), delete_user(), _ensure_not_last_admin(), list_users(), delete (+37 more)
+
+### Community 34 - "User"
+Cohesion: 0.09
+Nodes (30): Fabrica de dependencia: exige que o usuario tenha (ou herde) um dos papeis…, require_roles(), True se o papel do usuario satisfaz qualquer um dos exigidos., User, get, Conta autenticada e seu papel — usado para decidir o que exibir/permitir., read_current_user(), get_scheduler_status() (+22 more)
+
+### Community 35 - "create_notifications"
+Cohesion: 0.09
+Nodes (27): AlertRef, create_notifications(), list_notifications(), mark_all_as_read(), mark_as_read(), _minha_ou_404(), NotificationCreate, NotificationResponse (+19 more)
 
 ### Community 36 - "import_historico_planilha.py"
-Cohesion: 0.15
-Nodes (18): _cell_value(), _e_cabecalho_de_site(), _e_linha_ip(), _e_linha_total(), importar_para_banco(), _ler_planilha(), LinhaImpressora, main() (+10 more)
+Cohesion: 0.14
+Nodes (20): Grava ou atualiza o total de UM mes de UMA impressora — chave e (printer_id,…, upsert_printer_monthly(), _cell_value(), _e_cabecalho_de_site(), _e_linha_ip(), _e_linha_total(), importar_para_banco(), _ler_planilha() (+12 more)
 
-### Community 37 - "types.ts"
-Cohesion: 0.08
-Nodes (38): AlertsPage(), AlertsView(), AlertsViewProps, PrinterDetailsModal(), PrinterDetailsModalProps, PrinterRanking(), PrinterRankingProps, RankedPrinter (+30 more)
+### Community 37 - "Printer"
+Cohesion: 0.12
+Nodes (21): HistoryPage(), HistoryMatrix(), HistoryMatrixProps, PrinterDetailsModalProps, PrinterRanking(), PrinterRankingProps, RankedPrinter, RankList() (+13 more)
 
 ### Community 38 - "ETAPA FINAL — FECHAMENTO DA AUDITORIA"
 Cohesion: 0.14
 Nodes (14): Cálculo do score geral, ETAPA FINAL — FECHAMENTO DA AUDITORIA, F0. Auditorias realizadas nesta etapa, F1. Áreas finalmente cobertas (antes NÃO VERIFICADO por orçamento, agora CONFIRMADO), F2. Achados de UX — resumo consolidado, F3. Achados de acessibilidade — resumo consolidado, F4. Segurança da API — `alerts.py` e `notifications.py` (fecha C14), F4b. Backend — reforço de `auth.py`/`collect.py`/`printers.py`, grep de segurança final, concorrência dos DELETE novos (+6 more)
 
-### Community 39 - "1. Desenvolvimento (local)"
-Cohesion: 0.10
-Nodes (21): 1. Desenvolvimento (local), 2. Produção, 3. Roteiro de teste em produção (amanhã), 4. Sinais de problema e como reagir, 5. Links e referências rápidas, Acesso local, Backup manual do banco, Como atualizar o sistema (+13 more)
+### Community 39 - "2. Produção"
+Cohesion: 0.17
+Nodes (12): 2. Produção, 3. Roteiro de teste em produção (amanhã), 4. Sinais de problema e como reagir, 5. Links e referências rápidas, Backup manual do banco, Como atualizar o sistema, Guia Rápido — PrinterControl, Logs (+4 more)
 
-### Community 40 - "tests_rbac.py"
-Cohesion: 0.24
-Nodes (12): check(), check_true(), _confere_rbac_do_frontend(), h(), main(), Fase 1 - Autenticacao, RBAC e protecao das rotas. Diferente dos demais…, O frontend tem a sua propria copia da hierarquia de papeis, em…, Cria um banco no formato ANTERIOR a Fase 1 (users sem role/is_active), roda a… (+4 more)
+### Community 40 - "Settings"
+Cohesion: 0.09
+Nodes (17): Config, field_validator, Um ambiente escrito errado nao pode cair no default em silencio:…, Fail-fast: producao nao sobe com simulacao ligada (Fase 9). O risco concreto e…, Impede que um ambiente de producao suba silenciosamente com o secret de…, Aceita "https://a.com, https://b.com" alem da lista JSON. Sem isto,…, Mesmo tratamento de _cors_lista: aceita "127.0.0.1, ::1" alem de JSON. A…, Avisa (nao derruba) sobre a configuracao de proxy confiavel. Nao levanta… (+9 more)
 
 ### Community 41 - "layout.tsx"
 Cohesion: 0.29
 Nodes (5): ibmPlexMono, metadata, publicSans, sourceSerif, Providers()
 
-### Community 42 - "snmp.py"
-Cohesion: 0.15
-Nodes (13): SNMP Collector para impressoras. Porte direto da funcao Get-TonerSNMP de…, Decodifica bytes BER como inteiro sem sinal., Retorna (candidatos, houve_resposta_snmp)., GETBULK das tres colunas de uma vez (PS1: Build-SnmpGetBulk)., Fallback: um GET por indice (PS1: laco 1..20 com 3 falhas seguidas)., Aplica os filtros do PS1 e monta um candidato a toner., Cor pela descricao; se nao identificar e for colorida, usa indice % 4., GET de um valor numerico (INTEGER, Counter32, Gauge32, TimeTicks). (+5 more)
+### Community 42 - "Printer"
+Cohesion: 0.20
+Nodes (12): Printer, PrinterMonthly, PrinterReading, SQLModel, Etapa 4: identidade e (server, name), NAO ip — o Print Server permite varias…, Calculo de paginas por mes, compartilhado entre tres consumidores (Fase 12): -…, reading(), gravar() (+4 more)
 
-### Community 43 - "DecommissionedList.tsx"
-Cohesion: 0.60
-Nodes (4): DecommissionedList(), DecommissionedListProps, formatarData(), DecommissionedPrinter
+### Community 43 - "sync_server"
+Cohesion: 0.21
+Nodes (16): delete_server(), discover_server(), _get_or_404(), _marcar_resultado(), delete, post, RecursoId, Session (+8 more)
 
 ### Community 44 - "FakeAgent"
-Cohesion: 0.11
-Nodes (15): parse_varbinds(), Decodifica um OID BER para notacao pontuada., Extrai a lista de varbinds de uma resposta SNMP. Percorre a estrutura completa…, Le um TLV BER. Retorna (tag, length, value_start, next_pos)., _read_oid(), _read_tlv(), check(), FakeAgent (+7 more)
+Cohesion: 0.12
+Nodes (13): Decodifica um OID BER para notacao pontuada., Le um TLV BER. Retorna (tag, length, value_start, next_pos)., _read_oid(), _read_tlv(), check(), FakeAgent, LocalSNMPClient, main() (+5 more)
 
 ### Community 45 - "PLANO DE IMPLEMENTAÇÃO — ESCANEAR REDE REAL"
 Cohesion: 0.05
@@ -317,52 +328,52 @@ Cohesion: 0.22
 Nodes (9): `GET /api/printers`, `GET /api/printers/monthly-report`, `GET /api/printers/{printer_id}`, `GET /api/printers/{printer_id}/readings`, `GET /api/printers/with-status`, Impressoras, `PATCH /api/printers/{printer_id}`, `POST /api/printers` (+1 more)
 
 ### Community 48 - "Guia de Uso do PrinterControl"
-Cohesion: 0.13
-Nodes (14): Alertas — FUNCIONAL na leitura; PARCIAL nas ações, Como acessar, Configurações, Usuários e Integrações — COMING SOON, Dashboard — FUNCIONAL/PARCIAL, Exportar CSV — FUNCIONAL, Guia de Uso do PrinterControl, Histórico — PARCIAL, Interpretação dos dados (+6 more)
+Cohesion: 0.10
+Nodes (20): Acessar via web — PARCIAL, Adicionar impressora — AUSENTE/PARCIAL, Alertas — FUNCIONAL na leitura; PARCIAL nas ações, Ações, Como acessar, Configurações — COMING SOON, Configurações, Usuários e Integrações — COMING SOON, Dashboard — FUNCIONAL/PARCIAL (+12 more)
 
 ### Community 49 - "ConfigurarAmbiente.ps1"
 Cohesion: 0.31
 Nodes (4): Aviso(), Info(), Perguntar-Campo(), Perguntar-SimNao()
 
-### Community 50 - "PrinterReading"
-Cohesion: 0.12
-Nodes (13): PrinterMonthly, PrinterReading, SQLModel, gravar(), Fase 17 - pages_from_readings() soma saltos positivos entre leituras…, Uma leitura por valor, em ordem, minutos entre elas., Fase 12 - relatorio mensal: mescla PrinterMonthly (meses fechados, via…, Fase 12 - fechamento mensal automatico do scheduler. Cobre: os dois jobs novos… (+5 more)
+### Community 50 - "scheduler.py"
+Cohesion: 0.13
+Nodes (22): AsyncIOScheduler, monthly_report(), Contagem mensal por impressora, por mes e por departamento. Fase 12: mes ja…, month_bounds(), month_label(), month_period(), pages_from_readings(), datetime (+14 more)
 
 ### Community 51 - "useAppData"
 Cohesion: 0.09
-Nodes (35): react, ReportsPage(), AppShell(), AuthGate(), DepartmentBreakdown(), DepartmentBreakdownProps, Modal(), ModalProps (+27 more)
+Nodes (34): react, ReportsPage(), AppShell(), AuthGate(), Login(), MustChangePasswordGate(), SettingsView(), trocarSenha() (+26 more)
 
-### Community 52 - "preferences.tsx"
-Cohesion: 0.29
-Nodes (7): ESCALAS, ler(), Preferences, PreferencesContext, PreferencesContextValue, PreferencesProvider(), PREFERENCIAS_PADRAO
+### Community 52 - "theme.tsx"
+Cohesion: 0.27
+Nodes (8): lerPreferencia(), resolver(), sistemaEscuro(), Theme, ThemeContext, ThemeContextValue, ThemePreference, ThemeProvider()
 
 ### Community 53 - "Guia do Desenvolvedor"
 Cohesion: 0.13
 Nodes (15): Backend, Banco, Comandos do frontend, Escanear Rede (implementado), Guia do Desenvolvedor, Já resolvido — não reabra, O que não executar em produção sem autorização, Print Server (+7 more)
 
 ### Community 54 - "api.ts"
-Cohesion: 0.06
-Nodes (48): FORM_VAZIO, formatarMomento(), FormState, ICONE_SEVERIDADE, NotificationsView(), abrirEnvio(), enviar(), marcarComoLida() (+40 more)
+Cohesion: 0.05
+Nodes (65): DecommissionedList(), DecommissionedListProps, formatarData(), adaptDiscovered(), FORM_VAZIO, formatarMomento(), MODOS, NetworkView() (+57 more)
 
-### Community 55 - "Role"
-Cohesion: 0.10
-Nodes (29): str, RBAC minimo (Fase 1). Tres papeis cobrem todas as rotas existentes hoje: -…, Role, _active_admin_count(), create_user(), delete_user(), _ensure_not_last_admin(), list_users() (+21 more)
-
-### Community 56 - "Settings"
-Cohesion: 0.15
-Nodes (9): Config, Fail-fast: producao nao sobe com simulacao ligada (Fase 9). O risco concreto e…, Impede que um ambiente de producao suba silenciosamente com o secret de…, Producao exige origens proprias e explicitas (Fase 10). Tres recusas, todas por…, Settings, Settings de producao valida, sobrescrevendo so o que o teste investiga., settings_de_producao(), BaseSettings (+1 more)
-
-### Community 57 - "MockSNMPScenarios"
+### Community 55 - "Handoff: PrinterControl — Glassmorphism UI System"
 Cohesion: 0.12
-Nodes (12): MockSNMPScenarios, SNMP responde o contador, mas nao expoe a tabela de consumiveis., Monocromatica com toner em 5%., Colorida com ciano critico (18%) e os demais normais., Contador reiniciado (troca de placa/formatador): page_count baixo., Cenarios de teste. Cada metodo devolve um SNMPResult completo., Monocromatica saudavel., Colorida saudavel (4 toners, ordem C, M, Y, K). (+4 more)
+Nodes (16): About the Design Files, Background aurora, Base tokens, Design Tokens (critical — read this first), Fidelity, Files, Glassmorphism tokens, Handoff: PrinterControl — Glassmorphism UI System (+8 more)
+
+### Community 56 - "login"
+Cohesion: 0.18
+Nodes (14): change_own_password(), _identificar_origem(), _ip_da_conexao(), login(), patch, post, Request, Session (+6 more)
+
+### Community 57 - "SNMPResult"
+Cohesion: 0.08
+Nodes (21): Simulador de frota — APENAS PARA TESTE LOCAL. Diferenca para snmp_mock.py: la…, MockSNMPScenarios, Agente SNMP simulado — APENAS PARA TESTE LOCAL. Existe porque a maquina de…, SNMP responde o contador, mas nao expoe a tabela de consumiveis., Monocromatica com toner em 5%., Colorida com ciano critico (18%) e os demais normais., Contador reiniciado (troca de placa/formatador): page_count baixo., Cenarios de teste. Cada metodo devolve um SNMPResult completo. (+13 more)
 
 ### Community 58 - "auth.ts"
-Cohesion: 0.11
-Nodes (28): ACTIVE_NODES, features, Login(), handleSubmit(), LoginProps, NETWORK_LINKS, NETWORK_NODES, FormState (+20 more)
+Cohesion: 0.12
+Nodes (24): ACTIVE_NODES, features, handleSubmit(), LoginProps, NETWORK_LINKS, NETWORK_NODES, salvarPerfil(), api (+16 more)
 
 ### Community 60 - "alert_engine.py"
-Cohesion: 0.15
-Nodes (20): Alert, _active(), evaluate_reading(), _notify_all_active_users(), Session, Alertas automaticos (Etapa 8A, re-alerta de toner na Fase 11). Roda logo apos…, Fan-out de uma Notification por usuario ativo (Fase 11) — e o canal "site" dos…, Avalia uma leitura e sincroniza os alertas da impressora. Faz commit ao final.… (+12 more)
+Cohesion: 0.14
+Nodes (23): Alert, Alert, SQLModel, TonerHistory, Notification, SQLModel, Notificacoes internas (Fase 7). Por que uma tabela separada de `alerts`…, _active() (+15 more)
 
 ### Community 61 - "Print Server"
 Cohesion: 0.22
@@ -380,9 +391,9 @@ Nodes (12): Any, AuditLog, SQLModel, Trilha de auditoria administrativa (Fase 16
 Cohesion: 0.11
 Nodes (18): Como ler, D10 — O frontend não tem nenhum teste automatizado, D11 — O painel cai em dados de demonstração quando a API não responde, D12 — Datas ingênuas no servidor, hora do navegador no cliente, D13 — `/health` existe, mas nada o consulta, D14 — `httpx` sem teto de versão quebrava todas as suítes que usam `TestClient`, D15 — `requirements.txt` está em UTF-16, D16 — `backend/.env` em produção estava configurado como `demo`/`mock`, não `production` (+10 more)
 
-### Community 65 - "config.py"
-Cohesion: 0.09
-Nodes (32): discover_printers(), DiscoveredPrinter, _escapar_powershell(), _mock_discover(), PrintServerError, Exception, Camada de Print Server (Etapa 3). Reproduz a descoberta de impressoras do…, Uma linha do que Get-Printer + Get-PrinterPort devolveriam, combinadas. (+24 more)
+### Community 65 - "services/print_server.py"
+Cohesion: 0.06
+Nodes (37): PrintServer, SQLModel, str, Print Server como entidade (Fase 4). Ate aqui um Print Server existia de duas…, Modos aceitos, iguais aos de `settings.print_server_mode`., ServerMode, discover_printers(), DiscoveredPrinter (+29 more)
 
 ### Community 66 - "Autenticação"
 Cohesion: 0.29
@@ -396,9 +407,9 @@ Nodes (3): Matriz de Funcionalidades, Itens que os documentos antigos listavam e
 Cohesion: 0.25
 Nodes (8): 10 perguntas respondidas objetivamente, 41. Scores, veredito e roadmap, Matriz de risco (resumo), Scores por categoria (0–10, com base apenas no que foi verificável), Seção de falsos positivos (obrigatória), Seção "não verificado" (obrigatória), Top 10 pontos fortes, Top 10 problemas
 
-### Community 69 - "UsersView"
-Cohesion: 0.18
-Nodes (10): formatarData(), UsersView(), abrirEdicao(), confirmarAtivacao(), confirmarExclusao(), salvar(), validar(), createUser() (+2 more)
+### Community 69 - "UsersView.tsx"
+Cohesion: 0.11
+Nodes (22): FORM_VAZIO, formatarData(), FormState, UsersView(), abrirEdicao(), confirmarAtivacao(), confirmarExclusao(), salvar() (+14 more)
 
 ### Community 70 - "Mapa da API"
 Cohesion: 0.33
@@ -452,9 +463,9 @@ Nodes (6): G1. LGPD — inventário técnico de dados pessoais, G2. CVE scan —
 Cohesion: 0.17
 Nodes (11): File Structure, Glassmorphism Redesign — Phase 1 (Dashboard) Implementation Plan, Global Constraints, Roadmap (unchanged from Phase 0's plan), Self-Review, Task 1: Wire `PageHeader` into the Dashboard route, Task 2: Status dot semantics — `soft-pulse` keyframe + `PrinterStatusBadge` token fix, Task 3: Vitals strip (`VitalsStrip`, replaces `StatCards` + `AlertBanner`) (+3 more)
 
-### Community 83 - "dependencies.py"
-Cohesion: 0.10
-Nodes (14): get_session(), Session, Dependencias compartilhadas pelas rotas. Autorizacao (Fase 1) fica CENTRALIZADA…, Fabrica de dependencia: exige que o usuario tenha (ou herde) um dos papeis…, Usuario dono do JWT do header Authorization. 401 se ausente/invalido. O usuario…, `require_user` + bloqueio de conta com troca de senha pendente. Toda rota do…, require_active_user(), require_roles() (+6 more)
+### Community 83 - "tests_rbac.py"
+Cohesion: 0.24
+Nodes (12): check(), check_true(), _confere_rbac_do_frontend(), h(), main(), Fase 1 - Autenticacao, RBAC e protecao das rotas. Diferente dos demais…, O frontend tem a sua propria copia da hierarquia de papeis, em…, Cria um banco no formato ANTERIOR a Fase 1 (users sem role/is_active), roda a… (+4 more)
 
 ### Community 84 - "6. Subir o sistema em produção hoje"
 Cohesion: 0.22
@@ -472,29 +483,37 @@ Nodes (7): 1. O que o sistema faz, 8. Onde está o resto da documentação, Como
 Cohesion: 0.33
 Nodes (6): 5. Modo real x modo simulado, e os riscos, As duas camadas de proteção, Como o sistema decide entre real e simulado, O problema em uma frase, O risco mais grave: sincronizar em modo simulado, Riscos corrigidos na Fase 10 (24/08/2026)
 
-### Community 88 - "tests_production.py"
+### Community 88 - "notify_alert"
+Cohesion: 0.21
+Nodes (12): get_alert(), list_alerts(), notify_alert(), get, patch, post, RecursoId, Session (+4 more)
+
+### Community 89 - "1. Desenvolvimento (local)"
 Cohesion: 0.22
-Nodes (4): producao(), Fase 10 - Preparacao para producao corporativa. Cobre o que protege a exposicao…, Sobe um processo separado e diz se a configuracao foi aceita., subir_com_ambiente()
+Nodes (9): 1. Desenvolvimento (local), Acesso local, Credenciais de teste, Modo demo vs modo real (frontend), Pré-requisitos, Subir o backend, Subir o frontend, Testes em desenvolvimento (+1 more)
 
 ### Community 90 - "2. Como o sistema é montado"
 Cohesion: 0.50
 Nodes (4): 2. Como o sistema é montado, O "crachá" (token), O que cada tecnologia é, em uma linha, Por que duas peças, e não uma
 
-### Community 91 - "discovery.py"
+### Community 91 - "webhook_notifier.py"
+Cohesion: 0.32
+Nodes (7): _build_adaptive_card(), Notificacao de alerta critico via webhook (Etapa 6). Equivalente a Send-…, Envia o Adaptive Card ao webhook configurado. Nunca levanta excecao — retorna…, Host da URL, para logar sem expor path/assinatura., Mesmo corpo de Send-AlertaWebhook (Main.ps1:1319): titulo/cor conforme manual…, _safe_host(), send_toner_alert_webhook()
+
+### Community 93 - "tests_fleet.py"
+Cohesion: 0.12
+Nodes (12): _base_page_count(), _increment(), profile_for(), Perfil deterministico da impressora: online | offline | snmp_mudo | baixo |…, Contador inicial plausivel para uma impressora que nunca foi lida., Paginas impressas entre duas coletas — fixo por impressora, 5 a 124., Nivel do toner: base do perfil + desvio deterministico por impressora/cor,…, _toner() (+4 more)
+
+### Community 94 - "create_db_and_tables"
+Cohesion: 0.07
+Nodes (27): create_db_and_tables(), _finish_printer_migration(), _migrate_alert_type(), _migrate_alert_value(), _migrate_child_foreign_keys(), _migrate_print_servers(), _migrate_printer_schema(), _migrate_user_login_fields() (+19 more)
+
+### Community 95 - "collect_printer"
+Cohesion: 0.21
+Nodes (13): collect_fleet(), collect_printer(), CollectRequest, CollectResponse, FleetCollectResponse, BaseModel, post, RecursoId (+5 more)
+
+### Community 96 - "tests_print_servers.py"
 Cohesion: 0.39
-Nodes (8): _empty_result(), EnrichedDiscoveredPrinter, _is_color(), _is_label(), _normalize_ip(), DiscoveredPrinter, Enriquecimento transitório de filas descobertas com telemetria SNMP., _result_for_ip()
-
-### Community 93 - "models/user.py"
-Cohesion: 0.09
-Nodes (29): Alert, SQLModel, TonerHistory, SQLModel, get_alert(), list_alerts(), notify_alert(), get (+21 more)
-
-### Community 94 - "database.py"
-Cohesion: 0.08
-Nodes (32): create_db_and_tables(), _finish_printer_migration(), _migrate_alert_type(), _migrate_alert_value(), _migrate_print_servers(), _migrate_printer_schema(), _migrate_reading_uptime(), _migrate_user_login_fields() (+24 more)
-
-### Community 95 - "collect.py"
-Cohesion: 0.14
-Nodes (17): collect_fleet(), collect_printer(), CollectRequest, CollectResponse, FleetCollectResponse, get_scheduler_status(), list_scenarios(), BaseModel (+9 more)
+Nodes (7): check(), check_true(), h(), main(), Fase 4 - Registro de Print Servers e operacao por servidor. Como…, Monta um banco no formato ANTERIOR a Fase 4 (printers sem print_server_id, sem…, _testa_migracao_legada()
 
 ### Community 97 - "Scope decision"
 Cohesion: 0.22
@@ -504,69 +523,73 @@ Nodes (8): Follow-ups (not done here), Glassmorphism Redesign — Phase 6 (remai
 Cohesion: 0.25
 Nodes (7): Glassmorphism Redesign — Phase 3 (Suprimentos / Toner) Implementation Plan, Roadmap, Task 1: Extract `ScanBar`, Task 2: Page header on `/toner`, Task 3: Severity strip replaces the summary grid, Task 4: Table per handoff, Task 5: Verify
 
-### Community 99 - "seed.py"
+### Community 99 - "tests_webhook.py"
 Cohesion: 0.29
-Nodes (9): migrar_dominio(), mostrar_senha_uma_vez(), obter_senha_admin(), Session, Semeia o banco: contas iniciais + a frota de printers_data.json. SENHAS (Fase…, Imprime a senha em destaque. Unica vez que ela aparece em texto claro., Renomeia TODAS as contas `...@example.com` para `...@elgin.com.br`. Uso unico,…, Devolve (senha, foi_gerada). `foi_gerada` decide se a senha precisa ser… (+1 more)
+Nodes (4): make_offline_reading(), make_reading(), PrinterReading, Etapa 6 - webhook de alerta critico de toner. Banco SQLite temporario e ISOLADO…
 
 ### Community 100 - "C23. Terceiro passe — Frontend real (token/XSS/CSRF) e execução direta dos testes"
 Cohesion: 0.40
 Nodes (5): C23.1 Frontend — armazenamento de token, XSS, CSRF (corrige C1/C2-C3 de "NÃO VERIFICADO" para CONFIRMADO), C23.2 Execução real dos testes (corrige C19 com evidência de execução, não só inspeção estrutural), C23.3 Ajuste de score, C23.4 Seção "não verificado" — fecho, C23. Terceiro passe — Frontend real (token/XSS/CSRF) e execução direta dos testes
 
-### Community 101 - "field_validator"
-Cohesion: 0.29
-Nodes (4): field_validator, Aceita "https://a.com, https://b.com" alem da lista JSON. Sem isto,…, Normaliza um DATABASE_URL sqlite relativo (ex.: sqlite:///./x.db) para um…, Um ambiente escrito errado nao pode cair no default em silencio:…
+### Community 101 - "RateLimiter"
+Cohesion: 0.15
+Nodes (10): RateLimiter, Limite de tentativas para o login (Fase 10). POR QUE existe --------------…, Consome credito. So a FALHA conta — login certo nao gasta nada., Zera as contagens apos um login BEM-SUCEDIDO. Sem isto, quem erra a senha…, Esvazia tudo. Existe para os testes; nao ha rota que chegue aqui., Veredito de uma checagem. `retry_after` so faz sentido quando bloqueado., Janela deslizante em memoria, protegida por lock. O lock existe porque o…, Descarta o que saiu da janela e devolve o que restou. (+2 more)
 
 ### Community 102 - "unhandled_exception_handler"
 Cohesion: 0.40
-Nodes (5): Exception, Request, Erro nao tratado: o detalhe vai para o log do servidor, o cliente recebe apenas…, unhandled_exception_handler(), exception_handler
+Nodes (5): Request, Erro nao tratado: o detalhe vai para o log do servidor, o cliente recebe apenas…, unhandled_exception_handler(), Exception, exception_handler
 
 ### Community 103 - "Glassmorphism Redesign — Phases 4 & 5 (Alertas, Relatórios)"
 Cohesion: 0.33
 Nodes (5): Deliberate deviation, Glassmorphism Redesign — Phases 4 & 5 (Alertas, Relatórios), Phase 4 — Alertas, Phase 5 — Relatórios, Roadmap
 
-### Community 105 - "public/data/monthly-report.json"
-Cohesion: 0.67
-Nodes (3): public/data/monthly-report.json, public/data/printers.json, Arquivos de dados gerados são ignorados pelo git — gerar/apagar localmente nunca afeta o repositório
+### Community 105 - "scheduler_status"
+Cohesion: 0.33
+Nodes (6): health_check(), get, Saude, identificacao do ambiente (Fase 9) e diagnostico (Fase 10). O ambiente…, read_root(), Estado atual, para o endpoint de diagnostico., scheduler_status()
 
-### Community 106 - "tests_profile.py"
-Cohesion: 0.48
-Nodes (6): check(), check_true(), h(), login(), main(), Fase 8 - Perfil proprio e troca de senha. Como as demais suites desde a Fase 1,…
+### Community 106 - "update_server"
+Cohesion: 0.33
+Nodes (5): PrintServerUpdate, patch, `host` fica de fora de proposito: ele e a chave natural que aparece em…, Altera rotulo, modo e ativacao. `host` nao muda (ver PrintServerUpdate)., update_server()
 
-### Community 107 - "ServerMode"
-Cohesion: 0.67
-Nodes (3): str, Modos aceitos, iguais aos de `settings.print_server_mode`., ServerMode
+### Community 111 - "create_server"
+Cohesion: 0.32
+Nodes (5): create_server(), PrintServerCreate, field_validator, Registra um Print Server. O host e unico — e a chave natural., Recusa no cadastro o que a camada de execucao ja recusaria. O host e…
+
+### Community 112 - "hash_password"
+Cohesion: 0.10
+Nodes (18): create_access_token(), hash_password(), Hash de senha e emissao/validacao do JWT. POR QUE PyJWT E NAO python-jose (Fase…, Assina o JWT. Quem chama passa `sub` (e-mail) e `ver` (User.token_version) — os…, Fase 16 - trilha de auditoria administrativa. Cobre: criar/editar/excluir…, Fase 12 - relatorio mensal: mescla PrinterMonthly (meses fechados, via…, Fase 16 - limite de taxa em acoes de rede (discover/sync/coleta), alem do…, Etapa 12 - CRUD de impressoras contra o servidor rodando. Usa o banco REAL,… (+10 more)
 
 ### Community 113 - "Migração: Cloudflare Tunnel + Vercel → VM Windows Server própria"
 Cohesion: 0.17
 Nodes (11): Atenção pré-existente (não é novidade desta migração), Backend, Caddy no Windows Server, Contexto, Corte (baixo risco, com fallback), Decisão central, Domínio, Firewall do Windows Server (+3 more)
 
-### Community 125 - "main.py"
-Cohesion: 0.23
-Nodes (9): health_check(), lifespan(), get, Saude, identificacao do ambiente (Fase 9) e diagnostico (Fase 10). O ambiente…, read_root(), ping(), get, shutdown_scheduler() (+1 more)
+### Community 114 - "Correção do acesso por IP em desenvolvimento"
+Cohesion: 0.40
+Nodes (4): Correção do acesso por IP em desenvolvimento, Design — 2026-09-08, Operação e critérios de aceite, Roadmap e backlog desta correção
 
-### Community 126 - "Ações"
-Cohesion: 0.33
-Nodes (6): Acessar via web — PARCIAL, Adicionar impressora — AUSENTE/PARCIAL, Ações, Configurações — COMING SOON, Impressoras — FUNCIONAL/PARCIAL, Imprimir página de teste — SIMULADA
+### Community 125 - "database.py"
+Cohesion: 0.09
+Nodes (28): get_session(), _migrate_reading_uptime(), Etapa 7: adiciona printer_readings.uptime em bancos criados antes desta etapa.…, _sqlite_pragmas(), Session, rate_limited_action(), Dependencias compartilhadas pelas rotas. Autorizacao (Fase 1) fica CENTRALIZADA…, `require_user` + bloqueio de conta com troca de senha pendente. Toda rota do… (+20 more)
 
 ## Knowledge Gaps
-- **533 isolated node(s):** `$schema`, `typescript`, `oxc`, `react/rules-of-hooks`, `warn` (+528 more)
+- **552 isolated node(s):** `Config`, `Config`, `ModalProps`, `ServerFormState`, `FORM_VAZIO` (+547 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **21 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `User` connect `User` to `routes/auth.py`, `hash_password`, `notifications.py`, `seed.py`, `tests_rbac.py`, `tests_login_hardening.py`, `tests_profile.py`, `alert_engine.py`, `record`, `dependencies.py`, `PrinterReading`, `Printer`, `Role`, `printers.py`, `models/user.py`, `database.py`, `collect.py`?**
-  _High betweenness centrality (0.043) - this node is a cross-community bridge._
-- **Why does `SNMPClient` connect `SNMPClient` to `enrich_discovered_printers`, `snmp.py`, `FakeAgent`, `Printer`, `discovery.py`, `alert_engine.py`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **Why does `Printer` connect `Printer` to `config.py`, `seed.py`, `import_historico_planilha.py`, `User`, `tests_rbac.py`, `alert_engine.py`, `PrinterReading`, `printers.py`, `models/user.py`, `database.py`, `collect.py`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
-- **Are the 45 inferred relationships involving `User` (e.g. with `rate_limited_action()` and `require_active_user()`) actually correct?**
-  _`User` has 45 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 23 inferred relationships involving `Printer` (e.g. with `_finish_printer_migration()` and `notify_alert()`) actually correct?**
-  _`Printer` has 23 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 2 inferred relationships involving `SNMPClient` (e.g. with `PrinterCollector` and `FakeAgent`) actually correct?**
-  _`SNMPClient` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `$schema`, `typescript`, `oxc` to the rest of the system?**
-  _533 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `User` connect `User` to `tests_qa_findings.py`, `tests_environment.py`, `servers.py`, `tests_login_hardening.py`, `printers.py`, `models/user.py`, `create_notifications`, `Printer`, `sync_server`, `login`, `alert_engine.py`, `record`, `tests_rbac.py`, `notify_alert`, `create_db_and_tables`, `collect_printer`, `tests_print_servers.py`, `tests_webhook.py`, `update_server`, `tests_login_username.py`, `create_server`, `hash_password`, `database.py`?**
+  _High betweenness centrality (0.145) - this node is a cross-community bridge._
+- **Why does `create_server()` connect `create_server` to `User`, `servers.py`, `sync_server`, `app-data.tsx`, `collect_printer`, `record`?**
+  _High betweenness centrality (0.130) - this node is a cross-community bridge._
+- **Why does `PrintServer` connect `app-data.tsx` to `api.ts`, `create_server`?**
+  _High betweenness centrality (0.129) - this node is a cross-community bridge._
+- **Are the 46 inferred relationships involving `User` (e.g. with `rate_limited_action()` and `require_active_user()`) actually correct?**
+  _`User` has 46 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 3 inferred relationships involving `SNMPClient` (e.g. with `.collect_and_save()` and `.__init__()`) actually correct?**
+  _`SNMPClient` has 3 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `Config`, `Config`, `ModalProps` to the rest of the system?**
+  _552 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `package.json` be split into smaller, more focused modules?**
+  _Cohesion score 0.0625 - nodes in this community are weakly interconnected._

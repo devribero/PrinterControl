@@ -45,7 +45,7 @@ import {
   type ApiDiscoveryResponse,
   type PrintServerUpdateInput,
 } from "../lib/api";
-import { adaptPrintServer, adaptSyncResult } from "../lib/adaptApi";
+import { adaptPrintServer, adaptSyncResult, parseApiDate } from "../lib/adaptApi";
 import { useApiErrorReporter } from "../lib/apiErrors";
 import { useAppData } from "../lib/app-data";
 import { useToast } from "../lib/toast";
@@ -80,8 +80,11 @@ function adaptDiscovered(data: ApiDiscoveryResponse): DiscoveredPrinter[] {
 
 function formatarMomento(iso: string | null): string {
   if (!iso) return "nunca";
-  const data = new Date(iso);
-  if (Number.isNaN(data.getTime())) return "desconhecido";
+  // parseApiDate e nao `new Date` (QA-09): o backend serializa UTC sem
+  // fuso, e `new Date` de uma string assim assume hora LOCAL — em
+  // America/Sao_Paulo isso adiantava todo horario exibido em 3h.
+  const data = parseApiDate(iso);
+  if (!data) return "desconhecido";
   return data.toLocaleString("pt-BR", {
     day: "2-digit",
     month: "2-digit",

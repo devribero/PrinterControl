@@ -10,6 +10,7 @@ from app.dependencies import require_active_user, require_user
 from app.models.user import User
 from app.schemas.user import (
     PasswordChange,
+    PasswordChangeResponse,
     ProfileUpdate,
     TokenResponse,
     UserLogin,
@@ -54,17 +55,37 @@ def _identificar_origem(request: Request) -> str:
     """
     IP de origem da requisicao, para a contagem por IP.
 
-    `X-Forwarded-For` so e lido com TRUST_PROXY_HEADERS=true: sem um proxy
-    de confianca na frente, esse cabecalho e escolhido pelo cliente, e
-    confiar nele permitiria trocar de identidade a cada tentativa —
-    exatamente o que o limite existe para impedir.
+    `X-Forwarded-For` e escolhido pelo cliente. Ler esse cabecalho de quem
+    quer que seja permite trocar de identidade a cada tentativa e zerar a
+    contagem por IP — exatamente o que o limite existe para impedir (QA-10:
+    sete tentativas com um XFF diferente a cada chamada nao chegavam ao 429
+    que cinco tentativas honestas provocavam).
+
+    Por isso a leitura exige DUAS condicoes, nao mais so a primeira:
+
+      1. TRUST_PROXY_HEADERS=true — ha um proxy na frente;
+      2. a CONEXAO ter chegado de um endereco em TRUSTED_PROXY_IPS.
+
+    A (2) e o que faltava. O cabecalho passa a ser aceito so quando quem o
+    entregou e o proxy conhecido; um cliente que alcance a porta do backend
+    por fora e identificado pelo IP real da conexao, invente ele o cabecalho
+    que quiser.
+
+    TRUSTED_PROXY_IPS vazio com TRUST_PROXY_HEADERS=true mantem o
+    comportamento antigo, para nao derrubar um deploy existente no meio de
+    um upgrade — mas o startup registra um aviso (ver config.py).
     """
-    if settings.trust_proxy_headers:
+    if settings.trust_proxy_headers and settings.proxy_confiavel(_ip_da_conexao(request)):
         encaminhado = request.headers.get("x-forwarded-for", "")
         if encaminhado:
             # O primeiro da lista e o cliente original; o resto sao proxies.
             return encaminhado.split(",")[0].strip()
 
+    return _ip_da_conexao(request)
+
+
+def _ip_da_conexao(request: Request) -> str:
+    """IP do peer TCP — o unico que o cliente nao escolhe."""
     return request.client.host if request.client else "desconhecido"
 
 
@@ -158,7 +179,7 @@ def login(
     # e o que faz require_user/decode_token nao precisarem saber que
     # username existe. Ver models/user.py (User.username) para o resto da
     # decisao.
-    access_token = create_access_token(data={"sub": user.email})
+    access_token = create_access_token(data={"sub": user.email, "ver": user.token_version})
     return TokenResponse(access_token=access_token, user=UserResponse.model_validate(user))
 
 
@@ -192,7 +213,7 @@ def update_current_user(
     return UserResponse.model_validate(user)
 
 
-@router.post("/change-password", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/change-password", response_model=PasswordChangeResponse)
 def change_own_password(
     data: PasswordChange,
     session: Session = Depends(get_session),
@@ -206,11 +227,16 @@ def change_own_password(
     alcancar para se destrancar — a outra e GET /me. Bloquear esta rota
     tambem deixaria a conta sem saida.
 
-    LIMITACAO CONHECIDA: o JWT e stateless e nao guarda versao de senha,
-    entao tokens emitidos antes desta troca continuam validos ate expirarem.
-    Invalidar sessoes antigas exigiria um campo de versao no usuario e uma
-    checagem em require_user — fora do escopo desta fase, registrado aqui
-    para nao virar surpresa.
+    Encerra TODAS as outras sessoes da conta (QA-04): `token_version` sobe
+    um, e require_user passa a recusar qualquer token emitido antes desta
+    chamada. Era a limitacao conhecida ate aqui — o JWT e stateless, e sem
+    esse contador trocar a senha nao tirava de circulacao o token de quem ja
+    estivesse dentro, que e justamente o motivo pelo qual se troca a senha
+    as pressas.
+
+    Quem trocou a senha tambem perde o proprio token: a resposta devolve um
+    novo em `access_token`, para o painel substituir o antigo sem obrigar um
+    novo login.
     """
     if not verify_password(data.current_password, user.password_hash):
         # 400, e nem 401 nem 403. A sessao e valida e tem permissao; o que
@@ -234,5 +260,15 @@ def change_own_password(
     # de que a conta deixou de estar so em posse de quem a criou/resetou.
     # Unico ponto do sistema que desliga esta flag.
     user.must_change_password = False
+    # QA-04: derruba todas as sessoes abertas com a senha ANTIGA.
+    user.token_version += 1
     session.add(user)
     session.commit()
+    session.refresh(user)
+
+    # Token novo para quem acabou de trocar. Sem isto a propria pessoa seria
+    # deslogada pela correcao — o token que ela esta usando agora tambem foi
+    # emitido com a versao antiga.
+    return PasswordChangeResponse(
+        access_token=create_access_token(data={"sub": user.email, "ver": user.token_version})
+    )

@@ -21,6 +21,7 @@ from app.dependencies import require_active_user, require_admin
 from app.models.alert import Alert
 from app.models.notification import SEVERITIES, Notification
 from app.models.user import User
+from app.schemas.common import RecursoId
 
 router = APIRouter(
     prefix="/notifications",
@@ -189,7 +190,7 @@ def unread_count(
 
 @router.patch("/{notification_id}/read", response_model=NotificationResponse)
 def mark_as_read(
-    notification_id: int,
+    notification_id: RecursoId,
     session: Session = Depends(get_session),
     user: User = Depends(require_active_user),
 ):

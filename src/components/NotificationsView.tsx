@@ -45,7 +45,7 @@ import {
   markNotificationRead,
   type ApiUser,
 } from "../lib/api";
-import { adaptNotification } from "../lib/adaptApi";
+import { adaptNotification, parseApiDate } from "../lib/adaptApi";
 import { useApiErrorReporter } from "../lib/apiErrors";
 import { useAppData } from "../lib/app-data";
 import { useToast } from "../lib/toast";
@@ -79,8 +79,11 @@ interface FormState {
 const FORM_VAZIO: FormState = { userIds: [], message: "", severity: "info", alertId: "" };
 
 function formatarMomento(iso: string): string {
-  const data = new Date(iso);
-  if (Number.isNaN(data.getTime())) return "—";
+  // parseApiDate e nao `new Date` (QA-09): o backend serializa UTC sem
+  // fuso, e `new Date` de uma string assim assume hora LOCAL — em
+  // America/Sao_Paulo isso adiantava todo horario exibido em 3h.
+  const data = parseApiDate(iso);
+  if (!data) return "—";
   return data.toLocaleString("pt-BR", {
     day: "2-digit",
     month: "2-digit",

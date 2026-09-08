@@ -104,6 +104,21 @@ class PasswordChange(BaseModel):
     new_password: str = Field(min_length=8)
 
 
+class PasswordChangeResponse(BaseModel):
+    """
+    Resposta de POST /api/auth/change-password.
+
+    Ate a correcao do QA-04 esta rota respondia 204 sem corpo, porque nao
+    havia nada a devolver: o token antigo seguia valendo. Agora a troca
+    incrementa `User.token_version` e invalida TODOS os tokens da conta — o
+    de quem esta trocando inclusive. O token novo vem aqui para que a
+    propria pessoa nao seja deslogada pela correcao.
+    """
+
+    access_token: str
+    token_type: str = "bearer"
+
+
 class UserUpdate(BaseModel):
     """
     Campos que um admin pode alterar em outra conta (Fase 3).

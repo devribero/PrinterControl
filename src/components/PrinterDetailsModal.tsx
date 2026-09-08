@@ -50,11 +50,14 @@ export default function PrinterDetailsModal({ printer, onClose }: PrinterDetails
   const activeMonth = monthly.find((m) => m.month === selectedMonth) ?? monthly[monthly.length - 1] ?? null;
   const maxMonthPages = Math.max(1, ...monthly.map((m) => m.pages));
 
+  // QA-06: ver a nota em PrinterTable.handleTestPage — não há rota de
+  // impressão no backend, e o toast de sucesso anterior anunciava um job
+  // que nunca era enviado.
   function handleTestPage() {
     push({
-      variant: "success",
-      title: "Página de teste enviada",
-      description: `Um job de impressão foi enfileirado para ${printer!.name}.`,
+      variant: "info",
+      title: "Impressão de teste indisponível",
+      description: `Ainda não é possível enviar um job para ${printer!.name} por aqui. Use a interface web da impressora.`,
     });
     onClose();
   }
@@ -91,7 +94,14 @@ export default function PrinterDetailsModal({ printer, onClose }: PrinterDetails
       </div>
 
       <div className={styles.factsGrid}>
-        <Fact label="Páginas impressas (período)" value={printer.pagesPrinted.toLocaleString("pt-BR")} />
+        {/* QA-17: `pagesPrinted` é o `page_count` da última leitura — o
+            contador ACUMULADO do equipamento desde que ele existe, não o
+            consumo de um período. O rótulo antigo ("Páginas impressas
+            (período)") fazia 5.000 páginas de vida inteira aparecerem como
+            5.000 páginas do mês, enquanto o gráfico logo abaixo mostrava 0
+            para o mesmo mês. O consumo por período continua sendo o bloco
+            "Impressões por mês", que vem do relatório mensal. */}
+        <Fact label="Contador acumulado" value={printer.pagesPrinted.toLocaleString("pt-BR")} />
         <Fact label="Última atividade" value={printer.lastSeen} />
         <Fact label="Endereço IP" value={printer.ip} />
       </div>
