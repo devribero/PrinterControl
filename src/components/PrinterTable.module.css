@@ -433,7 +433,13 @@
 
 .gridView {
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, 1fr) e não 1fr (QA-12): um item de grid tem min-width:auto, ou
+     seja, ele nunca encolhe abaixo do próprio conteúdo mínimo. Numa coluna
+     só, a linha "IP · modelo" do cartão empurrava a faixa além da largura
+     da tela e a borda direita saía cortada — a 360px o badge "Online"
+     sumia junto. O minmax(0, …) autoriza a faixa a ficar menor que o
+     conteúdo, e o overflow passa a ser tratado dentro do cartão. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   padding: 1.5rem;
 }
@@ -458,6 +464,9 @@
   text-align: left;
   transition: border-color 0.12s ease-out;
   cursor: pointer;
+  /* Par do minmax(0, 1fr) em .gridView (QA-12): sem min-width:0 o <button>
+     continua reivindicando a própria largura mínima e o corte volta. */
+  min-width: 0;
 }
 
 .gridCard:hover {
@@ -495,6 +504,16 @@
   gap: 0.25rem;
   font-size: 0.75rem;
   color: var(--text-muted);
+  min-width: 0;
+}
+
+/* QA-12: "IP · modelo" e o departamento são as linhas mais longas do cartão
+   e não têm ponto natural de quebra. Sem isto elas definem a largura mínima
+   do cartão inteiro e reintroduzem o estouro em tela estreita. */
+.gridCardMeta p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .gridCardIp {

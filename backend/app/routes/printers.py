@@ -6,6 +6,7 @@ from app.models.user import User
 from datetime import datetime
 
 from app.models.printer import Printer, PrinterMonthly, PrinterReading
+from app.services.alert_engine import evaluate_reading
 from app.services.environment_guard import bloquear_mock_em_producao
 from app.services.monthly_report import month_bounds, month_label, month_period, pages_from_readings
 from app.schemas.printer import (
@@ -17,6 +18,7 @@ from app.schemas.printer import (
     TonerLevel,
 )
 from typing import List
+from app.schemas.common import RecursoId
 
 # Fase 2: TODA rota de impressoras exige sessao. A dependencia fica no
 # router para que nenhuma rota nova nasca publica por esquecimento; as rotas
@@ -237,6 +239,13 @@ def monthly_report(
         ],
         "printers": [
             {
+                # QA-03: identidade estavel. O frontend casava o relatorio
+                # com a frota POR IP, e desde a Etapa 4 duas filas do mesmo
+                # Print Server podem dividir um IP — a segunda sobrescrevia
+                # a primeira no mapa e as duas passavam a exibir o total da
+                # ultima. `ip` continua no payload porque o relatorio de
+                # demonstracao (data/printers.ts) so tem IP.
+                "id": pid,
                 "ip": printers[pid].ip,
                 "name": printers[pid].name,
                 "department": printers[pid].department,
@@ -249,7 +258,7 @@ def monthly_report(
 
 
 @router.get("/{printer_id}", response_model=PrinterResponse)
-def get_printer(printer_id: int, session: Session = Depends(get_session)):
+def get_printer(printer_id: RecursoId, session: Session = Depends(get_session)):
     printer = session.get(Printer, printer_id)
     if not printer:
         raise HTTPException(status_code=404, detail="Impressora não encontrada")
@@ -283,7 +292,7 @@ def create_printer(
 
 @router.patch("/{printer_id}", response_model=PrinterResponse)
 def update_printer(
-    printer_id: int,
+    printer_id: RecursoId,
     printer_data: PrinterUpdate,
     session: Session = Depends(get_session),
     _user: User = Depends(require_admin),
@@ -319,13 +328,20 @@ def update_printer(
 
 @router.get("/{printer_id}/readings")
 def get_printer_readings(
-    printer_id: int,
+    printer_id: RecursoId,
     # Teto explicito (Fase 10): sem ele, `?limit=99999999` carregava o
     # historico inteiro da impressora em memoria e no JSON de resposta.
     # Mesmo padrao ja usado em /api/notifications.
     limit: int = Query(default=100, ge=1, le=500),
     session: Session = Depends(get_session),
 ):
+    # QA-16: 404 quando a impressora nao existe, em vez de 200 com lista
+    # vazia. Sem isto, "impressora inexistente" e "impressora sem historico"
+    # davam a MESMA resposta — um id errado no painel aparecia como uma
+    # impressora real que nunca foi coletada.
+    if not session.get(Printer, printer_id):
+        raise HTTPException(status_code=404, detail="Impressora não encontrada")
+
     readings = session.exec(
         select(PrinterReading)
         .where(PrinterReading.printer_id == printer_id)
@@ -337,7 +353,7 @@ def get_printer_readings(
 
 @router.post("/{printer_id}/readings")
 def create_printer_reading(
-    printer_id: int,
+    printer_id: RecursoId,
     reading_data: PrinterReadingCreate,
     session: Session = Depends(get_session),
     _user: User = Depends(require_operator),
@@ -372,6 +388,18 @@ def create_printer_reading(
         uptime=reading_data.uptime,
     )
     session.add(reading)
-    session.commit()
+
+    # QA-11: a mesma avaliacao que a coleta aplica. Ate aqui esta rota
+    # gravava a leitura e parava — uma leitura offline com toner em 1%
+    # entrava no banco, aparecia no painel e nao abria alerta nenhum, ao
+    # contrario da leitura identica vinda da coleta. Como este e o caminho
+    # usado para montar cenarios em demo/desenvolvimento, a diferenca fazia
+    # a tela de alertas mentir justamente onde ela e demonstrada.
+    #
+    # flush + evaluate_reading, mesmo desenho do PrinterCollector: um unico
+    # commit no final de evaluate_reading, leitura e alertas juntos.
+    session.flush()
+    session.refresh(reading)
+    evaluate_reading(session, printer_id, reading)
     session.refresh(reading)
     return reading

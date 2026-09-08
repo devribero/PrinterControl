@@ -45,19 +45,37 @@ export async function loadMonthlyReport(): Promise<MonthlyReport | null> {
 }
 
 /**
- * Mescla o relatório mensal real (por IP) nos objetos Printer já carregados,
- * preenchendo/atualizando `monthlyPages`. Impressoras sem correspondência no
- * relatório (ainda sem histórico suficiente, ex.: primeira execução do
- * script) mantêm o que já tinham (ou ficam sem monthlyPages).
+ * Mescla o relatório mensal nos objetos Printer já carregados, preenchendo
+ * `monthlyPages`. Impressoras sem correspondência no relatório (ainda sem
+ * histórico suficiente) mantêm o que já tinham.
+ *
+ * Casa por `id` quando o relatório traz id, e só cai no IP quando não traz
+ * (relatório de demonstração e o /data/monthly-report.json legado).
+ *
+ * QA-03: casar por IP era errado desde a Etapa 4, quando a identidade da
+ * impressora passou a ser (servidor, nome) e duas filas do mesmo Print
+ * Server puderam dividir um endereço. Com IP como chave, a segunda fila
+ * sobrescrevia a primeira no mapa e AS DUAS passavam a exibir o total da
+ * última — 100 e 250 viravam 250 e 250. O erro não aparecia como falha:
+ * aparecia como um número mensal plausível e errado.
  */
-export function mergeMonthlyReport<T extends { ip: string; monthlyPages?: unknown }>(
+export function mergeMonthlyReport<T extends { id?: string; ip: string; monthlyPages?: unknown }>(
   printers: T[],
   report: MonthlyReport | null
 ): T[] {
   if (!report) return printers;
-  const byIp = new Map(report.printers.map((p) => [p.ip, p.monthlyPages]));
+
+  const byId = new Map(
+    report.printers.filter((p) => p.id !== undefined).map((p) => [p.id, p.monthlyPages])
+  );
+  // Só as entradas SEM id caem no mapa por IP, para que um relatório misto
+  // nunca reintroduza a colisão nas que já têm identidade estável.
+  const byIp = new Map(
+    report.printers.filter((p) => p.id === undefined).map((p) => [p.ip, p.monthlyPages])
+  );
+
   return printers.map((p) => {
-    const monthlyPages = byIp.get(p.ip);
+    const monthlyPages = (p.id !== undefined ? byId.get(p.id) : undefined) ?? byIp.get(p.ip);
     return monthlyPages ? { ...p, monthlyPages } : p;
   });
 }

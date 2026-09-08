@@ -21,6 +21,7 @@ import {
   type ApiUser,
   type UserUpdateInput,
 } from "../lib/api";
+import { parseApiDate } from "../lib/adaptApi";
 import { useApiErrorReporter } from "../lib/apiErrors";
 import { ROLES, ROLE_LABELS, parseRole, type Role } from "../lib/permissions";
 import { useAppData } from "../lib/app-data";
@@ -53,8 +54,11 @@ const FORM_VAZIO: FormState = {
 const SENHA_MINIMA = 8;
 
 function formatarData(iso: string): string {
-  const data = new Date(iso);
-  return Number.isNaN(data.getTime()) ? "—" : data.toLocaleDateString("pt-BR");
+  // parseApiDate e nao `new Date` (QA-09): o backend serializa UTC sem
+  // fuso, e `new Date` de uma string assim assume hora LOCAL — em
+  // America/Sao_Paulo isso adiantava todo horario exibido em 3h.
+  const data = parseApiDate(iso);
+  return data ? data.toLocaleDateString("pt-BR") : "—";
 }
 
 export default function UsersView() {

@@ -11,6 +11,12 @@ REM do Windows (scripts\Servico-PrinterControl.ps1) — ver docs\OPERATIONS.md.
 setlocal
 set "ROOT=%~dp0"
 
+REM Outro projeto (Discord) define DATABASE_URL=postgresql://... no ambiente do
+REM usuario do Windows. O Pydantic da precedencia ao ambiente sobre o .env, entao
+REM o backend tentaria abrir PostgreSQL (e quebrar em psycopg2) em vez do SQLite.
+REM O setlocal acima limita esta limpeza a esta sessao; nada global e alterado.
+set "DATABASE_URL="
+
 if not exist "%ROOT%backend\venv\Scripts\activate.bat" (
     echo [ERRO] Nao encontrei o venv em backend\venv
     echo Crie o venv antes: cd backend ^&^& python -m venv venv ^&^& venv\Scripts\pip install -r requirements.txt
@@ -21,7 +27,7 @@ if not exist "%ROOT%backend\venv\Scripts\activate.bat" (
 echo Iniciando PrinterControl...
 echo.
 
-start "PrinterControl - Backend" cmd /k "cd /d "%ROOT%backend" && call venv\Scripts\activate.bat && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload"
+start "PrinterControl - Backend" cmd /k "cd /d "%ROOT%backend" && set "DATABASE_URL=" && call venv\Scripts\activate.bat && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload"
 
 start "PrinterControl - Frontend" cmd /k "cd /d "%ROOT%" && npm run dev"
 

@@ -45,11 +45,15 @@ def require_user(
     """
     Usuario dono do JWT do header Authorization. 401 se ausente/invalido.
 
-    O usuario e SEMPRE relido do banco a cada requisicao (o JWT carrega
-    apenas o e-mail). E isso que faz uma conta desativada perder o acesso
-    imediatamente, sem precisar de revogacao/blacklist de token: o token
-    continua criptograficamente valido, mas a conta por tras dele nao passa
-    mais na checagem de `is_active`.
+    O usuario e SEMPRE relido do banco a cada requisicao. E isso que faz uma
+    conta desativada perder o acesso imediatamente: o token continua
+    criptograficamente valido, mas a conta por tras dele nao passa mais na
+    checagem de `is_active`.
+
+    A checagem de `token_version` (QA-04) cobre o que `is_active` sozinho nao
+    cobria: trocar a senha, ou desativar E REATIVAR a conta, invalida os
+    tokens antigos em definitivo, em vez de apenas escondê-los enquanto a
+    conta estiver desligada.
     """
     unauthorized = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -68,11 +72,24 @@ def require_user(
     if not user:
         raise unauthorized
 
+    # Ordem importa: `is_active` vem ANTES da versao do token para que uma
+    # conta desativada continue recebendo a mensagem que explica o motivo,
+    # e nao um 401 generico. A desativacao tambem incrementa token_version,
+    # entao as duas checagens barrariam — mas so esta diz o que houve.
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Conta desativada. Procure um administrador.",
         )
+
+    # QA-04: token emitido antes da ultima troca de senha ou desativacao.
+    # Na pratica e o token de uma conta REATIVADA (a desativada ja parou
+    # acima) ou de uma sessao aberta com a senha antiga.
+    #
+    # 401 e nao 403: e a propria credencial que deixou de valer, e o painel
+    # precisa mandar a pessoa entrar de novo — que e o que ele faz com 401.
+    if payload["token_version"] != user.token_version:
+        raise unauthorized
 
     return user
 

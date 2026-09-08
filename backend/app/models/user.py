@@ -76,6 +76,28 @@ class User(SQLModel, table=True):
     # troca confirmada.
     must_change_password: bool = Field(default=False)
 
+    # Versao da credencial (QA-04). O JWT carrega este numero em `ver`;
+    # require_user recusa qualquer token cujo `ver` nao seja o valor atual
+    # da conta. Incrementar o campo invalida DE UMA VEZ todas as sessoes
+    # abertas daquela conta.
+    #
+    # Existe porque o JWT e stateless: ate aqui trocar a senha nao derrubava
+    # sessao nenhuma (o token antigo valia ate expirar), e desativar/reativar
+    # a conta tambem nao — o 403 de `is_active` sumia assim que a conta
+    # voltava, e o token antigo voltava a funcionar junto. A tela de
+    # Configuracoes chegava a orientar "desative e reative para encerrar
+    # sessoes suspeitas", conselho que nao fazia o que prometia.
+    #
+    # Incrementado em exatamente tres pontos, todos "esta credencial mudou
+    # de maos": troca da propria senha, redefinicao de senha por um admin e
+    # desativacao da conta. Reativar NAO incrementa (a desativacao ja
+    # queimou as sessoes; incrementar de novo so gastaria um numero).
+    #
+    # Contas migradas comecam em 0, igual a uma conta nova. Tokens emitidos
+    # antes desta mudanca nao carregam `ver` e sao recusados — ver
+    # decode_token, que trata ausencia como incompativel de proposito.
+    token_version: int = Field(default=0)
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     def has_role(self, *required: str) -> bool:

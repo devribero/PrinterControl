@@ -185,6 +185,11 @@ def health_check():
         # gravadas, mesmo fora de producao.
         "mock_collect_enabled": settings.allow_mock_collect,
         "print_server_mode": settings.print_server_mode,
+        # QA-02: o painel precisa saber de quanto em quanto tempo a coleta
+        # roda para decidir quando uma leitura ficou velha. Sem isto ele
+        # teria de chutar um limite fixo, que estaria errado em qualquer
+        # instalacao com intervalo diferente do padrao.
+        "collection_interval_minutes": settings.collection_interval_minutes,
         "uptime_seconds": round(time.time() - _INICIADO_EM, 1),
         "database": "ok" if banco_ok else "erro",
         "scheduler": scheduler_info,

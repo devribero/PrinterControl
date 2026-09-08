@@ -79,9 +79,18 @@ export default function PrinterTable({
     [printers, currentPage, pageSize]
   );
 
+  // QA-06: NÃO existe rota de impressão no backend — nem aqui nem no modal
+  // de detalhes havia qualquer chamada. O toast de sucesso ("Job
+  // enfileirado") anunciava uma impressão que nunca saiu, e quem clicasse
+  // ficaria esperando papel. Enquanto a operação não existir de verdade, a
+  // mensagem diz que ela não existe. Mesmo texto em PrinterDetailsModal.
   function handleTestPage(p: Printer, e: React.MouseEvent) {
     e.stopPropagation();
-    push({ variant: "success", title: "Página de teste enviada", description: `Job enfileirado para ${p.name}.` });
+    push({
+      variant: "info",
+      title: "Impressão de teste indisponível",
+      description: `Ainda não é possível enviar um job para ${p.name} por aqui. Use a interface web da impressora.`,
+    });
   }
 
   function handleWebAccess(p: Printer, e: React.MouseEvent) {

@@ -173,7 +173,7 @@ else:
 from datetime import timedelta  # noqa: E402
 from app.services.auth import create_access_token  # noqa: E402
 
-expirado = create_access_token({"sub": EMAIL}, expires_delta=timedelta(seconds=-60))
+expirado = create_access_token({"sub": EMAIL, 'ver': 0}, expires_delta=timedelta(seconds=-60))
 check("token expirado -> 401", request("POST", "/api/printers", novo, expirado)[0], 401)
 
 print("\n--- 8. limpeza ---")

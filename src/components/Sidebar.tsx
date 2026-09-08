@@ -1,13 +1,19 @@
 /**
  * Dependências externas: react, next/navigation (rota ativa), next/link
- * (navegação), recharts (sparkline "Rede Monitorada" — dado fictício em
- * data/printers.ts, não vem de coleta real) e lucide-react.
+ * (navegação), recharts e lucide-react.
+ *
+ * O cartão "Rede Monitorada" mostra dado real desde o QA-14 (prefixo /24 da
+ * frota ativa, instante da última coleta, versão do backend). A SPARKLINE
+ * dentro dele continua sendo a série fictícia de data/printers.ts —
+ * decoração, não medição; não há série temporal de disponibilidade no
+ * backend para alimentá-la.
  * Filtros (status/tipo/departamento) e contagem de alertas vêm do
  * AppDataProvider (lib/app-data.tsx) — Sidebar só lê e dispara updateFilter.
  */
 "use client";
 
 import Link from "next/link";
+import { useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import {
@@ -30,6 +36,7 @@ import ElginLogo from "./ElginLogo";
 import { useTheme } from "../lib/theme";
 import { getChartColors } from "../lib/chartColors";
 import { useAppData } from "../lib/app-data";
+import { parseApiDate } from "../lib/adaptApi";
 import { cn } from "../lib/cn";
 import styles from "./Sidebar.module.css";
 
@@ -65,9 +72,47 @@ export default function Sidebar({ mobileOpen, onCloseMobile, onNavigate, onOpenH
   const { theme } = useTheme();
   const chartColors = getChartColors(theme);
   const pathname = usePathname();
-  const { alerts, can } = useAppData();
+  const { alerts, can, activeFleet, backendEnv } = useAppData();
 
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+
+  /**
+   * QA-14: este bloco exibia "10.0.0.0/24", "Versão 2.0.1" e
+   * "17/08/2026 12:30:07" — três constantes escritas no layout, que não
+   * mudavam ao sincronizar, ao recarregar nem ao trocar de tela. Passavam
+   * por leitura do ambiente e não eram.
+   *
+   * Agora saem dos mesmos dados que o resto do painel usa. A rede é o
+   * prefixo /24 dos IPs reais da frota ativa; com mais de um, informa
+   * quantos, porque escolher um deles seria voltar a mentir.
+   */
+  const redeMonitorada = useMemo(() => {
+    const prefixos = new Set(
+      activeFleet
+        .map((p) => p.ip.split("."))
+        .filter((partes) => partes.length === 4 && partes.every((n) => n !== "" && !Number.isNaN(Number(n))))
+        .map((partes) => `${partes[0]}.${partes[1]}.${partes[2]}.0/24`),
+    );
+    if (prefixos.size === 0) return "—";
+    if (prefixos.size === 1) return [...prefixos][0];
+    return `${prefixos.size} redes`;
+  }, [activeFleet]);
+
+  /** Coleta mais recente da frota ativa — o "última atualização" de verdade. */
+  const ultimaColeta = useMemo(() => {
+    const instantes = activeFleet
+      .map((p) => parseApiDate(p.lastSeenAt ?? null))
+      .filter((d): d is Date => d !== null);
+    if (instantes.length === 0) return "sem coleta";
+    const maisRecente = new Date(Math.max(...instantes.map((d) => d.getTime())));
+    return maisRecente.toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }, [activeFleet]);
 
 
   return (
@@ -123,7 +168,7 @@ export default function Sidebar({ mobileOpen, onCloseMobile, onNavigate, onOpenH
         <div className={styles.bottom}>
           <div className={styles.networkCard}>
             <p className={styles.networkTitle}>Rede Monitorada</p>
-            <p className={styles.networkValue}>10.0.0.0/24</p>
+            <p className={styles.networkValue}>{redeMonitorada}</p>
             <div className={styles.sparkWrap}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={sparkData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
@@ -138,9 +183,9 @@ export default function Sidebar({ mobileOpen, onCloseMobile, onNavigate, onOpenH
               </ResponsiveContainer>
             </div>
             <div className={styles.networkMeta}>
-              <p>Versão 2.0.1</p>
-              <p>Última atualização</p>
-              <p className={styles.networkMetaSoft}>17/08/2026 12:30:07</p>
+              <p>{backendEnv?.version ? `API v${backendEnv.version}` : "API indisponível"}</p>
+              <p>Última coleta</p>
+              <p className={styles.networkMetaSoft}>{ultimaColeta}</p>
             </div>
           </div>
 
