@@ -36,8 +36,21 @@ export interface Printer {
   updatedAt?: string;
   status: PrinterStatus;
   toner: TonerLevel[] | null;
+  /**
+   * Contador ACUMULADO do equipamento (`page_count` da última leitura), não
+   * o consumo de um período — ver QA-17 e o rótulo em PrinterDetailsModal.
+   * O consumo por período é `monthlyPages`.
+   */
   pagesPrinted: number;
+  /** Texto pronto para exibição ("há 12 min", "12/08 14:30"). */
   lastSeen: string;
+  /**
+   * Instante ISO da última leitura, cru, ou null se nunca coletada. Existe
+   * separado de `lastSeen` porque só com o valor bruto dá para calcular a
+   * IDADE da leitura (QA-02) — o outro é texto. Opcional: o conjunto de
+   * demonstração (data/printers.ts) não o preenche.
+   */
+  lastSeenAt?: string | null;
   monthlyPages?: MonthlyPageCount[];
 }
 
@@ -141,6 +154,13 @@ export interface MonthlyReport {
   generatedAt: string;
   monthlyUsage: MonthlyUsageEntry[];
   printers: {
+    /**
+     * Id da impressora no backend (QA-03). Opcional porque o relatório de
+     * demonstração (data/printers.ts) e o /data/monthly-report.json legado
+     * não têm id — só o relatório real da API o traz. `mergeMonthlyReport`
+     * usa o id quando existe e cai no IP quando não existe.
+     */
+    id?: string;
     ip: string;
     name: string;
     department: string;

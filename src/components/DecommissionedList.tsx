@@ -11,6 +11,7 @@
  * contagem em monospace no cabeçalho e tabela de quatro colunas.
  */
 import type { DecommissionedPrinter } from "../types";
+import { parseApiDate } from "../lib/adaptApi";
 import styles from "./DecommissionedList.module.css";
 
 interface DecommissionedListProps {
@@ -19,8 +20,11 @@ interface DecommissionedListProps {
 
 function formatarData(iso: string | null): string {
   if (!iso) return "—";
-  const data = new Date(iso);
-  if (Number.isNaN(data.getTime())) return "—";
+  // parseApiDate e nao `new Date` (QA-09): o backend serializa UTC sem
+  // fuso, e `new Date` de uma string assim assume hora LOCAL — em
+  // America/Sao_Paulo isso adiantava todo horario exibido em 3h.
+  const data = parseApiDate(iso);
+  if (!data) return "—";
   return data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 

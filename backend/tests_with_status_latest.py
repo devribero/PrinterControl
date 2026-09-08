@@ -62,7 +62,7 @@ with Session(engine) as s:
         ))
     s.commit()
 
-TOKEN = create_access_token({"sub": "withstatus.test@example.com"})
+TOKEN = create_access_token({"sub": "withstatus.test@example.com", 'ver': 0})
 client = TestClient(app)
 
 resp = client.get("/api/printers/with-status", headers={"Authorization": f"Bearer {TOKEN}"})

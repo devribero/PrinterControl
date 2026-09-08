@@ -255,13 +255,14 @@ export default function SettingsView() {
             </label>
           </div>
 
-          {/* Limitação real, documentada no backend: o JWT não guarda versão
-              de senha, então sessões já abertas continuam valendo. Melhor
-              dizer do que deixar a pessoa supor que trocou e "expulsou" todo
-              mundo. */}
+          {/* QA-04: este texto dizia o contrário — que as sessões abertas
+              continuavam valendo e que a saída era pedir desativação e
+              reativação da conta. As duas metades estavam erradas: a troca
+              não derrubava nada, e desativar/reativar também não (o token
+              antigo voltava junto com a conta). Agora a troca encerra as
+              outras sessões de fato, via User.token_version. */}
           <p className={styles.note}>
-            Sessões já abertas em outros dispositivos continuam válidas até expirarem. Para encerrar
-            uma sessão suspeita agora, peça a um administrador para desativar e reativar sua conta.
+            Trocar a senha encerra as sessões abertas em outros dispositivos. Esta continua conectada.
           </p>
 
           {erroSenha && <p className={styles.formError}>{erroSenha}</p>}

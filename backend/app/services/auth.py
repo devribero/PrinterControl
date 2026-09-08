@@ -41,6 +41,11 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+    """
+    Assina o JWT. Quem chama passa `sub` (e-mail) e `ver` (User.token_version)
+    — os dois sao obrigatorios: decode_token recusa token sem `ver`, e emitir
+    um aqui deixaria a conta sem conseguir entrar.
+    """
     to_encode = data.copy()
 
     # Aware em UTC, em vez de datetime.utcnow(): o naive de antes dependia de
@@ -56,7 +61,13 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 
 def decode_token(token: str) -> dict | None:
     """
-    Devolve {"email": ...} para um token valido, ou None.
+    Devolve {"email": ..., "token_version": ...} para um token valido, ou None.
+
+    `token_version` (QA-04) e a versao da credencial no momento da emissao.
+    Um token SEM esse campo e recusado aqui mesmo: os unicos assim sao os
+    emitidos antes desta mudanca, e aceita-los manteria de pe exatamente as
+    sessoes que a correcao existe para poder encerrar. O efeito pratico e um
+    logout unico de todo mundo no deploy.
 
     `algorithms` e uma lista de UM item de proposito: aceitar o algoritmo que
     o proprio token declara e a confusao de algoritmo da CVE-2024-33663.
@@ -72,4 +83,9 @@ def decode_token(token: str) -> dict | None:
     email = payload.get("sub")
     if email is None:
         return None
-    return {"email": email}
+
+    versao = payload.get("ver")
+    if not isinstance(versao, int):
+        return None
+
+    return {"email": email, "token_version": versao}

@@ -109,7 +109,7 @@ export default function MustChangePasswordGate() {
 
         <div className={styles.account}>
           Entrando como <strong>{account.name}</strong>
-          {/* `account.email` já vem só com a parte antes do "@" (ver
+          {/* Prefere o username; `account.email` (completo desde o QA-13) é o fallback (ver
               toAccount em lib/auth.ts) — não reconstruímos o domínio aqui
               para não arriscar mostrar um errado. */}
           {" "}({account.username ?? account.email})

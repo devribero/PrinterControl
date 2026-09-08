@@ -21,6 +21,7 @@ from app.models.user import Role, User
 from app.schemas.user import UserCreate, UserDelete, UserResponse, UserUpdate
 from app.services import audit_log
 from app.services.auth import hash_password
+from app.schemas.common import RecursoId
 
 
 def _snapshot_user(user: User) -> dict:
@@ -138,7 +139,7 @@ def create_user(
 
 @router.patch("/{user_id}", response_model=UserResponse)
 def update_user(
-    user_id: int,
+    user_id: RecursoId,
     update: UserUpdate,
     session: Session = Depends(get_session),
     admin: User = Depends(require_admin),
@@ -180,6 +181,17 @@ def update_user(
         if password is not None:
             user.password_hash = hash_password(password)
             user.must_change_password = True
+            # QA-04: a senha passou pelas maos de outra pessoa; as sessoes
+            # abertas com a senha anterior deixam de valer agora.
+            user.token_version += 1
+
+    # QA-04: desativar tambem queima as sessoes. Sem isto o bloqueio durava
+    # so enquanto a conta ficasse desligada — reativa-la fazia o token antigo
+    # (possivelmente o roubado que motivou a desativacao) voltar a funcionar.
+    # E o que a tela de Configuracoes ja prometia ao orientar
+    # "desative e reative para encerrar sessoes suspeitas".
+    if data.get("is_active") is False and user.is_active:
+        user.token_version += 1
 
     if data.get("role") is not None:
         user.role = Role(data.pop("role")).value
@@ -199,7 +211,7 @@ def update_user(
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(
-    user_id: int,
+    user_id: RecursoId,
     payload: UserDelete,
     session: Session = Depends(get_session),
     admin: User = Depends(require_admin),

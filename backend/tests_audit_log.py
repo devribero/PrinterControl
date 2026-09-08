@@ -46,8 +46,8 @@ with Session(engine) as s:
     s.refresh(admin)
     s.refresh(viewer)
 
-ADMIN_TOKEN = create_access_token({"sub": "auditoria.admin@example.com"})
-VIEWER_TOKEN = create_access_token({"sub": "auditoria.viewer@example.com"})
+ADMIN_TOKEN = create_access_token({"sub": "auditoria.admin@example.com", 'ver': 0})
+VIEWER_TOKEN = create_access_token({"sub": "auditoria.viewer@example.com", 'ver': 0})
 H_ADMIN = {"Authorization": f"Bearer {ADMIN_TOKEN}"}
 H_VIEWER = {"Authorization": f"Bearer {VIEWER_TOKEN}"}
 client = TestClient(app)

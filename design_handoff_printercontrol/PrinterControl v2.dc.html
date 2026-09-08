@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.474.0/dist/umd/lucide.min.js"></script>
+<script src="data/printers.js"></script>
+<style>
+  :root {
+    --bg-page: #f6f3ee; --bg-surface: #fff; --bg-header: rgba(255,255,255,0.92);
+    --border: #e7dfd2; --divider: #f2ede5; --track: #ece5da; --border-strong: #d8cdb9;
+    --text-primary: #26211c; --text-secondary: #6f6459; --text-muted: #a79b8b;
+    --link: #0a6a9c; --link-hover: #0098e0;
+    --success: #3f8f5f; --warning: #c8862e; --danger: #c1503d; --danger-bg: #fbeae6;
+    --selection: #e3f4fc; --navy: #0a4b6e;
+    --tint-success: #eaf5ee; --tint-warning: #faf0dd; --tint-link: #eaf6fb; --tint-plum: #faf0dd;
+    --sidebar-bg: #f3efe6; --navy-text: #0a4b6e;
+    --glass-bg: rgba(255,255,255,0.62); --glass-bg-elevated: rgba(255,255,255,0.86); --glass-bg-floating: rgba(255,255,255,0.94);
+    --glass-border: rgba(20,30,45,0.12); --glass-highlight: rgba(255,255,255,0.45);
+    --glass-shadow: 0 20px 50px -28px rgba(20,30,45,0.22), inset 0 1px 0 rgba(255,255,255,0.35);
+    --glass-hover: rgba(20,30,45,0.05);
+    --glass-blur: blur(18px) saturate(140%);
+  }
+  [data-theme="dark"] {
+    --bg-page: #060607; --bg-surface: #101012; --bg-header: rgba(9,9,10,0.92);
+    --border: #26272a; --divider: #1c1d1f; --track: #26272a; --border-strong: #3a3b3e;
+    --text-primary: #f2f0ec; --text-secondary: #a8a5a0; --text-muted: #6f6c68;
+    --link: #4ab3e8; --link-hover: #7cc9ef;
+    --success: #5cb37f; --warning: #d9a34f; --danger: #e2776a; --danger-bg: #2a1b19;
+    --selection: #17293380; --navy: #123a54;
+    --tint-success: #10201a; --tint-warning: #221c10; --tint-link: #101c24; --tint-plum: rgba(104,45,86,0.26);
+    --sidebar-bg: #000000; --navy-text: #6fb8dd;
+    --glass-bg: rgba(20,21,23,0.55); --glass-bg-elevated: rgba(16,16,18,0.78); --glass-bg-floating: rgba(14,14,16,0.9);
+    --glass-border: rgba(255,255,255,0.07); --glass-highlight: rgba(255,255,255,0.05);
+    --glass-shadow: 0 20px 55px -26px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+    --glass-hover: rgba(255,255,255,0.05);
+    --glass-blur: blur(20px) saturate(130%);
+  }
+  body { margin: 0; background: var(--bg-page); color: var(--text-primary); font-family: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; transition: background-color 0.15s ease-out, color 0.15s ease-out; }
+  p, h1, h2, h3, h4, h5, h6, figure { margin: 0; }
+  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { color: var(--link-hover); }
+  input, select, textarea { font: inherit; color: inherit; }
+  *, *::before, *::after { box-sizing: border-box; }
+  ::selection { background: var(--selection); color: var(--link); }
+  :focus-visible { outline: 2px solid var(--link-hover); outline-offset: 1px; border-radius: 3px; }
+  @keyframes fade-up { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+  @keyframes soft-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  svg.lucide { display: block; }
+  table { border-collapse: collapse; }
+</style>
+</helmet>
+
+<div style="display:flex; min-height:100vh; background:var(--bg-page)" data-theme="{{ theme }}">
+
+  <div style="position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none">
+    <div style="position:absolute; top:-14%; left:-8%; width:48rem; height:48rem; border-radius:50%; background:radial-gradient(circle, color-mix(in srgb, var(--link) 34%, transparent) 0%, transparent 70%); filter:blur(10px)"></div>
+    <div style="position:absolute; bottom:-20%; right:-10%; width:50rem; height:50rem; border-radius:50%; background:radial-gradient(circle, color-mix(in srgb, var(--navy) 30%, transparent) 0%, transparent 70%); filter:blur(10px)"></div>
+    <div style="position:absolute; top:22%; right:8%; width:34rem; height:34rem; border-radius:50%; background:radial-gradient(circle, color-mix(in srgb, var(--link-hover) 20%, transparent) 0%, transparent 70%); filter:blur(10px)"></div>
+  </div>
+
+  <aside style="position:sticky; top:0; z-index:1; display:flex; height:100vh; width:248px; flex-shrink:0; flex-direction:column; border-right:1px solid var(--glass-border); background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow)">
+    <div style="display:flex; align-items:center; gap:0.75rem; padding:1.375rem 1.25rem; border-bottom:1px solid var(--border)">
+      <img src="assets/logo-elgin.webp" alt="Elgin" style="height:24px; width:auto; display:block">
+      <span style="height:20px; width:1px; background:var(--border)"></span>
+      <p style="font-size:0.75rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-secondary)">Impressoras</p>
+    </div>
+
+    <div style="flex:1; overflow-y:auto; padding:1.25rem 0.75rem">
+      <p style="padding:0 0.75rem 0.625rem; font-size:0.625rem; font-weight:700; letter-spacing:0.12em; color:var(--text-muted)">MONITORAMENTO</p>
+      <nav style="display:flex; flex-direction:column; gap:1px">
+        <sc-for list="{{ navMain }}" as="n" hint-placeholder-count="7">
+          <button onClick="{{ n.go }}" style="display:flex; width:100%; align-items:center; gap:0.625rem; border-radius:6px; padding:0.5rem 0.75rem; font-size:0.8125rem; font-weight:{{ n.weight }}; background:{{ n.bg }}; color:{{ n.fg }}; box-shadow:{{ n.rail }}; transition:background-color 0.12s ease-out, color 0.12s ease-out" style-hover="background:var(--glass-hover)">
+            <span style="display:flex; color:{{ n.iconColor }}"><i data-lucide="{{ n.icon }}" width="16" height="16"></i></span>
+            <span style="flex:1; text-align:left">{{ n.label }}</span>
+            <sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}">
+              <span style="min-width:1.125rem; text-align:center; border-radius:3px; padding:0 0.25rem; font-family:'IBM Plex Mono', monospace; font-size:0.6875rem; font-weight:600; background:var(--danger-bg); color:var(--danger)">{{ n.badge }}</span>
+            </sc-if>
+          </button>
+        </sc-for>
+      </nav>
+
+      <p style="padding: 1.5rem 0.75rem 0.625rem; font-size: 0.625rem; font-weight: 700; letter-spacing: 0.12em; color: var(--text-muted); opacity: 1">ADMINISTRAÇÃO</p>
+      <nav style="display:flex; flex-direction:column; gap:1px">
+        <sc-for list="{{ navAdmin }}" as="n" hint-placeholder-count="4">
+          <button onClick="{{ n.go }}" style="display:flex; width:100%; align-items:center; gap:0.625rem; border-radius:6px; padding:0.5rem 0.75rem; font-size:0.8125rem; font-weight:{{ n.weight }}; background:{{ n.bg }}; color:{{ n.fg }}; box-shadow:{{ n.rail }}; transition:background-color 0.12s ease-out, color 0.12s ease-out" style-hover="background:var(--glass-hover)">
+            <span style="display:flex; color:{{ n.iconColor }}"><i data-lucide="{{ n.icon }}" width="16" height="16"></i></span>
+            <span style="flex:1; text-align:left">{{ n.label }}</span>
+          </button>
+        </sc-for>
+      </nav>
+    </div>
+
+    <div style="border-top:1px solid var(--border); padding:1rem 1.25rem">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; gap:0.5rem">
+        <p style="font-size:0.625rem; font-weight:700; letter-spacing:0.12em; color:var(--text-muted)">REDE MONITORADA</p>
+        <span style="height:6px; width:6px; border-radius:999px; background:var(--success); animation:soft-pulse 3s ease-in-out infinite"></span>
+      </div>
+      <p style="margin-top:0.375rem; font-family:'IBM Plex Mono', monospace; font-size:0.9375rem; font-weight:500; letter-spacing:-0.01em; color:var(--text-primary)">10.0.0.0/24</p>
+      <div style="margin-top:0.75rem; display:flex; justify-content:space-between; border-top:1px solid var(--border); padding-top:0.625rem; font-size:0.6875rem; color:var(--text-muted)">
+        <span>Versão</span><span style="font-family:'IBM Plex Mono', monospace; color:var(--text-secondary)">2.0.1</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding-top:0.25rem; font-size:0.6875rem; color:var(--text-muted)">
+        <span>Sincronizado</span><span style="font-family:'IBM Plex Mono', monospace; color:var(--text-secondary)">17/08 12:30</span>
+      </div>
+      <button style="margin-top:0.875rem; display:flex; width:100%; align-items:center; justify-content:center; gap:0.5rem; border-radius:6px; border:1px solid var(--border); padding:0.5rem 0; font-size:0.75rem; font-weight:600; color:var(--text-secondary); transition:border-color 0.12s ease-out, color 0.12s ease-out" style-hover="border-color:var(--border-strong); color:var(--text-primary)">
+        <i data-lucide="life-buoy" width="14" height="14"></i>
+        Central de Ajuda
+      </button>
+    </div>
+  </aside>
+
+  <div style="position:relative; z-index:1; display:flex; min-height:100vh; flex:1; min-width:0; flex-direction:column">
+
+    <header style="position:sticky; top:0; z-index:30; display:flex; align-items:center; gap:1.5rem; border-bottom:1px solid var(--glass-border); background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); padding:0 2.5rem; height:60px; backdrop-filter:blur(8px)">
+      <div style="display:flex; align-items:center; gap:0.5rem; border:1px solid var(--border); border-radius:6px; background:var(--bg-page); padding:0.4375rem 0.625rem; width:22rem; max-width:32vw; color:var(--text-muted); transition:border-color 0.12s ease-out" style-focus="border-color:var(--link-hover)">
+        <span style="flex-shrink:0; display:flex"><i data-lucide="search" width="15" height="15"></i></span>
+        <input type="text" placeholder="Pesquisar impressora, IP, modelo" style="width:100%; background:transparent; color:var(--text-primary); border:none; outline:none; font-size:0.8125rem">
+        <kbd style="flex-shrink:0; border-radius:3px; border:1px solid var(--border); background:var(--bg-surface); padding:0.0625rem 0.3125rem; font-family:'IBM Plex Mono', monospace; font-size:0.625rem; color:var(--text-muted)">⌘K</kbd>
+      </div>
+
+      <div style="margin-left:auto; display:flex; align-items:center; gap:0.25rem">
+        
+        <button style="display:inline-flex; position:relative; align-items:center; justify-content:center; border-radius:6px; padding:0.4375rem; color:var(--text-secondary); transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">
+          <i data-lucide="bell" width="17" height="17"></i>
+          <span style="position:absolute; top:5px; right:5px; height:6px; width:6px; border-radius:999px; background:var(--danger); box-shadow:0 0 0 2px var(--bg-surface)"></span>
+        </button>
+        <button onClick="{{ toggleTheme }}" style="display:inline-flex; align-items:center; justify-content:center; border-radius:6px; padding:0.4375rem; color:var(--text-secondary); transition:background-color 0.12s ease-out" style-hover="background:var(--divider)"><i data-lucide="{{ themeIcon }}" width="17" height="17"></i></button>
+        <button onClick="{{ goNotifications }}" style="display:inline-flex; align-items:center; justify-content:center; border-radius:6px; padding:0.4375rem; color:var(--text-secondary); transition:background-color 0.12s ease-out" style-hover="background:var(--divider)"><i data-lucide="inbox" width="17" height="17"></i></button>
+        <span style="margin:0 0.625rem; height:22px; width:1px; background:var(--border)"></span>
+        <button style="display:flex; align-items:center; gap:0.5rem; border-radius:6px; padding:0.25rem 0.5rem 0.25rem 0.25rem; transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">
+          <div style="display:flex; height:1.75rem; width:1.75rem; align-items:center; justify-content:center; border-radius:4px; background:var(--link); font-size:0.6875rem; font-weight:600; letter-spacing:0.02em; color:var(--bg-surface)">PR</div>
+          <div style="text-align:left; line-height:1.25">
+            <p style="font-size:0.8125rem; font-weight:600; color:var(--text-primary)">Pedro Ribeiro</p>
+            <p style="font-size:0.6875rem; color:var(--text-muted)">Administrador</p>
+          </div>
+          <span style="color:var(--text-muted); display:block"><i data-lucide="chevron-down" width="14" height="14"></i></span>
+        </button>
+      </div>
+    </header>
+
+    <main style="flex:1; padding:0 2.5rem 3rem">
+
+      <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; border-bottom:1px solid var(--border); padding:2.25rem 0 1.5rem">
+        <div style="display:flex; gap:0.75rem">
+          <span style="width:3px; border-radius:2px; background:var(--link-hover); flex-shrink:0"></span>
+          <div>
+            <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.6875rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted)">
+              <span>{{ crumbSection }}</span>
+              <span style="color:var(--border-strong)">/</span>
+              <span style="color:var(--text-secondary)">{{ pageTitle }}</span>
+            </div>
+            <h1 style="margin-top:0.375rem; font-size:1.375rem; font-weight:700; letter-spacing:-0.015em; color:var(--text-primary)">{{ pageTitle }}</h1>
+            <p style="margin-top:0.25rem; font-size:0.8125rem; color:var(--text-secondary)">{{ pageSubtitle }}</p>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem; flex-shrink:0">
+          <div style="display:flex; align-items:center; gap:0.4375rem; margin-right:0.5rem; font-size:0.75rem; color:var(--text-muted)">
+            <span style="height:6px; width:6px; border-radius:999px; background:var(--warning)"></span>
+            Modo demonstração
+          </div>
+          <button style="display:flex; align-items:center; gap:0.4375rem; border-radius:6px; border:1px solid var(--border); background:var(--bg-surface); padding:0.5rem 0.75rem; font-size:0.8125rem; font-weight:600; color:var(--text-primary); transition:border-color 0.12s ease-out, background-color 0.12s ease-out" style-hover="border-color:var(--border-strong); background:var(--bg-page)">
+            <i data-lucide="radio-tower" width="15" height="15"></i>
+            Escanear rede
+          </button>
+          <button style="display:flex; align-items:center; gap:0.4375rem; border-radius:6px; background:var(--link); padding:0.5rem 0.875rem; font-size:0.8125rem; font-weight:600; color:var(--bg-surface); transition:background-color 0.12s ease-out" style-hover="background:var(--link-hover)">
+            <i data-lucide="download" width="15" height="15"></i>
+            Exportar CSV
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:1.5rem; padding-top:1.5rem; animation:fade-up 0.18s ease-out">
+
+        <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; flex-direction:column; gap:1.75rem">
+
+            <div style="display:flex; flex-wrap:wrap; align-items:stretch; gap:0; border-radius:12px; overflow:hidden; background:color-mix(in srgb, var(--navy) 7%, var(--bg-surface)); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--navy) 18%, var(--border))">
+              <div style="flex:1 1 11rem; min-width:11rem; padding:1.5rem 1.75rem; border-right:1px solid color-mix(in srgb, var(--navy) 14%, var(--border))">
+                <p style="font-size:0.625rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--navy-text)">Frota monitorada</p>
+                <p style="margin-top:0.625rem; font-family:'IBM Plex Mono', monospace; font-size:2.75rem; font-weight:500; letter-spacing:-0.03em; line-height:1; color:var(--text-primary)">{{ total }}</p>
+              </div>
+              <div style="flex:1 1 14rem; min-width:14rem; display:flex; align-items:center; gap:1.75rem; padding:1.5rem 1.75rem; border-right:1px solid color-mix(in srgb, var(--navy) 14%, var(--border))">
+                <div>
+                  <p style="display:flex; align-items:center; gap:0.4375rem; font-size:0.75rem; color:var(--text-secondary)"><span style="height:6px; width:6px; border-radius:999px; background:var(--success); animation:soft-pulse 3s ease-in-out infinite"></span>Online</p>
+                  <p style="margin-top:0.4375rem; font-family:'IBM Plex Mono', monospace; font-size:1.375rem; font-weight:500; color:var(--success)">{{ online }}</p>
+                </div>
+                <div>
+                  <p style="display:flex; align-items:center; gap:0.4375rem; font-size:0.75rem; color:var(--text-secondary)"><span style="height:6px; width:6px; border-radius:999px; background:var(--warning)"></span>Atenção</p>
+                  <p style="margin-top:0.4375rem; font-family:'IBM Plex Mono', monospace; font-size:1.375rem; font-weight:500; color:var(--warning)">{{ attention }}</p>
+                </div>
+                <div>
+                  <p style="display:flex; align-items:center; gap:0.4375rem; font-size:0.75rem; color:var(--text-secondary)"><span style="height:6px; width:6px; border-radius:999px; background:var(--text-muted)"></span>Offline</p>
+                  <p style="margin-top:0.4375rem; font-family:'IBM Plex Mono', monospace; font-size:1.375rem; font-weight:500; color:var(--text-secondary)">{{ offline }}</p>
+                </div>
+              </div>
+              <div style="padding: 1.5rem 1.75rem; flex: 2 1 22rem; min-width: 22rem; display: flex; align-items: center; gap: 0.875rem; background: var(--tint-plum); opacity: 1; overflow: visible">
+                <span style="color:var(--danger); display:flex; flex-shrink:0"><i data-lucide="triangle-alert" width="18" height="18"></i></span>
+                <div style="min-width:0; flex:1">
+                  <p style="font-size:0.625rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--danger)">Mais urgente agora</p>
+                  <p style="margin-top:0.25rem; font-size:0.8125rem; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ topAlertMessage }} <span style="color:var(--text-secondary)">· +{{ alertsRest }} outros</span></p>
+                </div>
+                <button onClick="{{ goAlerts }}" style="flex-shrink:0; display:flex; align-items:center; gap:0.25rem; font-size:0.75rem; font-weight:600; color:var(--link)" style-hover="color:var(--link-hover)">
+                  Ver alertas
+                  <i data-lucide="arrow-right" width="14" height="14"></i>
+                </button>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:1.5rem; align-items:stretch">
+
+              <div style="display:flex; flex-direction:column; border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden; min-width:0">
+                <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem; border-bottom:1px solid var(--border); padding:1rem 1.25rem">
+                  <div style="display:flex; align-items:baseline; gap:0.625rem">
+                    <h3 style="font-size:0.9375rem; font-weight:700; color:var(--text-primary)">Frota de impressoras</h3>
+                    <span style="font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-muted)">{{ total }} equipamentos</span>
+                  </div>
+                  <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem">
+                    <div style="display:flex; align-items:center; gap:0.4375rem; border:1px solid var(--border); border-radius:6px; background:var(--bg-page); padding:0.375rem 0.5rem; color:var(--text-muted)">
+                      <span style="display:flex"><i data-lucide="search" width="14" height="14"></i></span>
+                      <input placeholder="Buscar..." style="width:7rem; background:transparent; color:var(--text-primary); border:none; outline:none; font-size:0.75rem">
+                    </div>
+                    <button style="display:flex; align-items:center; gap:0.375rem; border:1px solid var(--border); border-radius:6px; padding:0.375rem 0.5rem; font-size:0.75rem; font-weight:600; color:var(--text-secondary); transition:border-color 0.12s ease-out" style-hover="border-color:var(--border-strong); color:var(--text-primary)">
+                      <i data-lucide="sliders-horizontal" width="14" height="14"></i>
+                      Filtros
+                    </button>
+                  </div>
+                </div>
+
+                <div style="flex:1; overflow-x:auto; overflow-y:auto">
+                <table style="width:100%; min-width:480px; font-size:0.8125rem">
+                  <thead>
+                    <tr style="text-align:left; font-size:0.625rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); border-bottom:1px solid var(--border)">
+                      <th style="padding:0.625rem 1.25rem; font-weight:700">Impressora</th>
+                      <th style="padding:0.625rem 0.75rem; font-weight:700">Endereço</th>
+                      <th style="padding:0.625rem 0.75rem; font-weight:700">Departamento</th>
+                      <th style="padding:0.625rem 0.75rem; font-weight:700; text-align:right">Toner</th>
+                      <th style="padding:0.625rem 1.25rem; font-weight:700">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ pageRows }}" as="r" hint-placeholder-count="10">
+                      <tr style="cursor:pointer; border-bottom:1px solid var(--divider); box-shadow:{{ r.rail }}; transition:background-color 0.12s ease-out" style-hover="background:var(--glass-hover)">
+                        <td style="padding:0.6875rem 1.25rem; font-weight:600; color:var(--text-primary)">{{ r.name }}</td>
+                        <td style="padding:0.6875rem 0.75rem; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-secondary)">{{ r.ip }}</td>
+                        <td style="padding:0.6875rem 0.75rem; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-secondary)">{{ r.department }}</td>
+                        <td style="padding:0.6875rem 0.75rem; text-align:right">
+                          <sc-if value="{{ r.hasToner }}" hint-placeholder-val="{{ true }}">
+                            <div style="display:inline-flex; align-items:center; gap:0.5rem">
+                              <div style="height:3px; width:2.5rem; border-radius:1px; background:var(--track); overflow:hidden"><div style="height:100%; width:{{ r.tonerPercent }}%; background:{{ r.tonerColor }}"></div></div>
+                              <span style="min-width:2.25rem; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; font-weight:500; color:{{ r.tonerColor }}">{{ r.tonerPercent }}%</span>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ r.noToner }}" hint-placeholder-val="{{ false }}">
+                            <span style="font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-muted)">—</span>
+                          </sc-if>
+                        </td>
+                        <td style="padding:0.6875rem 1.25rem">
+                          <span style="display:inline-flex; align-items:center; gap:0.4375rem; border-radius:5px; padding:0.1875rem 0.5rem 0.1875rem 0.375rem; background:{{ r.statusBg }}; font-size:0.75rem; font-weight:500; color:{{ r.statusFg }}">
+                            <span style="height:6px; width:6px; border-radius:999px; background:{{ r.statusDot }}; animation:{{ r.statusPulse }}"></span>
+                            {{ r.statusLabel }}
+                          </span>
+                        </td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+                </div>
+
+                <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.5rem; padding:0.75rem 1.25rem; border-top:1px solid var(--border)">
+                  <p style="font-size:0.75rem; color:var(--text-muted)">Exibindo <span style="font-family:'IBM Plex Mono', monospace; color:var(--text-secondary)">1–10</span> de <span style="font-family:'IBM Plex Mono', monospace; color:var(--text-secondary)">{{ total }}</span></p>
+                  <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.25rem; max-width:100%; overflow-x:auto">
+                    <button style="display:flex; align-items:center; justify-content:center; height:1.75rem; width:1.75rem; border-radius:5px; border:1px solid var(--border); color:var(--text-muted); opacity:0.5"><i data-lucide="chevron-left" width="14" height="14"></i></button>
+                    <sc-for list="{{ pageNumbers }}" as="pn" hint-placeholder-count="9">
+                      <button style="min-width:1.75rem; height:1.75rem; border-radius:5px; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; font-weight:500; background:{{ pn.bg }}; color:{{ pn.fg }}; transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">{{ pn.n }}</button>
+                    </sc-for>
+                    <button style="display:flex; align-items:center; justify-content:center; height:1.75rem; width:1.75rem; border-radius:5px; border:1px solid var(--border); color:var(--text-secondary); transition:border-color 0.12s ease-out" style-hover="border-color:var(--border-strong); color:var(--text-primary)"><i data-lucide="chevron-right" width="14" height="14"></i></button>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:1.25rem">
+                <div style="border-radius:10px; background:var(--tint-link); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--link) 20%, var(--border))">
+                  <div style="display:flex; align-items:center; justify-content:space-between; padding:0.875rem 1.25rem">
+                    <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Níveis de toner</h3>
+                    <span style="font-size:0.625rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--link)">Pior canal</span>
+                  </div>
+                  <div style="display:flex; flex-direction:column; padding:0 1.25rem 1.25rem">
+                    <sc-for list="{{ globalToner }}" as="t" hint-placeholder-count="4">
+                      <div style="padding:0.75rem 0; border-top:1px solid color-mix(in srgb, var(--link) 12%, transparent)">
+                        <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.8125rem">
+                          <span style="display:flex; align-items:center; gap:0.5rem; color:var(--text-secondary)"><span style="height:7px; width:7px; border-radius:2px; background:{{ t.color }}"></span>{{ t.label }}</span>
+                          <span style="font-family:'IBM Plex Mono', monospace; font-size:0.75rem; font-weight:500; color:{{ t.levelColor }}">{{ t.percent }}%</span>
+                        </div>
+                        <div style="margin-top:0.4375rem; height:3px; width:100%; border-radius:1px; background:color-mix(in srgb, var(--link) 14%, var(--bg-surface)); overflow:hidden"><div style="height:100%; width:{{ t.percent }}%; background:{{ t.color }}"></div></div>
+                      </div>
+                    </sc-for>
+                    <button onClick="{{ goToner }}" style="margin-top:0.75rem; display:flex; align-items:center; gap:0.3125rem; font-size:0.75rem; font-weight:600; color:var(--link)" style-hover="color:var(--link-hover)">
+                      Abrir suprimentos
+                      <i data-lucide="arrow-right" width="13" height="13"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div style="border-radius: 10px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger) 22%, var(--border)); padding: 1.25rem 1.25rem; background-color: var(--tint-plum)">
+                  <p style="font-size:0.625rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--danger)">Reposição urgente</p>
+                  <p style="margin-top:0.5rem; display:flex; align-items:baseline; gap:0.375rem">
+                    <span style="font-family:'IBM Plex Mono', monospace; font-size:1.5rem; font-weight:500; letter-spacing:-0.02em; color:var(--text-primary)">{{ criticalPercent }}%</span>
+                    <span style="font-size:0.75rem; color:var(--text-secondary)">restante no canal preto</span>
+                  </p>
+                  <p style="margin-top:0.5rem; font-size:0.75rem; line-height:1.5; color:var(--text-secondary)">{{ criticalCountLabel }} abaixo do limiar crítico de 15%.</p>
+                  <button style="margin-top:0.875rem; border-radius:6px; background:var(--bg-surface); padding:0.4375rem 0.75rem; font-size:0.75rem; font-weight:600; color:var(--danger); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--danger) 30%, var(--border))">Ver recomendações</button>
+                </div>
+
+                <div style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow)">
+                  <div style="border-bottom:1px solid var(--border); padding:0.875rem 1.25rem">
+                    <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Ações rápidas</h3>
+                  </div>
+                  <div style="display:flex; flex-direction:column; padding:0.375rem">
+                    <sc-for list="{{ quickActions }}" as="q" hint-placeholder-count="5">
+                      <button onClick="{{ q.go }}" style="display:flex; width:100%; align-items:center; gap:0.75rem; border-radius:6px; padding:0.625rem 0.75rem; text-align:left; transition:background-color 0.12s ease-out" style-hover="background:var(--glass-hover)">
+                        <span style="color:var(--text-muted); display:flex; flex-shrink:0"><i data-lucide="{{ q.icon }}" width="16" height="16"></i></span>
+                        <span style="flex:1; font-size:0.8125rem; font-weight:600; color:var(--text-primary)">{{ q.label }}</span>
+                        <span style="color:var(--border-strong); display:flex; flex-shrink:0"><i data-lucide="chevron-right" width="14" height="14"></i></span>
+                      </button>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:1.5rem">
+              <div style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:0.875rem 1.25rem; background:color-mix(in srgb, var(--navy) 6%, var(--bg-surface))">
+                  <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Consumo de páginas</h3>
+                  <span style="font-size:0.625rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--navy-text)">Jan – Jun</span>
+                </div>
+                <div style="padding:1.5rem; height:17rem">{{ pagesChart }}</div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow)">
+                <div style="border-bottom:1px solid var(--border); padding:0.875rem 1.25rem">
+                  <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Impressões totais</h3>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; padding:1.5rem">
+                  <p style="font-family:'IBM Plex Mono', monospace; font-size:2.25rem; font-weight:500; line-height:1; letter-spacing:-0.03em; color:var(--text-primary)">949.054</p>
+                  <div style="margin-top:0.625rem; display:flex; align-items:center; gap:0.375rem; font-size:0.8125rem; color:var(--text-secondary)">
+                    <span style="display:flex; color:var(--success)"><i data-lucide="trending-up" width="15" height="15"></i></span>
+                    <span style="font-family:'IBM Plex Mono', monospace; font-weight:500; color:var(--success)">+0,1%</span>
+                    vs. mês anterior
+                  </div>
+                  <div style="margin-top:auto; display:flex; align-items:flex-end; gap:0.5rem; padding-top:1.5rem; height:4.5rem">
+                    <sc-for list="{{ monthBars }}" as="b" hint-placeholder-count="6">
+                      <div style="flex:1 1 0%; border-radius:1px 1px 0 0; background:{{ b.color }}; height:{{ b.h }}px"></div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; border-radius:10px; background:var(--tint-success); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--success) 20%, var(--border))">
+                <div style="padding:0.875rem 1.25rem">
+                  <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Saúde da frota</h3>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding:0 1.25rem 1.25rem">
+                  <sc-for list="{{ healthBars }}" as="hb" hint-placeholder-count="3">
+                    <div style="padding-bottom:1.25rem">
+                      <div style="display:flex; align-items:center; justify-content:space-between; font-size:0.75rem">
+                        <span style="color:var(--text-secondary)">{{ hb.label }}</span>
+                        <span style="font-family:'IBM Plex Mono', monospace; font-weight:500; color:var(--text-primary)">{{ hb.value }} <span style="color:var(--text-muted)">· {{ hb.pct }}%</span></span>
+                      </div>
+                      <div style="margin-top:0.4375rem; height:4px; width:100%; border-radius:1px; background:color-mix(in srgb, var(--success) 16%, var(--bg-surface)); overflow:hidden"><div style="height:100%; width:{{ hb.pct }}%; background:{{ hb.color }}"></div></div>
+                    </div>
+                  </sc-for>
+                  <button onClick="{{ goAlerts }}" style="display:flex; align-items:center; gap:0.3125rem; font-size:0.75rem; font-weight:600; color:var(--link)" style-hover="color:var(--link-hover)">
+                    Ver alertas abertos
+                    <i data-lucide="arrow-right" width="13" height="13"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isPrinters }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; border-bottom:1px solid var(--border); padding:1rem 1.5rem">
+              <div style="display:flex; align-items:center; gap:0.375rem">
+                <sc-for list="{{ statusTabs }}" as="tb" hint-placeholder-count="4">
+                  <button style="border-radius:6px; padding:0.375rem 0.75rem; font-size:0.75rem; font-weight:600; background:{{ tb.bg }}; color:{{ tb.fg }}; transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">{{ tb.label }} <span style="font-family:'IBM Plex Mono', monospace; opacity:0.7">{{ tb.count }}</span></button>
+                </sc-for>
+              </div>
+              <div style="display:flex; align-items:center; gap:0.5rem">
+                <div style="display:flex; align-items:center; gap:0.4375rem; border:1px solid var(--border); border-radius:6px; background:var(--bg-page); padding:0.375rem 0.5rem; color:var(--text-muted)">
+                  <span style="display:flex"><i data-lucide="search" width="14" height="14"></i></span>
+                  <input placeholder="Nome, IP ou modelo" style="width:11rem; background:transparent; color:var(--text-primary); border:none; outline:none; font-size:0.75rem">
+                </div>
+                <div style="display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden">
+                  <button style="padding:0.4375rem 0.5rem; background:var(--divider); color:var(--text-primary); display:flex"><i data-lucide="rows-3" width="15" height="15"></i></button>
+                  <button style="padding:0.4375rem 0.5rem; border-left:1px solid var(--border); color:var(--text-muted); display:flex" style-hover="color:var(--text-primary)"><i data-lucide="layout-grid" width="15" height="15"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <div style="overflow-x:auto">
+              <table style="width:100%; font-size:0.8125rem">
+                <thead>
+                  <tr style="text-align:left; font-size:0.625rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); border-bottom:1px solid var(--border)">
+                    <th style="padding:0.625rem 1.5rem; font-weight:700">Impressora</th>
+                    <th style="padding:0.625rem 0.75rem; font-weight:700">Endereço</th>
+                    <th style="padding:0.625rem 0.75rem; font-weight:700">Modelo</th>
+                    <th style="padding:0.625rem 0.75rem; font-weight:700">Departamento</th>
+                    <th style="padding:0.625rem 0.75rem; font-weight:700; text-align:right">Toner</th>
+                    <th style="padding:0.625rem 0.75rem; font-weight:700">Status</th>
+                    <th style="padding:0.625rem 1.5rem; font-weight:700; text-align:right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ pageRows }}" as="pr" hint-placeholder-count="10">
+                    <tr style="cursor:pointer; border-bottom:1px solid var(--divider); transition:background-color 0.12s ease-out" style-hover="background:var(--glass-hover)">
+                      <td style="padding:0.6875rem 1.5rem; font-weight:600; color:var(--text-primary)">{{ pr.name }}</td>
+                      <td style="padding:0.6875rem 0.75rem; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-secondary)">{{ pr.ip }}</td>
+                      <td style="padding:0.6875rem 0.75rem; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-secondary)">{{ pr.model }}</td>
+                      <td style="padding:0.6875rem 0.75rem; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text-secondary)">{{ pr.department }}</td>
+                      <td style="padding:0.6875rem 0.75rem; text-align:right">
+                        <sc-if value="{{ pr.hasToner }}" hint-placeholder-val="{{ true }}">
+                          <div style="display:inline-flex; align-items:center; gap:0.5rem">
+                            <div style="height:3px; width:2.5rem; border-radius:1px; background:var(--track); overflow:hidden"><div style="height:100%; width:{{ pr.tonerPercent }}%; background:{{ pr.tonerColor }}"></div></div>
+                            <span style="min-width:2.25rem; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; font-weight:500; color:{{ pr.tonerColor }}">{{ pr.tonerPercent }}%</span>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{ pr.noToner }}" hint-placeholder-val="{{ false }}">
+                          <span style="font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-muted)">—</span>
+                        </sc-if>
+                      </td>
+                      <td style="padding:0.6875rem 0.75rem">
+                        <span style="display:inline-flex; align-items:center; gap:0.4375rem; border-radius:5px; padding:0.1875rem 0.5rem 0.1875rem 0.375rem; background:{{ pr.statusBg }}; font-size:0.75rem; font-weight:500; color:{{ pr.statusFg }}">
+                          <span style="height:6px; width:6px; border-radius:999px; background:{{ pr.statusDot }}; animation:{{ pr.statusPulse }}"></span>
+                          {{ pr.statusLabel }}
+                        </span>
+                      </td>
+                      <td style="padding:0.5rem 1.5rem">
+                        <div style="display:flex; align-items:center; justify-content:flex-end; gap:0.125rem">
+                          <button style="border-radius:5px; padding:0.375rem; color:var(--text-muted); display:flex; transition:background-color 0.12s ease-out, color 0.12s ease-out" style-hover="background:var(--track); color:var(--link)"><i data-lucide="file-text" width="14" height="14"></i></button>
+                          <button style="border-radius:5px; padding:0.375rem; color:var(--text-muted); display:flex; transition:background-color 0.12s ease-out, color 0.12s ease-out" style-hover="background:var(--track); color:var(--link)"><i data-lucide="globe" width="14" height="14"></i></button>
+                          <button style="border-radius:5px; padding:0.375rem; color:var(--text-muted); display:flex; transition:background-color 0.12s ease-out, color 0.12s ease-out" style-hover="background:var(--track); color:var(--link)"><i data-lucide="printer" width="14" height="14"></i></button>
+                          <button style="border-radius:5px; padding:0.375rem; color:var(--text-muted); display:flex; transition:background-color 0.12s ease-out, color 0.12s ease-out" style-hover="background:var(--track); color:var(--link)"><i data-lucide="settings" width="14" height="14"></i></button>
+                        </div>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:0.75rem 1.5rem">
+              <p style="font-size:0.75rem; color:var(--text-muted)">Exibindo <span style="font-family:'IBM Plex Mono', monospace; color:var(--text-secondary)">1–10</span> de <span style="font-family:'IBM Plex Mono', monospace; color:var(--text-secondary)">{{ total }}</span></p>
+              <div style="display:flex; align-items:center; gap:0.25rem">
+                <button style="display:flex; align-items:center; justify-content:center; height:1.75rem; width:1.75rem; border-radius:5px; border:1px solid var(--border); color:var(--text-muted); opacity:0.5"><i data-lucide="chevron-left" width="14" height="14"></i></button>
+                <sc-for list="{{ pageNumbers }}" as="pn" hint-placeholder-count="9">
+                  <button style="min-width:1.75rem; height:1.75rem; border-radius:5px; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; font-weight:500; background:{{ pn.bg }}; color:{{ pn.fg }}; transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">{{ pn.n }}</button>
+                </sc-for>
+                <button style="display:flex; align-items:center; justify-content:center; height:1.75rem; width:1.75rem; border-radius:5px; border:1px solid var(--border); color:var(--text-secondary); transition:border-color 0.12s ease-out" style-hover="border-color:var(--border-strong); color:var(--text-primary)"><i data-lucide="chevron-right" width="14" height="14"></i></button>
+                <select style="margin-left:0.375rem; border-radius:5px; border:1px solid var(--border); background:var(--bg-surface); padding:0.3125rem 0.5rem; font-size:0.75rem; color:var(--text-secondary); outline:none">
+                  <option>10 / página</option>
+                  <option>20 / página</option>
+                  <option>50 / página</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isToner }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; gap:1.5rem">
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:0.375rem; border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); padding:0.75rem 1.25rem">
+              <p style="font-size:0.8125rem; color:var(--text-secondary); margin-right:0.5rem">Precisam de intervenção agora:</p>
+              <sc-for list="{{ tonerSummary }}" as="s" hint-placeholder-count="4">
+                <button style="display:flex; align-items:center; gap:0.4375rem; border-radius:6px; padding:0.375rem 0.625rem; background:{{ s.bg }}; transition:background-color 0.12s ease-out" style-hover="background:var(--glass-hover)">
+                  <span style="display:flex; color:{{ s.fg }}"><i data-lucide="{{ s.icon }}" width="14" height="14"></i></span>
+                  <span style="font-family:'IBM Plex Mono', monospace; font-size:1.0625rem; font-weight:600; letter-spacing:-0.02em; color:var(--text-primary)">{{ s.value }}</span>
+                  <span style="font-size:0.75rem; color:var(--text-secondary)">{{ s.label }}</span>
+                </button>
+              </sc-for>
+            </div>
+
+            <div style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; border-bottom:1px solid var(--border); padding:1rem 1.5rem">
+                <div style="display:flex; flex-wrap:wrap; gap:0.375rem">
+                  <sc-for list="{{ tonerPills }}" as="p" hint-placeholder-count="5">
+                    <button style="border-radius:6px; padding:0.375rem 0.75rem; font-size:0.75rem; font-weight:600; background:{{ p.bg }}; color:{{ p.fg }}; transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">{{ p.label }}</button>
+                  </sc-for>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.4375rem; border:1px solid var(--border); border-radius:6px; background:var(--bg-page); padding:0.375rem 0.5rem; color:var(--text-muted)">
+                  <span style="display:flex"><i data-lucide="search" width="14" height="14"></i></span>
+                  <input placeholder="Nome ou IP" style="width:9rem; background:transparent; color:var(--text-primary); border:none; outline:none; font-size:0.75rem">
+                </div>
+              </div>
+
+              <div style="overflow-x:auto">
+                <table style="width:100%; min-width:760px; font-size:0.8125rem">
+                  <thead>
+                    <tr style="text-align:left; font-size:0.625rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); border-bottom:1px solid var(--border)">
+                      <th style="padding:0.625rem 1.5rem; font-weight:700">Impressora</th>
+                      <th style="padding:0.625rem 0.75rem; font-weight:700">Endereço</th>
+                      <th style="padding:0.625rem 0.75rem; font-weight:700">Status</th>
+                      <th style="padding:0.625rem 0.75rem; font-weight:700">Níveis por canal</th>
+                      <th style="padding:0.625rem 1.5rem; font-weight:700; text-align:right">Atividade</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ tonerRows }}" as="tr2" hint-placeholder-count="12">
+                      <tr style="cursor:pointer; border-bottom:1px solid var(--divider); box-shadow:{{ tr2.rail }}; transition:background-color 0.12s ease-out" style-hover="background:var(--glass-hover)">
+                        <td style="padding:0.6875rem 1.5rem">
+                          <p style="font-weight:600; color:var(--text-primary)">{{ tr2.name }}</p>
+                          <p style="margin-top:0.125rem; font-size:0.6875rem; color:var(--text-muted)">{{ tr2.department }}</p>
+                        </td>
+                        <td style="padding:0.6875rem 0.75rem; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-secondary)">{{ tr2.ip }}</td>
+                        <td style="padding:0.6875rem 0.75rem">
+                          <span style="display:inline-flex; align-items:center; gap:0.4375rem; border-radius:5px; padding:0.1875rem 0.5rem 0.1875rem 0.375rem; background:{{ tr2.statusBg }}; font-size:0.75rem; font-weight:500; color:{{ tr2.statusFg }}">
+                            <span style="height:6px; width:6px; border-radius:999px; background:{{ tr2.statusDot }}; animation:{{ tr2.statusPulse }}"></span>
+                            {{ tr2.statusLabel }}
+                          </span>
+                        </td>
+                        <td style="padding:0.6875rem 0.75rem">
+                          <sc-if value="{{ tr2.hasToner }}" hint-placeholder-val="{{ true }}">
+                            <div style="display:flex; flex-wrap:wrap; align-items:center; column-gap:1.25rem; row-gap:0.375rem">
+                              <sc-for list="{{ tr2.channels }}" as="c" hint-placeholder-count="1">
+                                <div style="display:flex; align-items:center; gap:0.4375rem">
+                                  <span style="height:7px; width:7px; flex-shrink:0; border-radius:2px; background:{{ c.dot }}"></span>
+                                  <div style="height:3px; width:2.75rem; border-radius:1px; background:var(--track); overflow:hidden"><div style="height:100%; width:{{ c.percent }}%; background:{{ c.dot }}"></div></div>
+                                  <span style="font-family:'IBM Plex Mono', monospace; font-size:0.6875rem; font-weight:500; color:{{ c.color }}">{{ c.percent }}%</span>
+                                </div>
+                              </sc-for>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ tr2.noToner }}" hint-placeholder-val="{{ false }}">
+                            <span style="font-size:0.75rem; color:var(--text-muted)">Sem leitura de toner</span>
+                          </sc-if>
+                        </td>
+                        <td style="padding:0.6875rem 1.5rem; text-align:right; font-size:0.75rem; color:var(--text-secondary)">{{ tr2.lastSeen }}</td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+              <div style="padding:0.75rem 1.5rem; font-size:0.75rem; color:var(--text-muted)">Exibindo <span style="font-family:'IBM Plex Mono', monospace; color:var(--text-secondary)">{{ total }}</span> de <span style="font-family:'IBM Plex Mono', monospace; color:var(--text-secondary)">{{ total }}</span> impressoras · ordenadas por criticidade</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isAlerts }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; border-bottom:1px solid var(--border); padding:1rem 1.5rem">
+              <div style="display:flex; align-items:center; gap:0.375rem">
+                <button style="border-radius:6px; padding:0.375rem 0.75rem; font-size:0.75rem; font-weight:600; background:var(--tint-link); color:var(--link)">Todos <span style="font-family:'IBM Plex Mono', monospace; opacity:0.7">{{ alertCount }}</span></button>
+                <button style="border-radius:6px; padding:0.375rem 0.75rem; font-size:0.75rem; font-weight:600; color:var(--danger); transition:background-color 0.12s ease-out" style-hover="background:var(--danger-bg)">Crítico <span style="font-family:'IBM Plex Mono', monospace; opacity:0.7">{{ criticalCount }}</span></button>
+                <button style="border-radius:6px; padding:0.375rem 0.75rem; font-size:0.75rem; font-weight:600; color:var(--warning); transition:background-color 0.12s ease-out" style-hover="background:var(--tint-warning)">Atenção <span style="font-family:'IBM Plex Mono', monospace; opacity:0.7">{{ warningCount }}</span></button>
+              </div>
+              <p style="font-size:0.75rem; color:var(--text-muted)">Derivados automaticamente das leituras da frota</p>
+            </div>
+            <ul style="list-style:none; margin:0; padding:0">
+              <sc-for list="{{ alertRows }}" as="a" hint-placeholder-count="10">
+                <li style="border-bottom:1px solid var(--divider); box-shadow:{{ a.rail }}">
+                  <button style="display:flex; width:100%; align-items:center; gap:0.875rem; padding:0.875rem 1.5rem; text-align:left; transition:background-color 0.12s ease-out" style-hover="background:var(--glass-hover)">
+                    <span style="flex-shrink:0; display:flex; color:{{ a.fg }}"><i data-lucide="triangle-alert" width="15" height="15"></i></span>
+                    <div style="min-width:0; flex:1">
+                      <p style="font-size:0.8125rem; color:var(--text-primary)">{{ a.message }}</p>
+                    </div>
+                    <span style="flex-shrink:0; font-size:0.6875rem; color:var(--text-muted)">{{ a.timestamp }}</span>
+                    <span style="flex-shrink:0; width:4.5rem; text-align:right; font-size:0.625rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:{{ a.fg }}">{{ a.badge }}</span>
+                  </button>
+                </li>
+              </sc-for>
+            </ul>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isReports }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; gap:1.5rem">
+            <div style="display:flex; flex-wrap:wrap; align-items:stretch; border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); padding:0.25rem 0.5rem">
+              <sc-for list="{{ monthCounters }}" as="m" hint-placeholder-count="6">
+                <div style="flex:1 1 8rem; min-width:8rem; padding:0.875rem 1rem; border-left:1px solid var(--divider); border-radius:6px; background:{{ m.bg }}">
+                  <p style="font-size:0.625rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted)">{{ m.month }}</p>
+                  <p style="margin-top:0.4375rem; font-family:'IBM Plex Mono', monospace; font-size:1.0625rem; font-weight:500; letter-spacing:-0.02em; color:var(--text-primary)">{{ m.pages }} <span style="font-size:0.6875rem; font-weight:500; color:{{ m.deltaColor }}">{{ m.delta }}</span></p>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:1.5rem; align-items:start">
+              <div style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow)">
+                <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); padding:0.875rem 1.25rem">
+                  <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Consumo por departamento</h3>
+                  <span style="font-size:0.625rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted)">Todas as unidades</span>
+                </div>
+                <div style="display:flex; flex-direction:column">
+                  <sc-for list="{{ departments }}" as="d" hint-placeholder-count="7">
+                    <button style="display:flex; width:100%; align-items:center; gap:1.25rem; border-bottom:1px solid var(--divider); padding:0.8125rem 1.25rem; text-align:left; transition:background-color 0.12s ease-out" style-hover="background:var(--glass-hover)">
+                      <div style="width:12rem; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.8125rem; font-weight:500; color:var(--text-primary)">{{ d.department }}</div>
+                      <div style="height:4px; flex:1; border-radius:1px; background:var(--track); overflow:hidden"><div style="height:100%; background:var(--link-hover); width:{{ d.barPct }}%"></div></div>
+                      <div style="width:5.5rem; flex-shrink:0; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:0.8125rem; font-weight:500; color:var(--text-primary)">{{ d.total }}</div>
+                      <div style="width:2.5rem; flex-shrink:0; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:0.6875rem; color:var(--text-muted)">{{ d.pct }}%</div>
+                      <span style="flex-shrink:0; color:var(--border-strong); display:flex"><i data-lucide="chevron-down" width="15" height="15"></i></span>
+                    </button>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="display:flex; flex-direction:column; gap:1.5rem">
+                <sc-for list="{{ rankings }}" as="rk" hint-placeholder-count="2">
+                  <div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; padding-bottom:0.625rem; border-bottom:1px solid var(--border)">
+                      <span style="display:flex; color:{{ rk.iconFg }}"><i data-lucide="{{ rk.icon }}" width="14" height="14"></i></span>
+                      <h3 style="font-size:0.8125rem; font-weight:600; color:var(--text-primary)">{{ rk.title }}</h3>
+                    </div>
+                    <div style="display:flex; flex-direction:column; padding-top:0.375rem">
+                      <sc-for list="{{ rk.items }}" as="it" hint-placeholder-count="5">
+                        <div style="padding:0.5rem 0">
+                          <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem">
+                            <span style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.8125rem; color:var(--text-primary)">{{ it.rank }}. {{ it.name }}</span>
+                            <span style="flex-shrink:0; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-secondary)">{{ it.total }}</span>
+                          </div>
+                          <div style="margin-top:0.3125rem; height:2px; width:100%; border-radius:1px; background:var(--track); overflow:hidden"><div style="height:100%; width:{{ it.pct }}%; background:{{ rk.barColor }}"></div></div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+              <div style="display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); padding:0.875rem 1.25rem">
+                <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Impressoras inativas</h3>
+                <span style="font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-muted)">{{ decomCount }} equipamentos</span>
+              </div>
+              <div style="overflow-x:auto">
+                <table style="width:100%; min-width:560px; font-size:0.8125rem">
+                  <thead>
+                    <tr style="text-align:left; font-size:0.625rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); border-bottom:1px solid var(--border)">
+                      <th style="padding:0.5625rem 1.25rem; font-weight:700">Modelo</th>
+                      <th style="padding:0.5625rem 1.25rem; font-weight:700">Departamento / origem</th>
+                      <th style="padding:0.5625rem 1.25rem; font-weight:700">Endereço</th>
+                      <th style="padding:0.5625rem 1.25rem; font-weight:700; text-align:right">Inativa desde</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ decommissioned }}" as="p" hint-placeholder-count="8">
+                      <tr style="border-bottom:1px solid var(--divider)">
+                        <td style="padding:0.5625rem 1.25rem; font-weight:500; color:var(--text-primary)">{{ p.model }}</td>
+                        <td style="padding:0.5625rem 1.25rem; color:var(--text-secondary)">{{ p.department }}</td>
+                        <td style="padding:0.5625rem 1.25rem; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-secondary)">{{ p.ip }}</td>
+                        <td style="padding:0.5625rem 1.25rem; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-muted)">{{ p.date }}</td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isHistory }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; gap:1.5rem">
+            <div style="display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:0.75rem">
+              <div style="display:flex; align-items:baseline; gap:0.625rem">
+                <h2 style="font-size:1.0625rem; font-weight:700; letter-spacing:-0.01em; color:var(--text-primary)">Histórico de impressão</h2>
+                <span style="font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-muted)">{{ historyGrandTotal }} páginas · 6 meses</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:0.375rem">
+                <button style="display:flex; align-items:center; gap:0.375rem; border-radius:6px; border:1px solid var(--border); padding:0.375rem 0.625rem; font-size:0.75rem; font-weight:600; color:var(--text-secondary); transition:border-color 0.12s ease-out" style-hover="border-color:var(--border-strong); color:var(--text-primary)">
+                  <i data-lucide="maximize-2" width="13" height="13"></i>
+                  Expandir tudo
+                </button>
+                <button style="display:flex; align-items:center; gap:0.375rem; border-radius:6px; border:1px solid var(--border); padding:0.375rem 0.625rem; font-size:0.75rem; font-weight:600; color:var(--text-secondary); transition:border-color 0.12s ease-out" style-hover="border-color:var(--border-strong); color:var(--text-primary)">
+                  <i data-lucide="minimize-2" width="13" height="13"></i>
+                  Recolher
+                </button>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+              <table style="width:100%; font-size:0.8125rem">
+                <thead>
+                  <tr style="text-align:left; font-size:0.625rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); border-bottom:1px solid var(--border)">
+                    <th style="padding:0.5625rem 1.25rem; font-weight:700">Período</th>
+                    <sc-for list="{{ historyMonths }}" as="m" hint-placeholder-count="6">
+                      <th style="padding:0.5625rem 1rem; font-weight:700; text-align:right">{{ m.month }}</th>
+                    </sc-for>
+                    <th style="padding:0.5625rem 1.25rem; font-weight:700; text-align:right; color:var(--link)">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="padding:0.75rem 1.25rem; font-weight:500; color:var(--text-primary)">Páginas impressas</td>
+                    <sc-for list="{{ historyMonths }}" as="m" hint-placeholder-count="6">
+                      <td style="padding:0.75rem 1rem; text-align:right; font-family:'IBM Plex Mono', monospace; color:var(--text-secondary)">{{ m.total }}</td>
+                    </sc-for>
+                    <td style="padding:0.75rem 1.25rem; text-align:right; font-family:'IBM Plex Mono', monospace; font-weight:600; color:var(--link)">{{ historyGrandTotal }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <sc-for list="{{ historySites }}" as="s" hint-placeholder-count="4">
+              <div style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+                <button onClick="{{ s.toggle }}" style="display:flex; width:100%; align-items:center; justify-content:space-between; gap:0.75rem; padding:0.875rem 1.25rem; text-align:left; transition:background-color 0.12s ease-out" style-hover="background:var(--glass-hover)">
+                  <div style="display:flex; align-items:center; gap:0.625rem">
+                    <span style="color:var(--text-muted); display:flex"><i data-lucide="{{ s.chevron }}" width="15" height="15"></i></span>
+                    <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">{{ s.site }}</h3>
+                    <span style="font-size:0.6875rem; color:var(--text-muted)">{{ s.countLabel }}</span>
+                  </div>
+                  <span style="font-family:'IBM Plex Mono', monospace; font-size:0.8125rem; font-weight:500; color:var(--text-primary)">{{ s.totalLabel }}</span>
+                </button>
+                <sc-if value="{{ s.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="overflow-x:auto; border-top:1px solid var(--border)">
+                    <table style="width:100%; min-width:760px; font-size:0.8125rem">
+                      <thead>
+                        <tr style="text-align:left; font-size:0.625rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); border-bottom:1px solid var(--border)">
+                          <th style="padding:0.5625rem 1.25rem; font-weight:700">Impressora</th>
+                          <th style="padding:0.5625rem 0.75rem; font-weight:700">Endereço</th>
+                          <th style="padding:0.5625rem 0.75rem; font-weight:700">Departamento</th>
+                          <sc-for list="{{ historyMonths }}" as="m" hint-placeholder-count="6">
+                            <th style="padding:0.5625rem 0.75rem; font-weight:700; text-align:right">{{ m.month }}</th>
+                          </sc-for>
+                          <th style="padding:0.5625rem 1.25rem; font-weight:700; text-align:right">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <sc-for list="{{ s.printers }}" as="p" hint-placeholder-count="5">
+                          <tr style="border-bottom:1px solid var(--divider); transition:background-color 0.12s ease-out" style-hover="background:var(--glass-hover)">
+                            <td style="padding:0.5625rem 1.25rem; font-weight:500; color:var(--text-primary)">{{ p.name }}</td>
+                            <td style="padding:0.5625rem 0.75rem; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-muted)">{{ p.ip }}</td>
+                            <td style="max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0.5625rem 0.75rem; color:var(--text-secondary)">{{ p.dept }}</td>
+                            <sc-for list="{{ p.months }}" as="mp" hint-placeholder-count="6">
+                              <td style="padding:0.5625rem 0.75rem; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-secondary)">{{ mp.pages }}</td>
+                            </sc-for>
+                            <td style="padding:0.5625rem 1.25rem; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; font-weight:600; color:var(--text-primary)">{{ p.total }}</td>
+                          </tr>
+                        </sc-for>
+                        <tr style="background:var(--bg-page)">
+                          <td style="padding:0.625rem 1.25rem; font-size:0.6875rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-secondary)" colspan="3">Subtotal</td>
+                          <sc-for list="{{ s.monthTotals }}" as="mt" hint-placeholder-count="6">
+                            <td style="padding:0.625rem 0.75rem; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; font-weight:600; color:var(--text-primary)">{{ mt.value }}</td>
+                          </sc-for>
+                          <td style="padding:0.625rem 1.25rem; text-align:right; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; font-weight:600; color:var(--link)">{{ s.totalValue }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isNetwork }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:1.5rem; align-items:start">
+
+            <div style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; border-bottom:1px solid var(--border); padding:1rem 1.5rem">
+                <div style="display:flex; align-items:baseline; gap:0.625rem">
+                  <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Print Servers</h3>
+                  <span style="font-size:0.75rem; color:var(--text-muted)">infraestrutura de filas</span>
+                </div>
+                <button style="display:flex; align-items:center; gap:0.4375rem; border-radius:6px; background:var(--link); padding:0.4375rem 0.75rem; font-size:0.75rem; font-weight:600; color:var(--bg-surface); transition:background-color 0.12s ease-out" style-hover="background:var(--link-hover)">
+                  <i data-lucide="plus" width="14" height="14"></i>
+                  Novo Print Server
+                </button>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:0.75rem; border-bottom:1px solid var(--border); padding:0.875rem 1.5rem; background:var(--danger-bg)">
+                <span style="display:flex; color:var(--danger); flex-shrink:0"><i data-lucide="circle-alert" width="16" height="16"></i></span>
+                <p style="flex:1; font-size:0.8125rem; color:var(--text-primary)">Backend indisponível <span style="color:var(--text-secondary)">— verifique se o serviço está em execução para listar os servidores.</span></p>
+                <button style="flex-shrink:0; display:flex; align-items:center; gap:0.375rem; font-size:0.75rem; font-weight:600; color:var(--danger)">
+                  <i data-lucide="refresh-cw" width="13" height="13"></i>
+                  Tentar novamente
+                </button>
+              </div>
+
+              <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; padding:3.5rem 1.5rem">
+                <span style="color:var(--border-strong); display:flex"><i data-lucide="server-off" width="22" height="22"></i></span>
+                <p style="font-size:0.8125rem; color:var(--text-muted)">Nenhum print server carregado.</p>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:1.25rem">
+              <div style="display:flex; flex-direction:column; gap:0.75rem; border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); padding:1.25rem; box-shadow:inset 3px 0 0 var(--link-hover)">
+                <div style="display:flex; align-items:center; gap:0.5rem">
+                  <span style="color:var(--link); display:flex"><i data-lucide="database" width="16" height="16"></i></span>
+                  <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Sincronizar</h3>
+                </div>
+                <p style="font-size:0.8125rem; line-height:1.55; color:var(--text-secondary)">Aplica o que o Print Server informa ao cadastro: cria as filas novas, atualiza as existentes e desativa as que sumiram. Nada é apagado — leituras e alertas são preservados.</p>
+                <span style="align-self:flex-start; border-radius:3px; background:#faf0dd; padding:0.0625rem 0.375rem; font-size:0.625rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--warning)">grava no banco</span>
+                <button style="margin-top:0.25rem; align-self:flex-start; display:flex; align-items:center; gap:0.4375rem; border-radius:6px; background:var(--link); padding:0.4375rem 0.75rem; font-size:0.8125rem; font-weight:600; color:var(--bg-surface); opacity:0.5">
+                  <i data-lucide="database" width="14" height="14"></i>
+                  Sincronizar
+                </button>
+              </div>
+
+              <div style="border-top:1px solid var(--border); padding-top:1rem; display:flex; flex-direction:column; gap:0.625rem">
+                <div style="display:flex; align-items:center; gap:0.5rem">
+                  <span style="color:var(--text-muted); display:flex"><i data-lucide="radio-tower" width="15" height="15"></i></span>
+                  <h3 style="font-size:0.8125rem; font-weight:600; color:var(--text-primary)">Descobrir</h3>
+                  <span style="font-size:0.625rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-muted)">somente leitura</span>
+                </div>
+                <p style="font-size:0.75rem; line-height:1.55; color:var(--text-secondary)">Consulta as filas do Print Server sem alterar o cadastro — resultado temporário, nada é criado ou removido.</p>
+                <button style="align-self:flex-start; font-size:0.75rem; font-weight:600; color:var(--link); opacity:0.5">Descobrir agora →</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isUsers }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+            <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.75rem; border-bottom:1px solid var(--border); padding:1rem 1.5rem">
+              <div style="display:flex; align-items:center; gap:0.375rem">
+                <button style="border-radius:6px; padding:0.375rem 0.75rem; font-size:0.75rem; font-weight:600; background:var(--divider); color:var(--text-primary)">Todos</button>
+                <button style="border-radius:6px; padding:0.375rem 0.75rem; font-size:0.75rem; font-weight:600; color:var(--text-secondary); transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">Administradores</button>
+                <button style="border-radius:6px; padding:0.375rem 0.75rem; font-size:0.75rem; font-weight:600; color:var(--text-secondary); transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">Operadores</button>
+                <button style="border-radius:6px; padding:0.375rem 0.75rem; font-size:0.75rem; font-weight:600; color:var(--text-secondary); transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">Inativos</button>
+              </div>
+              <div style="display:flex; align-items:center; gap:0.5rem">
+                <div style="display:flex; align-items:center; gap:0.4375rem; border:1px solid var(--border); border-radius:6px; background:var(--bg-page); padding:0.375rem 0.5rem; color:var(--text-muted)">
+                  <span style="display:flex"><i data-lucide="search" width="14" height="14"></i></span>
+                  <input placeholder="Nome ou e-mail" style="width:11rem; background:transparent; color:var(--text-primary); border:none; outline:none; font-size:0.75rem">
+                </div>
+                <button style="display:flex; align-items:center; gap:0.4375rem; border-radius:6px; background:var(--link); padding:0.4375rem 0.75rem; font-size:0.75rem; font-weight:600; color:var(--bg-surface); transition:background-color 0.12s ease-out" style-hover="background:var(--link-hover)">
+                  <i data-lucide="user-plus" width="14" height="14"></i>
+                  Novo usuário
+                </button>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:0.75rem; border-bottom:1px solid var(--border); padding:0.875rem 1.5rem; background:var(--danger-bg)">
+              <span style="display:flex; color:var(--danger); flex-shrink:0"><i data-lucide="circle-alert" width="15" height="15"></i></span>
+              <p style="flex:1; font-size:0.8125rem; color:var(--text-primary)">Backend indisponível <span style="color:var(--text-secondary)">— não foi possível carregar a lista de usuários.</span></p>
+              <button style="flex-shrink:0; font-size:0.75rem; font-weight:600; color:var(--danger)">Tentar novamente</button>
+            </div>
+
+            <table style="width:100%; font-size:0.8125rem">
+              <thead>
+                <tr style="text-align:left; font-size:0.625rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); border-bottom:1px solid var(--border)">
+                  <th style="padding:0.625rem 1.5rem; font-weight:700">Nome</th>
+                  <th style="padding:0.625rem 0.75rem; font-weight:700">E-mail</th>
+                  <th style="padding:0.625rem 0.75rem; font-weight:700">Perfil</th>
+                  <th style="padding:0.625rem 0.75rem; font-weight:700">Status</th>
+                  <th style="padding:0.625rem 0.75rem; font-weight:700">Criado em</th>
+                  <th style="padding:0.625rem 1.5rem; font-weight:700; text-align:right">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="6" style="padding:3.5rem 1.5rem; text-align:center; font-size:0.8125rem; color:var(--text-muted)">Nenhum usuário carregado.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isNotifications }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid; grid-template-columns:minmax(0,1fr) 280px; gap:1.5rem; align-items:start">
+            <div style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem; border-bottom:1px solid var(--border); padding:1rem 1.5rem">
+                <div style="display:flex; align-items:center; gap:0.375rem">
+                  <button style="border-radius:6px; padding:0.375rem 0.75rem; font-size:0.75rem; font-weight:600; background:var(--divider); color:var(--text-primary)">Todas</button>
+                  <button style="border-radius:6px; padding:0.375rem 0.75rem; font-size:0.75rem; font-weight:600; color:var(--text-secondary); transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">Não lidas</button>
+                </div>
+                <button style="display:flex; align-items:center; gap:0.4375rem; border-radius:6px; background:var(--link); padding:0.4375rem 0.75rem; font-size:0.75rem; font-weight:600; color:var(--bg-surface); transition:background-color 0.12s ease-out" style-hover="background:var(--link-hover)">
+                  <i data-lucide="send" width="14" height="14"></i>
+                  Nova notificação
+                </button>
+              </div>
+              <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; padding:4rem 1.5rem">
+                <span style="color:var(--border-strong); display:flex"><i data-lucide="inbox" width="24" height="24"></i></span>
+                <p style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Sua caixa está vazia</p>
+                <p style="font-size:0.8125rem; color:var(--text-muted)">Notificações dirigidas a você aparecem aqui, ordenadas por urgência.</p>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:1rem">
+              <div>
+                <p style="font-size:0.625rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted)">Origem</p>
+                <p style="margin-top:0.5rem; font-size:0.8125rem; line-height:1.55; color:var(--text-secondary)">Esta é sua caixa pessoal — menções e atribuições diretas.</p>
+              </div>
+              <div style="border-top:1px solid var(--border); padding-top:1rem">
+                <p style="font-size:0.8125rem; line-height:1.55; color:var(--text-secondary)">O histórico técnico da frota (impressora offline, toner acabando) continua em <a href="#" onClick="{{ goAlerts }}">Alertas</a> e no sino do cabeçalho.</p>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isIntegrations }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; align-items:center; gap:1rem; border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); padding:1.25rem 1.5rem">
+            <span style="color:var(--border-strong); display:flex; flex-shrink:0"><i data-lucide="plug" width="20" height="20"></i></span>
+            <div style="flex:1; min-width:0">
+              <h2 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Integrações</h2>
+              <p style="margin-top:0.1875rem; font-size:0.8125rem; line-height:1.5; color:var(--text-muted)">Conexão do painel com outras ferramentas corporativas. Em desenvolvimento.</p>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; gap:2.5rem; align-items:flex-start">
+            <nav style="position:sticky; top:5.5rem; width:12rem; flex-shrink:0; display:flex; flex-direction:column; gap:1px">
+              <p style="padding:0 0.75rem 0.625rem; font-size:0.625rem; font-weight:700; letter-spacing:0.12em; color:var(--text-muted)">NESTA PÁGINA</p>
+              <button style="border-radius:6px; padding:0.4375rem 0.75rem; text-align:left; font-size:0.8125rem; font-weight:600; background:var(--divider); color:var(--text-primary); box-shadow:inset 2px 0 0 var(--link-hover)">Perfil</button>
+              <button style="border-radius:6px; padding:0.4375rem 0.75rem; text-align:left; font-size:0.8125rem; color:var(--text-secondary); transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">Senha</button>
+              <button style="border-radius:6px; padding:0.4375rem 0.75rem; text-align:left; font-size:0.8125rem; color:var(--text-secondary); transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">Aparência</button>
+              <button style="border-radius:6px; padding:0.4375rem 0.75rem; text-align:left; font-size:0.8125rem; color:var(--text-secondary); transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">Acessibilidade</button>
+              <button style="border-radius:6px; padding:0.4375rem 0.75rem; text-align:left; font-size:0.8125rem; color:var(--text-secondary); transition:background-color 0.12s ease-out" style-hover="background:var(--divider)">Administração</button>
+            </nav>
+
+            <div style="flex:1; min-width:0; max-width:44rem; display:flex; flex-direction:column; gap:1.25rem">
+              <section style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+                <header style="border-bottom:1px solid var(--border); padding:1rem 1.5rem">
+                  <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Perfil</h3>
+                  <p style="margin-top:0.1875rem; font-size:0.8125rem; color:var(--text-muted)">Como você aparece no painel.</p>
+                </header>
+                <div style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:1.25rem; padding:1.25rem 1.5rem">
+                  <label style="display:flex; flex-direction:column; gap:0.375rem">
+                    <span style="font-size:0.75rem; font-weight:600; color:var(--text-primary)">Nome</span>
+                    <input type="text" value="Pedro Ribeiro" style="width:100%; border-radius:6px; border:1px solid var(--border); background:var(--bg-page); padding:0.5rem 0.75rem; font-size:0.8125rem; color:var(--text-primary); outline:none; transition:border-color 0.12s ease-out" style-focus="border-color:var(--link-hover)">
+                  </label>
+                  <label style="display:flex; flex-direction:column; gap:0.375rem">
+                    <span style="font-size:0.75rem; font-weight:600; color:var(--text-primary)">E-mail</span>
+                    <input type="text" value="pedro.ribeiro" disabled="disabled" style="width:100%; border-radius:6px; border:1px solid var(--border); background:var(--track); padding:0.5rem 0.75rem; font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--text-secondary); outline:none">
+                    <span style="font-size:0.6875rem; line-height:1.5; color:var(--text-muted)">Identifica sua conta no sistema e não pode ser alterado.</span>
+                  </label>
+                  <div style="display:flex; flex-direction:column; gap:0.375rem">
+                    <span style="font-size:0.75rem; font-weight:600; color:var(--text-primary)">Perfil de acesso</span>
+                    <div style="display:flex; align-items:center; gap:0.5rem">
+                      <span style="border-radius:3px; background:var(--selection); padding:0.125rem 0.5rem; font-size:0.6875rem; font-weight:600; letter-spacing:0.02em; color:var(--link)">Administrador</span>
+                      <span style="font-size:0.6875rem; color:var(--text-muted)">Alterado em <a href="#">Usuários</a></span>
+                    </div>
+                  </div>
+                </div>
+                <footer style="display:flex; justify-content:flex-end; border-top:1px solid var(--border); background:var(--bg-page); padding:0.75rem 1.5rem">
+                  <button style="display:flex; align-items:center; gap:0.4375rem; border-radius:6px; background:var(--link); padding:0.4375rem 0.875rem; font-size:0.8125rem; font-weight:600; color:var(--bg-surface); opacity:0.5">
+                    <i data-lucide="check" width="14" height="14"></i>
+                    Salvar alterações
+                  </button>
+                </footer>
+              </section>
+
+              <section style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+                <header style="border-bottom:1px solid var(--border); padding:1rem 1.5rem">
+                  <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Senha</h3>
+                  <p style="margin-top:0.1875rem; font-size:0.8125rem; line-height:1.5; color:var(--text-muted)">Exige a senha atual — é o que impede que uma sessão aberta em máquina alheia assuma a conta.</p>
+                </header>
+                <div style="display:flex; flex-direction:column; gap:1.25rem; padding:1.25rem 1.5rem">
+                  <label style="display:flex; flex-direction:column; gap:0.375rem; max-width:20rem">
+                    <span style="font-size:0.75rem; font-weight:600; color:var(--text-primary)">Senha atual</span>
+                    <input type="password" style="width:100%; border-radius:6px; border:1px solid var(--border); background:var(--bg-page); padding:0.5rem 0.75rem; font-size:0.8125rem; color:var(--text-primary); outline:none; transition:border-color 0.12s ease-out" style-focus="border-color:var(--link-hover)">
+                  </label>
+                  <div style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:1rem">
+                    <label style="display:flex; flex-direction:column; gap:0.375rem">
+                      <span style="font-size:0.75rem; font-weight:600; color:var(--text-primary)">Nova senha</span>
+                      <input type="password" placeholder="Mínimo de 8 caracteres" style="width:100%; border-radius:6px; border:1px solid var(--border); background:var(--bg-page); padding:0.5rem 0.75rem; font-size:0.8125rem; color:var(--text-primary); outline:none; transition:border-color 0.12s ease-out" style-focus="border-color:var(--link-hover)">
+                    </label>
+                    <label style="display:flex; flex-direction:column; gap:0.375rem">
+                      <span style="font-size:0.75rem; font-weight:600; color:var(--text-primary)">Confirmar nova senha</span>
+                      <input type="password" style="width:100%; border-radius:6px; border:1px solid var(--border); background:var(--bg-page); padding:0.5rem 0.75rem; font-size:0.8125rem; color:var(--text-primary); outline:none; transition:border-color 0.12s ease-out" style-focus="border-color:var(--link-hover)">
+                    </label>
+                  </div>
+                  <p style="border-left:2px solid var(--border-strong); padding:0.25rem 0 0.25rem 0.75rem; font-size:0.75rem; line-height:1.55; color:var(--text-secondary)">Sessões já abertas em outros dispositivos continuam válidas até expirarem. Para encerrar uma sessão suspeita agora, peça a um administrador para desativar e reativar sua conta.</p>
+                </div>
+                <footer style="display:flex; justify-content:flex-end; border-top:1px solid var(--border); background:var(--bg-page); padding:0.75rem 1.5rem">
+                  <button style="display:flex; align-items:center; gap:0.4375rem; border-radius:6px; background:var(--link); padding:0.4375rem 0.875rem; font-size:0.8125rem; font-weight:600; color:var(--bg-surface); opacity:0.5">
+                    <i data-lucide="key-round" width="14" height="14"></i>
+                    Alterar senha
+                  </button>
+                </footer>
+              </section>
+
+              <section style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+                <header style="border-bottom:1px solid var(--border); padding:1rem 1.5rem">
+                  <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Aparência</h3>
+                  <p style="margin-top:0.1875rem; font-size:0.8125rem; color:var(--text-muted)">Aplicada neste dispositivo. Atualmente em modo claro.</p>
+                </header>
+                <div style="padding:1.25rem 1.5rem">
+                  <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:0.625rem">
+                    <button style="display:flex; align-items:center; gap:0.5rem; border-radius:6px; border:1px solid var(--border); background:var(--bg-page); padding:0.625rem 0.75rem; font-size:0.8125rem; font-weight:500; color:var(--text-secondary); transition:border-color 0.12s ease-out" style-hover="border-color:var(--border-strong)">
+                      <i data-lucide="sun" width="15" height="15"></i> Claro
+                    </button>
+                    <button style="display:flex; align-items:center; gap:0.5rem; border-radius:6px; border:1px solid var(--border); background:var(--bg-page); padding:0.625rem 0.75rem; font-size:0.8125rem; font-weight:500; color:var(--text-secondary); transition:border-color 0.12s ease-out" style-hover="border-color:var(--border-strong)">
+                      <i data-lucide="moon" width="15" height="15"></i> Escuro
+                    </button>
+                    <button style="display:flex; align-items:center; gap:0.5rem; border-radius:6px; border:1px solid var(--link-hover); background:var(--selection); padding:0.625rem 0.75rem; font-size:0.8125rem; font-weight:600; color:var(--link)">
+                      <i data-lucide="monitor" width="15" height="15"></i> Sistema
+                    </button>
+                  </div>
+                  <p style="margin-top:0.75rem; font-size:0.6875rem; line-height:1.5; color:var(--text-muted)">O botão de tema no cabeçalho fixa claro ou escuro. Escolha <strong style="color:var(--text-secondary)">Sistema</strong> para voltar a acompanhar o computador.</p>
+                </div>
+              </section>
+
+              <section style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); box-shadow:var(--glass-shadow); overflow:hidden">
+                <header style="border-bottom:1px solid var(--border); padding:1rem 1.5rem">
+                  <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Acessibilidade</h3>
+                  <p style="margin-top:0.1875rem; font-size:0.8125rem; line-height:1.5; color:var(--text-muted)">Guardadas neste dispositivo, não na conta — a necessidade costuma ser da máquina, não da pessoa.</p>
+                </header>
+                <div style="display:flex; flex-direction:column; gap:1.25rem; padding:1.25rem 1.5rem">
+                  <div>
+                    <span style="font-size:0.75rem; font-weight:600; color:var(--text-primary)">Tamanho do texto</span>
+                    <div style="margin-top:0.5rem; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:0.625rem">
+                      <button style="display:flex; align-items:baseline; gap:0.5rem; border-radius:6px; border:1px solid var(--link-hover); background:var(--selection); padding:0.625rem 0.75rem; text-align:left">
+                        <span style="font-weight:600; font-size:1rem; color:var(--text-primary)">Aa</span>
+                        <span style="font-size:0.75rem; font-weight:600; color:var(--link)">Padrão</span>
+                      </button>
+                      <button style="display:flex; align-items:baseline; gap:0.5rem; border-radius:6px; border:1px solid var(--border); background:var(--bg-page); padding:0.625rem 0.75rem; text-align:left; transition:border-color 0.12s ease-out" style-hover="border-color:var(--border-strong)">
+                        <span style="font-weight:600; font-size:1.15rem; color:var(--text-primary)">Aa</span>
+                        <span style="font-size:0.75rem; color:var(--text-secondary)">Grande</span>
+                      </button>
+                      <button style="display:flex; align-items:baseline; gap:0.5rem; border-radius:6px; border:1px solid var(--border); background:var(--bg-page); padding:0.625rem 0.75rem; text-align:left; transition:border-color 0.12s ease-out" style-hover="border-color:var(--border-strong)">
+                        <span style="font-weight:600; font-size:1.3rem; color:var(--text-primary)">Aa</span>
+                        <span style="font-size:0.75rem; color:var(--text-secondary)">Maior</span>
+                      </button>
+                    </div>
+                  </div>
+                  <label style="display:flex; align-items:flex-start; gap:0.625rem; border-top:1px solid var(--divider); padding-top:1rem; cursor:pointer">
+                    <input type="checkbox" style="flex-shrink:0; margin-top:0.1875rem; width:0.875rem; height:0.875rem; accent-color:var(--link-hover); cursor:pointer">
+                    <span style="display:flex; flex-direction:column; gap:0.125rem">
+                      <span style="font-size:0.8125rem; font-weight:600; color:var(--text-primary)">Reduzir animações</span>
+                      <span style="font-size:0.75rem; line-height:1.5; color:var(--text-muted)">Corta transições e movimentos do painel. Soma-se à configuração do sistema operacional.</span>
+                    </span>
+                  </label>
+                  <label style="display:flex; align-items:flex-start; gap:0.625rem; border-top:1px solid var(--divider); padding-top:1rem; cursor:pointer">
+                    <input type="checkbox" style="flex-shrink:0; margin-top:0.1875rem; width:0.875rem; height:0.875rem; accent-color:var(--link-hover); cursor:pointer">
+                    <span style="display:flex; flex-direction:column; gap:0.125rem">
+                      <span style="font-size:0.8125rem; font-weight:600; color:var(--text-primary)">Realce de foco reforçado</span>
+                      <span style="font-size:0.75rem; line-height:1.5; color:var(--text-muted)">Anel mais grosso ao navegar por teclado, para não perder o cursor em telas densas.</span>
+                    </span>
+                  </label>
+                </div>
+              </section>
+
+              <section style="border:1px solid var(--glass-border); border-radius:14px; background:var(--glass-bg-elevated); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur); overflow:hidden; box-shadow:var(--glass-shadow), inset 3px 0 0 var(--warning)">
+                <header style="border-bottom:1px solid var(--border); padding:1rem 1.5rem">
+                  <div style="display:flex; align-items:center; gap:0.5rem">
+                    <h3 style="font-size:0.875rem; font-weight:600; color:var(--text-primary)">Administração</h3>
+                    <span style="border-radius:3px; background:#faf0dd; padding:0.0625rem 0.375rem; font-size:0.625rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--warning)">afeta todos</span>
+                  </div>
+                  <p style="margin-top:0.1875rem; font-size:0.8125rem; line-height:1.5; color:var(--text-muted)">Nada crítico é editável aqui, de propósito: cada ação vive na tela que a documenta e a confirma.</p>
+                </header>
+                <div style="display:flex; flex-direction:column; gap:1.25rem; padding:1.25rem 1.5rem">
+                  <div style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:0.625rem">
+                    <button onClick="{{ goUsers }}" style="display:flex; flex-direction:column; gap:0.3125rem; border-radius:6px; border:1px solid var(--border); padding:0.875rem; text-align:left; transition:border-color 0.12s ease-out, background-color 0.12s ease-out" style-hover="border-color:var(--link-hover); background:var(--bg-page)">
+                      <span style="color:var(--text-secondary); display:flex"><i data-lucide="users" width="16" height="16"></i></span>
+                      <span style="font-size:0.8125rem; font-weight:600; color:var(--text-primary)">Usuários</span>
+                      <span style="font-size:0.6875rem; line-height:1.5; color:var(--text-muted)">Criar contas, alterar perfis de acesso, ativar e desativar.</span>
+                    </button>
+                    <button onClick="{{ goNetwork }}" style="display:flex; flex-direction:column; gap:0.3125rem; border-radius:6px; border:1px solid var(--border); padding:0.875rem; text-align:left; transition:border-color 0.12s ease-out, background-color 0.12s ease-out" style-hover="border-color:var(--link-hover); background:var(--bg-page)">
+                      <span style="color:var(--text-secondary); display:flex"><i data-lucide="network" width="16" height="16"></i></span>
+                      <span style="font-size:0.8125rem; font-weight:600; color:var(--text-primary)">Print Servers</span>
+                      <span style="font-size:0.6875rem; line-height:1.5; color:var(--text-muted)">Registrar servidores, descobrir impressoras e sincronizar o cadastro.</span>
+                    </button>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:0.375rem; border-top:1px solid var(--divider); padding-top:1rem">
+                    <span style="font-size:0.75rem; font-weight:600; color:var(--text-primary)">Backend em uso</span>
+                    <code style="align-self:flex-start; border-radius:4px; border:1px solid var(--border); background:var(--bg-page); padding:0.3125rem 0.5rem; font-family:'IBM Plex Mono', monospace; font-size:0.6875rem; color:var(--text-secondary)">http://localhost:8000</code>
+                    <span style="font-size:0.6875rem; line-height:1.5; color:var(--text-muted)">Definido no build. Chaves, credenciais e webhook ficam no <code style="font-family:'IBM Plex Mono', monospace">.env</code> do backend e nunca são expostos na interface.</span>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </sc-if>
+
+      </div>
+    </main>
+
+    <footer style="display:flex; align-items:center; justify-content:space-between; gap:1rem; border-top:1px solid var(--border); padding:1rem 2.5rem; font-size:0.6875rem; color:var(--text-muted)">
+      <p>Elgin Impressoras · © 2026</p>
+      <div style="display:flex; align-items:center; gap:1.25rem">
+        <p style="display:flex; align-items:center; gap:0.4375rem"><span style="height:5px; width:5px; border-radius:999px; background:var(--warning)"></span>Dados de demonstração</p>
+        <p style="display:flex; align-items:center; gap:0.4375rem"><span style="height:5px; width:5px; border-radius:999px; background:var(--text-muted)"></span>Relatório mensal fictício</p>
+        <p style="display:flex; align-items:center; gap:0.4375rem"><span style="height:5px; width:5px; border-radius:999px; background:var(--text-muted)"></span>Sessão não verificada</p>
+      </div>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1600,&quot;height&quot;:1000}}">
+const CHANNEL = { K: "#3a332c", C: "#3b8fc4", M: "#c74d8e", Y: "#d9a52e" };
+const STATUS = {
+  online: { label: "Online", dot: "var(--success)", fg: "var(--success)", bg: "transparent" },
+  offline: { label: "Offline", dot: "var(--text-muted)", fg: "var(--text-secondary)", bg: "transparent" },
+  atencao: { label: "Atenção", dot: "var(--warning)", fg: "var(--warning)", bg: "var(--tint-warning)" },
+};
+const levelColor = (p) => (p <= 15 ? "var(--danger)" : p <= 35 ? "var(--warning)" : "var(--success)");
+const classify = (t) => {
+  if (!t || !t.length) return "none";
+  const w = Math.min.apply(null, t.map((x) => x.percent));
+  return w <= 15 ? "critical" : w <= 35 ? "warning" : "normal";
+};
+const nf = (n) => n.toLocaleString("pt-BR");
+const SEP = " — ";
+const siteOf = (p) => { const i = p.department.lastIndexOf(SEP); return i === -1 ? "Outras unidades" : p.department.slice(i + SEP.length); };
+const deptOf = (p) => { const i = p.department.lastIndexOf(SEP); return i === -1 ? p.department : p.department.slice(0, i); };
+const fmtDate = (iso) => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? "—" : d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+};
+
+const NAV_MAIN = [
+  { id: "dashboard", label: "Visão geral", icon: "layout-dashboard" },
+  { id: "printers", label: "Impressoras", icon: "printer" },
+  { id: "toner", label: "Suprimentos", icon: "droplet" },
+  { id: "alerts", label: "Alertas", icon: "triangle-alert", badged: true },
+  { id: "reports", label: "Relatórios", icon: "file-bar-chart-2" },
+  { id: "history", label: "Histórico", icon: "history" },
+  { id: "network", label: "Mapeamento de rede", icon: "network" },
+];
+const NAV_ADMIN = [
+  { id: "users", label: "Usuários", icon: "user-cog" },
+  { id: "notifications", label: "Notificações", icon: "bell" },
+  { id: "integrations", label: "Integrações", icon: "plug" },
+  { id: "settings", label: "Configurações", icon: "settings" },
+];
+const PAGE = {
+  dashboard: { section: "Monitoramento", title: "Visão geral", subtitle: "Estado consolidado da frota, suprimentos e consumo de páginas." },
+  printers: { section: "Monitoramento", title: "Impressoras", subtitle: "Cadastro completo da frota monitorada, com status e nível de suprimento." },
+  toner: { section: "Monitoramento", title: "Suprimentos", subtitle: "Nível de toner de toda a frota, classificado por criticidade." },
+  alerts: { section: "Monitoramento", title: "Alertas", subtitle: "Eventos técnicos derivados das leituras — toner baixo e equipamentos fora do ar." },
+  reports: { section: "Monitoramento", title: "Relatórios", subtitle: "Contadores mensais, ranking de uso e consumo por departamento." },
+  history: { section: "Monitoramento", title: "Histórico", subtitle: "Contadores por impressora e por unidade, mês a mês." },
+  network: { section: "Monitoramento", title: "Mapeamento de rede", subtitle: "Print Servers registrados, descoberta de filas e sincronização do cadastro." },
+  users: { section: "Administração", title: "Usuários", subtitle: "Contas do painel, perfis de acesso e estado de ativação." },
+  notifications: { section: "Administração", title: "Notificações", subtitle: "Sua caixa pessoal de mensagens dirigidas, com leitura individual." },
+  integrations: { section: "Administração", title: "Integrações", subtitle: "Conexão do painel com outras ferramentas corporativas." },
+  settings: { section: "Administração", title: "Configurações", subtitle: "Perfil, segurança, aparência e acessibilidade." },
+};
+
+class Component extends DCLogic {
+  state = { screen: "dashboard", tick: 0, openSites: null, theme: (typeof localStorage !== "undefined" && localStorage.getItem("pc-theme")) || "light" };
+
+  toggleTheme = () => {
+    const next = this.state.theme === "dark" ? "light" : "dark";
+    this.setState({ theme: next });
+    try { localStorage.setItem("pc-theme", next); } catch (e) {}
+  };
+
+  componentDidMount() {
+    this.paintIcons();
+    if (!window.PRINTER_DATA) {
+      let n = 0;
+      const iv = setInterval(() => {
+        if (window.PRINTER_DATA || ++n > 40) { clearInterval(iv); this.setState({ tick: this.state.tick + 1 }); }
+      }, 100);
+    }
+  }
+  componentDidUpdate() { this.paintIcons(); }
+  paintIcons() {
+    const run = () => { if (window.lucide) window.lucide.createIcons(); };
+    run();
+    if (!window.lucide) setTimeout(run, 300);
+    setTimeout(run, 900);
+  }
+
+  go(id) { return () => { this.setState({ screen: id }); window.scrollTo({ top: 0 }); }; }
+  toggleSite(site) {
+    return () => {
+      const cur = this.state.openSites || [];
+      this.setState({ openSites: cur.indexOf(site) === -1 ? cur.concat([site]) : cur.filter((s) => s !== site) });
+    };
+  }
+
+  printers() { return window.PRINTER_DATA || []; }
+
+  navItems(list) {
+    const n0 = this.alerts().length;
+    return list.map((n) => {
+      const active = this.state.screen === n.id;
+      return {
+        label: n.label, icon: n.icon, go: this.go(n.id),
+        bg: active ? "var(--tint-link)" : "transparent",
+        fg: active ? "var(--text-primary)" : "var(--text-secondary)",
+        weight: active ? 600 : 500,
+        iconColor: active ? "var(--link)" : "var(--text-muted)",
+        rail: active ? "inset 2px 0 0 var(--link-hover)" : "none",
+        badge: n.badged ? n0 : false,
+      };
+    });
+  }
+
+  alerts() {
+    const out = [];
+    for (const p of this.printers()) {
+      if (!p.toner) continue;
+      for (const t of p.toner) {
+        if (t.percent <= 20) {
+          out.push({
+            severity: t.percent <= 10 ? "critical" : "warning",
+            message: "Toner baixo em " + p.name + " — " + t.label.split(" ")[0] + " em " + t.percent + "%",
+            timestamp: "agora",
+          });
+        }
+      }
+    }
+    for (const p of this.printers()) {
+      if (p.status === "offline") out.push({ severity: "warning", message: p.name + " sem resposta na rede", timestamp: p.lastSeen });
+    }
+    return out.sort((a, b) => (a.severity === "critical" ? -1 : b.severity === "critical" ? 1 : 0));
+  }
+
+  tableRow(p) {
+    const s = STATUS[p.status];
+    const t = p.toner ? p.toner[0] : null;
+    return {
+      name: p.name, ip: p.ip, model: p.model, department: p.department,
+      hasToner: !!t, noToner: !t,
+      tonerPercent: t ? t.percent : 0,
+      tonerColor: t ? levelColor(t.percent) : "var(--text-muted)",
+      statusLabel: s.label, statusFg: s.fg, statusDot: s.dot, statusBg: s.bg,
+      statusPulse: p.status === "online" ? "soft-pulse 3s ease-in-out infinite" : "none",
+      rail: p.status === "offline" ? "inset 2px 0 0 var(--danger)" : p.status === "atencao" ? "inset 2px 0 0 var(--warning)" : "none",
+    };
+  }
+
+  tonerRow(p) {
+    const cls = classify(p.toner);
+    const s = STATUS[p.status];
+    return {
+      name: p.name, ip: p.ip, department: deptOf(p), lastSeen: p.lastSeen,
+      rail: cls === "critical" ? "inset 2px 0 0 var(--danger)" : cls === "warning" ? "inset 2px 0 0 var(--warning)" : "none",
+      hasToner: !!(p.toner && p.toner.length), noToner: !(p.toner && p.toner.length),
+      channels: (p.toner || []).map((t) => ({ dot: CHANNEL[t.color], percent: t.percent, color: levelColor(t.percent) })),
+      statusLabel: s.label, statusFg: s.fg, statusDot: s.dot, statusBg: s.bg,
+      statusPulse: p.status === "online" ? "soft-pulse 3s ease-in-out infinite" : "none",
+    };
+  }
+
+  pagesChart() {
+    const h = React.createElement;
+    const data = (window.PC_DATA && window.PC_DATA.monthlyUsage) || [];
+    if (!data.length) return null;
+    const W = 560, H = 200, LEFT = 44, BOTTOM = 22, TOP = 8;
+    const plotW = W - LEFT - 4, plotH = H - BOTTOM - TOP, max = 180000;
+    const pts = data.map((d, i) => [LEFT + (i * plotW) / (data.length - 1), TOP + (1 - d.pages / max) * plotH]);
+    let line = "M" + pts[0][0] + "," + pts[0][1];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i + 1], dx = (b[0] - a[0]) / 2;
+      line += " C" + (a[0] + dx) + "," + a[1] + " " + (b[0] - dx) + "," + b[1] + " " + b[0] + "," + b[1];
+    }
+    const area = line + " L" + pts[pts.length - 1][0] + "," + (TOP + plotH) + " L" + pts[0][0] + "," + (TOP + plotH) + " Z";
+    const kids = [
+      h("defs", { key: "d" }, h("linearGradient", { id: "pgFill", x1: "0", y1: "0", x2: "0", y2: "1" }, [
+        h("stop", { key: 1, offset: "0%", stopColor: "var(--link-hover)", stopOpacity: 0.1 }),
+        h("stop", { key: 2, offset: "100%", stopColor: "var(--link-hover)", stopOpacity: 0 }),
+      ])),
+    ];
+    [0, 60000, 120000, 180000].forEach((t, i) => {
+      const y = TOP + (1 - t / max) * plotH;
+      kids.push(h("line", { key: "g" + i, x1: LEFT, y1: y, x2: W, y2: y, stroke: "var(--divider)", strokeWidth: 1 }));
+      kids.push(h("text", { key: "gt" + i, x: LEFT - 10, y: y + 3.5, textAnchor: "end", style: { fill: "var(--text-muted)", fontSize: 10, fontFamily: "'IBM Plex Mono', monospace" } }, t / 1000 + "k"));
+    });
+    kids.push(h("path", { key: "a", d: area, fill: "url(#pgFill)" }));
+    kids.push(h("path", { key: "l", d: line, fill: "none", stroke: "var(--link-hover)", strokeWidth: 1.75, strokeLinejoin: "round" }));
+    pts.forEach((p, i) => {
+      const isLast = i === pts.length - 1;
+      kids.push(h("circle", { key: "c" + i, cx: p[0], cy: p[1], r: isLast ? 3.5 : 2.25, fill: isLast ? "var(--link-hover)" : "var(--bg-surface)", stroke: "var(--link-hover)", strokeWidth: 1.5 }));
+      kids.push(h("text", { key: "m" + i, x: p[0], y: H - 4, textAnchor: "middle", style: { fill: "var(--text-muted)", fontSize: 10, letterSpacing: "0.06em" } }, data[i].month.toUpperCase()));
+    });
+    return h("svg", { viewBox: "0 0 " + W + " " + H, width: "100%", height: "100%", preserveAspectRatio: "none", style: { display: "block" } }, kids);
+  }
+
+  reportsVals() {
+    const ps = this.printers();
+    const D = window.PC_DATA || { monthlyUsage: [], departmentUsage: [], decommissioned: [] };
+    const monthCounters = D.monthlyUsage.map((m, i) => {
+      const prev = D.monthlyUsage[i - 1];
+      const delta = prev && prev.pages > 0 ? ((m.pages - prev.pages) / prev.pages) * 100 : null;
+      return {
+        month: m.month, pages: nf(m.pages), period: m.period,
+        delta: delta === null ? "referência" : (delta >= 0 ? "+" : "") + delta.toFixed(1).replace(".", ",") + "%",
+        deltaColor: delta === null ? "var(--text-muted)" : delta >= 0 ? "var(--success)" : "var(--danger)",
+        bg: i === D.monthlyUsage.length - 1 ? "var(--tint-link)" : "transparent",
+      };
+    });
+    const ranked = ps
+      .filter((p) => p.monthlyPages && p.monthlyPages.length)
+      .map((p) => ({ name: p.name, total: p.monthlyPages.reduce((s, m) => s + m.pages, 0) }))
+      .sort((a, b) => b.total - a.total);
+    const mkRank = (title, icon, items, tone) => {
+      const max = Math.max.apply(null, [1].concat(items.map((i) => i.total)));
+      return {
+        title, icon,
+        iconFg: tone === "brand" ? "var(--link)" : "var(--text-muted)",
+        barColor: tone === "brand" ? "var(--link-hover)" : "var(--border-strong)",
+        items: items.map((it, i) => ({ rank: i + 1, name: it.name, total: nf(it.total), pct: (it.total / max) * 100 })),
+      };
+    };
+    const deps = D.departmentUsage.slice().sort((a, b) => b.total - a.total);
+    const grand = deps.reduce((s, d) => s + d.total, 0);
+    const maxDep = Math.max.apply(null, [1].concat(deps.map((d) => d.total)));
+    return {
+      monthCounters,
+      rankings: [
+        mkRank("Maior volume de impressão", "arrow-up-wide-narrow", ranked.slice(0, 5), "brand"),
+        mkRank("Menor volume de impressão", "arrow-down-wide-narrow", ranked.slice(-5).reverse(), "faint"),
+      ],
+      departments: deps.map((d) => ({
+        department: d.department, total: nf(d.total),
+        pct: grand > 0 ? Math.round((d.total / grand) * 100) : 0,
+        barPct: (d.total / maxDep) * 100,
+      })),
+      decomCount: D.decommissioned.length,
+      decommissioned: D.decommissioned.map((p) => ({ model: p.model, department: p.department, ip: p.ip, date: fmtDate(p.deactivatedAt) })),
+    };
+  }
+
+  historyVals() {
+    const wh = this.printers().filter((p) => p.monthlyPages && p.monthlyPages.length);
+    const months = wh.length ? wh[0].monthlyPages.map((m) => m.month) : [];
+    const bySite = {};
+    wh.forEach((p) => { const s = siteOf(p); (bySite[s] = bySite[s] || []).push(p); });
+    const names = Object.keys(bySite).sort();
+    const open = this.state.openSites === null ? names.slice(0, 1) : this.state.openSites;
+    const mt = months.map((_, i) => wh.reduce((s, p) => s + ((p.monthlyPages[i] && p.monthlyPages[i].pages) || 0), 0));
+    return {
+      historyMonths: months.map((m, i) => ({ month: m, total: nf(mt[i]) })),
+      historyGrandTotal: nf(mt.reduce((a, b) => a + b, 0)),
+      historySites: names.map((site) => {
+        const list = bySite[site];
+        const smt = months.map((_, i) => list.reduce((s, p) => s + ((p.monthlyPages[i] && p.monthlyPages[i].pages) || 0), 0));
+        const tot = smt.reduce((a, b) => a + b, 0);
+        const isOpen = open.indexOf(site) !== -1;
+        return {
+          site, open: isOpen, chevron: isOpen ? "chevron-down" : "chevron-right",
+          toggle: this.toggleSite(site),
+          countLabel: list.length + (list.length !== 1 ? " impressoras" : " impressora"),
+          totalLabel: nf(tot) + " páginas", totalValue: nf(tot),
+          monthTotals: smt.map((v) => ({ value: nf(v) })),
+          printers: list.map((p) => ({
+            name: p.name, ip: p.ip, dept: deptOf(p),
+            months: p.monthlyPages.map((m) => ({ pages: nf(m.pages) })),
+            total: nf(p.monthlyPages.reduce((s, m) => s + m.pages, 0)),
+          })),
+        };
+      }),
+    };
+  }
+
+  renderVals() {
+    const theme = this.state.theme;
+    const themeIcon = theme === "dark" ? "sun" : "moon";
+    const ps = this.printers();
+    const alerts = this.alerts();
+    const D = window.PC_DATA || { globalToner: [], monthlyUsage: [] };
+    const counts = { online: 0, offline: 0, atencao: 0 };
+    ps.forEach((p) => counts[p.status]++);
+    const tc = { critical: 0, warning: 0, normal: 0, none: 0 };
+    ps.forEach((p) => tc[classify(p.toner)]++);
+    const order = { critical: 0, warning: 1, none: 2, normal: 3 };
+    const sorted = ps.slice().sort((a, b) => {
+      const ca = classify(a.toner), cb = classify(b.toner);
+      if (order[ca] !== order[cb]) return order[ca] - order[cb];
+      const wa = a.toner ? Math.min.apply(null, a.toner.map((t) => t.percent)) : 999;
+      const wb = b.toner ? Math.min.apply(null, b.toner.map((t) => t.percent)) : 999;
+      return wa - wb;
+    });
+    const maxPages = Math.max.apply(null, [1].concat(D.monthlyUsage.map((m) => m.pages)));
+    const totalPages = Math.ceil(ps.length / 10) || 1;
+    const screen = this.state.screen;
+    const page = PAGE[screen] || PAGE.dashboard;
+    const critical = D.globalToner.find((t) => t.percent <= 20);
+    const total = ps.length || 1;
+    const pctOf = (n) => Math.round((n / total) * 100);
+
+    return {
+      theme, themeIcon, toggleTheme: this.toggleTheme,
+      navMain: this.navItems(NAV_MAIN),
+      navAdmin: this.navItems(NAV_ADMIN),
+      goAlerts: this.go("alerts"), goPrinters: this.go("printers"), goToner: this.go("toner"),
+      goNotifications: this.go("notifications"), goUsers: this.go("users"), goNetwork: this.go("network"),
+      crumbSection: page.section, pageTitle: page.title, pageSubtitle: page.subtitle,
+      isDashboard: screen === "dashboard", isPrinters: screen === "printers",
+      isToner: screen === "toner", isAlerts: screen === "alerts",
+      isReports: screen === "reports", isHistory: screen === "history",
+      isNetwork: screen === "network", isUsers: screen === "users",
+      isNotifications: screen === "notifications", isIntegrations: screen === "integrations",
+      isSettings: screen === "settings",
+
+      total: ps.length, online: counts.online, offline: counts.offline, attention: counts.atencao, onlinePct: pctOf(counts.online),
+      alertCount: alerts.length,
+      alertsRest: Math.max(alerts.length - 1, 0),
+      criticalCount: alerts.filter((a) => a.severity === "critical").length,
+      warningCount: alerts.filter((a) => a.severity === "warning").length,
+      topAlertMessage: alerts.length ? alerts[0].message : "Nenhum alerta aberto",
+      criticalPercent: critical ? critical.percent : 0,
+      criticalCountLabel: tc.critical + (tc.critical === 1 ? " impressora está" : " impressoras estão"),
+
+      kpis: [
+        { label: "Frota total", value: ps.length, sublabel: "equipamentos detectados", icon: "printer", iconColor: "var(--link)", bg: "var(--bg-surface)", rail: "inset 2px 0 0 var(--link-hover)" },
+        { label: "Online", value: counts.online, sublabel: pctOf(counts.online) + "% da frota", icon: "wifi", iconColor: "var(--success)", bg: "var(--bg-surface)", rail: "none" },
+        { label: "Offline", value: counts.offline, sublabel: pctOf(counts.offline) + "% da frota", icon: "wifi-off", iconColor: "var(--danger)", bg: "var(--bg-surface)", rail: "none" },
+        { label: "Atenção", value: counts.atencao, sublabel: "requerem intervenção", icon: "triangle-alert", iconColor: "var(--warning)", bg: "var(--bg-surface)", rail: "none" },
+      ],
+      healthBars: [
+        { label: "Online", value: counts.online, pct: pctOf(counts.online), color: "var(--success)" },
+        { label: "Atenção", value: counts.atencao, pct: pctOf(counts.atencao), color: "var(--warning)" },
+        { label: "Offline", value: counts.offline, pct: pctOf(counts.offline), color: "var(--danger)" },
+      ],
+      quickActions: [
+        { label: "Relatório da frota", icon: "file-bar-chart-2", go: this.go("reports") },
+        { label: "Histórico de contadores", icon: "history", go: this.go("history") },
+        { label: "Cadastrar impressora", icon: "plus-circle", go: this.go("printers") },
+        { label: "Print Servers", icon: "network", go: this.go("network") },
+        { label: "Configurações", icon: "settings", go: this.go("settings") },
+      ],
+      statusTabs: [
+        { label: "Todas", count: ps.length, bg: "var(--tint-link)", fg: "var(--link)" },
+        { label: "Online", count: counts.online, bg: "transparent", fg: "var(--success)" },
+        { label: "Offline", count: counts.offline, bg: "transparent", fg: "var(--text-secondary)" },
+        { label: "Atenção", count: counts.atencao, bg: "transparent", fg: "var(--warning)" },
+      ],
+      globalToner: D.globalToner.map((t) => ({ label: t.label, percent: t.percent, color: CHANNEL[t.color], levelColor: levelColor(t.percent) })),
+      pageRows: ps.slice(0, 10).map((p) => this.tableRow(p)),
+      pageNumbers: Array.from({ length: totalPages }, (_, i) => ({
+        n: i + 1, bg: i === 0 ? "var(--link)" : "transparent", fg: i === 0 ? "var(--bg-surface)" : "var(--text-secondary)",
+      })),
+      tonerRows: sorted.map((p) => this.tonerRow(p)),
+      tonerSummary: [
+        { label: "Crítico ≤15%", value: tc.critical, icon: "triangle-alert", fg: "var(--danger)", bg: "var(--tint-warning)", rail: "inset 2px 0 0 var(--danger)" },
+        { label: "Baixo ≤35%", value: tc.warning, icon: "droplet", fg: "var(--warning)", bg: "transparent", rail: "none" },
+        { label: "Normal >35%", value: tc.normal, icon: "circle-check", fg: "var(--success)", rail: "none" },
+        { label: "Sem comunicação", value: counts.offline, icon: "wifi-off", fg: "var(--text-muted)", rail: "none" },
+      ],
+      tonerPills: [
+        { label: "Todos", bg: "var(--divider)", fg: "var(--text-primary)" },
+        { label: "Crítico · " + tc.critical, bg: "transparent", fg: "var(--text-secondary)" },
+        { label: "Baixo · " + tc.warning, bg: "transparent", fg: "var(--text-secondary)" },
+        { label: "Normal · " + tc.normal, bg: "transparent", fg: "var(--text-secondary)" },
+        { label: "Sem dados · " + tc.none, bg: "transparent", fg: "var(--text-secondary)" },
+      ],
+      alertRows: alerts.map((a) => ({
+        message: a.message, timestamp: a.timestamp,
+        badge: a.severity === "critical" ? "Crítico" : "Atenção",
+        fg: a.severity === "critical" ? "var(--danger)" : "var(--warning)",
+        rail: a.severity === "critical" ? "inset 2px 0 0 var(--danger)" : "none",
+      })),
+      monthBars: D.monthlyUsage.map((m, i) => ({
+        h: Math.round(8 + (m.pages / maxPages) * 62),
+        color: i === D.monthlyUsage.length - 1 ? "var(--link-hover)" : "var(--border-strong)",
+      })),
+      pagesChart: this.pagesChart(),
+      ...this.reportsVals(),
+      ...this.historyVals(),
+    };
+  }
+}
+</script>
+</body>
+</html>

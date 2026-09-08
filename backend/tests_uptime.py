@@ -196,7 +196,7 @@ with Session(database_module.engine) as s:
     s.add(User(email="uptime.viewer@example.com", password_hash=hash_password("x"),
                name="Uptime Viewer", role=Role.VIEWER.value))
     s.commit()
-AUTH = {"Authorization": f"Bearer {create_access_token({'sub': 'uptime.viewer@example.com'})}"}
+AUTH = {"Authorization": f"Bearer {create_access_token({'sub': 'uptime.viewer@example.com', 'ver': 0})}"}
 
 check("GET /readings sem token -> 401", client.get(f"/api/printers/{P1_ID}/readings").status_code, 401)
 

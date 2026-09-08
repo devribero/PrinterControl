@@ -13,9 +13,18 @@ import { parseRole, type Role } from "./permissions";
 /** Conta logada, no formato que a UI consome (Topbar, AuthGate, Sidebar). */
 export interface Account {
   /** Id da linha em `users`. Identidade exata — a UI usa para reconhecer
-   * "sou eu" sem depender do e-mail, que aqui vem truncado. */
+   * "sou eu" sem depender do e-mail. */
   id: number;
-  /** Parte antes do @ — a Topbar exibe `${email}@elgin.com`. */
+  /**
+   * E-mail COMPLETO da conta, exatamente como o backend o devolve.
+   *
+   * QA-13: até aqui este campo guardava só a parte antes do "@", e a Topbar
+   * remontava o endereço concatenando um domínio fixo (`@elgin.com`). Como
+   * as contas reais são `@elgin.com.br`, o painel exibia com toda a
+   * confiança um endereço que não existe — e a tela de Configurações, que
+   * não remontava nada, mostrava só o identificador. Guardar o valor real e
+   * exibir o valor real resolve os dois de uma vez.
+   */
   email: string;
   /** Segunda porta de login (opcional). Não é o `sub` do JWT — só exibicao. */
   username: string | null;
@@ -55,7 +64,9 @@ interface LoginResponse {
 function toAccount(user: ApiUser): Account {
   return {
     id: user.id,
-    email: user.email.split("@")[0],
+    // QA-13: e-mail INTEIRO. O split("@")[0] que existia aqui descartava o
+    // domínio, e quem precisava exibir um endereço tinha de inventá-lo.
+    email: user.email,
     username: user.username,
     name: user.name,
     role: parseRole(user.role),
@@ -185,14 +196,22 @@ export async function updateMyProfile(name: string): Promise<Account> {
  * Troca a própria senha. Exige a atual — sem isso, um token roubado viraria
  * posse permanente da conta.
  *
- * O backend responde 204; o token atual CONTINUA válido depois da troca (JWT
- * é stateless e não guarda versão de senha), então não há o que renovar aqui.
+ * QA-04: a troca agora ENCERRA todas as sessões da conta (o backend
+ * incrementa `token_version` e passa a recusar os tokens anteriores), que é
+ * o ponto de trocar a senha às pressas. Como o token desta aba também é um
+ * dos anteriores, a resposta traz um substituto — sem guardá-lo, quem
+ * acabou de trocar a senha cairia para a tela de login no próximo request.
+ *
+ * A rota respondia 204 sem corpo até essa mudança.
  */
 export async function changeMyPassword(currentPassword: string, newPassword: string): Promise<void> {
-  await api.post<void>("/api/auth/change-password", {
+  const data = await api.post<{ access_token?: string }>("/api/auth/change-password", {
     current_password: currentPassword,
     new_password: newPassword,
   });
+  if (data?.access_token) {
+    setToken(data.access_token, isTokenPersistent());
+  }
 }
 
 /**
@@ -200,10 +219,10 @@ export async function changeMyPassword(currentPassword: string, newPassword: str
  *
  * O backend já desligou `must_change_password` (é o único ponto que desliga
  * essa flag — ver `change_own_password` em routes/auth.py), mas a resposta
- * de `POST /change-password` é 204 sem corpo: não há usuário novo para
- * derivar. Quem chama (MustChangePasswordGate) já tem a `Account` em mãos e
- * só precisa desta cópia com a flag baixada, para o AuthGate liberar o
- * painel sem esperar por um novo `GET /me`.
+ * de `POST /change-password` traz só o token novo (QA-04), não o usuário.
+ * Quem chama (MustChangePasswordGate) já tem a `Account` em mãos e só
+ * precisa desta cópia com a flag baixada, para o AuthGate liberar o painel
+ * sem esperar por um novo `GET /me`.
  */
 export function withPasswordChanged(account: Account): Account {
   const updated: Account = { ...account, mustChangePassword: false };

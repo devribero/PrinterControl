@@ -45,8 +45,8 @@ with Session(engine) as s:
     s.add(admin2)
     s.commit()
 
-TOKEN1 = create_access_token({"sub": "ratelimit.admin1@example.com"})
-TOKEN2 = create_access_token({"sub": "ratelimit.admin2@example.com"})
+TOKEN1 = create_access_token({"sub": "ratelimit.admin1@example.com", 'ver': 0})
+TOKEN2 = create_access_token({"sub": "ratelimit.admin2@example.com", 'ver': 0})
 H1 = {"Authorization": f"Bearer {TOKEN1}"}
 H2 = {"Authorization": f"Bearer {TOKEN2}"}
 client = TestClient(app)

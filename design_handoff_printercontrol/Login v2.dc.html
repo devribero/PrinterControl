@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/lucide@0.474.0/dist/umd/lucide.min.js"></script>
+<style>
+  :root {
+    --bg-page: #f6f3ee; --bg-surface: #fff; --border: #e7dfd2; --divider: #f2ede5; --track: #ece5da;
+    --text-primary: #26211c; --text-secondary: #6f6459; --text-muted: #a79b8b;
+    --link: #0a6a9c; --link-hover: #0098e0; --success: #3f8f5f; --success-bg: #e7f3ec;
+    --danger: #c1503d; --selection: #e3f4fc;
+  }
+  [data-theme="dark"] {
+    --bg-page: #16181b; --bg-surface: #1e2124; --border: #34383c; --divider: #2a2d30; --track: #34383c;
+    --text-primary: #ece9e3; --text-secondary: #a5a19a; --text-muted: #74716a;
+    --link: #4ab3e8; --link-hover: #7cc9ef; --success: #5cb37f; --success-bg: #1e3129;
+    --danger: #e2776a; --selection: #1f3a4a;
+  }
+  body { margin: 0; background: var(--bg-page); color: var(--text-primary); font-family: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; transition: background-color 0.15s ease-out, color 0.15s ease-out; }
+  p, h1, h2, h3, h4, h5, h6 { margin: 0; }
+  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { color: var(--link-hover); }
+  input { font: inherit; color: inherit; }
+  *, *::before, *::after { box-sizing: border-box; }
+  ::selection { background: var(--selection); color: var(--link); }
+  :focus-visible { outline: 2px solid #0098e0; outline-offset: 2px; border-radius: 3px; }
+  @keyframes fade-up { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  @keyframes soft-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes nudge-a { 0%, 100% { transform: none; } 20% { transform: translateX(-3px); } 60% { transform: translateX(3px); } 80% { transform: translateX(-1px); } }
+  @keyframes nudge-b { 0%, 100% { transform: none; } 20% { transform: translateX(-3px); } 60% { transform: translateX(3px); } 80% { transform: translateX(-1px); } }
+  svg.lucide { display: block; }
+</style>
+</helmet>
+
+<div style="display:grid; grid-template-columns:{{ gridCols }}; min-height:100vh; background:var(--bg-page)" data-theme="{{ theme }}">
+
+  <section style="display:{{ heroDisplay }}; position:relative; flex-direction:column; justify-content:space-between; overflow:hidden; background:#0a4b6e; padding:{{ heroPad }}; color:#fff">
+    <div style="position:absolute; inset:0; opacity:0.5; pointer-events:none">{{ lattice }}</div>
+
+    <div style="position:relative; display:flex; align-items:center; gap:0.875rem">
+      <img src="assets/logo-elgin.webp" alt="Elgin" style="height:22px; width:auto; display:block; filter:brightness(0) invert(1)" />
+      <span style="height:18px; width:1px; background:rgba(255,255,255,0.25)"></span>
+      <p style="font-size:0.6875rem; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:rgba(255,255,255,0.7)">Impressoras</p>
+    </div>
+
+    <div style="position:relative; max-width:30rem; padding:3rem 0">
+      <p style="font-size:0.6875rem; font-weight:700; letter-spacing:0.16em; text-transform:uppercase; color:#7fd0f5">Painel corporativo</p>
+      <h1 style="margin-top:1rem; font-size:2rem; font-weight:600; line-height:1.22; letter-spacing:-0.02em; text-wrap:pretty; color:#fff">Gestão de frota de impressão para toda a operação.</h1>
+      <p style="margin-top:1rem; font-size:0.9375rem; line-height:1.6; color:rgba(255,255,255,0.72); text-wrap:pretty">Status, suprimentos, alertas e contadores mensais de cada equipamento da rede — em um único painel, sempre atualizado.</p>
+
+      <dl style="margin:2.5rem 0 0; display:flex; flex-direction:column">
+        <sc-for list="{{ capabilities }}" as="c" hint-placeholder-count="3">
+          <div style="display:flex; gap:1rem; border-top:1px solid rgba(255,255,255,0.14); padding:1rem 0">
+            <span style="flex-shrink:0; margin-top:0.125rem; color:#7fd0f5; display:flex"><i data-lucide="{{ c.icon }}" width="17" height="17"></i></span>
+            <div>
+              <dt style="font-size:0.875rem; font-weight:600; color:#fff">{{ c.title }}</dt>
+              <dd style="margin:0.1875rem 0 0; font-size:0.8125rem; line-height:1.55; color:rgba(255,255,255,0.62)">{{ c.text }}</dd>
+            </div>
+          </div>
+        </sc-for>
+      </dl>
+    </div>
+
+    <div style="position:relative; display:flex; align-items:center; gap:2.5rem; border-top:1px solid rgba(255,255,255,0.14); padding-top:1.5rem">
+      <div>
+        <p style="font-family:'IBM Plex Mono', monospace; font-size:1.25rem; font-weight:500; letter-spacing:-0.02em; color:#fff">100+</p>
+        <p style="margin-top:0.1875rem; font-size:0.6875rem; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.55)">Impressoras</p>
+      </div>
+      <div>
+        <p style="font-family:'IBM Plex Mono', monospace; font-size:1.25rem; font-weight:500; letter-spacing:-0.02em; color:#fff">8</p>
+        <p style="margin-top:0.1875rem; font-size:0.6875rem; letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,255,255,0.55)">Unidades</p>
+      </div>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:0.5rem; font-size:0.75rem; color:rgba(255,255,255,0.62)">
+        <span style="height:6px; width:6px; border-radius:999px; background:#5fc98a; animation:soft-pulse 3s ease-in-out infinite"></span>
+        Coleta ativa
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex; flex-direction:column; justify-content:center; align-items:center; padding:{{ formPad }}; position:relative">
+
+    <button onClick="{{ toggleTheme }}" style="position:absolute; top:1.5rem; right:1.5rem; display:flex; align-items:center; justify-content:center; border-radius:6px; border:1px solid var(--border); padding:0.4375rem; color:var(--text-secondary); transition:background-color 0.12s ease-out" style-hover="background:var(--divider)"><i data-lucide="{{ themeIcon }}" width="16" height="16"></i></button>
+
+    <div style="display:{{ mobileLogoDisplay }}; align-items:center; gap:0.75rem; margin-bottom:2.5rem">
+      <img src="assets/logo-elgin.webp" alt="Elgin" style="height:22px; width:auto; display:block" />
+      <span style="height:18px; width:1px; background:var(--border)"></span>
+      <p style="font-size:0.6875rem; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-secondary)">Impressoras</p>
+    </div>
+
+    <div style="width:100%; max-width:23rem; animation:{{ cardAnim }}">
+
+      <sc-if value="{{ isSignedIn }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px solid var(--border); border-radius:10px; background:var(--bg-surface); padding:2.5rem 2rem; text-align:center; animation:fade-up 0.2s ease-out">
+          <span style="display:inline-flex; align-items:center; justify-content:center; height:2.5rem; width:2.5rem; border-radius:999px; background:var(--success-bg); color:var(--success)"><i data-lucide="check" width="20" height="20"></i></span>
+          <h2 style="margin-top:1rem; font-size:1rem; font-weight:600; color:var(--text-primary)">Autenticado</h2>
+          <p style="margin-top:0.375rem; font-size:0.8125rem; line-height:1.55; color:var(--text-secondary)">Sessão iniciada como <span style="font-family:'IBM Plex Mono', monospace; color:var(--text-primary)">{{ signedEmail }}</span>. Abrindo o painel…</p>
+          <div style="margin-top:1.5rem; height:2px; width:100%; border-radius:1px; background:var(--track); overflow:hidden"><div style="height:100%; width:100%; background:#0098e0"></div></div>
+          <button onClick="{{ reset }}" style="margin-top:1.25rem; font-size:0.75rem; font-weight:600; color:var(--link)">Voltar ao formulário</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSignedOut }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <h2 style="font-size:1.25rem; font-weight:600; letter-spacing:-0.015em; color:var(--text-primary)">Acessar o painel</h2>
+          <p style="margin-top:0.375rem; font-size:0.875rem; line-height:1.55; color:var(--text-secondary)">Use as credenciais corporativas fornecidas pela equipe de TI.</p>
+
+          <form onSubmit="{{ submit }}" style="margin-top:2rem; display:flex; flex-direction:column; gap:1.25rem">
+
+            <div style="display:flex; flex-direction:column; gap:0.4375rem">
+              <label for="login-user" style="font-size:0.75rem; font-weight:600; letter-spacing:0.01em; color:var(--text-primary)">E-mail ou usuário</label>
+              <div style="display:flex; align-items:center; gap:0.625rem; border:1px solid {{ emailBorder }}; border-radius:6px; background:var(--bg-surface); padding:0 0.75rem; height:2.625rem; box-shadow:{{ emailRing }}; transition:border-color 0.12s ease-out, box-shadow 0.12s ease-out">
+                <span style="flex-shrink:0; display:flex; color:{{ emailIcon }}"><i data-lucide="at-sign" width="16" height="16"></i></span>
+                <input id="login-user" type="text" autocomplete="username" value="{{ email }}" onChange="{{ setEmail }}" onFocus="{{ focusEmail }}" onBlur="{{ blurField }}" placeholder="seu.usuario@elgin.com.br" style="width:100%; height:100%; background:transparent; border:none; outline:none; font-size:0.875rem; color:var(--text-primary)" />
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:0.4375rem">
+              <div style="display:flex; align-items:baseline; justify-content:space-between; gap:1rem">
+                <label for="login-pass" style="font-size:0.75rem; font-weight:600; letter-spacing:0.01em; color:var(--text-primary)">Senha</label>
+                <button type="button" onClick="{{ forgot }}" style="font-size:0.75rem; font-weight:500; color:var(--link); transition:color 0.12s ease-out" style-hover="color:var(--link-hover)">Esqueceu a senha?</button>
+              </div>
+              <div style="display:flex; align-items:center; gap:0.625rem; border:1px solid {{ passBorder }}; border-radius:6px; background:var(--bg-surface); padding:0 0.375rem 0 0.75rem; height:2.625rem; box-shadow:{{ passRing }}; transition:border-color 0.12s ease-out, box-shadow 0.12s ease-out">
+                <span style="flex-shrink:0; display:flex; color:{{ passIcon }}"><i data-lucide="lock" width="16" height="16"></i></span>
+                <input id="login-pass" type="{{ passType }}" autocomplete="current-password" value="{{ password }}" onChange="{{ setPassword }}" onFocus="{{ focusPass }}" onBlur="{{ blurField }}" placeholder="Digite sua senha" style="width:100%; height:100%; background:transparent; border:none; outline:none; font-size:0.875rem; color:var(--text-primary)" />
+                <button type="button" onClick="{{ toggleReveal }}" aria-label="{{ revealLabel }}" style="flex-shrink:0; display:flex; border-radius:5px; padding:0.375rem; color:var(--text-muted); transition:background-color 0.12s ease-out, color 0.12s ease-out" style-hover="background:#f2ede5; color:var(--text-secondary)"><i data-lucide="{{ revealIcon }}" width="16" height="16"></i></button>
+              </div>
+            </div>
+
+            <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
+              <div role="alert" style="display:flex; align-items:flex-start; gap:0.625rem; border:1px solid var(--border); border-radius:6px; background:var(--bg-surface); box-shadow:inset 3px 0 0 var(--danger); padding:0.75rem 0.875rem; animation:fade-up 0.16s ease-out">
+                <span style="flex-shrink:0; margin-top:0.0625rem; display:flex; color:var(--danger)"><i data-lucide="triangle-alert" width="15" height="15"></i></span>
+                <div>
+                  <p style="font-size:0.8125rem; font-weight:600; color:var(--text-primary)">{{ errorTitle }}</p>
+                  <p style="margin-top:0.125rem; font-size:0.75rem; line-height:1.5; color:var(--text-secondary)">{{ errorText }}</p>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ hasNotice }}" hint-placeholder-val="{{ false }}">
+              <div role="status" style="display:flex; align-items:flex-start; gap:0.625rem; border:1px solid var(--border); border-radius:6px; background:var(--bg-surface); box-shadow:inset 3px 0 0 var(--link-hover); padding:0.75rem 0.875rem; animation:fade-up 0.16s ease-out">
+                <span style="flex-shrink:0; margin-top:0.0625rem; display:flex; color:var(--link)"><i data-lucide="info" width="15" height="15"></i></span>
+                <div style="min-width:0; flex:1">
+                  <p style="font-size:0.8125rem; font-weight:600; color:var(--text-primary)">{{ noticeTitle }}</p>
+                  <p style="margin-top:0.125rem; font-size:0.75rem; line-height:1.5; color:var(--text-secondary)">{{ noticeText }}</p>
+                </div>
+                <button type="button" onClick="{{ dismissNotice }}" aria-label="Dispensar aviso" style="flex-shrink:0; display:flex; border-radius:4px; padding:0.125rem; color:var(--text-muted); transition:color 0.12s ease-out" style-hover="color:var(--text-secondary)"><i data-lucide="x" width="14" height="14"></i></button>
+              </div>
+            </sc-if>
+
+            <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.8125rem; color:var(--text-secondary); cursor:pointer">
+              <input type="checkbox" checked="{{ remember }}" onChange="{{ toggleRemember }}" style="width:0.875rem; height:0.875rem; accent-color:var(--link); cursor:pointer" />
+              Manter conectado neste dispositivo
+            </label>
+
+            <button type="submit" disabled="{{ loading }}" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; height:2.625rem; border-radius:6px; background:var(--link); font-size:0.875rem; font-weight:600; color:#fff; opacity:{{ submitOpacity }}; cursor:{{ submitCursor }}; transition:background-color 0.12s ease-out" style-hover="background:#0098e0">
+              <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+                <span style="display:flex; animation:spin 0.7s linear infinite"><i data-lucide="loader-circle" width="16" height="16"></i></span>
+              </sc-if>
+              {{ submitLabel }}
+            </button>
+          </form>
+
+          <div style="margin-top:1.75rem; border-top:1px solid #e7dfd2; padding-top:1.25rem; display:flex; align-items:flex-start; gap:0.625rem">
+            <span style="flex-shrink:0; margin-top:0.0625rem; display:flex; color:var(--text-muted)"><i data-lucide="shield-check" width="15" height="15"></i></span>
+            <p style="font-size:0.75rem; line-height:1.55; color:var(--text-muted)">Acesso restrito a contas corporativas Elgin. Tentativas repetidas bloqueiam o usuário temporariamente.</p>
+          </div>
+        </div>
+      </sc-if>
+
+      <p style="margin-top:2.5rem; font-size:0.6875rem; color:var(--text-muted)">© 2026 Elgin · Painel de Impressoras</p>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+const NODES = [
+  [12, 14], [34, 8], [58, 18], [82, 10],
+  [6, 38], [28, 34], [50, 42], [74, 36], [93, 44],
+  [16, 60], [40, 66], [64, 58], [88, 68],
+  [10, 86], [33, 90], [56, 82], [80, 92],
+];
+const LINKS = [
+  [0,1],[1,2],[2,3],[0,4],[1,5],[2,6],[3,7],[3,8],
+  [4,5],[5,6],[6,7],[7,8],[5,9],[6,10],[7,11],[8,12],
+  [9,10],[10,11],[11,12],[9,13],[10,14],[11,15],[12,16],
+  [13,14],[14,15],[15,16],
+];
+const ACTIVE = [2, 6, 10, 15];
+
+class Component extends DCLogic {
+  state = {
+    email: "", password: "", reveal: false, remember: true,
+    loading: false, error: null, notice: null, signedIn: false, shake: 0, focus: null,
+    w: typeof window !== "undefined" ? window.innerWidth : 1440,
+    theme: (typeof localStorage !== "undefined" && localStorage.getItem("pc-theme")) || "light",
+  };
+
+  toggleTheme = () => {
+    const next = this.state.theme === "dark" ? "light" : "dark";
+    this.setState({ theme: next });
+    try { localStorage.setItem("pc-theme", next); } catch (e) {}
+  };
+
+  componentDidMount() {
+    this.paintIcons();
+    this.onResize = () => this.setState({ w: window.innerWidth });
+    window.addEventListener("resize", this.onResize);
+  }
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.onResize);
+    clearTimeout(this.timer);
+  }
+  componentDidUpdate() { this.paintIcons(); }
+  paintIcons() {
+    const run = () => { if (window.lucide) window.lucide.createIcons(); };
+    run();
+    if (!window.lucide) setTimeout(run, 300);
+    setTimeout(run, 900);
+  }
+
+  submit = (e) => {
+    e.preventDefault();
+    if (this.state.loading) return;
+    const { email, password } = this.state;
+    if (!email.trim() || !password) {
+      this.setState({
+        error: { title: "Preencha os dois campos", text: "Informe o e-mail ou usuário corporativo e a senha para continuar." },
+        notice: null,
+        shake: this.state.shake + 1,
+      });
+      return;
+    }
+    this.setState({ loading: true, error: null, notice: null });
+    this.timer = setTimeout(() => {
+      if (password === "elgin") {
+        this.setState({ loading: false, signedIn: true });
+      } else {
+        this.setState({
+          loading: false,
+          error: { title: "Credenciais não reconhecidas", text: "E-mail/usuário ou senha incorretos. Verifique os dados e tente novamente." },
+          shake: this.state.shake + 1,
+        });
+      }
+    }, 1100);
+  };
+
+  lattice() {
+    const h = React.createElement;
+    const kids = [];
+    LINKS.forEach(([a, b], i) => {
+      kids.push(h("line", {
+        key: "l" + i, x1: NODES[a][0], y1: NODES[a][1], x2: NODES[b][0], y2: NODES[b][1],
+        stroke: "#fff", strokeWidth: 0.1, strokeOpacity: 0.28,
+      }));
+    });
+    NODES.forEach((n, i) => {
+      const on = ACTIVE.indexOf(i) !== -1;
+      kids.push(h("circle", {
+        key: "n" + i, cx: n[0], cy: n[1], r: on ? 0.85 : 0.45,
+        fill: on ? "#7fd0f5" : "#fff", fillOpacity: on ? 0.9 : 0.4,
+      }));
+    });
+    return h("svg", { viewBox: "0 0 100 100", preserveAspectRatio: "none", width: "100%", height: "100%", "aria-hidden": "true", style: { display: "block" } }, kids);
+  }
+
+  renderVals() {
+    const s = this.state;
+    const narrow = s.w < 940;
+    const err = !!s.error;
+    const ring = (field, isErr) => {
+      if (isErr) return { border: "var(--danger)", ring: "none", icon: "var(--danger)" };
+      if (s.focus === field) return { border: "var(--link-hover)", ring: "0 0 0 3px rgba(0,152,224,0.12)", icon: "var(--link)" };
+      return { border: "var(--border)", ring: "none", icon: "var(--text-muted)" };
+    };
+    const em = ring("email", false);
+    const pw = ring("pass", err);
+
+    return {
+      theme: s.theme, themeIcon: s.theme === "dark" ? "sun" : "moon", toggleTheme: this.toggleTheme,
+      gridCols: narrow ? "1fr" : "minmax(0, 1.05fr) minmax(30rem, 0.95fr)",
+      heroDisplay: narrow ? "none" : "flex",
+      heroPad: "3.5rem 4rem",
+      formPad: narrow ? "3rem 1.5rem" : "3rem 5rem",
+      mobileLogoDisplay: narrow ? "flex" : "none",
+      cardAnim: s.shake ? (s.shake % 2 ? "nudge-a" : "nudge-b") + " 0.36s ease-out 1" : "none",
+      lattice: this.lattice(),
+      capabilities: [
+        { icon: "activity", title: "Monitoramento contínuo", text: "Status, nível de toner e contadores coletados diretamente dos equipamentos." },
+        { icon: "bell-ring", title: "Alertas antecipados", text: "Aviso antes do toner acabar ou de uma impressora sair da rede." },
+        { icon: "shield-check", title: "Acesso controlado", text: "Perfis de permissão por função, com registro de quem acessa o painel." },
+      ],
+
+      email: s.email, password: s.password,
+      setEmail: (e) => this.setState({ email: e.target.value, error: null, notice: null }),
+      setPassword: (e) => this.setState({ password: e.target.value, error: null, notice: null }),
+      focusEmail: () => this.setState({ focus: "email" }),
+      focusPass: () => this.setState({ focus: "pass" }),
+      blurField: () => this.setState({ focus: null }),
+      emailBorder: em.border, emailRing: em.ring, emailIcon: em.icon,
+      passBorder: pw.border, passRing: pw.ring, passIcon: pw.icon,
+
+      reveal: s.reveal,
+      passType: s.reveal ? "text" : "password",
+      revealIcon: s.reveal ? "eye-off" : "eye",
+      revealLabel: s.reveal ? "Ocultar senha" : "Mostrar senha",
+      toggleReveal: () => this.setState({ reveal: !s.reveal }),
+
+      remember: s.remember,
+      toggleRemember: (e) => this.setState({ remember: e.target.checked }),
+
+      submit: this.submit,
+      loading: s.loading,
+      submitLabel: s.loading ? "Verificando credenciais…" : "Entrar no painel",
+      submitOpacity: s.loading ? 0.65 : 1,
+      submitCursor: s.loading ? "progress" : "pointer",
+
+      hasError: err,
+      errorTitle: s.error ? s.error.title : "",
+      errorText: s.error ? s.error.text : "",
+
+      isSignedIn: s.signedIn, isSignedOut: !s.signedIn,
+      signedEmail: s.email,
+      reset: () => this.setState({ signedIn: false, password: "" }),
+
+      hasNotice: !!s.notice,
+      noticeTitle: s.notice ? s.notice.title : "",
+      noticeText: s.notice ? s.notice.text : "",
+      dismissNotice: () => this.setState({ notice: null }),
+      forgot: () => this.setState({
+        error: null,
+        notice: { title: "Redefinição feita pela equipe de TI", text: "A troca de senha é solicitada ao administrador do sistema na Elgin." },
+      }),
+    };
+  }
+}
+</script>
+</body>
+</html>

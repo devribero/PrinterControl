@@ -21,6 +21,7 @@ from app.services.printer_collector import PrinterCollector
 from app.services.scheduler import scheduler_status
 from app.services.environment_guard import bloquear_mock_em_producao
 from app.services.snmp_mock import SCENARIOS
+from app.schemas.common import RecursoId
 
 router = APIRouter(prefix="/collect", tags=["collect"])
 
@@ -62,7 +63,7 @@ class CollectResponse(BaseModel):
 
 @router.post("/printers/{printer_id}", response_model=CollectResponse)
 def collect_printer(
-    printer_id: int,
+    printer_id: RecursoId,
     request: CollectRequest,
     session: Session = Depends(get_session),
     user: User = Depends(rate_limited_action("collect_printer", require=require_operator)),

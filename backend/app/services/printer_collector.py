@@ -128,10 +128,23 @@ class PrinterCollector:
 
             reading = self._result_to_reading(printer_id, result)
             session.add(reading)
-            session.commit()
+
+            # flush e nao commit (QA-05): o INSERT vai para o banco e a
+            # leitura ganha id/timestamp, mas a transacao continua ABERTA.
+            # evaluate_reading roda dentro dela e faz o unico commit, la no
+            # final — leitura e alertas passam a ser tudo ou nada.
+            #
+            # Com o commit aqui, uma falha na avaliacao de alertas deixava a
+            # leitura gravada e ainda assim devolvia success=False: o
+            # rollback do except nao desfaz o que ja foi confirmado. Quem
+            # chamasse ia reprocessar (duplicando a leitura) ou desistir
+            # (perdendo o alerta), sem forma de saber qual dos dois era o
+            # caso a partir do retorno.
+            session.flush()
             session.refresh(reading)
 
             # Etapa 8A: alertas automaticos derivados da leitura recem-gravada.
+            # Faz o commit da transacao inteira ao final.
             alert_actions = evaluate_reading(session, printer_id, reading)
 
             return {

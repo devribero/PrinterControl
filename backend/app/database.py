@@ -49,21 +49,40 @@ if "sqlite" in settings.database_url:
             # transacao em cada leitura gravada.
             cursor.execute("PRAGMA synchronous=NORMAL")
 
-            # foreign_keys FICA DESLIGADO (o padrao do SQLite). NAO e
-            # esquecimento — ligar quebra a aplicacao HOJE.
+            # foreign_keys CONTINUA DESLIGADO — mas por um motivo diferente
+            # do que estava escrito aqui antes (QA-01).
             #
-            # `printer_readings` e `alerts` carregam FK para "printers_old",
-            # tabela que a migracao de schema das etapas anteriores renomeou e
-            # descartou. Com a checagem desligada isso e inofensivo; ligada,
-            # todo INSERT de leitura falha com
-            #     no such table: main.printers_old
-            # e a coleta inteira para. Verificavel com PRAGMA foreign_key_check.
+            # O motivo ANTIGO acabou: as FKs de `printer_readings`,
+            # `printer_monthly`, `alerts` e `toner_history` apontavam para
+            # "printers_old", tabela que a migracao da Etapa 4 renomeou e
+            # descartou, e ligar a checagem fazia todo INSERT de leitura
+            # falhar com "no such table: main.printers_old".
+            # _migrate_child_foreign_keys() corrigiu isso: o schema agora
+            # descreve as relacoes reais e `PRAGMA foreign_key_check` passa
+            # limpo (eram 33.859 violacoes).
             #
-            # Consertar exige reconstruir as duas tabelas com a FK correta —
-            # migracao de banco, com backup e janela, decidida a parte. Ate la,
-            # a integridade referencial continua garantida pelo codigo (nada
-            # apaga impressora: o que some vira active=False), que e como
-            # sempre funcionou.
+            # O motivo ATUAL e que LIGAR a checagem quebra quatro caminhos que
+            # funcionam hoje, e cada um precisa de decisao propria:
+            #
+            #   1. _finish_printer_migration() faz `DELETE FROM printers` com
+            #      as leituras ainda apontando para elas — a migracao da
+            #      Etapa 4 deixa de rodar em bancos que ainda nao passaram
+            #      por ela;
+            #   2. apagar um alerta que ja gerou Notification passa a ser
+            #      recusado, em vez de deixar a notificacao com referencia
+            #      pendurada (que e o que a interface hoje trata como null);
+            #   3. `POST /api/notifications` aceita `alert_id` do cliente sem
+            #      conferir se existe: um id inventado viraria 500 em vez de
+            #      ser gravado e exibido sem referencia;
+            #   4. as fixtures de tests_printer_sync e tests_webhook apagam
+            #      linhas em ordem incompativel com a checagem.
+            #
+            # Nenhum dos quatro e dificil; todos mudam comportamento
+            # observavel e merecem um passo proprio, com teste. Ate la o
+            # schema esta correto — o que faltava para essa mudanca sequer
+            # ser possivel — e a integridade referencial continua sustentada
+            # pelo codigo, como sempre foi (nada apaga impressora: o que some
+            # do Print Server vira active=False).
         finally:
             cursor.close()
 
@@ -91,7 +110,9 @@ def create_db_and_tables():
     _migrate_reading_uptime()
     _migrate_user_rbac()
     _migrate_user_login_fields()
+    _migrate_user_token_version()
     _migrate_print_servers()
+    _migrate_child_foreign_keys()
 
 
 def _migrate_alert_type():
@@ -249,6 +270,40 @@ def _migrate_user_login_fields():
         conn.commit()
 
 
+def _migrate_user_token_version():
+    """
+    QA-04: adiciona `users.token_version` em bancos criados antes da
+    revogacao de sessao. Aditiva e idempotente, mesmo padrao de
+    _migrate_alert_type(): so roda ALTER TABLE se a coluna ainda nao existe,
+    e nunca recria/renomeia/apaga a tabela.
+
+    Toda conta comeca em 0, igual a uma conta nova. Tokens emitidos antes
+    desta mudanca nao carregam o campo `ver` e sao recusados por
+    decode_token — ou seja, o deploy desta correcao desloga todo mundo uma
+    vez. E deliberado: aceitar os tokens antigos manteria de pe exatamente
+    as sessoes que a correcao existe para poder encerrar.
+    """
+    from sqlalchemy import text
+
+    with engine.connect() as conn:
+        cols = {row[1] for row in conn.execute(text("PRAGMA table_info(users)"))}
+        if not cols:
+            return  # tabela ainda nao existe; create_all ja cuidou/cuidara
+
+        if "token_version" not in cols:
+            conn.execute(text("ALTER TABLE users ADD COLUMN token_version INTEGER"))
+            logger.warning(
+                "Migracao QA-04: coluna users.token_version criada. As sessoes "
+                "abertas no momento do deploy precisarao de novo login."
+            )
+
+        # Rede de seguranca: NULL viraria None em Python e a comparacao com o
+        # `ver` do token (int) daria sempre diferente — a conta nao entraria
+        # mais em lugar nenhum.
+        conn.execute(text("UPDATE users SET token_version = 0 WHERE token_version IS NULL"))
+        conn.commit()
+
+
 def _migrate_print_servers():
     """
     Fase 4: registro de Print Servers.
@@ -335,6 +390,195 @@ def _migrate_print_servers():
             )
         )
         conn.commit()
+
+
+def _migrate_child_foreign_keys():
+    """
+    QA-01: reaponta para `printers` as FKs que ficaram em `printers_old`.
+
+    O QUE ACONTECEU
+    ---------------
+    A Etapa 4 recriou `printers` para trocar a identidade de `ip UNIQUE` para
+    (server, name). O caminho foi `ALTER TABLE printers RENAME TO
+    printers_old` (ver _migrate_printer_schema). O SQLite moderno, ao
+    renomear uma tabela, REESCREVE as referencias a ela nas outras tabelas —
+    entao as quatro filhas passaram a declarar FK para `printers_old`, que na
+    sequencia foi apagada. O resultado e um schema que descreve uma relacao
+    com uma tabela inexistente: `PRAGMA foreign_key_check` acusava 33.859
+    violacoes, e `PRAGMA integrity_check` continuava dizendo "ok" porque ele
+    nao olha FK.
+
+    Nao havia corrupcao de dado — nenhuma linha ficou orfa, os printer_id
+    todos casam com `printers` — mas o schema mentia, e era essa mentira que
+    obrigava a manter `PRAGMA foreign_keys` desligado.
+
+    COMO CORRIGE
+    ------------
+    O procedimento de troca de schema documentado pelo proprio SQLite, por
+    tabela e dentro de UMA transacao:
+
+        renomeia X -> X_fk_old  ->  recria X pelo modelo (FK correta)
+        -> copia os dados  ->  apaga X_fk_old
+
+    Tres cuidados que nao sao opcionais aqui:
+
+    `legacy_alter_table=ON` durante o RENAME. Sem ele o SQLite repete
+    exatamente o erro original: ao renomear `alerts`, a FK de `notifications`
+    seria reescrita para `alerts_fk_old` e o problema so mudaria de lugar.
+
+    Os indices de X_fk_old sao apagados antes de recriar X. Nomes de indice
+    sao globais no banco, nao por tabela; sem isso o CREATE INDEX da tabela
+    nova colide com o indice homonimo ainda preso a antiga.
+
+    Uma transacao por tabela. Uma interrupcao no meio (o `--reload` do uvicorn
+    matando o processo, que ja aconteceu neste projeto — ver
+    _migrate_printer_schema) reverte aquela tabela inteira; a proxima
+    inicializacao refaz.
+
+    Idempotente: le a FK atual e nao faz nada onde ela ja aponta para
+    `printers`. Em banco novo tambem nao faz nada — o create_all ja o cria
+    correto, porque os modelos sempre declararam `foreign_key="printers.id"`.
+    """
+    import app.models  # noqa: F401  (registra todo o metadata)
+
+    from sqlalchemy import text
+    from sqlalchemy.schema import CreateIndex, CreateTable
+
+    # O metadata do SQLModel e a fonte do schema correto: toda tabela mapeada
+    # pode ser reconstruida a partir dele. Varrer o metadata (em vez de uma
+    # lista fixa de nomes) e o que faz esta migracao pegar tambem os casos que
+    # ninguem previu — foi assim que `notifications`, apontando para um
+    # `alerts_fk_old` deixado por uma tentativa interrompida, entrou aqui.
+    modelos = {
+        tabela.name: tabela for tabela in SQLModel.metadata.sorted_tables
+    }
+
+    with engine.connect() as conn:
+        existentes = {
+            row[0]
+            for row in conn.execute(text("SELECT name FROM sqlite_master WHERE type='table'"))
+        }
+
+        pendentes = []
+        for tabela in existentes:
+            if tabela not in modelos:
+                continue  # tabela sem modelo: nao ha schema de referencia
+            alvos = {
+                row[2] for row in conn.execute(text(f"PRAGMA foreign_key_list({tabela})"))
+            }
+            # Alvo que nao existe como tabela = relacao declarada com algo que
+            # nao esta la. `printers_old` e o caso historico; qualquer
+            # `*_fk_old` de uma migracao interrompida cai na mesma rede.
+            if alvos - existentes:
+                pendentes.append((tabela, sorted(alvos - existentes)))
+
+    if not pendentes:
+        return
+
+    logger.warning(
+        "Migracao QA-01: %d tabela(s) com FK apontando para tabela inexistente: %s",
+        len(pendentes),
+        "; ".join(f"{t} -> {', '.join(a)}" for t, a in pendentes),
+    )
+    pendentes = [t for t, _ in pendentes]
+
+    backup_path = _sqlite_backup_path()
+    if backup_path and backup_path.exists():
+        stamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+        backup = backup_path.with_name(f"{backup_path.stem}.backup-fk-{stamp}{backup_path.suffix}")
+        shutil.copyfile(backup_path, backup)
+        logger.warning("Backup do banco criado em: %s", backup)
+
+    # DDL da tabela nova, gerado a partir do modelo (fonte unica do schema) e
+    # executado adiante pelo driver. E preciso te-lo como TEXTO porque o
+    # rebuild inteiro roda numa conexao crua — ver a nota dos PRAGMAs abaixo.
+    def _ddl(tabela_modelo):
+        criar = [str(CreateTable(tabela_modelo).compile(engine)).strip()]
+        criar += [str(CreateIndex(ix).compile(engine)).strip() for ix in tabela_modelo.indexes]
+        return criar
+
+    for tabela in pendentes:
+        tabela_modelo = modelos[tabela]
+        antiga = f"{tabela}_fk_old"
+
+        # Conexao CRUA, e nao uma Connection do SQLAlchemy: `foreign_keys` e
+        # `legacy_alter_table` sao ignorados silenciosamente dentro de uma
+        # transacao, e a Connection abre uma implicitamente no primeiro
+        # execute. Foi exatamente o que aconteceu na primeira tentativa desta
+        # migracao: o legacy_alter_table nao pegou e o RENAME de `alerts`
+        # reescreveu a FK de `notifications` para `alerts_fk_old` —
+        # reproduzindo, em outra tabela, o defeito que estamos corrigindo.
+        bruta = engine.raw_connection()
+        try:
+            driver = bruta.driver_connection
+            isolamento_anterior = driver.isolation_level
+            driver.isolation_level = None  # controle manual de BEGIN/COMMIT
+            cur = driver.cursor()
+            try:
+                # OFF durante o rebuild e o procedimento que o proprio SQLite
+                # documenta: a tabela antiga e a nova coexistem por alguns
+                # comandos, e a checagem reclamaria desse estado intermediario.
+                # A verificacao vem depois, com foreign_key_check.
+                cur.execute("PRAGMA foreign_keys=OFF")
+                cur.execute("PRAGMA legacy_alter_table=ON")
+
+                cur.execute("BEGIN")
+                try:
+                    # Sobra de uma tentativa anterior interrompida.
+                    cur.execute(f"DROP TABLE IF EXISTS {antiga}")
+                    cur.execute(f"ALTER TABLE {tabela} RENAME TO {antiga}")
+
+                    # Nomes de indice sao globais no banco, nao por tabela:
+                    # sem apagar os da antiga, o CREATE INDEX da nova colide.
+                    for indice in [
+                        row[1]
+                        for row in cur.execute(f"PRAGMA index_list('{antiga}')").fetchall()
+                        if not row[1].startswith("sqlite_autoindex")
+                    ]:
+                        cur.execute(f"DROP INDEX IF EXISTS {indice}")
+
+                    colunas_antigas = [
+                        row[1] for row in cur.execute(f"PRAGMA table_info({antiga})").fetchall()
+                    ]
+
+                    for comando in _ddl(tabela_modelo):
+                        cur.execute(comando)
+
+                    # So as colunas presentes dos DOIS lados. Uma coluna que o
+                    # modelo ganhou e a tabela antiga nao tem fica com o
+                    # default; uma que so a antiga tem e descartada com ela.
+                    colunas_novas = {c.name for c in tabela_modelo.columns}
+                    comuns = [c for c in colunas_antigas if c in colunas_novas]
+                    lista = ", ".join(comuns)
+                    cur.execute(f"INSERT INTO {tabela} ({lista}) SELECT {lista} FROM {antiga}")
+                    cur.execute(f"DROP TABLE {antiga}")
+                    cur.execute("COMMIT")
+                except Exception:
+                    cur.execute("ROLLBACK")
+                    raise
+            finally:
+                cur.execute("PRAGMA legacy_alter_table=OFF")
+                cur.execute("PRAGMA foreign_keys=ON")
+                cur.close()
+                driver.isolation_level = isolamento_anterior
+        finally:
+            bruta.close()
+
+        logger.warning("Migracao QA-01: %s reconstruida com FK para printers.", tabela)
+
+    with engine.connect() as conn:
+        violacoes = len(list(conn.execute(text("PRAGMA foreign_key_check"))))
+    if violacoes:
+        # Nao levanta: o banco esta em estado consistente (as copias foram
+        # atomicas) e derrubar o boot aqui deixaria o sistema fora do ar por
+        # causa de um dado preexistente. Registra alto para aparecer.
+        logger.error(
+            "Migracao QA-01: ainda ha %d violacao(oes) de FK apos a reconstrucao. "
+            "Investigue com PRAGMA foreign_key_check antes de confiar na checagem.",
+            violacoes,
+        )
+    else:
+        logger.warning("Migracao QA-01 concluida: PRAGMA foreign_key_check limpo.")
 
 
 def _sqlite_backup_path() -> Path | None:
