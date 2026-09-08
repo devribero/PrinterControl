@@ -18,6 +18,11 @@ npm run dev
 
 ## Build
 
+Para acessar em desenvolvimento pelo IP `10.36.1.34`, use
+`http://10.36.1.34:3000`. O host está liberado em `next.config.ts`;
+reinicie `npm run dev` após alterar essa configuração.
+Veja [acesso pela rede](docs/DEV_NETWORK_ACCESS.md) para diagnóstico e validação.
+
 ```bash
 npm run build
 ```
