@@ -8,6 +8,12 @@ Rules:
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
 
+## Task Observer
+
+At the start of any task-oriented session — any interaction where you will
+use tools and produce deliverables — invoke the task-observer skill before
+beginning work.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
