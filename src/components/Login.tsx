@@ -294,7 +294,7 @@ export default function Login({ onSuccess }: LoginProps) {
           </form>
         </div>
 
-        <p className={styles.footer}>© 2026 Pedro Ribeiro - Elgin</p>
+        <p className={styles.footer}>© 2026 Pedro e Mateus - Elgin Impressoras</p>
       </div>
     </div>
   );
