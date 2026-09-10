@@ -73,27 +73,77 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Acesso a storage que nunca lanca.
+ *
+ * `localStorage` NAO e so "as vezes vazio": em navegador com dados de site
+ * bloqueados por politica — o padrao em maquina de dominio com GPO de
+ * navegador, e tambem em janela anonima com cookies de terceiros barrados —
+ * o simples ACESSO a propriedade lanca `SecurityError`.
+ *
+ * Isso ja custou uma tela travada: `getToken()` era a primeira linha de
+ * `restoreSession()`, fora do try/catch dela; a excecao rejeitava a promessa,
+ * o `.then()` que desligava o spinner nunca rodava, e o painel ficava em
+ * "Restaurando sessao..." para sempre — sem erro visivel e sem relacao
+ * aparente com a politica que causou tudo.
+ *
+ * Sem storage, a sessao simplesmente nao persiste entre recarregamentos.
+ * E uma degradacao aceitavel; a tela eternamente travada nao era.
+ */
+function lerStorage(key: string): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem(key) ?? sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function gravarStorage(key: string, valor: string, persistente: boolean): void {
+  if (typeof window === "undefined") return;
+  try {
+    (persistente ? localStorage : sessionStorage).setItem(key, valor);
+  } catch {
+    // Sem persistencia: a sessao vale so enquanto a aba estiver aberta.
+  }
+}
+
+function apagarStorage(key: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    /* ignorado */
+  }
+  try {
+    sessionStorage.removeItem(key);
+  } catch {
+    /* ignorado */
+  }
+}
+
 /** Token do usuario logado — localStorage (lembrar) ou sessionStorage. */
 export function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(TOKEN_KEY) ?? sessionStorage.getItem(TOKEN_KEY);
+  return lerStorage(TOKEN_KEY);
 }
 
 export function setToken(token: string, remember: boolean) {
   clearToken();
-  (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, token);
+  gravarStorage(TOKEN_KEY, token, remember);
 }
 
 /** True quando o token foi guardado com "lembrar de mim" (localStorage). */
 export function isTokenPersistent(): boolean {
   if (typeof window === "undefined") return false;
-  return localStorage.getItem(TOKEN_KEY) !== null;
+  try {
+    return localStorage.getItem(TOKEN_KEY) !== null;
+  } catch {
+    return false;
+  }
 }
 
 export function clearToken() {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(TOKEN_KEY);
-  sessionStorage.removeItem(TOKEN_KEY);
+  apagarStorage(TOKEN_KEY);
 }
 
 interface RequestOptions {

@@ -347,3 +347,57 @@ nssm start PrinterControl
 
 Remova antes a tarefa agendada (`-Acao remover`) — as duas rodando juntas
 disputariam a porta 8000.
+## Fase A — diagnóstico em domínio (2026-09-10)
+
+O transporte de produção é Python/FastAPI chamando `powershell.exe` com
+comandos inline. `Main.ps1` foi removido; referências anteriores a scripts de
+serviço neste documento são históricas e não autorizam recriá-los ou mudar a
+conta da tarefa. A identidade SYSTEM sem permissão continua hipótese.
+
+Preserve `backend/.env` de desenvolvimento (demo/mock). Na máquina de domínio,
+selecione explicitamente `backend/.env.dominio` (development/real) no processo
+que inicia o backend. Por exemplo, a partir de `backend/`, no contexto de
+execução que se deseja diagnosticar:
+
+```powershell
+.\venv\Scripts\python.exe -m uvicorn app.main:app --env-file .env.dominio --host 127.0.0.1 --port 8000
+```
+
+O `--env-file` carrega variáveis antes de importar a aplicação; variáveis já
+presentes no processo têm precedência. Não copie esse arquivo sobre `.env`.
+Confira `environment` e `print_server_mode` em `/health` e no log de boot.
+Executar interativamente mede a identidade interativa; para avaliar a tarefa,
+consulte a API do backend que a própria tarefa iniciou.
+
+Com token admin obtido no login, consulte `GET /health/print-server` pelo
+Swagger `/docs` (Authorize). Preserve a resposta completa, inclusive em HTTP
+503. `configured_mode` mostra a configuração, `probe_mode=real` confirma que o
+teste acessou o transporte real mesmo se configurado como mock. Nenhum sync
+é executado pelo endpoint.
+
+Correlacione `call_id`, `identity`, `operation`, `duration_ms`, `count` e
+`category` nos logs. A duração é da chamada ao subprocess, incluindo início
+do PowerShell e resolução DNS. Cada Get-Printer/Get-PrinterPort tem medição e
+whoami próprios. Cada comando tem o timeout configurado; whoami tem teto
+adicional de 5 segundos. Falha de whoami é explícita e não interrompe a consulta.
+
+Em seguida execute discovery manual (`POST /api/servers/discover`, ou por ID
+para servidor cadastrado), verificando também host e modo daquele cadastro.
+Discovery inclui portas e enriquecimento SNMP, por isso pode falhar mesmo
+quando o diagnóstico mínimo passou. Não conclua que sucesso significa frota
+completa: compare a quantidade com a frota conhecida.
+
+Sync bloqueia queda **estritamente superior a 20%** das filas ativas do host,
+antes de alterar impressoras. 100→79 bloqueia, 100→80 permite; retorno vazio
+com filas ativas bloqueia. Filas inativas históricas não entram na base e
+discovery é deduplicado. Sem filas ativas, permite descoberta inicial.
+O alerta fica na resposta 409/log e em `last_error` do servidor cadastrado,
+consultável por `GET /api/servers`. Não há bypass nesta fase.
+
+Produção recusa mock no boot, inclusive herdado do default. Modos vazios ou
+inválidos e ambientes desconhecidos também são recusados. Development/demo
+continuam permitindo mock; se ENVIRONMENT também faltar, o default development
+não permite detectar sozinho uma implantação destinada à produção.
+
+Fase B: somente após obter categoria + whoami em domínio, o operador decidirá
+se solicita uma alteração de identidade. Nenhuma conta/permissão foi alterada.
