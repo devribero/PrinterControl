@@ -75,30 +75,16 @@ function toAccount(user: ApiUser): Account {
   };
 }
 
-// Mesmo motivo do bloco de storage em api.ts: em navegador com dados de site
-// bloqueados por politica de dominio, o acesso a `localStorage` LANCA em vez
-// de devolver null. Aqui a consequencia seria mais discreta que a de la (o
-// cache da conta some), mas a excecao subiria pelo mesmo caminho e travaria a
-// restauracao da sessao do mesmo jeito.
 function cacheAccount(account: Account, remember: boolean) {
   if (typeof window === "undefined") return;
-  try {
-    (remember ? localStorage : sessionStorage).setItem(ACCOUNT_KEY, JSON.stringify(account));
-  } catch {
-    // Sem persistencia: a conta continua em memoria nesta aba.
-  }
+  (remember ? localStorage : sessionStorage).setItem(ACCOUNT_KEY, JSON.stringify(account));
 }
 
 /** Conta guardada localmente. Só é usada quando o backend está inacessível. */
 function readCachedAccount(): Account | null {
   if (typeof window === "undefined") return null;
 
-  let raw: string | null = null;
-  try {
-    raw = localStorage.getItem(ACCOUNT_KEY) ?? sessionStorage.getItem(ACCOUNT_KEY);
-  } catch {
-    return null;
-  }
+  const raw = localStorage.getItem(ACCOUNT_KEY) ?? sessionStorage.getItem(ACCOUNT_KEY);
   if (!raw) return null;
 
   try {
@@ -247,15 +233,7 @@ export function withPasswordChanged(account: Account): Account {
 export function logout() {
   clearToken();
   if (typeof window !== "undefined") {
-    try {
-      localStorage.removeItem(ACCOUNT_KEY);
-    } catch {
-      /* ignorado */
-    }
-    try {
-      sessionStorage.removeItem(ACCOUNT_KEY);
-    } catch {
-      /* ignorado */
-    }
+    localStorage.removeItem(ACCOUNT_KEY);
+    sessionStorage.removeItem(ACCOUNT_KEY);
   }
 }

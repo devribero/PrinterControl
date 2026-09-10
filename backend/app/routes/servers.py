@@ -17,7 +17,6 @@ from datetime import datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, field_validator
 from sqlmodel import Session, func, select
 
@@ -38,16 +37,10 @@ from app.services.environment_guard import bloquear_mock_em_producao
 from app.models.user import User
 from app.services.discovery import enrich_discovered_printers
 from app.services.print_server import PrintServerError, discover_printers, validar_host
-from app.services.printer_sync import SyncBlockedError, sync_printers
+from app.services.printer_sync import sync_printers
 from app.schemas.common import RecursoId
 
 router = APIRouter(prefix="/servers", tags=["servers"])
-
-
-def _print_server_failure(exc: PrintServerError) -> JSONResponse:
-    # detail continua texto para clientes existentes; categoria e contexto sao aditivos.
-    return JSONResponse(status_code=409 if isinstance(exc, SyncBlockedError) else 502,
-                        content=exc.as_dict())
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -473,7 +466,7 @@ def discover(_user: User = Depends(rate_limited_action("discover"))):
     try:
         return _executar_discover(settings.print_server_host, settings.print_server_mode)
     except PrintServerError as exc:
-        return _print_server_failure(exc)
+        raise HTTPException(status_code=502, detail=str(exc))
 
 
 @router.post("/sync", response_model=SyncResponse)
@@ -492,14 +485,8 @@ def sync(session: Session = Depends(get_session), _user: User = Depends(rate_lim
     try:
         result = sync_printers(session)
     except PrintServerError as exc:
-        registro = session.exec(select(PrintServer).where(PrintServer.host == settings.print_server_host)).first()
-        if registro:
-            _marcar_resultado(session, registro, erro=f"[{exc.category}] {exc}")
-        return _print_server_failure(exc)
+        raise HTTPException(status_code=502, detail=str(exc))
 
-    registro = session.exec(select(PrintServer).where(PrintServer.host == settings.print_server_host)).first()
-    if registro:
-        _marcar_resultado(session, registro, erro=None, sincronizou=True)
     return SyncResponse(**result.__dict__)
 
 
@@ -520,8 +507,8 @@ def discover_server(
     try:
         resposta = _executar_discover(server.host, server.mode)
     except PrintServerError as exc:
-        _marcar_resultado(session, server, erro=f"[{exc.category}] {exc}")
-        return _print_server_failure(exc)
+        _marcar_resultado(session, server, erro=str(exc))
+        raise HTTPException(status_code=502, detail=str(exc))
 
     _marcar_resultado(session, server, erro=None)
     return resposta
@@ -559,8 +546,8 @@ def sync_server(
     try:
         result = sync_printers(session, server=server.host, mode=server.mode)
     except PrintServerError as exc:
-        _marcar_resultado(session, server, erro=f"[{exc.category}] {exc}")
-        return _print_server_failure(exc)
+        _marcar_resultado(session, server, erro=str(exc))
+        raise HTTPException(status_code=502, detail=str(exc))
 
     _marcar_resultado(session, server, erro=None, sincronizou=True)
     return SyncResponse(**result.__dict__)
