@@ -1,5 +1,33 @@
 # Bateria de testes em máquina do domínio — PrinterControl
 
+## Atualização Fase A — 10/09/2026
+
+A Fase A foi implementada localmente; **a validação em domínio permanece
+pendente**. O restante deste documento preserva o diagnóstico anterior como
+histórico. Main.ps1 foi removido da árvore; testes de sua GUI, instalação de
+drivers e Point & Print não fazem parte do produto ativo. SYSTEM sem permissão
+é hipótese, não causa raiz confirmada.
+
+Sequência em campo:
+
+1. Iniciar o backend na máquina de domínio usando explicitamente
+   `backend/.env.dominio` (development/real), preservando o `.env` de dev.
+   Ver o comando e a precedência de variáveis em [Operações](OPERATIONS.md).
+2. Autenticar como admin e consultar `GET /health/print-server` na API do
+   processo iniciado pela tarefa/serviço sob avaliação. Guardar HTTP, host,
+   `configured_mode`, `probe_mode`, `identity`, `identity_error`, `category`,
+   `detail`, `call_id`, `duration_ms` e `count`.
+3. Executar discovery manual e correlacionar logs de Get-Printer e
+   Get-PrinterPort; comparar contagem e nomes com a frota conhecida.
+4. Se houver sync, queda >20% das filas ativas do host deve retornar 409,
+   sem alterar impressoras; verificar `last_error` em `GET /api/servers`.
+5. Com a evidência real, o operador decide se solicita a Fase B. Não trocar
+   conta, permissões ou tarefa apenas por inferência a partir de SYSTEM.
+
+Um diagnóstico 200 confirma a consulta mínima, não a completude da frota,
+o acesso a portas nem SNMP. RPC indisponível não distingue sozinho firewall
+e Spooler; resultado desconhecido deve permanecer inconclusivo.
+
 **Documento de planejamento. Nada aqui foi executado.**
 Gerado em 09/09/2026 a partir da leitura do código em
 `fix/auditoria-qa-2026-09-08`.
@@ -14,8 +42,9 @@ Gerado em 09/09/2026 a partir da leitura do código em
 
 ## 1. Sumário executivo
 
-O PrinterControl tem **duas peças de software vivas** e **uma legada ainda no
-repositório**, e as três dependem do domínio por caminhos diferentes:
+O PrinterControl tem **duas peças de software vivas**. A peça legada abaixo
+permanece apenas no histórico Git desde a Fase A; sua localização e
+funcionalidades na tabela descrevem o estado anterior à remoção:
 
 | Peça | Onde | Como toca o domínio |
 |---|---|---|

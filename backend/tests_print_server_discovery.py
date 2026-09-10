@@ -5,9 +5,15 @@ import json
 import os
 import subprocess
 import unittest
+import tempfile
+from pathlib import Path
 from unittest.mock import patch
 
 os.environ.setdefault("PRINT_SERVER_MODE", "mock")
+# A importacao das rotas cria um engine; nao herdar DATABASE_URL de outro
+# projeto do Windows, mesmo que estes testes nao abram conexao.
+_tmp = tempfile.TemporaryDirectory(prefix="printercontrol-discovery-")
+os.environ["DATABASE_URL"] = f"sqlite:///{Path(_tmp.name).as_posix()}/unused.db"
 
 from app.config import settings  # noqa: E402
 from app.routes import servers  # noqa: E402
