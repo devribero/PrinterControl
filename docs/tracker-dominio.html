@@ -1,0 +1,501 @@
+<title>Bateria de Domínio PrinterControl</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ground:#eef1f4; --surface:#ffffff; --surface-2:#f6f8fa;
+  --ink:#131a21; --ink-soft:#56646f; --ink-faint:#8593a0;
+  --rule:#d3dae1; --rule-soft:#e4e9ee;
+  --accent:#1c5b95; --accent-soft:#e3ecf5;
+  --pass:#17694f; --pass-bg:#dff0e8;
+  --fail:#a8302f; --fail-bg:#fae1e0;
+  --block:#91650d; --block-bg:#faeed3;
+  --na:#6b7885;   --na-bg:#e6eaee;
+  --pend:#c3ccd4;
+  --p0:#a8302f; --p1:#91650d; --p2:#1c5b95; --p3:#8593a0;
+  --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  --cond:"IBM Plex Sans Condensed","IBM Plex Sans",-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono","Consolas",monospace;
+  --shadow:0 1px 2px rgba(19,26,33,.05),0 1px 1px rgba(19,26,33,.04);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0d1319; --surface:#151d25; --surface-2:#1b242d;
+    --ink:#dce4ea; --ink-soft:#93a2af; --ink-faint:#6b7a87;
+    --rule:#26313b; --rule-soft:#1e2830;
+    --accent:#63a6e0; --accent-soft:#17293a;
+    --pass:#4fb08a; --pass-bg:#122d24;
+    --fail:#e3796f; --fail-bg:#33191a;
+    --block:#d6a445; --block-bg:#302512;
+    --na:#8595a2;   --na-bg:#1f2830;
+    --pend:#39454f;
+    --p0:#e3796f; --p1:#d6a445; --p2:#63a6e0; --p3:#6b7a87;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0d1319; --surface:#151d25; --surface-2:#1b242d;
+  --ink:#dce4ea; --ink-soft:#93a2af; --ink-faint:#6b7a87;
+  --rule:#26313b; --rule-soft:#1e2830;
+  --accent:#63a6e0; --accent-soft:#17293a;
+  --pass:#4fb08a; --pass-bg:#122d24;
+  --fail:#e3796f; --fail-bg:#33191a;
+  --block:#d6a445; --block-bg:#302512;
+  --na:#8595a2;   --na-bg:#1f2830;
+  --pend:#39454f;
+  --p0:#e3796f; --p1:#d6a445; --p2:#63a6e0; --p3:#6b7a87;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:920px;margin:0 auto;padding:0 14px 96px}
+
+/* ── cabeçalho ─────────────────────────────────────────────── */
+header.top{padding:26px 0 18px}
+.eyebrow{font-family:var(--cond);font-size:11.5px;font-weight:600;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint)}
+h1{font-size:25px;font-weight:700;letter-spacing:-.019em;margin:5px 0 6px;
+  text-wrap:balance;line-height:1.18}
+.sub{color:var(--ink-soft);font-size:13.5px;max-width:62ch;margin:0}
+.sub code{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);
+  padding:1px 4px;border-radius:3px}
+
+/* ── faixa de progresso ────────────────────────────────────── */
+.ribbon{margin-top:18px;background:var(--surface);border:1px solid var(--rule);
+  border-radius:7px;padding:13px 14px;box-shadow:var(--shadow)}
+.ribbon-head{display:flex;justify-content:space-between;align-items:baseline;
+  gap:12px;margin-bottom:9px}
+.ribbon-head .n{font-family:var(--mono);font-size:19px;font-weight:600;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.ribbon-head .n span{color:var(--ink-faint);font-size:13px;font-weight:400}
+.bar{display:flex;height:9px;border-radius:5px;overflow:hidden;background:var(--pend);gap:1.5px}
+.bar i{display:block;transition:width .3s ease}
+.bar i.pa{background:var(--pass)} .bar i.fa{background:var(--fail)}
+.bar i.bl{background:var(--block)} .bar i.na{background:var(--na)}
+.legend{display:flex;flex-wrap:wrap;gap:5px 15px;margin-top:10px;
+  font-size:12px;color:var(--ink-soft)}
+.legend b{font-family:var(--mono);font-weight:500;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.dot{width:8px;height:8px;border-radius:2px;display:inline-block;
+  margin-right:5px;vertical-align:.5px}
+
+/* ── controles ─────────────────────────────────────────────── */
+.controls{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 6px;align-items:center}
+.seg{display:flex;background:var(--surface);border:1px solid var(--rule);
+  border-radius:6px;overflow:hidden;box-shadow:var(--shadow)}
+.seg button{appearance:none;border:0;background:transparent;color:var(--ink-soft);
+  font-family:var(--sans);font-size:13px;font-weight:500;padding:7px 13px;
+  cursor:pointer;border-right:1px solid var(--rule-soft)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.chip{appearance:none;font-family:var(--sans);font-size:12.5px;font-weight:500;
+  padding:6px 11px;border-radius:20px;border:1px solid var(--rule);
+  background:var(--surface);color:var(--ink-soft);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);
+  color:var(--accent);font-weight:600}
+.spacer{flex:1}
+.linkish{appearance:none;border:0;background:transparent;color:var(--accent);
+  font-family:var(--sans);font-size:12.5px;font-weight:500;cursor:pointer;
+  padding:6px 4px;text-decoration:underline;text-underline-offset:2px}
+:is(button,summary,input,textarea,select):focus-visible{outline:2px solid var(--accent);
+  outline-offset:2px;border-radius:4px}
+
+/* ── blocos ────────────────────────────────────────────────── */
+.block{margin-top:22px}
+.block-head{display:flex;align-items:baseline;gap:9px;padding:0 2px 8px}
+.block-num{font-family:var(--mono);font-size:12px;font-weight:600;color:#fff;
+  background:var(--ink-soft);border-radius:4px;padding:2px 6px;flex:none;
+  font-variant-numeric:tabular-nums}
+.block-num.out{background:var(--na)}
+.block-title{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.block-count{font-family:var(--mono);font-size:12px;color:var(--ink-faint);
+  margin-left:auto;font-variant-numeric:tabular-nums;flex:none}
+.block-note{font-size:12.5px;color:var(--ink-soft);padding:0 2px 9px;max-width:64ch}
+
+.rows{background:var(--surface);border:1px solid var(--rule);border-radius:7px;
+  overflow:hidden;box-shadow:var(--shadow)}
+.row{border-bottom:1px solid var(--rule-soft)}
+.row:last-child{border-bottom:0}
+.row-main{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;
+  cursor:pointer;position:relative}
+.row-main::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+.row[data-p="P0"] .row-main::before{background:var(--p0)}
+.row[data-p="P1"] .row-main::before{background:var(--p1)}
+.row[data-p="P2"] .row-main::before{background:var(--p2)}
+.row[data-p="P3"] .row-main::before{background:var(--p3)}
+.row-id{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink-soft);
+  flex:none;width:52px;padding-top:1px}
+.row-body{flex:1;min-width:0}
+.row-t{font-size:13.8px;line-height:1.42;font-weight:500}
+.row-meta{display:flex;flex-wrap:wrap;gap:4px 9px;margin-top:4px;
+  font-size:11.5px;color:var(--ink-faint)}
+.row-meta .pri{font-family:var(--mono);font-weight:600}
+.row[data-p="P0"] .pri{color:var(--p0)} .row[data-p="P1"] .pri{color:var(--p1)}
+.row[data-p="P2"] .pri{color:var(--p2)} .row[data-p="P3"] .pri{color:var(--p3)}
+.row-meta .only{color:var(--accent);font-weight:600}
+.stamp{flex:none;font-family:var(--cond);font-size:10.5px;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;padding:3px 7px;border-radius:4px;
+  background:var(--na-bg);color:var(--ink-faint);margin-top:1px}
+.row[data-s="pass"] .stamp{background:var(--pass-bg);color:var(--pass)}
+.row[data-s="fail"] .stamp{background:var(--fail-bg);color:var(--fail)}
+.row[data-s="block"] .stamp{background:var(--block-bg);color:var(--block)}
+.row[data-s="na"] .stamp{background:var(--na-bg);color:var(--na)}
+
+.detail{padding:0 12px 13px 74px;background:var(--surface-2);
+  border-top:1px dashed var(--rule)}
+.detail dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;
+  margin:11px 0 0;font-size:12.5px}
+.detail dt{font-family:var(--cond);font-size:10.5px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);padding-top:2px}
+.detail dd{margin:0;color:var(--ink-soft)}
+.detail dd.code{font-family:var(--mono);font-size:11.8px;color:var(--ink);
+  overflow-x:auto;white-space:nowrap;padding-bottom:2px}
+.states{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.states button{appearance:none;font-family:var(--sans);font-size:12px;font-weight:600;
+  padding:6px 11px;border-radius:5px;border:1px solid var(--rule);
+  background:var(--surface);color:var(--ink-soft);cursor:pointer}
+.states button[aria-pressed="true"][data-v="pass"]{background:var(--pass);border-color:var(--pass);color:#fff}
+.states button[aria-pressed="true"][data-v="fail"]{background:var(--fail);border-color:var(--fail);color:#fff}
+.states button[aria-pressed="true"][data-v="block"]{background:var(--block);border-color:var(--block);color:#fff}
+.states button[aria-pressed="true"][data-v="na"]{background:var(--na);border-color:var(--na);color:#fff}
+.states button[aria-pressed="true"][data-v=""]{background:var(--ink-soft);border-color:var(--ink-soft);color:#fff}
+textarea{width:100%;margin-top:9px;font-family:var(--mono);font-size:12px;
+  line-height:1.5;padding:8px 9px;border:1px solid var(--rule);border-radius:5px;
+  background:var(--surface);color:var(--ink);resize:vertical;min-height:60px}
+textarea::placeholder{color:var(--ink-faint)}
+.saved{font-size:11.5px;color:var(--ink-faint);margin-top:5px;font-family:var(--mono)}
+
+/* ── portão ────────────────────────────────────────────────── */
+.gate{margin-top:9px;border:1px solid var(--rule);border-left:3px solid var(--block);
+  border-radius:6px;background:var(--surface);padding:10px 13px;box-shadow:var(--shadow)}
+.gate.open{border-left-color:var(--pass)}
+.gate.shut{border-left-color:var(--fail)}
+.gate-l{font-family:var(--cond);font-size:10.5px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--block)}
+.gate.open .gate-l{color:var(--pass)} .gate.shut .gate-l{color:var(--fail)}
+.gate p{margin:3px 0 0;font-size:12.8px;color:var(--ink-soft);max-width:64ch}
+
+/* ── rodapé de estado ──────────────────────────────────────── */
+.bus{position:fixed;left:0;right:0;bottom:0;background:var(--surface);
+  border-top:1px solid var(--rule);padding:8px 14px;font-size:12px;
+  color:var(--ink-soft);display:flex;gap:10px;align-items:center;z-index:9}
+.bus .pill{font-family:var(--cond);font-size:10.5px;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:4px;
+  background:var(--na-bg);color:var(--ink-faint)}
+.bus .pill.on{background:var(--pass-bg);color:var(--pass)}
+.bus .pill.off{background:var(--block-bg);color:var(--block)}
+.empty{padding:26px 14px;text-align:center;color:var(--ink-faint);font-size:13px}
+@media (max-width:560px){
+  h1{font-size:21px}
+  .detail{padding-left:12px}
+  .row-id{width:46px;font-size:11.5px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">PrinterControl &middot; execução em máquina do domínio</div>
+  <h1>Bateria de Domínio</h1>
+  <p class="sub">72 testes de <code>docs/TESTES_MAQUINA_DOMINIO.md</code>, na ordem de execução.
+     Os blocos têm portões: um bloco com falha bloqueia o seguinte, porque a falha
+     faria os testes de baixo falharem pela causa errada.</p>
+
+  <div class="ribbon">
+    <div class="ribbon-head">
+      <div class="n" id="done">0<span> / 72 registrados</span></div>
+      <div class="eyebrow" id="phase">Bloco 0 — Reconhecimento</div>
+    </div>
+    <div class="bar" id="bar">
+      <i class="pa" style="width:0"></i><i class="fa" style="width:0"></i>
+      <i class="bl" style="width:0"></i><i class="na" style="width:0"></i>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--pass)"></i>Passou <b id="c-pass">0</b></span>
+      <span><i class="dot" style="background:var(--fail)"></i>Falhou <b id="c-fail">0</b></span>
+      <span><i class="dot" style="background:var(--block)"></i>Bloqueado <b id="c-block">0</b></span>
+      <span><i class="dot" style="background:var(--na)"></i>N/A <b id="c-na">0</b></span>
+      <span><i class="dot" style="background:var(--pend)"></i>Pendente <b id="c-pend">72</b></span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Modo de visualização">
+      <button id="v-seq" aria-pressed="true">Sequência</button>
+      <button id="v-cat" aria-pressed="false">Categoria</button>
+    </div>
+    <button class="chip" id="f-dom" aria-pressed="false">Só no domínio</button>
+    <button class="chip" id="f-p0" aria-pressed="false">Só P0</button>
+    <button class="chip" id="f-open" aria-pressed="false">Só pendentes</button>
+    <span class="spacer"></span>
+    <button class="linkish" id="export">Exportar CSV</button>
+  </div>
+</header>
+
+<main id="list"></main>
+</div>
+
+<div class="bus">
+  <span class="pill" id="sync">conectando</span>
+  <span id="bus-msg">Carregando o estado salvo…</span>
+</div>
+
+<script>
+const TESTS = [{"id":"GP-01","cat":"Politicas de dominio","blk":"0 - Reconhecimento","ord":1,"t":"gpresult /h completo - inventario do que o dominio impoe","ref":"-","d":"D-09 / D-19","dom":true,"p":"P0","v":"O HTML abre e as secoes Impressoras, PowerShell e Variaveis de ambiente foram lidas"},{"id":"AD-01","cat":"Active Directory","blk":"0 - Reconhecimento","ord":2,"t":"Identidade interativa (whoami /fqdn, /groups, USERDOMAIN, LOGONSERVER)","ref":"-","d":"D-01","dom":true,"p":"P0","v":"whoami /fqdn devolve DN completo e LOGONSERVER aponta para um DC"},{"id":"GP-02","cat":"Politicas de dominio","blk":"0 - Reconhecimento","ord":3,"t":"Variaveis de ambiente injetadas por GPO ou script de logon","ref":"backend/app/config.py (class Config)","d":"D-19","dom":true,"p":"P0","v":"Nenhuma variavel de Maquina ou Usuario colide com chave de Settings"},{"id":"AD-05","cat":"Active Directory","blk":"0 - Reconhecimento","ord":4,"t":"Deriva de relogio < 5 min contra o DC","ref":"-","d":"D-25","dom":true,"p":"P0","v":"w32tm /query /source aponta para o DC e o offset e menor que 5 min"},{"id":"IF-05","cat":"Infraestrutura","blk":"0 - Reconhecimento","ord":5,"t":"Banco em disco local fixo, nao em pasta redirecionada","ref":"backend/app/config.py (DEFAULT_DB_PATH)","d":"D-20","dom":true,"p":"P0","v":"Get-Volume do caminho do .db mostra DriveType Fixed, nao Network"},{"id":"SE-02","cat":"Seguranca","blk":"0 - Reconhecimento","ord":6,"t":"Perfil de firewall DomainAuthenticated e regras efetivas","ref":"backend/app/main.py (HOST 127.0.0.1)","d":"D-21","dom":true,"p":"P0","v":"Get-NetConnectionProfile mostra DomainAuthenticated e as saidas necessarias estao permitidas"},{"id":"RE-01","cat":"Rede corporativa","blk":"0 - Reconhecimento","ord":7,"t":"DNS interno resolve o print server (curto, FQDN, reverso)","ref":"backend/app/services/print_server.py:62-100","d":"D-03","dom":true,"p":"P0","v":"As tres formas resolvem e o DNS configurado sao os DCs"},{"id":"SE-01","cat":"Seguranca","blk":"0 - Reconhecimento","ord":8,"t":"Segredo do webhook versionado em Main.ps1 linha 11","ref":"Main.ps1:11","d":"D-14","dom":false,"p":"P0","v":"String sig= confirmada na linha 11 --  ACL da pasta e visibilidade do repo registradas"},{"id":"AD-02","cat":"Active Directory","blk":"1 - Caminho critico","ord":9,"t":"Identidade do processo do backend (tarefa agendada vs interativo)","ref":"scripts/Servico-PrinterControl.ps1:118-134","d":"D-01","dom":true,"p":"P0","v":"Principal.UserId da tarefa e uma conta de dominio, ou D-02 prova que MAQUINA$ enumera"},{"id":"SE-06","cat":"Seguranca","blk":"1 - Caminho critico","ord":10,"t":"ExecutionPolicy e Script Block Logging poluindo o stdout","ref":"backend/app/services/print_server.py:130-155","d":"D-23","dom":true,"p":"P1","v":"ConvertFrom-Json aceita a saida do Get-Printer sem erro (teste binario)"},{"id":"SV-01","cat":"Servidores","blk":"1 - Caminho critico","ord":11,"t":"Get-Printer -ComputerName retorna a frota completa","ref":"backend/app/services/print_server.py:170-180","d":"D-02","dom":true,"p":"P0","v":"count da API == (Get-Printer -ComputerName ...).Count, identicos"},{"id":"SV-02","cat":"Servidores","blk":"1 - Caminho critico","ord":12,"t":"Get-PrinterPort mapeia PrinterHostAddress para todas as portas","ref":"backend/app/services/print_server.py:190-196","d":"D-02","dom":true,"p":"P0","v":"ip_resolution majoritariamente resolved --  portas sem endereco caem em SV-03"},{"id":"AD-03","cat":"Active Directory","blk":"1 - Caminho critico","ord":13,"t":"Conta de maquina MAQUINA$ consegue (ou nao) enumerar o print server","ref":"scripts/Servico-PrinterControl.ps1:33-41","d":"D-01 / D-02","dom":true,"p":"P0","v":"Repetir 11 e 12 no contexto da tarefa: mesmo resultado, ou a causa esta isolada"},{"id":"AD-04","cat":"Active Directory","blk":"1 - Caminho critico","ord":14,"t":"Kerberos vs NTLM: klist apos discovery por FQDN, nome curto e IP","ref":"backend/app/services/print_server.py:62-100","d":"D-03","dom":true,"p":"P1","v":"klist mostra ticket host/<servidor> apos FQDN --  se so o IP falhar, NTLM esta restrito"},{"id":"PE-05","cat":"Permissoes","blk":"1 - Caminho critico","ord":15,"t":"Permissao por fila no print server produz discovery parcial","ref":"backend/app/services/printer_sync.py:120-126","d":"D-02 / D-04","dom":true,"p":"P0","v":"PORTAO: count da API == contagem do PowerShell. Divergencia impede o bloco 3"},{"id":"IF-06","cat":"Infraestrutura","blk":"2 - Rede de seguranca","ord":16,"t":"Backup em UNC gravavel pela conta MAQUINA$","ref":"scripts/Servico-PrinterControl.ps1:63-68","d":"D-12","dom":true,"p":"P0","v":"Arquivo .db novo aparece na share, testado no contexto SYSTEM e nao so no interativo"},{"id":"IF-07","cat":"Infraestrutura","blk":"2 - Rede de seguranca","ord":17,"t":"Restauracao do backup + PRAGMA integrity_check","ref":"backend/backup_db.py","d":"D-12","dom":false,"p":"P0","v":"PORTAO: integrity_check devolve ok no arquivo restaurado. Sem isso, nao execute o bloco 3"},{"id":"RS-01","cat":"Resiliencia","blk":"3 - Escrita no banco","ord":18,"t":"Print server inalcancavel produz 502 sem escrever nada no banco","ref":"backend/app/services/printer_sync.py (docstring)","d":"D-04","dom":true,"p":"P0","v":"HTTP 502 e as contagens SQL antes/depois sao identicas"},{"id":"SV-07","cat":"Servidores","blk":"3 - Escrita no banco","ord":19,"t":"Sync real: um servidor nao desativa impressoras de outro","ref":"backend/app/services/printer_sync.py:83-88","d":"D-04","dom":true,"p":"P1","v":"discovered do sync == count do discover == contagem do PowerShell"},{"id":"RS-02","cat":"Resiliencia","blk":"3 - Escrita no banco","ord":20,"t":"Descoberta parcial nao pode causar desativacao em massa","ref":"backend/app/services/printer_sync.py:120-126","d":"D-04","dom":true,"p":"P0","v":"PORTAO: deactivated == 0. Qualquer outro valor exige investigacao antes de seguir"},{"id":"RE-03","cat":"Rede corporativa","blk":"4 - Rede ate a frota","ord":21,"t":"ICMP a 400 ms vs 3 s para amostra da frota","ref":"backend/app/services/snmp.py:282-303","d":"D-06","dom":true,"p":"P1","v":"Impressoras ligadas respondem dentro de 400 ms --  se so respondem com 3 s, e latencia"},{"id":"RE-04","cat":"Rede corporativa","blk":"4 - Rede ate a frota","ord":22,"t":"SNMP UDP/161 alcancavel entre VLANs","ref":"backend/app/services/snmp.py:227-231","d":"D-07","dom":true,"p":"P1","v":"snmp_responded True e o nivel de toner bate com o painel fisico da impressora"},{"id":"SE-03","cat":"Seguranca","blk":"4 - Rede ate a frota","ord":23,"t":"EDR/IDS nao bloqueia a varredura paralela da frota","ref":"backend/app/services/printer_fleet.py:147-210","d":"D-08","dom":true,"p":"P1","v":"Ciclo completo sem bloqueio e duracao do ciclo menor que COLLECTION_INTERVAL_MINUTES"},{"id":"IF-01","cat":"Infraestrutura","blk":"5 - Servico permanente","ord":24,"t":"Instalacao da tarefa agendada com conta de dominio","ref":"scripts/Servico-PrinterControl.ps1:87-140","d":"D-11","dom":true,"p":"P0","v":"-Acao status mostra Running e /health responde status=ok"},{"id":"IF-02","cat":"Infraestrutura","blk":"5 - Servico permanente","ord":25,"t":"Sobe no boot sem ninguem logado","ref":"scripts/Servico-PrinterControl.ps1 (gatilho AtStartup)","d":"D-11","dom":true,"p":"P0","v":"Apos reboot sem login, /health responde"},{"id":"IF-04","cat":"Infraestrutura","blk":"5 - Servico permanente","ord":26,"t":"uptime_seconds crescendo (detecta reinicio em laco)","ref":"backend/app/main.py (health_check)","d":"D-11","dom":false,"p":"P1","v":"Duas consultas espacadas mostram uptime_seconds maior na segunda"},{"id":"AD-06","cat":"Active Directory","blk":"5 - Servico permanente","ord":27,"t":"Coleta agendada funciona sob a conta do servico (fecha o ciclo do passo 9)","ref":"scripts/Servico-PrinterControl.ps1","d":"D-01 / D-11","dom":true,"p":"P1","v":"Um ciclo do scheduler grava PrinterReading novo sem intervencao manual"},{"id":"IN-01","cat":"Integracoes","blk":"6 - Periferia","ord":28,"t":"Webhook Teams atraves do proxy corporativo","ref":"backend/app/services/webhook_notifier.py:105-156","d":"D-13","dom":true,"p":"P2","v":"O Adaptive Card aparece no canal de teste (True sozinho nao basta)"},{"id":"IM-01","cat":"Impressao","blk":"6 - Periferia","ord":29,"t":"Point & Print via UNC sob GPO PrintNightmare","ref":"Main.ps1:1753-1755","d":"D-09","dom":true,"p":"P1","v":"Get-Printer lista a fila e uma pagina de teste imprime --  ou o erro esperado 0x11b aparece"},{"id":"RE-06","cat":"Rede corporativa","blk":"6 - Periferia","ord":30,"t":"IP por DHCP vs allowedDevOrigins fixo","ref":"next.config.ts:4","d":"D-17","dom":true,"p":"P2","v":"Sem Blocked cross-origin request no console e a tela renderiza (nao Restaurando sessao)"},{"id":"IN-03","cat":"Integracoes","blk":"6 - Periferia","ord":31,"t":"Download do GitHub pelo atualizador atraves do proxy","ref":"scripts/Atualizar-PrinterControl.ps1:36-66","d":"D-24","dom":true,"p":"P2","v":"Get-FileHash do .env e do .db identicos antes e depois da atualizacao"},{"id":"GP-07","cat":"Politicas de dominio","blk":"6 - Periferia","ord":32,"t":"Sessao entre dois perfis de dominio na mesma maquina","ref":"src/lib/api.ts:9 (TOKEN_KEY)","d":"D-16","dom":true,"p":"P2","v":"Usuario B nao herda o elgin_auth_token do usuario A"},{"id":"AD-07","cat":"Active Directory","blk":"6 - Periferia","ord":33,"t":"Expiracao de senha da conta de servico (documentar politica)","ref":"scripts/Servico-PrinterControl.ps1","d":"D-11","dom":true,"p":"P2","v":"Politica de expiracao registrada e data da proxima expiracao anotada"},{"id":"GP-03","cat":"Politicas de dominio","blk":"6 - Periferia","ord":34,"t":"Point & Print / RestrictDriverInstallationToAdministrators","ref":"Main.ps1:1621","d":"D-09","dom":true,"p":"P1","v":"Valores de registro lidos e correlacionados com o resultado de IM-01"},{"id":"GP-04","cat":"Politicas de dominio","blk":"6 - Periferia","ord":35,"t":"ExecutionPolicy de maquina e logging de script","ref":"scripts/*.ps1","d":"D-23","dom":true,"p":"P1","v":"Get-ExecutionPolicy -List registrado --  MachinePolicy anotada"},{"id":"GP-05","cat":"Politicas de dominio","blk":"6 - Periferia","ord":36,"t":"UAC (EnableLUA, ConsentPromptBehavior*)","ref":"Main.ps1:1795-1798","d":"D-22","dom":true,"p":"P2","v":"Usuario comum recebe a mensagem Requer Administrador em vez de falha silenciosa"},{"id":"GP-06","cat":"Politicas de dominio","blk":"6 - Periferia","ord":37,"t":"Redirecionamento de Pastas (Desktop) e perfil movel","ref":"backend/app/config.py","d":"D-20 / D-16","dom":true,"p":"P0","v":"GetFolderPath('Desktop') aponta para caminho local, nao UNC"},{"id":"IN-02","cat":"Integracoes","blk":"6 - Periferia","ord":38,"t":"Proxy visto pelo processo SYSTEM vs usuario","ref":"backend/app/services/webhook_notifier.py","d":"D-13 / D-19","dom":true,"p":"P2","v":"netsh winhttp show proxy comparado com as variaveis do usuario"},{"id":"IM-02","cat":"Impressao","blk":"6 - Periferia","ord":39,"t":"Get-PrinterDriver local e deteccao de driver pre-instalado","ref":"Main.ps1:1694-1710","d":"D-10","dom":true,"p":"P2","v":"O popup mostra Driver pre-instalado quando ha um compativel"},{"id":"IM-03","cat":"Impressao","blk":"6 - Periferia","ord":40,"t":"Instalacao de .inf e de .exe a partir da pasta Drivers","ref":"Main.ps1:1790+","d":"D-10","dom":true,"p":"P2","v":"Get-PrinterDriver antes e depois difere e a fila imprime"},{"id":"IM-04","cat":"Impressao","blk":"6 - Periferia","ord":41,"t":"Atalhos .lnk resolvendo para shares SMB","ref":"Main.ps1:1638-1646","d":"D-10","dom":true,"p":"P2","v":"Todos os alvos de .lnk retornam Test-Path verdadeiro"},{"id":"IM-05","cat":"Impressao","blk":"6 - Periferia","ord":42,"t":"Spooler parado produz mensagem Servico de Spooler indisponivel","ref":"Main.ps1:1712-1715","d":"D-09","dom":true,"p":"P3","v":"A mensagem aparece em vez de excecao nao tratada"},{"id":"SE-04","cat":"Seguranca","blk":"6 - Periferia","ord":43,"t":"Inspecao TLS quebra o webhook (SSLCertVerificationError)","ref":"backend/app/services/webhook_notifier.py","d":"D-13","dom":true,"p":"P2","v":"httpx.get a um host HTTPS externo funciona ou o erro de certificado e capturado"},{"id":"SE-05","cat":"Seguranca","blk":"6 - Periferia","ord":44,"t":"AppLocker/SRP contra .exe de driver vindo de share","ref":"Main.ps1:1790+","d":"D-10","dom":true,"p":"P2","v":"Get-AppLockerPolicy -Effective exportado e correlacionado com IM-03"},{"id":"RE-02","cat":"Rede corporativa","blk":"6 - Periferia","ord":45,"t":"Sufixo de busca DNS entregue por GPO/DHCP","ref":"backend/app/services/print_server.py:62-100","d":"D-03","dom":true,"p":"P1","v":"Get-DnsClientGlobalSetting mostra o sufixo do dominio e o nome curto resolve"},{"id":"RE-05","cat":"Rede corporativa","blk":"6 - Periferia","ord":46,"t":"TCP/135 + faixa RPC dinamica ate o print server","ref":"backend/app/services/print_server.py:170-180","d":"D-02 / D-21","dom":true,"p":"P0","v":"Test-NetConnection porta 135 devolve TcpTestSucceeded True"},{"id":"SV-03","cat":"Servidores","blk":"6 - Periferia","ord":47,"t":"Fallback ip = port_name quando a porta nao tem endereco (ex USB001)","ref":"backend/app/services/print_server.py:193","d":"D-02","dom":true,"p":"P2","v":"Filas com porta USB aparecem com ip_resolution unresolved, sem quebrar a descoberta"},{"id":"SV-04","cat":"Servidores","blk":"6 - Periferia","ord":48,"t":"Filas compartilhando o mesmo IP sao agrupadas em uma consulta SNMP","ref":"backend/app/services/discovery.py (_result_for_ip)","d":"D-02","dom":true,"p":"P2","v":"network_query_reused True e unique_ips menor que count"},{"id":"SV-05","cat":"Servidores","blk":"6 - Periferia","ord":49,"t":"Timeout de 30 s: comportamento com print server lento","ref":"backend/app/config.py (print_server_timeout_seconds)","d":"D-02","dom":true,"p":"P2","v":"Erro PowerShell nao respondeu em 30s, sem travar o processo"},{"id":"SV-06","cat":"Servidores","blk":"6 - Periferia","ord":50,"t":"Cadastro de multiplos print servers, cada um com seu modo","ref":"backend/app/routes/servers.py (create_server)","d":"D-02","dom":true,"p":"P2","v":"Dois servidores listados em GET /api/servers com modos independentes"},{"id":"RS-03","cat":"Resiliencia","blk":"6 - Periferia","ord":52,"t":"Impressora offline produz status_reason=ping_failed, nao erro generico","ref":"backend/app/services/discovery.py (_empty_result)","d":"D-06","dom":true,"p":"P1","v":"O campo status_reason traz ping_failed e nao unknown"},{"id":"RS-04","cat":"Resiliencia","blk":"6 - Periferia","ord":53,"t":"SNMP mudo com ping OK produz ping_ok_snmp_not_responding","ref":"backend/app/services/discovery.py:97-104","d":"D-07","dom":true,"p":"P1","v":"status_reason distingue os tres cenarios de falha SNMP"},{"id":"IF-08","cat":"Infraestrutura","blk":"6 - Periferia","ord":54,"t":"Rotacao de log (5 MB x 10) e permissao de escrita em backend/logs","ref":"backend/app/config.py (log_*)","d":"D-11","dom":false,"p":"P2","v":"Arquivo printercontrol.log cresce e rotaciona --  a conta do servico escreve nele"},{"id":"PE-06","cat":"Permissoes","blk":"6 - Periferia","ord":55,"t":"ACL da share de backup para MAQUINA$","ref":"scripts/Servico-PrinterControl.ps1:63-68","d":"D-12","dom":true,"p":"P0","v":"Get-Acl da share lista a conta de maquina ou o grupo que a contem, com escrita"},{"id":"PE-07","cat":"Permissoes","blk":"6 - Periferia","ord":56,"t":"ACL da pasta do projeto (quem le o .env e o .db)","ref":"backend/.env","d":"D-14 / D-20","dom":true,"p":"P1","v":"Lista de principals com leitura registrada --  contas inesperadas viram achado"},{"id":"PE-02","cat":"Permissoes","blk":"6 - Periferia","ord":57,"t":"Admin do dominio nao ganha privilegio no painel","ref":"backend/app/dependencies.py:113-176","d":"D-15","dom":true,"p":"P1","v":"Conta de Domain Admin sem usuario no SQLite recebe 401 no login"},{"id":"AU-07","cat":"Autenticacao","blk":"6 - Periferia","ord":58,"t":"Confirmar ausencia de SSO/Windows Auth e registrar como decisao","ref":"backend/app/services/auth.py","d":"D-15","dom":true,"p":"P1","v":"Nenhum endpoint aceita Negotiate/NTLM --  decisao registrada em ata"},{"id":"AU-01","cat":"Autenticacao","blk":"FORA do dominio","ord":59,"t":"Login com e-mail e com username resolvem a mesma conta","ref":"backend/app/routes/auth.py","d":"D-15","dom":false,"p":"P1","v":"As duas formas devolvem o mesmo user id em GET /api/auth/me"},{"id":"AU-02","cat":"Autenticacao","blk":"FORA do dominio","ord":60,"t":"Senha errada e conta inexistente respondem em tempo semelhante","ref":"backend/app/routes/auth.py:39-55","d":"D-15","dom":false,"p":"P2","v":"Diferenca de tempo entre os dois casos abaixo de 50 ms em 20 amostras"},{"id":"AU-03","cat":"Autenticacao","blk":"FORA do dominio","ord":61,"t":"Sexta tentativa em 15 min devolve 429 com Retry-After","ref":"backend/app/services/rate_limit.py","d":"D-15","dom":false,"p":"P1","v":"HTTP 429 e header Retry-After presente na sexta chamada"},{"id":"AU-04","cat":"Autenticacao","blk":"FORA do dominio","ord":62,"t":"X-Forwarded-For forjado nao contorna o limite de login (QA-10)","ref":"backend/app/routes/auth.py (_identificar_origem)","d":"D-15","dom":false,"p":"P0","v":"Sete tentativas com XFF diferente a cada uma ainda chegam ao 429"},{"id":"AU-05","cat":"Autenticacao","blk":"FORA do dominio","ord":63,"t":"Token anterior a troca de senha devolve 401 (token_version)","ref":"backend/app/dependencies.py:95-104","d":"D-16","dom":false,"p":"P1","v":"Token antigo devolve 401 apos POST /api/auth/change-password"},{"id":"AU-06","cat":"Autenticacao","blk":"FORA do dominio","ord":64,"t":"Conta desativada devolve 403 com mensagem especifica, nao 401 generico","ref":"backend/app/dependencies.py:86-92","d":"D-15","dom":false,"p":"P1","v":"Corpo do 403 contem Conta desativada"},{"id":"PE-01","cat":"Permissoes","blk":"FORA do dominio","ord":65,"t":"Matriz papel x endpoint (viewer/operator/admin x todas as rotas)","ref":"backend/app/dependencies.py:113-176","d":"D-15","dom":false,"p":"P1","v":"Matriz completa preenchida por teste real, nao por leitura de codigo"},{"id":"PE-03","cat":"Permissoes","blk":"FORA do dominio","ord":66,"t":"Frontend esconde vs backend proibe - testar pela API","ref":"src/lib/permissions.ts","d":"D-15","dom":false,"p":"P1","v":"Nenhuma rota permite pela API o que a tela esconde"},{"id":"PE-04","cat":"Permissoes","blk":"FORA do dominio","ord":67,"t":"must_change_password bloqueia tudo exceto /auth/me e /change-password","ref":"backend/app/dependencies.py:107-135","d":"D-15","dom":false,"p":"P2","v":"403 em todas as rotas e 200 nas duas excecoes"},{"id":"IF-03","cat":"Infraestrutura","blk":"FORA do dominio","ord":68,"t":"Reinicio automatico apos kill do processo (RestartCount 999)","ref":"scripts/Servico-PrinterControl.ps1","d":"D-11","dom":false,"p":"P1","v":"Apos Stop-Process, /health volta a responder dentro de 1 minuto"},{"id":"IN-04","cat":"Integracoes","blk":"FORA do dominio","ord":69,"t":"URL do webhook nunca aparece no log (so o host)","ref":"backend/app/services/webhook_notifier.py (_safe_host)","d":"D-13","dom":false,"p":"P1","v":"grep por sig= no printercontrol.log nao retorna nada"},{"id":"RS-05","cat":"Resiliencia","blk":"FORA do dominio","ord":70,"t":"Coleta parada nao gera alerta nenhum - confirmar e registrar lacuna","ref":"backend/app/services/scheduler.py","d":"A-04","dom":false,"p":"P1","v":"Com scheduler parado, nenhum alerta e criado --  lacuna registrada como achado"},{"id":"RS-06","cat":"Resiliencia","blk":"FORA do dominio","ord":71,"t":"Webhook falhando nao derruba a coleta","ref":"backend/app/services/webhook_notifier.py (docstring)","d":"D-13","dom":false,"p":"P1","v":"Com WEBHOOK_URL invalida, o ciclo de coleta conclui normalmente"},{"id":"RS-07","cat":"Resiliencia","blk":"FORA do dominio","ord":72,"t":"429 do limite de acoes de rede (10 por 60 s por usuario)","ref":"backend/app/dependencies.py (rate_limited_action)","d":"D-04","dom":false,"p":"P2","v":"Decima primeira chamada a /api/servers/discover devolve 429"},{"id":"D-05","cat":"Servidores","blk":"FORA do dominio","ord":73,"t":"Exclusao de Print Server em cascata (NUNCA contra servidor real)","ref":"backend/app/routes/servers.py (delete_server)","d":"D-05","dom":false,"p":"P3","v":"204 com confirm_host correto --  400 com confirm_host errado --  contagens zeradas"}];
+
+const BLOCK_NOTE = {
+  "0 - Reconhecimento":"Somente leitura, risco zero. Faça tudo antes de tocar no sistema. O script scripts/Coletar-Evidencias-Dominio.ps1 cobre este bloco inteiro.",
+  "1 - Caminho critico":"A identidade do processo é a única credencial de domínio que o sistema usa. A diferença entre o contexto interativo e o da tarefa agendada é o achado mais valioso da bateria.",
+  "2 - Rede de seguranca":"O backup precisa estar verificado antes de qualquer escrita no banco. Um backup não restaurado não é um backup.",
+  "3 - Escrita no banco":"Primeira escrita real. Backup fresco obrigatório e contagens SQL antes e depois.",
+  "4 - Rede ate a frota":"Avise a equipe de segurança antes: para um EDR, uma varredura paralela de ICMP + UDP/161 tem a forma de um scanner de rede.",
+  "5 - Servico permanente":"Fecha o ciclo aberto no Bloco 1: a coleta precisa funcionar sob a conta do serviço, não só na sua sessão.",
+  "6 - Periferia":"Pode ficar para uma segunda janela sem prejuízo dos anteriores.",
+  "FORA do dominio":"Não ganham nada com o ambiente corporativo. Rode antes, na sua máquina, para não gastar a janela de teste lá."
+};
+
+const GATE = {
+  "0 - Reconhecimento":{tests:["GP-02","AD-05","IF-05","RE-01"],
+    txt:"GP-02, AD-05, IF-05 e RE-01 precisam passar. Variável de ambiente colidindo faz todo teste seguinte medir a configuração errada; relógio fora por mais de 5 min faz o Kerberos recusar e o Bloco 1 inteiro dar falso negativo."},
+  "1 - Caminho critico":{tests:["PE-05"],
+    txt:"PE-05 precisa passar: o count da API tem de bater exatamente com a contagem do PowerShell. Discovery parcial seguido de sync desativa a frota real em massa."},
+  "2 - Rede de seguranca":{tests:["IF-07"],
+    txt:"IF-07 precisa passar: o backup restaurado tem de responder ok ao PRAGMA integrity_check. Sem isso, não execute o Bloco 3."},
+  "3 - Escrita no banco":{tests:["RS-02"],
+    txt:"RS-02 precisa passar: deactivated == 0. Qualquer outro valor exige investigação antes de seguir."}
+};
+
+const LABEL = {pass:"Passou", fail:"Falhou", block:"Bloqueado", na:"N/A", "":"Pendente"};
+const BLOCKS = ["0 - Reconhecimento","1 - Caminho critico","2 - Rede de seguranca",
+  "3 - Escrita no banco","4 - Rede ate a frota","5 - Servico permanente",
+  "6 - Periferia","FORA do dominio"];
+
+let state = {};                 // id -> {s, n, at}
+let db = null, saving = new Set();
+const view = {mode:"seq", dom:false, p0:false, open:false};
+const expanded = new Set();
+
+/* ── util ─────────────────────────────────────────────────── */
+const esc = s => String(s).replace(/[&<>"]/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const st = id => (state[id] && state[id].s) || "";
+const visible = t =>
+  (!view.dom || t.dom) && (!view.p0 || t.p === "P0") && (!view.open || !st(t.id));
+
+/* ── render ───────────────────────────────────────────────── */
+function summary(){
+  const c = {pass:0, fail:0, block:0, na:0, pend:0};
+  TESTS.forEach(t => { const s = st(t.id); c[s || "pend"]++; });
+  const total = TESTS.length, done = total - c.pend;
+  document.getElementById("done").innerHTML =
+    done + "<span> / " + total + " registrados</span>";
+  ["pass","fail","block","na","pend"].forEach(k =>
+    document.getElementById("c-" + k).textContent = c[k]);
+  const bars = document.querySelectorAll("#bar i");
+  [c.pass, c.fail, c.block, c.na].forEach((n, i) =>
+    bars[i].style.width = (n / total * 100) + "%");
+
+  // fase atual: o primeiro bloco que ainda tem teste pendente
+  const b = BLOCKS.find(b => TESTS.some(t => t.blk === b && !st(t.id)));
+  document.getElementById("phase").textContent =
+    b ? (b === "FORA do dominio" ? "Fora do domínio" : "Bloco " + b.replace(" - ", " — ")) : "Bateria concluída";
+}
+
+function gateFor(blk){
+  const g = GATE[blk]; if (!g) return "";
+  const sts = g.tests.map(st);
+  const shut = sts.some(s => s === "fail" || s === "block");
+  const open = sts.every(s => s === "pass" || s === "na");
+  const cls = shut ? "shut" : open ? "open" : "";
+  const lbl = shut ? "Portão fechado — não avance" : open ? "Portão liberado" : "Portão pendente";
+  return '<div class="gate ' + cls + '"><div class="gate-l">' + lbl +
+    '</div><p>' + esc(g.txt) + "</p></div>";
+}
+
+function rowHTML(t){
+  const s = st(t.id), note = (state[t.id] && state[t.id].n) || "";
+  const at = (state[t.id] && state[t.id].at) || "";
+  const open = expanded.has(t.id);
+  let h = '<div class="row" data-p="' + t.p + '" data-s="' + s + '" data-id="' + t.id + '">' +
+    '<div class="row-main" role="button" tabindex="0" aria-expanded="' + open + '">' +
+      '<span class="row-id">' + esc(t.id) + "</span>" +
+      '<span class="row-body"><span class="row-t">' + esc(t.t) + "</span>" +
+        '<span class="row-meta"><span class="pri">' + t.p + "</span>" +
+        "<span>" + esc(t.cat) + "</span>" +
+        (t.dom ? '<span class="only">só no domínio</span>' : "<span>também fora</span>") +
+        "<span>" + esc(t.d) + "</span></span></span>" +
+      '<span class="stamp">' + LABEL[s] + "</span>" +
+    "</div>";
+  if (open){
+    h += '<div class="detail"><dl>' +
+      "<dt>Validar</dt><dd>" + esc(t.v) + "</dd>" +
+      "<dt>Código</dt><dd class=\"code\">" + esc(t.ref) + "</dd>" +
+      "<dt>Detalhe</dt><dd>" + esc(t.d) + " em TESTES_MAQUINA_DOMINIO.md</dd>" +
+      "</dl><div class=\"states\">" +
+      ["pass","fail","block","na",""].map(v =>
+        '<button data-v="' + v + '" aria-pressed="' + (s === v) + '">' +
+        LABEL[v] + "</button>").join("") +
+      '</div><textarea placeholder="Resultado observado, código de erro, arquivo de evidência…">' +
+      esc(note) + "</textarea>" +
+      (at ? '<div class="saved">registrado ' + esc(at) + "</div>" : "") +
+      "</div>";
+  }
+  return h + "</div>";
+}
+
+function render(){
+  const groups = view.mode === "seq"
+    ? BLOCKS.map(b => [b, TESTS.filter(t => t.blk === b && visible(t))])
+    : [...new Set(TESTS.map(t => t.cat))].sort()
+        .map(c => [c, TESTS.filter(t => t.cat === c && visible(t))]);
+
+  let h = "";
+  groups.forEach(([name, items], i) => {
+    if (!items.length) return;
+    const done = items.filter(t => st(t.id)).length;
+    const num = view.mode === "seq"
+      ? (name === "FORA do dominio" ? "—" : name.split(" - ")[0])
+      : String(i + 1);
+    const title = view.mode === "seq"
+      ? (name === "FORA do dominio" ? "Fora do domínio" : name.split(" - ")[1])
+      : name;
+    h += '<section class="block"><div class="block-head">' +
+      '<span class="block-num' + (name === "FORA do dominio" ? " out" : "") + '">' + num + "</span>" +
+      '<span class="block-title">' + esc(title) + "</span>" +
+      '<span class="block-count">' + done + "/" + items.length + "</span></div>";
+    if (view.mode === "seq" && BLOCK_NOTE[name])
+      h += '<p class="block-note">' + esc(BLOCK_NOTE[name]) + "</p>";
+    h += '<div class="rows">' + items.map(rowHTML).join("") + "</div>";
+    if (view.mode === "seq") h += gateFor(name);
+    h += "</section>";
+  });
+  document.getElementById("list").innerHTML =
+    h || '<p class="empty">Nenhum teste com os filtros atuais.</p>';
+  summary();
+}
+
+/* ── persistência ─────────────────────────────────────────── */
+function stamp(){
+  return new Date().toLocaleString("pt-BR",
+    {day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+}
+function bus(msg, cls){
+  document.getElementById("bus-msg").textContent = msg;
+  const p = document.getElementById("sync");
+  p.className = "pill" + (cls ? " " + cls : "");
+  p.textContent = cls === "on" ? "salvando na nuvem"
+                : cls === "off" ? "só neste aparelho" : "conectando";
+}
+function localSave(){
+  try { localStorage.setItem("pc-dominio", JSON.stringify(state)); } catch (e) {}
+}
+async function persist(id){
+  const rec = state[id] || {s:"", n:"", at:""};
+  localSave();
+  if (!db) return;
+  saving.add(id);
+  try {
+    await db.doc("runs/atual/tests/" + id).set(rec);
+    bus("Salvo — visível em qualquer aparelho que abrir esta página.", "on");
+  } catch (e) {
+    bus("Não consegui salvar na nuvem (" + (e && e.code || "erro") +
+        "). O registro ficou neste aparelho.", "off");
+  } finally { saving.delete(id); }
+}
+
+/* ── interação ────────────────────────────────────────────── */
+function setStatus(id, v){
+  state[id] = Object.assign({s:"", n:""}, state[id], {s:v, at:v ? stamp() : ""});
+  render(); persist(id);
+}
+let noteTimer;
+document.addEventListener("input", e => {
+  const ta = e.target.closest(".detail textarea"); if (!ta) return;
+  const id = ta.closest(".row").dataset.id;
+  state[id] = Object.assign({s:"", at:""}, state[id], {n:ta.value});
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => { summary(); persist(id); }, 700);
+});
+function toggle(row){
+  const id = row.dataset.id;
+  expanded.has(id) ? expanded.delete(id) : expanded.add(id);
+  render();
+}
+document.addEventListener("click", e => {
+  const sb = e.target.closest(".states button");
+  if (sb){ setStatus(sb.closest(".row").dataset.id, sb.dataset.v); return; }
+  if (e.target.closest(".detail")) return;
+  const rm = e.target.closest(".row-main");
+  if (rm) toggle(rm.closest(".row"));
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const rm = e.target.closest(".row-main");
+  if (rm){ e.preventDefault(); toggle(rm.closest(".row")); }
+});
+
+function bind(id, fn){ document.getElementById(id).addEventListener("click", fn); }
+bind("v-seq", () => { view.mode = "seq"; syncSeg(); render(); });
+bind("v-cat", () => { view.mode = "cat"; syncSeg(); render(); });
+function syncSeg(){
+  document.getElementById("v-seq").setAttribute("aria-pressed", view.mode === "seq");
+  document.getElementById("v-cat").setAttribute("aria-pressed", view.mode === "cat");
+}
+[["f-dom","dom"],["f-p0","p0"],["f-open","open"]].forEach(([el, key]) =>
+  bind(el, () => {
+    view[key] = !view[key];
+    document.getElementById(el).setAttribute("aria-pressed", view[key]);
+    render();
+  }));
+
+/* ── exportar ─────────────────────────────────────────────── */
+bind("export", async () => {
+  const q = v => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+  const head = ["ID","Categoria","Bloco","Ordem","Teste","Referencia","Item",
+                "So no dominio","Prioridade","Como validar","Status",
+                "Registrado em","Resultado observado"];
+  const body = TESTS.map(t => {
+    const r = state[t.id] || {};
+    return [t.id, t.cat, t.blk, t.ord, t.t, t.ref, t.d, t.dom ? "S" : "N",
+            t.p, t.v, LABEL[r.s || ""], r.at || "", r.n || ""].map(q).join(";");
+  });
+  const csv = "﻿" + [head.map(q).join(";"), ...body].join("\r\n");
+  const nome = "bateria-dominio-" +
+    new Date().toISOString().slice(0, 16).replace(/[:T]/g, "") + ".csv";
+  const dl = await claude.use("downloads");
+  if (dl){
+    try { await dl.save({filename:nome, data:csv});
+          bus("CSV gerado — abre no Excel com ; como separador.", db ? "on" : "off"); return; }
+    catch (e) { /* recusado ou indisponível: cai no plano B */ }
+  }
+  const w = window.open("", "_blank");
+  if (w){ w.document.write("<pre>" + esc(csv) + "</pre>"); w.document.close(); }
+  else bus("Não consegui gerar o arquivo. Copie os dados pela tela.", "off");
+});
+
+/* ── início ───────────────────────────────────────────────── */
+try {
+  const raw = localStorage.getItem("pc-dominio");
+  if (raw) state = JSON.parse(raw) || {};
+} catch (e) { state = {}; }
+render();
+bus("Registros ficam neste aparelho enquanto a nuvem não responde.", "off");
+
+claude.use("db").then(d => {
+  if (!d){ bus("Sem sincronização: os registros ficam só neste aparelho.", "off"); return; }
+  db = d;
+  db.collection("runs/atual/tests").onSnapshot(
+    snap => {
+      snap.docs.forEach(doc => {
+        if (saving.has(doc.id)) return;      // não sobrescreve o que estou digitando
+        const v = doc.data() || {};
+        state[doc.id] = {s:v.s || "", n:v.n || "", at:v.at || ""};
+      });
+      localSave(); render();
+      bus("Sincronizado — abra em qualquer aparelho para ver o mesmo estado.", "on");
+    },
+    err => bus("Sincronização interrompida (" + err.code +
+               "). Os registros seguem neste aparelho.", "off")
+  );
+}).catch(() => bus("Sem sincronização: os registros ficam só neste aparelho.", "off"));
+</script>

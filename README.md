@@ -61,3 +61,16 @@ demonstração fixa:
   ```
   (Esses arquivos são ignorados pelo git — ver `.gitignore` — então gerar ou
   apagar localmente nunca afeta o repositório.)
+
+## Print Server — Fase A
+
+O backend é Python/FastAPI; `powershell.exe` executa comandos inline de
+descoberta. `Main.ps1` foi descontinuado e permanece apenas no histórico Git.
+Não há agente Windows, WinRM ou arquivo `.ps1` no transporte de produção.
+`backend/.env` é o ambiente de desenvolvimento; `backend/.env.dominio` é
+exclusivo da máquina de domínio. Veja [Fase A](docs/CHANGELOG_PHASE_A.md).
+
+Diagnóstico: `GET /health/print-server` com token admin. Executa `Get-Printer`
+real mesmo em mock e retorna identidade, categoria, duração e contagem.
+Sync com queda superior a 20% das filas ativas do servidor retorna 409,
+preservando as impressoras. Instruções em [Operações](docs/OPERATIONS.md).

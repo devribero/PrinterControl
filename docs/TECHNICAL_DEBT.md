@@ -1,5 +1,13 @@
 # Dívida técnica — registro único
 
+## Fase A — 2026-09-10 (implementada; validação em domínio pendente)
+
+- Resolvido: P0 de sync com queda >20% de filas ativas por servidor.
+- Resolvido: erros categorizados, identidade/tempos/contagens e diagnóstico real.
+- Resolvido: Main.ps1 removido e validação de mock reforçada no boot.
+- Fase B: identidade SYSTEM é hipótese pendente de teste em domínio.
+- Plano e validação: [changelog](CHANGELOG_PHASE_A.md).
+
 Este é o **lugar único** onde a dívida técnica do PrinterControl fica
 registrada. `OPERATIONS.md`, `DEVELOPER_GUIDE.md` e `CONTEXTO-DESENVOLVIMENTO.md`
 apontam para cá em vez de manterem listas próprias — foi assim que itens já

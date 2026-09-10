@@ -78,6 +78,21 @@ class Settings(BaseSettings):
     print_server_host: str = "elgjunprt"
     print_server_timeout_seconds: int = 30
 
+    @field_validator("print_server_mode")
+    @classmethod
+    def _print_server_mode_conhecido(cls, value: str) -> str:
+        value = value.strip().lower()
+        if value not in {"mock", "real"}:
+            raise ValueError("PRINT_SERVER_MODE invalido: use 'mock' ou 'real'; vazio nao e permitido.")
+        return value
+
+    @field_validator("print_server_timeout_seconds")
+    @classmethod
+    def _print_server_timeout_positivo(cls, value: int) -> int:
+        if value <= 0:
+            raise ValueError("PRINT_SERVER_TIMEOUT_SECONDS deve ser positivo.")
+        return value
+
     # ------------------------------------------------------------------
     # Webhook de alerta critico de toner (Etapa 6), equivalente a
     # Send-AlertaWebhook do Main.ps1 (Adaptive Card via Power Automate/Teams).
@@ -128,7 +143,7 @@ class Settings(BaseSettings):
         SECRET_KEY logo abaixo — configuracao incoerente com o ambiente e
         erro de operacao, nao preferencia.
         """
-        if not self.is_production:
+        if self.environment in {"development", "demo"}:
             return self
 
         if self.print_server_mode != "real":

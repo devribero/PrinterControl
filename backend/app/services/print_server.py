@@ -1,7 +1,7 @@
 """
 Camada de Print Server (Etapa 3).
 
-Reproduz a descoberta de impressoras do Main.ps1:
+Descoberta ativa em Python com transporte PowerShell inline:
 
     Get-Printer     -ComputerName $servidor   -> Nome, DriverName, PortName
     Get-PrinterPort -ComputerName $servidor   -> PortName, PrinterHostAddress
@@ -13,12 +13,14 @@ Dois modos, controlados por settings.print_server_mode:
     "mock" -> dados simulados, no MESMO formato do caminho real, incluindo
               impressoras que compartilham IP (necessario para o agrupamento
               da Etapa 8). Nao toca rede nem Windows.
-    "real" -> PowerShell via subprocess, fiel ao Main.ps1.
+    "real" -> PowerShell via subprocess, sem arquivo .ps1.
 """
 import json
 import logging
 import re
 import subprocess
+import time
+from uuid import uuid4
 from dataclasses import dataclass
 
 from app.config import settings
@@ -27,7 +29,15 @@ logger = logging.getLogger("printercontrol.print_server")
 
 
 class PrintServerError(Exception):
-    """RPC ao Print Server falhou ou saida do PowerShell nao pode ser interpretada."""
+    """Falha categorizada; a mensagem continua disponivel via str(exc)."""
+
+    def __init__(self, message: str, category: str = "unknown_error", **context):
+        super().__init__(message)
+        self.category = category
+        self.context = context
+
+    def as_dict(self) -> dict:
+        return {"detail": str(self), "category": self.category, **self.context}
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -67,17 +77,17 @@ def validar_host(server: str) -> str:
     aparecer so na primeira sincronizacao.
     """
     if not isinstance(server, str):
-        raise PrintServerError(f"Host do Print Server invalido: {server!r} (esperado texto).")
+        raise PrintServerError(f"Host do Print Server invalido: {server!r} (esperado texto).", "invalid_configuration")
 
     limpo = server.strip()
 
     if not limpo:
-        raise PrintServerError("Host do Print Server vazio.")
+        raise PrintServerError("Host do Print Server vazio.", "invalid_configuration")
 
     if len(limpo) > _MAX_HOSTNAME_LENGTH:
         raise PrintServerError(
             f"Host do Print Server muito longo ({len(limpo)} caracteres, maximo "
-            f"{_MAX_HOSTNAME_LENGTH})."
+            f"{_MAX_HOSTNAME_LENGTH}).", "invalid_configuration"
         )
 
     if not _HOSTNAME_RE.match(limpo):
@@ -85,7 +95,7 @@ def validar_host(server: str) -> str:
             f"Host do Print Server invalido: {server!r}. Use apenas o nome do "
             "servidor (ex.: elgjunprt), um FQDN (ex.: elgjunprt.elgin.local) ou "
             "um IPv4. Espacos, aspas, ponto-e-virgula e outros caracteres nao "
-            "sao aceitos porque o nome e usado em um comando do sistema."
+            "sao aceitos porque o nome e usado em um comando do sistema.", "invalid_configuration"
         )
 
     return limpo
@@ -145,45 +155,143 @@ def _mock_discover(server: str) -> list[DiscoveredPrinter]:
 #  REAL — PowerShell via subprocess, mesma chamada do Main.ps1
 # ─────────────────────────────────────────────────────────────────────────
 
-def _run_powershell_json(command: str, timeout: int) -> list[dict]:
-    """
-    Executa um comando PowerShell que termina em `ConvertTo-Json` e devolve
-    sempre uma lista de dict — o `ConvertTo-Json` do Windows devolve um
-    objeto solto (nao lista) quando ha exatamente 1 resultado, entao
-    normalizamos aqui.
-    """
+def _effective_identity() -> tuple[str | None, str | None]:
+    """Identidade herdada pelo subprocess; nunca usa USERNAME como substituto."""
     try:
-        proc = subprocess.run(
-            ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", command],
-            capture_output=True,
-            text=True,
-            timeout=timeout,
+        result = subprocess.run(
+            ["whoami.exe"], capture_output=True, text=True, timeout=5,
         )
-    except FileNotFoundError as exc:
-        raise PrintServerError("powershell.exe nao encontrado neste host") from exc
-    except subprocess.TimeoutExpired as exc:
-        raise PrintServerError(f"PowerShell nao respondeu em {timeout}s") from exc
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip(), None
+        return None, "whoami_failed"
+    except (OSError, subprocess.TimeoutExpired):
+        return None, "whoami_unavailable"
 
-    if proc.returncode != 0:
-        raise PrintServerError(f"PowerShell falhou: {proc.stderr.strip() or proc.stdout.strip()}")
 
-    raw = proc.stdout.strip()
-    if not raw:
-        return []
+def _error_category(evidence: dict, fallback: str) -> str:
+    """Codigos primeiro; texto apenas quando a evidencia e especifica."""
+    codes = set()
+    for key in ("hresult", "native_code"):
+        try:
+            codes.add(int(evidence.get(key)) & 0xFFFF)
+        except (ValueError, TypeError):
+            pass
+    description = " ".join(str(evidence.get(k, "")) for k in
+                           ("type", "root_type", "error_id", "message")).lower()
+    # CimException pode ter HResult generico, mas trazer o HRESULT Windows
+    # real em FullyQualifiedErrorId (independente do idioma da mensagem).
+    codes.update(int(code, 16) & 0xFFFF for code in re.findall(r"0x[0-9a-f]{8}\b", description))
+    if "commandnotfoundexception" in description:
+        return "cmdlet_not_found"
+    if evidence.get("stage") == "dns" or codes & {11001, 11002, 11003, 11004}:
+        return "dns_resolution_failed"
+    if (5 in codes or "unauthorizedaccessexception" in description
+            or evidence.get("native_status") == "AccessDenied"):
+        return "access_denied"
+    if codes & {1722, 1726, 1460, 121, 10060}:
+        return "rpc_timeout_or_unavailable"
+    description += " " + fallback.lower()
+    if "commandnotfoundexception" in description:
+        return "cmdlet_not_found"
+    if any(s in description for s in ("access is denied", "access denied", "access was denied", "acesso negado")):
+        return "access_denied"
+    if "spooler" in description and any(s in description for s in
+            ("not running", "unavailable", "not available", "indispon", "parado", "não está", "nao esta")):
+        return "spooler_unavailable"
+    if any(s in description for s in ("rpc server is unavailable", "servidor rpc", "timed out", "timeout")):
+        return "rpc_timeout_or_unavailable"
+    return "unknown_error"
 
+
+def _run_powershell_json(command: str, timeout: int, *, server: str | None = None,
+                         operation: str = "PowerShell", telemetry: dict | None = None) -> list[dict]:
+    """Comandos inline, DNS e erro estruturado; stdout reservado ao resultado JSON."""
+    context = telemetry if telemetry is not None else {}
+    context.update(server=server, operation=operation, call_id=uuid4().hex)
+    identity, identity_error = _effective_identity()
+    context.update(identity=identity, identity_error=identity_error)
+    logger.info("Print Server chamada | %s", context)
+    if identity_error:
+        logger.warning("Identidade indisponivel | %s", context)
+    # DNS executado no mesmo processo PowerShell, sob o timeout da chamada.
+    dns = ""
+    if server is not None:
+        host = _escapar_powershell(validar_host(server))
+        dns = (f"$stage='dns'; [void][System.Net.Dns]::GetHostAddresses('{host}'); "
+               "$stage='cmdlet'; ")
+    wrapped = (
+        "[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false); "
+        "$ErrorActionPreference='Stop'; $stage='cmdlet'; try { "
+        + dns + command + " } catch { "
+        "$e=$_.Exception; $root=$e.GetBaseException(); "
+        "$info=@{stage=$stage; type=$e.GetType().FullName; "
+        "root_type=$root.GetType().FullName; native_status=[string]$root.NativeErrorCode; "
+        "error_id=$_.FullyQualifiedErrorId; hresult=$root.HResult; "
+        "native_code=$root.NativeErrorCode; message=$e.Message}; "
+        "[Console]::Error.WriteLine('PRINT_SERVER_ERROR:' + ($info | ConvertTo-Json -Compress)); exit 1 }"
+    )
+    started = time.perf_counter()
+    count = None
+    category = None
+    failure = None
     try:
-        data = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise PrintServerError(f"Saida do PowerShell nao e JSON valido: {exc}") from exc
+        try:
+            proc = subprocess.run(
+                ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", wrapped],
+                capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout,
+            )
+        except FileNotFoundError as exc:
+            raise PrintServerError("powershell.exe nao encontrado neste host", "powershell_not_found") from exc
+        except subprocess.TimeoutExpired as exc:
+            raise PrintServerError(f"PowerShell nao respondeu em {timeout}s", "rpc_timeout_or_unavailable") from exc
+        except OSError as exc:
+            raise PrintServerError("Nao foi possivel iniciar powershell.exe", "transport_unavailable") from exc
 
-    return data if isinstance(data, list) else [data]
+        if proc.returncode != 0:
+            raw_error = proc.stderr.strip() or proc.stdout.strip()
+            evidence = {}
+            for line in raw_error.splitlines():
+                if line.startswith("PRINT_SERVER_ERROR:"):
+                    try:
+                        parsed = json.loads(line.split(":", 1)[1])
+                        if isinstance(parsed, dict):
+                            evidence = parsed
+                    except json.JSONDecodeError:
+                        pass
+            category = _error_category(evidence, raw_error)
+            message = evidence.get("message") or raw_error or "erro sem detalhe"
+            raise PrintServerError(f"PowerShell falhou: {message}", category,
+                                   error_id=evidence.get("error_id"), hresult=evidence.get("hresult"))
+
+        raw = proc.stdout.strip().lstrip("\ufeff")
+        try:
+            data = json.loads(raw) if raw else []
+        except json.JSONDecodeError as exc:
+            raise PrintServerError("Saida do PowerShell nao e JSON valido", "invalid_json") from exc
+        # ConvertTo-Json pode emitir null, objeto unico ou array.
+        rows = [] if data is None else data if isinstance(data, list) else [data]
+        if not all(isinstance(row, dict) and isinstance(row.get("Name"), str)
+                   and row["Name"].strip() for row in rows):
+            raise PrintServerError("JSON do PowerShell tem estrutura invalida", "invalid_json")
+        count = len(rows)
+        return rows
+    except PrintServerError as exc:
+        category = exc.category
+        failure = exc
+        raise
+    finally:
+        context.update(duration_ms=round((time.perf_counter() - started) * 1000, 2),
+                       count=count, category=category)
+        if failure is not None:
+            failure.context.update({k: v for k, v in context.items() if k != "category"})
+        log = logger.error if category else logger.info
+        log("Print Server resultado | %s", context)
 
 
 def _real_discover(server: str, timeout: int) -> list[DiscoveredPrinter]:
     """
-    Equivalente exato de Get-ImpressorasEmpresa + o inicio de
-    Process-ImpressorasList no Main.ps1 (so a parte de descoberta —
-    ping/SNMP ficam para a Etapa 5).
+    Combina filas e portas do Print Server. Ping/SNMP pertencem ao
+    enriquecimento posterior; nao ha dependencia de script legado.
     """
     # Duas camadas antes da interpolacao: a allowlist recusa o host que nao
     # for hostname/FQDN/IPv4, e o escape neutraliza aspas simples caso algo
@@ -201,8 +309,8 @@ def _real_discover(server: str, timeout: int) -> list[DiscoveredPrinter]:
         "Select-Object Name, PrinterHostAddress | ConvertTo-Json -Compress"
     )
 
-    printers = _run_powershell_json(printers_cmd, timeout)
-    ports = _run_powershell_json(ports_cmd, timeout)
+    printers = _run_powershell_json(printers_cmd, timeout, server=host, operation="Get-Printer")
+    ports = _run_powershell_json(ports_cmd, timeout, server=host, operation="Get-PrinterPort")
 
     # portMap[PortName] = PrinterHostAddress — mesma logica do Main.ps1.
     port_map = {
@@ -252,9 +360,11 @@ def discover_printers(
     nao mascarar um problema real de rede/dominio.
     """
     server = server or settings.print_server_host
-    mode = mode or settings.print_server_mode
+    mode = settings.print_server_mode if mode is None else mode
 
     if mode == "mock":
+        if settings.environment not in {"development", "demo"}:
+            raise PrintServerError("Mock permitido apenas em development/demo", "invalid_configuration")
         logger.info("Descoberta em modo mock | server=%s", server)
         return _mock_discover(server)
 
@@ -262,4 +372,25 @@ def discover_printers(
         logger.info("Descoberta em modo real | server=%s", server)
         return _real_discover(server, settings.print_server_timeout_seconds)
 
-    raise PrintServerError(f"PRINT_SERVER_MODE invalido: {mode!r} (use 'mock' ou 'real')")
+    raise PrintServerError(f"PRINT_SERVER_MODE invalido: {mode!r} (use 'mock' ou 'real')", "invalid_configuration")
+
+
+def diagnose_print_server() -> dict:
+    """Consulta real minima; nao usa discovery, portas, SNMP nem banco."""
+    telemetry = {}
+    result = {"server": settings.print_server_host, "configured_mode": settings.print_server_mode,
+              "probe_mode": "real", "identity": None, "identity_error": None,
+              "category": None, "duration_ms": None, "count": None}
+    try:
+        host = _escapar_powershell(validar_host(settings.print_server_host))
+        _run_powershell_json(
+            f"Get-Printer -ComputerName '{host}' -ErrorAction Stop | "
+            "Select-Object Name | ConvertTo-Json -Compress",
+            settings.print_server_timeout_seconds, server=settings.print_server_host,
+            operation="Get-Printer", telemetry=telemetry,
+        )
+        result.update(telemetry, success=True)
+    except PrintServerError as exc:
+        result.update(exc.as_dict())
+        result.update(telemetry, success=False, category=exc.category)
+    return result

@@ -11,6 +11,7 @@ from app.config import settings
 from app.database import create_db_and_tables, engine
 from app.logging_config import setup_logging
 from app.routes import audit_log, auth, printers, alerts, collect, servers, users, notifications, ping
+from app.routes import health
 from app.services.scheduler import scheduler_status, shutdown_scheduler, start_scheduler
 
 setup_logging()
@@ -118,6 +119,7 @@ app.include_router(collect.router, prefix=settings.api_prefix)
 app.include_router(servers.router, prefix=settings.api_prefix)
 app.include_router(audit_log.router, prefix=settings.api_prefix)
 app.include_router(ping.router, prefix=settings.api_prefix)
+app.include_router(health.router)
 
 
 @app.get("/")

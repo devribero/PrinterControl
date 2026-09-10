@@ -197,11 +197,28 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   // em GET /api/auth/me. 401/403 (token invalido ou conta desativada) limpam
   // a sessao dentro de restoreSession(); servidor fora do ar mantem o token e
   // devolve status "unverified".
+  // O limite existe porque `fetch` NAO tem timeout proprio: quando o
+  // backend nao responde nem recusa (firewall que descarta o pacote em vez
+  // de recusar a conexao, ou NEXT_PUBLIC_API_URL apontando para um
+  // 127.0.0.1 que so existe na maquina de quem abriu o painel), a promessa
+  // simplesmente nunca resolve. Sem isto, `sessionLoading` ficava `true`
+  // para sempre e a tela parava em "Restaurando sessao..." — sem erro, sem
+  // log, sem saida.
+  //
+  // 8s e folgado para um GET /api/auth/me, que le uma linha do SQLite.
+  // Estourado o prazo, `restoreSession` trata o abort como falha de rede e
+  // devolve "unverified" (com cache) ou "anonymous" — ou seja, cai na tela
+  // de login, que e um estado em que da para agir.
+  const SESSION_TIMEOUT_MS = 8000;
+
   useEffect(() => {
     let cancelled = false;
-    restoreSession().then((session) => {
+    const controller = new AbortController();
+    const prazo = setTimeout(() => controller.abort(), SESSION_TIMEOUT_MS);
+
+    const encerrar = (session: Awaited<ReturnType<typeof restoreSession>> | null) => {
       if (cancelled) return;
-      if (session.status === "anonymous") {
+      if (!session || session.status === "anonymous") {
         setAccount(null);
         setSessionVerified(false);
       } else {
@@ -209,9 +226,23 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         setSessionVerified(session.status === "authenticated");
       }
       setSessionLoading(false);
-    });
+    };
+
+    restoreSession(controller.signal)
+      .then(encerrar)
+      // `.catch` NAO e redundante com o try/catch de restoreSession: as
+      // leituras de storage acontecem ANTES dele (getToken), e um navegador
+      // com dados de site bloqueados por politica faz `localStorage` LANCAR
+      // em vez de devolver null. A promessa entao rejeitava, este `.then`
+      // nunca rodava, e o resultado era o mesmo spinner eterno — por uma
+      // causa completamente diferente da de cima.
+      .catch(() => encerrar(null))
+      .finally(() => clearTimeout(prazo));
+
     return () => {
       cancelled = true;
+      clearTimeout(prazo);
+      controller.abort();
     };
   }, []);
 
