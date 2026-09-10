@@ -131,7 +131,14 @@ A recuperação resolve automaticamente a condição. Toner crítico novo ou esc
 
 ## Legado
 
-`Main.ps1` e os scripts PowerShell representam a arquitetura anterior baseada em Print Server, SNMP e JSON estático. Eles não são a mesma via de comunicação usada pelo frontend moderno quando a API FastAPI está disponível.
+O backend ativo é Python/FastAPI. A descoberta usa comandos inline via
+`subprocess`/`powershell.exe`, sem agente Windows, WinRM ou arquivo `.ps1`.
+`Main.ps1` é legado descontinuado, preservado apenas no histórico Git.
+
+Roadmap Fase A implementado (2026-09-10): remoção do legado, erros categorizados,
+identidade/tempos/contagens, bloqueio de sync com queda >20%, validação de
+mock e diagnóstico real separado. Fase B aguarda evidência em domínio.
+Ver [changelog](CHANGELOG_PHASE_A.md) e [ADR](adr/001-print-server-phase-a.md).
 
 ## PLANO DE IMPLEMENTAÇÃO — ESCANEAR REDE REAL
 
@@ -375,7 +382,8 @@ Corrigir ou revisar antes da exposição:
 - revisar rotas GET públicas;
 - não expor documentação Swagger sem política definida;
 - validar CORS restrito;
-- remover/rotacionar o webhook embutido em `Main.ps1`;
+- verificar a rotação do webhook presente no histórico Git de `Main.ps1`
+  (arquivo removido da árvore na Fase A; exclusão não revoga credenciais);
 - manter `ALLOW_MOCK_COLLECT=false`;
 - manter `PRINT_SERVER_MODE=real` somente na máquina corporativa;
 - validar limites e timeouts de discovery;

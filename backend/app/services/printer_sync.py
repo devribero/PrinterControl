@@ -13,14 +13,22 @@ preservando leituras e alertas associados.
 """
 from dataclasses import dataclass
 from datetime import datetime
+import logging
 
 from sqlmodel import Session, select
 
 from app.config import settings
 from app.models.print_server import PrintServer
 from app.models.printer import Printer
-from app.services.print_server import discover_printers
+from app.services.print_server import PrintServerError, discover_printers
 from app.services.printer_rules import obter_modelo, obter_tipo_impressora
+
+logger = logging.getLogger("printercontrol.printer_sync")
+MAX_DISCOVERY_DROP_PERCENT = 20
+
+
+class SyncBlockedError(PrintServerError):
+    """Discovery parcial: nenhum registro de impressora pode ser alterado."""
 
 
 @dataclass
@@ -67,6 +75,24 @@ def sync_printers(
         (p.server, p.name): p
         for p in session.exec(select(Printer).where(Printer.server == server))
     }
+
+    # Deduplicar antes de contar e escrever evita inflar a cobertura ou criar
+    # duas linhas com a mesma chave. Uma descoberta de outro host e invalida.
+    if any(d.server != server or not d.name.strip() for d in discovered):
+        raise PrintServerError("Discovery retornou fila invalida ou de outro servidor", "invalid_json")
+    discovered = list({(d.server, d.name): d for d in discovered}.values())
+    active_count = sum(p.active for p in existing.values())
+    if active_count and len(discovered) * 100 < active_count * (100 - MAX_DISCOVERY_DROP_PERCENT):
+        drop = round((active_count - len(discovered)) / active_count * 100, 2)
+        error = SyncBlockedError(
+            f"Sync bloqueado em {server}: discovery retornou {len(discovered)} filas "
+            f"para {active_count} ativas ({drop}% de queda; limite {MAX_DISCOVERY_DROP_PERCENT}%). "
+            "Nenhuma impressora foi alterada. Verifique discovery e identidade antes de repetir.",
+            "sync_discovery_drop_blocked", server=server, registered_active=active_count,
+            discovered=len(discovered), drop_percent=drop, threshold_percent=MAX_DISCOVERY_DROP_PERCENT,
+        )
+        logger.error("ALERTA | %s", error.as_dict())
+        raise error
 
     seen_keys: set[tuple[str, str]] = set()
     created = updated = reactivated = 0

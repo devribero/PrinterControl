@@ -558,3 +558,28 @@ O endpoint usado pelo botão "Escanear Rede" é `POST /api/servers/discover` (ve
 - não grava SQLite.
 
 O frontend chama esse endpoint diretamente (`discoverPrinters()` em `src/lib/api.ts`), e não `GET /api/printers/with-status`.
+## Fase A — diagnóstico e erros do Print Server (2026-09-10)
+
+`GET /health/print-server` exige token admin, com o mesmo limitador das ações
+de rede. Consulta sempre `Get-Printer` real no `PRINT_SERVER_HOST` configurado;
+não executa sync, Get-PrinterPort nem SNMP e não persiste diagnóstico no banco.
+
+Retorno 200 (`success=true`) ou 503 (`success=false`): `server`,
+`configured_mode` (mock/real), `probe_mode` (sempre real), `identity` (whoami
+do processo), `identity_error`, `category`, `duration_ms`, `count` e `call_id`.
+Falhas incluem `detail`; contagem não obtida é null. Se whoami falhar, a
+identidade será null com motivo explícito; não se substitui pelo usuário da API.
+Host inválido impede iniciar o transporte. Autenticação: 401/403; limite: 429.
+
+Categorias: `dns_resolution_failed`, `rpc_timeout_or_unavailable`,
+`access_denied`, `spooler_unavailable`, `invalid_json`, `cmdlet_not_found`.
+Outras falhas: `powershell_not_found`, `transport_unavailable`,
+`invalid_configuration`, `unknown_error`. RPC indisponível não prova firewall
+bloqueado ou Spooler parado; a categoria específica exige evidência.
+
+As duas rotas de discovery/sync mantêm `detail` textual e acrescentam categoria
+e contexto nos erros 502. As duas rotas de sync retornam 409 com
+`category=sync_discovery_drop_blocked`, `registered_active`, `discovered`,
+`drop_percent` e `threshold_percent` quando a queda ultrapassa 20%.
+O bloqueio preserva todas as impressoras; o servidor cadastrado registra
+`last_error`/`last_status=error`, sem avançar `last_sync_at`. Também há log ERROR.
