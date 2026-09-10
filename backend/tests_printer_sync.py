@@ -156,12 +156,19 @@ with Session(engine) as s:
 
     print("\n--- 3a sincronizacao: P2 sumiu do Print Server ---")
     printer_sync.discover_printers = fake_discover([P1, P3])
-    r = sync_printers(s, server=SERVER)
-    check("nenhuma criada", r.created, 0)
-    check("1 desativada (P2)", r.deactivated, 1)
+    try:
+        sync_printers(s, server=SERVER)
+        check_true("queda de 33% bloqueada", False)
+    except printer_sync.SyncBlockedError as exc:
+        check("queda de 33% bloqueada", exc.category, "sync_discovery_drop_blocked")
     p2 = s.exec(select(Printer).where(Printer.server == SERVER, Printer.name == "P2")).first()
     check_true("P2 continua no banco (nao foi apagada)", p2 is not None)
-    check("P2 marcada inativa", p2.active, False)
+    check("P2 permanece ativa apos bloqueio", p2.active, True)
+
+    # Fixture independente: uma fila historicamente inativa deve reativar.
+    p2.active = False
+    s.add(p2)
+    s.commit()
 
     print("\n--- 4a sincronizacao: P2 reaparece + P4 e nova ---")
     printer_sync.discover_printers = fake_discover([P1, P2, P3, P4])
