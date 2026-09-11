@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * Dependências externas: react (useState) e lucide-react (ícones do form).
+ * Dependências externas: react (useState/useRef) e lucide-react (ícones).
  * A validação das credenciais é feita pelo backend (POST /api/auth/login via
  * lib/auth.ts). `onSuccess` é a única saída deste componente;
  * quem decide o que fazer com a conta autenticada é App.tsx.
  */
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import {
   Mail,
   Lock,
@@ -18,9 +18,15 @@ import {
   Activity,
   BellRing,
   Wifi,
+  Sun,
+  Moon,
+  Monitor,
+  ArrowRight,
   Printer as PrinterIcon,
+  type LucideIcon,
 } from "lucide-react";
 import { login, type Account } from "../lib/auth";
+import { useTheme, type ThemePreference } from "../lib/theme";
 import { ApiError } from "../lib/api";
 import { useToast } from "../lib/toast";
 import ElginLogo from "./ElginLogo";
@@ -31,22 +37,32 @@ interface LoginProps {
   onSuccess: (account: Account, remember: boolean) => void;
 }
 
+// Textos curtos de propósito: cabem em uma linha no painel de ~42% da tela e
+// deixam o painel inteiro dentro de uma janela de notebook sem rolagem.
 const features = [
   {
     icon: Activity,
     title: "Monitoramento em tempo real",
-    text: "Acompanhe o status de toda a sua frota de impressoras em um só lugar.",
+    text: "Status de toda a frota em um só lugar.",
   },
   {
     icon: BellRing,
     title: "Alertas inteligentes",
-    text: "Seja avisado antes que o toner acabe ou uma impressora saia do ar.",
+    text: "Aviso antes do toner acabar ou de uma impressora cair.",
   },
   {
     icon: ShieldCheck,
     title: "Acesso seguro",
-    text: "Controle quem entra no painel e mantenha sua rede sob controle.",
+    text: "Só quem tem permissão entra no painel.",
   },
+];
+
+// Os três estados de lib/theme.tsx. "Sistema" precisa estar aqui: sem ele,
+// quem tocasse em Claro/Escuro uma vez nunca mais voltava a seguir o SO.
+const THEME_OPTIONS: { value: ThemePreference; label: string; icon: LucideIcon }[] = [
+  { value: "light", label: "Claro", icon: Sun },
+  { value: "dark", label: "Escuro", icon: Moon },
+  { value: "system", label: "Sistema", icon: Monitor },
 ];
 
 // Nós fixos do "mapa de rede" decorativo do painel esquerdo — coordenadas em
@@ -64,14 +80,17 @@ const NETWORK_LINKS: [number, number][] = [
   [9, 10], [10, 11], [11, 12], [9, 13], [10, 14], [11, 15], [12, 16],
   [13, 14], [14, 15], [15, 16],
 ];
-const ACTIVE_NODES = new Set([2, 6, 10, 15]);
+const ACTIVE_NODES = [2, 6, 10, 15];
 
+// `slice` (e não `none`) mantém a proporção: com `none` o SVG esticava junto
+// com o painel e os nós viravam elipses. `non-scaling-stroke` deixa as linhas
+// com 1px em qualquer tamanho de tela.
 function NetworkMap() {
   return (
     <svg
       className={styles.networkMap}
       viewBox="0 0 100 100"
-      preserveAspectRatio="none"
+      preserveAspectRatio="xMidYMid slice"
       aria-hidden="true"
     >
       {NETWORK_LINKS.map(([a, b], i) => (
@@ -82,14 +101,34 @@ function NetworkMap() {
           x2={NETWORK_NODES[b].x}
           y2={NETWORK_NODES[b].y}
           stroke="white"
-          strokeWidth="0.15"
+          strokeWidth="1"
+          vectorEffect="non-scaling-stroke"
         />
       ))}
       {NETWORK_NODES.map((n, i) => (
-        <circle key={i} cx={n.x} cy={n.y} r={ACTIVE_NODES.has(i) ? 1.1 : 0.6} fill="white" />
+        <circle key={i} cx={n.x} cy={n.y} r={0.55} fill="white" />
+      ))}
+      {ACTIVE_NODES.map((index, i) => (
+        <g key={index}>
+          <circle
+            className={styles.nodeHalo}
+            style={{ animationDelay: `${i * 0.8}s` }}
+            cx={NETWORK_NODES[index].x}
+            cy={NETWORK_NODES[index].y}
+            r={2.6}
+            fill="white"
+          />
+          <circle cx={NETWORK_NODES[index].x} cy={NETWORK_NODES[index].y} r={1.1} fill="white" />
+        </g>
       ))}
     </svg>
   );
+}
+
+interface LoginError {
+  message: string;
+  /** true quando o problema é o que foi digitado (marca os campos). */
+  invalid: boolean;
 }
 
 export default function Login({ onSuccess }: LoginProps) {
@@ -98,18 +137,38 @@ export default function Login({ onSuccess }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<LoginError | null>(null);
   const [shake, setShake] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
   const { push } = useToast();
+  const { theme, preference, setPreference } = useTheme();
+
+  function showInvalid(message: string) {
+    setError({ message, invalid: true });
+    setShake(true);
+    window.setTimeout(() => setShake(false), 420);
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (loading) return;
-    setError("");
+
+    // Campo vazio nem chega ao backend: cada POST conta para o bloqueio por
+    // tentativas (429), e "senha incorreta" para um campo em branco é mentira.
+    const user = email.trim();
+    if (!user || !password) {
+      showInvalid("Informe o e-mail/usuário e a senha para entrar.");
+      (user ? passwordRef : emailRef).current?.focus();
+      return;
+    }
+
+    setError(null);
     setLoading(true);
 
     try {
-      const account = await login(email, password, remember);
+      const account = await login(user, password, remember);
       onSuccess(account, remember);
     } catch (err) {
       setLoading(false);
@@ -119,25 +178,31 @@ export default function Login({ onSuccess }: LoginProps) {
       // — mostrar "senha incorreta" por cima dela é enganoso: a senha pode
       // estar certíssima, o pedido nem chegou a ser conferido. Só o "resto"
       // (401 de fato) cai no texto genérico.
-      const emBloqueioOuOffline = err instanceof ApiError && (err.status === 0 || err.status === 429);
-      setError(
-        emBloqueioOuOffline
-          ? err.message
-          : "E-mail/usuário ou senha incorretos. Verifique os dados e tente novamente.",
-      );
-
-      // O "shake" sinaliza "o que você digitou está errado" — correto para
-      // 401, mas mentiroso para 429: a digitação pode estar perfeita, o
-      // bloqueio é por excesso de tentativas, não por causa desta.
-      if (!emBloqueioOuOffline) {
-        setShake(true);
-        window.setTimeout(() => setShake(false), 420);
+      //
+      // O "shake" e o contorno vermelho sinalizam "o que você digitou está
+      // errado" — correto para 401, mas mentiroso para 429: a digitação pode
+      // estar perfeita, o bloqueio é por excesso de tentativas, não por esta.
+      const lockedOrOffline = err instanceof ApiError && (err.status === 0 || err.status === 429);
+      if (lockedOrOffline) {
+        setError({ message: err.message, invalid: false });
+      } else {
+        showInvalid("E-mail/usuário ou senha incorretos. Verifique os dados e tente novamente.");
+        passwordRef.current?.select();
       }
     }
   }
 
-  function handleForgotPassword(e: React.MouseEvent) {
-    e.preventDefault();
+  // Ao corrigir o que foi digitado, o aviso de credencial inválida sai.
+  // O de bloqueio/servidor fica: editar o campo não muda aquela situação.
+  function clearInvalid() {
+    if (error?.invalid) setError(null);
+  }
+
+  function handleCapsLock(e: KeyboardEvent<HTMLInputElement>) {
+    setCapsLock(e.getModifierState("CapsLock"));
+  }
+
+  function handleForgotPassword() {
     push({
       variant: "info",
       title: "Fale com o administrador",
@@ -145,157 +210,213 @@ export default function Login({ onSuccess }: LoginProps) {
     });
   }
 
+  const invalid = error?.invalid ?? false;
+  const passwordDescribedBy = [capsLock ? "login-caps" : "", error ? "login-error" : ""]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div className={styles.page}>
       {/* Left / branded hero panel */}
-      <div className={styles.heroPanel}>
+      <aside className={styles.heroPanel}>
         <NetworkMap />
-        <div className={styles.blobTopRight} />
-        <div className={styles.blobBottomLeft} />
+        <div className={styles.glowTop} aria-hidden="true" />
+        <div className={styles.glowBottom} aria-hidden="true" />
 
         <div className={styles.heroLogo}>
-          <ElginLogo height={38} tone="white" />
+          <ElginLogo height={36} tone="white" />
           <p className={styles.heroLogoSubtitle}>Impressoras</p>
         </div>
 
         <div className={styles.heroContent}>
           <span className={styles.badge}>
-            <PrinterIcon size={12} />
+            <PrinterIcon size={12} aria-hidden="true" />
             Painel corporativo
           </span>
           <h1 className={styles.heroTitle}>
-            Gerencie sua frota de impressoras com clareza total.
+            Gerencie sua frota de impressoras com{" "}
+            <span className={styles.heroTitleAccent}>clareza total.</span>
           </h1>
           <p className={styles.heroSubtitle}>
             Um painel único para status, toner, alertas e relatórios de toda a sua rede corporativa.
           </p>
 
-          <div className={styles.featureList}>
+          <ul className={styles.featureList}>
             {features.map((f) => (
-              <div key={f.title} className={styles.featureItem}>
-                <div className={styles.featureIconWrap}>
-                  <f.icon size={18} />
-                </div>
+              <li key={f.title} className={styles.featureItem}>
+                <span className={styles.featureIconWrap} aria-hidden="true">
+                  <f.icon size={17} />
+                </span>
                 <div>
                   <p className={styles.featureTitle}>{f.title}</p>
                   <p className={styles.featureText}>{f.text}</p>
                 </div>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
 
         <div className={styles.statusCard}>
-          <div className={styles.statusIconWrap}>
-            <Wifi size={19} />
-          </div>
+          <span className={styles.statusIconWrap} aria-hidden="true">
+            <Wifi size={18} />
+          </span>
           <div>
             <p className={styles.statusTitle}>100+ impressoras monitoradas</p>
-            <p className={styles.statusSubtitle}>8 unidades · atualizado em tempo real</p>
+            <p className={styles.statusSubtitle}>
+              <span className={styles.liveDot} aria-hidden="true" />
+              8 unidades · atualizado em tempo real
+            </p>
           </div>
         </div>
-      </div>
+      </aside>
 
       {/* Right / form panel */}
-      <div className={styles.formPanel}>
-        <div className={styles.mobileLogo}>
-          <ElginLogo height={32} />
-          <p className={styles.mobileLogoSubtitle}>Impressoras</p>
-        </div>
-
-        <div className={cn(styles.card, shake ? styles.shake : "")}>
-          <div className={styles.cardIcon}>
-            <ShieldCheck size={20} />
+      <main className={styles.formPanel}>
+        <header className={styles.formTopbar}>
+          <div className={styles.mobileLogo}>
+            <ElginLogo height={28} tone={theme === "dark" ? "white" : "brand"} />
+            <p className={styles.mobileLogoSubtitle}>Impressoras</p>
           </div>
-          <h2 className={styles.cardTitle}>Bem-vindo de volta</h2>
-          <p className={styles.cardSubtitle}>Entre com sua conta para acessar o painel de monitoramento.</p>
 
-          <form className={styles.form} onSubmit={handleSubmit} noValidate>
-            <div className={styles.field}>
-              <label htmlFor="login-email" className={styles.label}>
-                E-mail ou usuário
-              </label>
-              <div className={styles.inputWrap}>
-                <Mail size={17} className={styles.inputIcon} />
-                <input
-                  id="login-email"
-                  type="text"
-                  autoComplete="username"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu.usuario ou seu.usuario@elgin.com.br"
-                  className={styles.input}
-                />
-              </div>
+          <div className={styles.themeSwitch} role="group" aria-label="Tema da tela">
+            {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setPreference(value)}
+                aria-pressed={preference === value}
+                aria-label={label}
+                title={label}
+                className={cn(styles.themeOption, preference === value ? styles.themeOptionActive : "")}
+              >
+                <Icon size={14} aria-hidden="true" />
+                <span className={styles.themeLabel}>{label}</span>
+              </button>
+            ))}
+          </div>
+        </header>
+
+        <div className={styles.formMain}>
+          <div className={cn(styles.card, shake ? styles.shake : "")}>
+            <div className={styles.cardIcon} aria-hidden="true">
+              <ShieldCheck size={20} />
             </div>
+            <h2 className={styles.cardTitle}>Bem-vindo de volta</h2>
+            <p className={styles.cardSubtitle}>Entre com sua conta para acessar o painel de monitoramento.</p>
 
-            <div className={styles.field}>
-              <div className={styles.labelRow}>
-                <label htmlFor="login-password" className={styles.label}>
-                  Senha
+            <form className={styles.form} onSubmit={handleSubmit} noValidate>
+              <div className={styles.field}>
+                <label htmlFor="login-email" className={styles.label}>
+                  E-mail ou usuário
                 </label>
-                <button type="button" className={styles.forgotLink} onClick={handleForgotPassword}>
-                  Esqueceu a senha?
-                </button>
+                <div className={styles.inputWrap}>
+                  <Mail size={17} className={styles.inputIcon} aria-hidden="true" />
+                  <input
+                    ref={emailRef}
+                    id="login-email"
+                    name="username"
+                    type="text"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      clearInvalid();
+                    }}
+                    placeholder="nome.sobrenome ou e-mail"
+                    aria-invalid={invalid}
+                    aria-describedby={error ? "login-error" : undefined}
+                    className={styles.input}
+                  />
+                </div>
               </div>
-              <div className={styles.inputWrap}>
-                <Lock size={17} className={styles.inputIcon} />
-                <input
-                  id="login-password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••"
-                  className={styles.input}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((s) => !s)}
-                  className={styles.togglePassword}
-                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                >
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-                </button>
+
+              <div className={styles.field}>
+                <div className={styles.labelRow}>
+                  <label htmlFor="login-password" className={styles.label}>
+                    Senha
+                  </label>
+                  <button type="button" className={styles.forgotLink} onClick={handleForgotPassword}>
+                    Esqueceu a senha?
+                  </button>
+                </div>
+                <div className={styles.inputWrap}>
+                  <Lock size={17} className={styles.inputIcon} aria-hidden="true" />
+                  <input
+                    ref={passwordRef}
+                    id="login-password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      clearInvalid();
+                    }}
+                    onKeyDown={handleCapsLock}
+                    onKeyUp={handleCapsLock}
+                    onBlur={() => setCapsLock(false)}
+                    placeholder="••••••••"
+                    aria-invalid={invalid}
+                    aria-describedby={passwordDescribedBy || undefined}
+                    className={styles.input}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className={styles.togglePassword}
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    {showPassword ? <EyeOff size={17} aria-hidden="true" /> : <Eye size={17} aria-hidden="true" />}
+                  </button>
+                </div>
+                {capsLock && (
+                  <p id="login-caps" className={styles.capsHint} role="status">
+                    <TriangleAlert size={13} aria-hidden="true" />
+                    Caps Lock está ativado
+                  </p>
+                )}
               </div>
-            </div>
 
-            {error && (
-              <div className={styles.errorBox}>
-                <TriangleAlert size={17} className={styles.errorIcon} />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <label className={styles.rememberLabel}>
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-                className={styles.checkbox}
-              />
-              Lembrar de mim neste dispositivo
-            </label>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className={styles.submitButton}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={17} className="animate-spin" />
-                  Entrando...
-                </>
-              ) : (
-                "Entrar"
+              {error && (
+                <div id="login-error" className={styles.errorBox} role="alert">
+                  <TriangleAlert size={17} className={styles.errorIcon} aria-hidden="true" />
+                  <span>{error.message}</span>
+                </div>
               )}
-            </button>
-          </form>
+
+              <label className={styles.rememberLabel}>
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className={styles.checkbox}
+                />
+                Lembrar de mim neste dispositivo
+              </label>
+
+              <button type="submit" disabled={loading} aria-busy={loading} className={styles.submitButton}>
+                {loading ? (
+                  <>
+                    <Loader2 size={17} className="animate-spin" aria-hidden="true" />
+                    Entrando...
+                  </>
+                ) : (
+                  <>
+                    Entrar
+                    <ArrowRight size={17} className={styles.submitArrow} aria-hidden="true" />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
         </div>
 
-        <p className={styles.footer}>© 2026 Pedro e Mateus - Elgin Impressoras</p>
-      </div>
+        <footer className={styles.footer}>© 2026 Elgin Impressoras · Pedro e Mateus</footer>
+      </main>
     </div>
   );
 }

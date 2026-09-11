@@ -1,56 +1,125 @@
+/* Tokens próprios da tela de login. Os pares de texto/fundo foram escolhidos
+   para passar em contraste AA — o antigo "muted" (#a79b8b sobre branco, ~2,6:1)
+   era usado em subtítulo e rodapé, e o botão do modo escuro tinha texto branco
+   sobre #4ab3e8 (~2,4:1). */
 .page {
-  --login-bg-page: #f6f3ee;
+  --login-bg-page: #f4f1eb;
   --login-bg-surface: #fff;
-  --login-border: #e7dfd2;
+  --login-bg-field: #faf8f4;
+  --login-border: #e5ddd0;
+  --login-border-strong: #d3c8b5;
   --login-text-primary: #26211c;
-  --login-text-secondary: #6f6459;
-  --login-text-muted: #a79b8b;
+  --login-text-secondary: #62584e;
+  --login-text-muted: #857969;
   --login-link: #0a6a9c;
-  --login-link-hover: #0098e0;
-  --login-accent-tint: #eaf6fb;
-  --login-success: #3f8f5f;
-  --login-success-bg: #e7f3ec;
-  --login-danger: #c1503d;
+  --login-link-hover: #085a85;
+  --login-focus: #0098e0;
+  --login-accent-tint: #e6f3fa;
+  --login-button-bg: #0a6a9c;
+  --login-button-bg-hover: #085a85;
+  --login-button-text: #fff;
+  --login-danger: #b2442f;
   --login-danger-bg: #fbeae6;
+  --login-warning: #8a5a12;
+  --login-card-shadow: 0 1px 2px rgba(38, 33, 28, 0.04), 0 24px 56px -28px rgba(38, 33, 28, 0.28);
 
   position: relative;
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--login-bg-page);
+  color: var(--login-text-primary);
+}
+
+@media (min-width: 768px) {
+  .page {
+    flex-direction: row;
+  }
 }
 
 :global(html.dark) .page {
-  --login-bg-page: #16181b;
-  --login-bg-surface: #1e2124;
-  --login-border: #34383c;
-  --login-text-primary: #ece9e3;
-  --login-text-secondary: #a5a19a;
-  --login-text-muted: #74716a;
-  --login-link: #4ab3e8;
-  --login-link-hover: #7cc9ef;
-  --login-accent-tint: #101c24;
-  --login-success: #5cb37f;
-  --login-success-bg: #1e3129;
-  --login-danger: #e2776a;
-  --login-danger-bg: #2a1b19;
+  --login-bg-page: #0f1113;
+  --login-bg-surface: #181b1e;
+  --login-bg-field: #121417;
+  --login-border: #2a2e32;
+  --login-border-strong: #3a3f44;
+  --login-text-primary: #eeebe5;
+  --login-text-secondary: #aba79f;
+  --login-text-muted: #8a867e;
+  --login-link: #5dbbeb;
+  --login-link-hover: #8fd0f2;
+  --login-focus: #5dbbeb;
+  --login-accent-tint: #0f2130;
+  --login-button-bg: #4ab3e8;
+  --login-button-bg-hover: #74c5ee;
+  --login-button-text: #04192a;
+  --login-danger: #ec8a7d;
+  --login-danger-bg: #2c1b18;
+  --login-warning: #e3b66a;
+  --login-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 28px 60px -30px rgba(0, 0, 0, 0.8);
 }
 
 /* ---------- Left / branded hero panel ---------- */
 
+/* Abaixo de 768px o painel vai para depois do formulário: no celular o login
+   ocupa a primeira tela inteira. A partir de 768px ele fica fixo (sticky) com
+   a altura da janela, e as regras de max-height no fim desta seção enxugam o
+   conteúdo em telas baixas para nada ficar cortado nem forçar rolagem. */
 .heroPanel {
   position: relative;
-  display: none;
-  width: 46%;
+  order: 2;
+  isolation: isolate;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 2rem;
   overflow: hidden;
-  background: linear-gradient(155deg, #0a3a5c 0%, #0d4d78 46%, #0a6a9c 100%);
-  padding: 3rem;
+  padding: 2.5rem 1.5rem;
+  color: #fff;
+  background:
+    radial-gradient(90% 60% at 0% 0%, rgba(40, 150, 210, 0.35) 0%, transparent 60%),
+    radial-gradient(80% 60% at 100% 100%, rgba(0, 152, 224, 0.4) 0%, transparent 60%),
+    linear-gradient(160deg, #072a44 0%, #0a3f66 50%, #0b5a8c 100%);
+}
+
+/* No escuro o azul cheio brigava com o cinza do formulário; aqui ele desce
+   para um marinho mais profundo, mesma matiz. */
+:global(html.dark) .heroPanel {
+  background:
+    radial-gradient(90% 60% at 0% 0%, rgba(40, 150, 210, 0.18) 0%, transparent 60%),
+    radial-gradient(80% 60% at 100% 100%, rgba(0, 152, 224, 0.22) 0%, transparent 60%),
+    linear-gradient(160deg, #051a2b 0%, #072c47 55%, #093b5e 100%);
+}
+
+/* Grade de pontos sutil, desvanecendo a partir do canto superior. */
+.heroPanel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(120% 90% at 30% 20%, #000 30%, transparent 80%);
+}
+
+@media (min-width: 768px) {
+  .heroPanel {
+    order: 0;
+    position: sticky;
+    top: 0;
+    flex-shrink: 0;
+    width: 44%;
+    height: 100vh;
+    height: 100dvh;
+    padding: 2.25rem;
+  }
 }
 
 @media (min-width: 1024px) {
   .heroPanel {
-    display: flex;
+    width: 46%;
+    padding: 3rem;
   }
 }
 
@@ -60,54 +129,92 @@
   }
 }
 
+@media (min-width: 1600px) {
+  .heroPanel {
+    width: 38%;
+    padding: 3.5rem;
+  }
+}
+
 .networkMap {
   pointer-events: none;
   position: absolute;
   inset: 0;
-  height: 100%;
+  z-index: -1;
   width: 100%;
-  opacity: 0.16;
+  height: 100%;
+  opacity: 0.18;
+  mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
 }
 
-.blobTopRight {
-  pointer-events: none;
-  position: absolute;
-  right: -8rem;
-  top: -8rem;
-  height: 24rem;
-  width: 24rem;
-  border-radius: 9999px;
-  background: color-mix(in srgb, #4dc4f0 20%, transparent);
-  filter: blur(110px);
+.nodeHalo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nodePulse 3.2s ease-in-out infinite both;
 }
 
-.blobBottomLeft {
+@keyframes nodePulse {
+  0%,
+  100% {
+    opacity: 0.08;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(1.15);
+  }
+}
+
+.glowTop,
+.glowBottom {
   pointer-events: none;
   position: absolute;
-  bottom: -6rem;
-  left: -4rem;
-  height: 18rem;
-  width: 18rem;
+  z-index: -1;
   border-radius: 9999px;
-  background: color-mix(in srgb, #0098e0 25%, transparent);
+}
+
+.glowTop {
+  right: -10rem;
+  top: -10rem;
+  width: 26rem;
+  height: 26rem;
+  background: rgba(77, 196, 240, 0.22);
   filter: blur(100px);
+}
+
+.glowBottom {
+  left: -6rem;
+  bottom: -8rem;
+  width: 20rem;
+  height: 20rem;
+  background: rgba(0, 152, 224, 0.28);
+  filter: blur(90px);
 }
 
 .heroLogo {
   position: relative;
-  line-height: 1.2;
+  display: none;
+  line-height: 1.1;
+}
+
+@media (min-width: 768px) {
+  .heroLogo {
+    display: block;
+  }
 }
 
 .heroLogoSubtitle {
-  margin-top: 0.25rem;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: color-mix(in srgb, #fff 60%, transparent);
+  margin-top: 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .heroContent {
   position: relative;
+  max-width: 30rem;
 }
 
 .badge {
@@ -115,61 +222,74 @@
   align-items: center;
   gap: 0.375rem;
   border-radius: 9999px;
-  background: color-mix(in srgb, #fff 10%, transparent);
-  padding: 0.25rem 0.75rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.3125rem 0.75rem;
   font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: color-mix(in srgb, #fff 80%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 15%, transparent);
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
 }
 
 .heroTitle {
   font-family: var(--font-serif);
   margin-top: 1.25rem;
-  max-width: 28rem;
-  font-size: 2.3rem;
+  font-size: clamp(1.75rem, 1.1rem + 1.5vw, 2.6rem);
   font-weight: 600;
-  line-height: 1.18;
+  line-height: 1.12;
   letter-spacing: -0.02em;
   color: #fff;
   text-wrap: balance;
 }
 
+.heroTitleAccent {
+  background: linear-gradient(90deg, #8fdcff 0%, #d6f2ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 .heroSubtitle {
   margin-top: 1rem;
-  max-width: 24rem;
+  max-width: 26rem;
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: color-mix(in srgb, #fff 70%, transparent);
+  color: rgba(255, 255, 255, 0.74);
 }
 
 .featureList {
-  margin-top: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  margin: 1.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.875rem;
+}
+
+@media (min-width: 1024px) {
+  .featureList {
+    margin-top: 2.25rem;
+    gap: 1rem;
+  }
 }
 
 .featureItem {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.875rem;
 }
 
 .featureIconWrap {
   display: flex;
-  height: 2.5rem;
-  width: 2.5rem;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, #fff 10%, transparent);
-  color: #fff;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 15%, transparent);
-  backdrop-filter: blur(4px);
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.6875rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #bfe8fb;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
 }
 
 .featureTitle {
@@ -179,32 +299,34 @@
 }
 
 .featureText {
-  margin-top: 0.125rem;
-  font-size: 0.875rem;
-  color: color-mix(in srgb, #fff 60%, transparent);
+  margin-top: 0.0625rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.66);
 }
 
 .statusCard {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.875rem;
   border-radius: 1rem;
-  background: color-mix(in srgb, #fff 10%, transparent);
-  padding: 1rem;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, #fff 15%, transparent);
+  background: rgba(255, 255, 255, 0.07);
+  padding: 0.875rem 1rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(12px);
 }
 
 .statusIconWrap {
   display: flex;
-  height: 2.75rem;
-  width: 2.75rem;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--success) 20%, transparent);
-  color: #7fe0ac;
+  background: rgba(92, 179, 127, 0.18);
+  color: #86e3b0;
 }
 
 .statusTitle {
@@ -214,8 +336,69 @@
 }
 
 .statusSubtitle {
+  display: flex;
+  align-items: center;
+  gap: 0.4375rem;
+  margin-top: 0.125rem;
   font-size: 0.75rem;
-  color: color-mix(in srgb, #fff 60%, transparent);
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.liveDot {
+  flex-shrink: 0;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 9999px;
+  background: #6ee7a1;
+  animation: livePulse 2s ease-out infinite;
+}
+
+@keyframes livePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(110, 231, 161, 0.55);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 6px rgba(110, 231, 161, 0);
+  }
+}
+
+/* Telas baixas (notebook com a barra do navegador, janela reduzida): o painel
+   tem a altura da janela, então o conteúdo encolhe em vez de ser cortado. */
+@media (min-width: 768px) and (max-height: 720px) {
+  .heroPanel {
+    gap: 1.25rem;
+    padding-top: 1.75rem;
+    padding-bottom: 1.75rem;
+  }
+
+  .heroTitle {
+    margin-top: 1rem;
+    font-size: clamp(1.625rem, 1rem + 1.2vw, 2.125rem);
+  }
+
+  .heroSubtitle {
+    margin-top: 0.75rem;
+  }
+
+  .featureList {
+    margin-top: 1.25rem;
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 768px) and (max-height: 600px) {
+  .heroSubtitle,
+  .featureText {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) and (max-height: 480px) {
+  .featureList,
+  .statusCard {
+    display: none;
+  }
 }
 
 /* ---------- Right / form panel ---------- */
@@ -225,52 +408,130 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background:
+    radial-gradient(60% 45% at 50% 0%, color-mix(in srgb, var(--login-link) 7%, transparent), transparent 70%),
+    var(--login-bg-page);
+}
+
+.formTopbar {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  background: var(--login-bg-surface);
-  padding: 3rem 1.5rem;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.25rem 0;
 }
 
 @media (min-width: 640px) {
-  .formPanel {
-    padding-left: 2.5rem;
-    padding-right: 2.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .formPanel {
-    box-shadow: -24px 0 48px -32px rgba(38, 33, 28, 0.12);
+  .formTopbar {
+    padding: 1.5rem 2rem 0;
   }
 }
 
 .mobileLogo {
-  margin-bottom: 2rem;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .mobileLogo {
     display: none;
   }
 }
 
 .mobileLogoSubtitle {
-  margin-top: 0.125rem;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  color: var(--login-text-muted);
+  margin-top: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--login-text-secondary);
+}
+
+.themeSwitch {
+  display: inline-flex;
+  gap: 0.125rem;
+  margin-left: auto;
+  border-radius: 9999px;
+  border: 1px solid var(--login-border);
+  background: var(--login-bg-surface);
+  padding: 0.1875rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.themeOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  padding: 0.375rem 0.6875rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--login-text-secondary);
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.themeOption:hover {
+  color: var(--login-text-primary);
+}
+
+.themeOptionActive,
+.themeOptionActive:hover {
+  background: var(--login-accent-tint);
+  color: var(--login-link);
+}
+
+@media (max-width: 479px) {
+  .themeLabel {
+    display: none;
+  }
+
+  .themeOption {
+    padding: 0.4375rem;
+  }
+}
+
+.formMain {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem;
+  animation: formIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (min-width: 640px) {
+  .formMain {
+    padding: 2.5rem 2rem;
+  }
+}
+
+@keyframes formIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .card {
   width: 100%;
-  max-width: 400px;
-  border-radius: 1rem;
+  max-width: 25.5rem;
+  border-radius: 1.25rem;
   border: 1px solid var(--login-border);
   background: var(--login-bg-surface);
-  padding: 2rem;
-  box-shadow: var(--shadow-lg);
-  transition: transform 0.2s;
+  padding: 1.75rem 1.5rem;
+  box-shadow: var(--login-card-shadow);
+}
+
+@media (min-width: 640px) {
+  .card {
+    padding: 2.25rem;
+  }
 }
 
 .shake {
@@ -299,19 +560,21 @@
 
 .cardIcon {
   display: flex;
-  height: 2.75rem;
-  width: 2.75rem;
   align-items: center;
   justify-content: center;
-  border-radius: 0.75rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.875rem;
   background: var(--login-accent-tint);
   color: var(--login-link);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--login-link) 18%, transparent);
 }
 
 .cardTitle {
-  margin-top: 1rem;
+  margin-top: 1.125rem;
   font-size: 1.5rem;
-  font-weight: 800;
+  font-weight: 700;
+  line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--login-text-primary);
 }
@@ -319,26 +582,27 @@
 .cardSubtitle {
   margin-top: 0.375rem;
   font-size: 0.875rem;
-  color: var(--login-text-muted);
+  line-height: 1.5;
+  color: var(--login-text-secondary);
 }
 
 .form {
   margin-top: 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.125rem;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 0.4375rem;
 }
 
 .label {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--login-text-secondary);
+  color: var(--login-text-primary);
 }
 
 .labelRow {
@@ -348,60 +612,115 @@
 }
 
 .forgotLink {
+  border-radius: 4px;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--login-link);
 }
 
 .forgotLink:hover {
   color: var(--login-link-hover);
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .inputWrap {
   display: flex;
   align-items: center;
   gap: 0.625rem;
+  height: 2.875rem;
   border-radius: 0.75rem;
   border: 1px solid var(--login-border);
-  background: var(--login-bg-page);
-  padding: 0.75rem 0.875rem;
+  background: var(--login-bg-field);
+  padding: 0 0.875rem;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
+.inputWrap:hover {
+  border-color: var(--login-border-strong);
+}
+
 .inputWrap:focus-within {
-  border-color: color-mix(in srgb, var(--login-link-hover) 50%, transparent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--login-link-hover) 15%, transparent);
+  border-color: var(--login-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--login-focus) 18%, transparent);
+}
+
+.inputWrap:has(.input[aria-invalid="true"]) {
+  border-color: color-mix(in srgb, var(--login-danger) 70%, transparent);
+}
+
+.inputWrap:has(.input[aria-invalid="true"]):focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--login-danger) 18%, transparent);
 }
 
 .inputIcon {
   flex-shrink: 0;
   color: var(--login-text-muted);
+  transition: color 0.15s;
+}
+
+.inputWrap:focus-within .inputIcon {
+  color: var(--login-link);
 }
 
 .input {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
   background: transparent;
   font-size: 0.9375rem;
   color: var(--login-text-primary);
-  border-color: transparent;
 }
 
 .input::placeholder {
   color: var(--login-text-muted);
+  opacity: 1;
 }
 
-.input:focus {
+/* O anel de foco fica no .inputWrap; o contorno global do :focus-visible
+   desenharia um segundo retângulo colado no texto. */
+.input:focus,
+.input:focus-visible {
   outline: none;
 }
 
+/* Autopreenchimento do Chrome pinta o campo de branco/amarelo — no modo
+   escuro virava um bloco claro com texto claro, ilegível. */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--login-text-primary);
+  caret-color: var(--login-text-primary);
+  box-shadow: 0 0 0 1000px var(--login-bg-field) inset;
+  transition: background-color 600000s 0s;
+}
+
 .togglePassword {
+  display: flex;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-right: -0.375rem;
+  border-radius: 0.5rem;
   color: var(--login-text-muted);
+  transition: color 0.15s, background-color 0.15s;
 }
 
 .togglePassword:hover {
   color: var(--login-text-primary);
+  background: color-mix(in srgb, var(--login-text-primary) 6%, transparent);
+}
+
+.capsHint {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--login-warning);
 }
 
 .errorBox {
@@ -409,15 +728,17 @@
   align-items: flex-start;
   gap: 0.625rem;
   border-radius: 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--login-danger) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--login-danger) 30%, transparent);
   background: var(--login-danger-bg);
   padding: 0.75rem 0.875rem;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
   color: var(--login-danger);
+  animation: formIn 0.2s ease both;
 }
 
 .errorIcon {
-  margin-top: 0.125rem;
+  margin-top: 0.0625rem;
   flex-shrink: 0;
 }
 
@@ -425,47 +746,97 @@
   display: flex;
   align-items: center;
   gap: 0.625rem;
+  width: fit-content;
   font-size: 0.875rem;
   color: var(--login-text-secondary);
+  cursor: pointer;
   user-select: none;
 }
 
 .checkbox {
-  height: 1rem;
   width: 1rem;
-  border-radius: 0.25rem;
-  border: 1px solid var(--login-border);
-  accent-color: var(--login-link-hover);
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--login-link);
+  cursor: pointer;
 }
 
 .submitButton {
-  margin-top: 0.25rem;
+  margin-top: 0.375rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  height: 2.875rem;
   border-radius: 0.75rem;
-  background: var(--login-link);
-  padding: 0.75rem 0;
+  background: var(--login-button-bg);
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #fff;
-  box-shadow: var(--shadow-sm);
-  transition: background-color 0.15s;
+  color: var(--login-button-text);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 10px 24px -12px color-mix(in srgb, var(--login-button-bg) 80%, transparent);
+  transition: background-color 0.15s, transform 0.1s;
 }
 
-.submitButton:hover {
-  background: var(--login-link-hover);
+.submitButton:hover:not(:disabled) {
+  background: var(--login-button-bg-hover);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .submitButton:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
+  cursor: progress;
+  opacity: 0.8;
+}
+
+.submitArrow {
+  transition: transform 0.2s ease;
+}
+
+.submitButton:hover:not(:disabled) .submitArrow {
+  transform: translateX(3px);
 }
 
 .footer {
-  margin-top: 2rem;
+  padding: 0 1.25rem 1.5rem;
   text-align: center;
   font-size: 0.75rem;
-  color: var(--login-text-muted);
+  color: var(--login-text-secondary);
+}
+
+/* Mesma lógica do painel esquerdo: em janela baixa o formulário perde o
+   respiro decorativo (ícone, paddings) antes de obrigar a página a rolar. */
+@media (min-width: 768px) and (max-height: 720px) {
+  .formTopbar {
+    padding-top: 1rem;
+  }
+
+  .formMain {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .card {
+    padding: 1.75rem 2rem;
+  }
+
+  .cardIcon {
+    display: none;
+  }
+
+  .cardTitle {
+    margin-top: 0;
+  }
+
+  .form {
+    margin-top: 1.25rem;
+    gap: 0.875rem;
+  }
+
+  .footer {
+    padding-bottom: 1rem;
+  }
 }
