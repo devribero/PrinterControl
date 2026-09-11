@@ -325,13 +325,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       setApiAlerts(null);
       setUsingRealData(false);
       setApiError(ANONYMOUS_MESSAGE);
+      setMonthlyReport(null);
       setInitialLoading(false);
-      loadMonthlyReport().then((report) => {
-        if (!cancelled && report) setMonthlyReport(report);
-      });
-      return () => {
-        cancelled = true;
-      };
+      // Sem sessão só a tela de login é renderizada e nada consome o relatório
+      // mensal. Buscar aqui o /data/monthly-report.json legado (que nada gera
+      // mais) só servia para deixar um 404 no console da tela de login.
+      return;
     }
 
     setInitialLoading(true);
