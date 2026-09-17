@@ -4,14 +4,15 @@ import type { ReactNode } from "react";
 import { useAppData } from "../lib/app-data";
 import Login from "./Login";
 import AppShell from "./AppShell";
+import LoadingScreen from "./LoadingScreen";
 import MustChangePasswordGate from "./MustChangePasswordGate";
-import styles from "./AuthGate.module.css";
 
 /**
  * Decide entre tela de login, troca de senha obrigatória e painel. Enquanto
  * a sessão guardada está sendo confirmada no backend (`GET /api/auth/me`),
- * mostra um estado de espera em vez do formulário de login — sem isso, quem
- * já está logado veria a tela de login piscar a cada abertura do app.
+ * nenhuma das três é renderizada — sem isso, quem já está logado veria a
+ * tela de login piscar a cada abertura do app. A LoadingScreen cobre esse
+ * intervalo e a primeira carga da frota, e dissolve revelando o que vier.
  *
  * A troca obrigatória (`account.mustChangePassword`) entra ANTES do
  * `AppShell`: nenhuma tela do painel — nem a Sidebar, nem os dados — chega a
@@ -21,24 +22,23 @@ import styles from "./AuthGate.module.css";
  * ficaria vazio, cheio de 403.
  */
 export default function AuthGate({ children }: { children: ReactNode }) {
-  const { account, sessionLoading, handleLoginSuccess } = useAppData();
+  const { account, sessionLoading, initialLoading, handleLoginSuccess } = useAppData();
 
-  if (sessionLoading) {
-    return (
-      <div className={styles.wrap} role="status" aria-live="polite">
-        <div className={styles.spinner} />
-        <p className={styles.text}>Restaurando sessão...</p>
-      </div>
-    );
+  // Pronto: sessão resolvida e, havendo conta, a primeira carga da frota decidida (real ou demonstração).
+  const ready = !sessionLoading && (!account || !initialLoading);
+  const progress = sessionLoading ? 0.1 : ready ? 1 : 0.6;
+
+  let content: ReactNode = null;
+  if (!sessionLoading) {
+    if (!account) content = <Login onSuccess={handleLoginSuccess} />;
+    else if (account.mustChangePassword) content = <MustChangePasswordGate />;
+    else content = <AppShell>{children}</AppShell>;
   }
 
-  if (!account) {
-    return <Login onSuccess={handleLoginSuccess} />;
-  }
-
-  if (account.mustChangePassword) {
-    return <MustChangePasswordGate />;
-  }
-
-  return <AppShell>{children}</AppShell>;
+  return (
+    <>
+      {content}
+      <LoadingScreen progress={progress} done={ready} />
+    </>
+  );
 }

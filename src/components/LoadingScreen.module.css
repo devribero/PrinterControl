@@ -1,0 +1,70 @@
+/* Tela de carregamento inicial — design_handoff_loading_screen (hifi). */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  opacity: 1;
+  transition: opacity 900ms cubic-bezier(0.33, 0, 0.2, 1);
+}
+
+/* Sem visibility/display: cortariam o fade. A desmontagem vem depois dele. */
+.revealed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(36px, 6vh, 60px);
+}
+
+.logo {
+  display: block;
+  width: clamp(190px, 30vw, 330px);
+  height: auto;
+  will-change: opacity, transform;
+  animation: logoPulse 2800ms cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+@keyframes logoPulse {
+  0% {
+    opacity: 0.06;
+    transform: scale(0.984);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.06;
+    transform: scale(0.984);
+  }
+}
+
+.track {
+  width: 168px;
+  height: 2px;
+  border-radius: 99px;
+  background: #ebedf0;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 99px;
+  background: #0098ff;
+  transition: width 160ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -231,7 +231,34 @@ export default function PrinterTable({
             <tbody>
               {pageItems.map((p) => (
                 <tr key={p.id} onClick={() => onOpenDetails(p)} className={styles.row}>
-                  <td className={styles.tdFirst}>{p.name}</td>
+                  <td className={styles.tdFirst}>
+                    <div className={styles.nameCell}>
+                      <span
+                        className={cn(
+                          styles.nameIcon,
+                          p.status === "online"
+                            ? styles.nameIconOnline
+                            : p.status === "atencao"
+                              ? styles.nameIconAttention
+                              : styles.nameIconOffline,
+                        )}
+                        aria-hidden="true"
+                      >
+                        <PrinterIcon size={15} />
+                      </span>
+                      <span className={styles.nameText}>
+                        <span className={styles.nameMain} title={p.name}>
+                          {p.name}
+                        </span>
+                        {/* No card do Dashboard a coluna Modelo some; o modelo vem para cá. */}
+                        {compact && p.model && (
+                          <span className={styles.nameSub} title={p.model}>
+                            {p.model}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </td>
                   <td className={cn(styles.td, styles.tdIp)}>{p.ip}</td>
                   {!compact && (
                     <td className={cn(styles.td, styles.tdModel)} title={p.model}>

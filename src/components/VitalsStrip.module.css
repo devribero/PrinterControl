@@ -1,27 +1,126 @@
+/* Faixa de resumo do Dashboard: frota (anel + distribuição), três status
+   clicáveis (filtram a tabela) e o alerta mais urgente. As cores de status
+   passam por --tone para que cada bloco pinte ícone, número e barra com a
+   mesma variável. O layout em grade fica no fim do arquivo. */
 .strip {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  border-radius: 12px;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
-  background: color-mix(in srgb, var(--navy) 7%, var(--bg-surface));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--navy) 18%, var(--border));
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  background:
+    radial-gradient(90% 140% at 0% 0%, color-mix(in srgb, var(--link-hover) 13%, transparent) 0%, transparent 55%),
+    var(--glass-bg-elevated);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
 }
 
-.totalCell {
-  flex: 1 1 11rem;
-  min-width: 11rem;
-  padding: 1.5rem 1.75rem;
-  border-right: 1px solid color-mix(in srgb, var(--navy) 14%, var(--border));
+/* Grade de pontos sutil, só no canto do bloco da frota. */
+.strip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(color-mix(in srgb, var(--text-primary) 9%, transparent) 1px, transparent 1.2px);
+  background-size: 18px 18px;
+  mask-image: radial-gradient(55% 120% at 0% 0%, #000 0%, transparent 70%);
+}
+
+/* ---------- Frota ---------- */
+
+.fleet {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.125rem;
+  min-width: 0;
+  padding: 1.25rem 1.5rem;
+}
+
+.fleetButton {
+  display: flex;
+  align-items: center;
+  gap: 1.125rem;
+  margin: -0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.875rem;
   text-align: left;
-  transition: background-color 0.12s ease-out;
+  transition: background-color 0.15s;
 }
 
-.totalCell:hover {
-  background: color-mix(in srgb, var(--navy) 5%, transparent);
+.fleetButton:hover {
+  background: var(--glass-hover);
 }
 
-.totalLabel {
+.fleetButtonActive {
+  background: color-mix(in srgb, var(--link-hover) 9%, transparent);
+}
+
+.fleetButtonActive:hover {
+  background: color-mix(in srgb, var(--link-hover) 13%, transparent);
+}
+
+.ring {
+  flex-shrink: 0;
+  width: 4.75rem;
+  height: 4.75rem;
+  overflow: visible;
+}
+
+.ringGood {
+  --ring-color: var(--success);
+}
+
+.ringFair {
+  --ring-color: var(--warning);
+}
+
+.ringPoor {
+  --ring-color: var(--danger);
+}
+
+.ringTrack {
+  fill: none;
+  stroke: var(--track);
+  stroke-width: 6;
+}
+
+.ringValue {
+  fill: none;
+  stroke: var(--ring-color);
+  stroke-width: 6;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--ring-color) 45%, transparent));
+  transition: stroke-dasharray 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ringText {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  fill: var(--text-primary);
+}
+
+.ringCaption {
+  font-family: var(--font-sans);
+  font-size: 7.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  fill: var(--text-secondary);
+}
+
+.fleetText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.eyebrow {
   font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -30,140 +129,354 @@
 }
 
 .totalValue {
-  margin-top: 0.625rem;
+  margin-top: 0.375rem;
   font-family: var(--font-mono);
-  font-size: 2.75rem;
-  font-weight: 500;
-  letter-spacing: -0.03em;
+  font-size: 2.625rem;
+  font-weight: 600;
   line-height: 1;
+  letter-spacing: -0.03em;
   color: var(--text-primary);
 }
 
-.countsCell {
-  flex: 1 1 14rem;
-  min-width: 14rem;
-  display: flex;
-  align-items: stretch;
-  border-right: 1px solid color-mix(in srgb, var(--navy) 14%, var(--border));
-}
-
-.countItem {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 1.5rem 0.875rem;
-  text-align: left;
-  transition: background-color 0.12s ease-out;
-}
-
-.countItem:hover {
-  background: color-mix(in srgb, var(--navy) 5%, transparent);
-}
-
-.cellActive {
-  background: var(--tint-link);
-}
-
-.countLabel {
+.fleetHint {
+  margin-top: 0.4375rem;
   display: flex;
   align-items: center;
-  gap: 0.4375rem;
+  gap: 0.3125rem;
   font-size: 0.75rem;
   color: var(--text-secondary);
 }
 
-.dot {
-  height: 6px;
-  width: 6px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-
-.dotSuccess {
-  background: var(--success);
-  animation: soft-pulse 3s ease-in-out infinite;
-}
-
-.dotWarning {
-  background: var(--warning);
-}
-
-.dotMuted {
-  background: var(--text-muted);
-}
-
-.countValue {
-  margin-top: 0.4375rem;
-  font-family: var(--font-mono);
-  font-size: 1.375rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.countValueSuccess {
-  color: var(--success);
-}
-
-.countValueWarning {
+.staleNote {
   color: var(--warning);
 }
 
-.alertCell {
-  padding: 1.5rem 1.75rem;
-  flex: 2 1 22rem;
-  min-width: 22rem;
+.distribution {
+  display: flex;
+  gap: 3px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--track);
+}
+
+.distribution > span {
+  min-width: 4px;
+  border-radius: 999px;
+  transition: flex-grow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.segOnline {
+  background: var(--success);
+}
+
+.segAttention {
+  background: var(--warning);
+}
+
+.segOffline {
+  background: var(--text-muted);
+}
+
+/* ---------- Status ---------- */
+
+.statusGroup {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: center;
+  gap: 0.625rem;
+  padding: 1.125rem 1.25rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.statusTile {
+  --tone: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  min-width: 0;
+  border-radius: 0.875rem;
+  padding: 0.875rem;
+  text-align: left;
+  background: color-mix(in srgb, var(--tone) 6%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 16%, transparent);
+  transition: background-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.statusTile:hover {
+  background: color-mix(in srgb, var(--tone) 11%, transparent);
+  transform: translateY(-1px);
+}
+
+.statusTileActive,
+.statusTileActive:hover {
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  box-shadow:
+    inset 0 0 0 1.5px var(--tone),
+    0 10px 24px -16px var(--tone);
+}
+
+.toneOnline {
+  --tone: var(--success);
+}
+
+.toneAttention {
+  --tone: var(--warning);
+}
+
+.toneOffline {
+  --tone: var(--text-muted);
+}
+
+.statusHead {
   display: flex;
   align-items: center;
-  gap: 0.875rem;
-  background: var(--tint-plum);
-}
-
-.alertIcon {
-  flex-shrink: 0;
-  color: var(--danger);
-}
-
-.alertBody {
+  gap: 0.5rem;
   min-width: 0;
-  flex: 1;
-}
-
-.alertLabel {
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--danger);
-}
-
-.alertMessage {
-  margin-top: 0.25rem;
-  display: block;
-  width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.75rem;
+  font-weight: 600;
   white-space: nowrap;
-  text-align: left;
-  font-size: 0.8125rem;
-  color: var(--text-primary);
-}
-
-.alertRest {
   color: var(--text-secondary);
 }
 
-.alertLink {
+.statusIcon {
+  display: flex;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.625rem;
+  height: 1.625rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--tone) 16%, transparent);
+  color: var(--tone);
+}
+
+.statusValueRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.375rem;
+}
+
+.statusValue {
+  font-family: var(--font-mono);
+  font-size: 1.625rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--tone);
+}
+
+/* Cinza "muted" como número grande some no fundo; o tom fica no ícone e na barra. */
+.toneOffline .statusValue {
+  color: var(--text-primary);
+}
+
+.statusPct {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.statusBar {
+  display: block;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--track);
+}
+
+.statusBarFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tone);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------- Alerta mais urgente ---------- */
+
+.alertPanel {
+  --tone: var(--danger);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 1.125rem 1.5rem;
+  border-top: 1px solid var(--glass-border);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--tone) 11%, transparent) 0%,
+    color-mix(in srgb, var(--tone) 3%, transparent) 100%
+  );
+}
+
+.clearPanel {
+  --tone: var(--success);
+}
+
+.alertHead {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+}
+
+.alertIcon {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.625rem;
+  height: 1.625rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--tone) 16%, transparent);
+  color: var(--tone);
+}
+
+.alertPanel:not(.clearPanel) .alertIcon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  animation: alertPing 2.4s ease-out infinite;
+}
+
+@keyframes alertPing {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--danger) 45%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--danger) 0%, transparent);
+  }
+}
+
+.alertEyebrow {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tone);
+}
+
+.alertCount {
+  margin-left: auto;
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 0.125rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  color: var(--tone);
+}
+
+.alertMessage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+  border-radius: 0.375rem;
+  text-align: left;
+}
+
+.alertPrinter {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.alertText {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.alertMessage:hover .alertPrinter,
+.alertMessage:hover .alertText:first-child {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.alertLink {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
   gap: 0.25rem;
+  margin-top: 0.125rem;
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--link);
-  transition: color 0.12s ease-out;
+  transition: color 0.15s;
+}
+
+.alertLink svg {
+  transition: transform 0.15s;
 }
 
 .alertLink:hover {
   color: var(--link-hover);
+}
+
+.alertLink:hover svg {
+  transform: translateX(2px);
+}
+
+.clearText {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+/* ---------- Layout ---------- */
+
+@media (max-width: 639px) {
+  .statusGroup {
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .statusTile {
+    padding: 0.75rem 0.625rem;
+  }
+
+  .statusValue {
+    font-size: 1.375rem;
+  }
+}
+
+/* Tablet/notebook: frota | status lado a lado, alerta embaixo ocupando tudo. */
+@media (min-width: 768px) {
+  .strip {
+    grid-template-columns: minmax(15rem, 0.9fr) minmax(0, 1.5fr);
+  }
+
+  .statusGroup {
+    border-top: 0;
+    border-left: 1px solid var(--glass-border);
+  }
+
+  .alertPanel {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Tela larga: as três partes na mesma linha. */
+@media (min-width: 1280px) {
+  .strip {
+    grid-template-columns: minmax(15rem, 0.85fr) minmax(0, 1.45fr) minmax(17rem, 1fr);
+  }
+
+  .alertPanel {
+    grid-column: auto;
+    border-top: 0;
+    border-left: 1px solid var(--glass-border);
+  }
 }

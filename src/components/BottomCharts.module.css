@@ -113,8 +113,13 @@
 
 .bar {
   flex: 1 1 0%;
-  border-radius: 0.5rem 0.5rem 0 0;
-  background: color-mix(in srgb, var(--link) 80%, transparent);
+  border-radius: 0.5rem 0.5rem 0.25rem 0.25rem;
+  background: linear-gradient(180deg, var(--link-hover) 0%, color-mix(in srgb, var(--link) 45%, transparent) 100%);
+  transition: filter 0.15s;
+}
+
+.bar:hover {
+  filter: brightness(1.15);
 }
 
 .donutRow {

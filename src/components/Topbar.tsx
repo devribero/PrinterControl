@@ -74,7 +74,7 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
             type="text"
             value={filters.query}
             onChange={(e) => updateFilter("query", e.target.value)}
-            placeholder="Pesquisar impressora, IP, modelo..."
+            placeholder="Buscar impressora, IP ou modelo"
             className={styles.searchInput}
           />
           <kbd className={styles.searchKbd}>Ctrl K</kbd>

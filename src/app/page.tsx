@@ -29,6 +29,7 @@ export default function DashboardPage() {
     handleAlertSelect,
     filteredPrinters,
     printers,
+    activeFleet,
     setSelectedPrinter,
     globalToner,
     worstPrinter,
@@ -36,6 +37,11 @@ export default function DashboardPage() {
     usingRealMonthlyReport,
     handleRefresh,
   } = useAppData();
+
+  const topAlert = alerts[0] ?? null;
+  // A mensagem do backend nem sempre cita a impressora ("Impressora offline
+  // (sem resposta na última coleta)"), então o nome é resolvido à parte.
+  const topAlertPrinter = topAlert ? (printers.find((p) => p.id === topAlert.printerId)?.name ?? null) : null;
 
   return (
     <>
@@ -54,9 +60,11 @@ export default function DashboardPage() {
           online={stats.online}
           offline={stats.offline}
           attention={stats.attention}
+          stale={stats.stale}
           activeStatus={filters.status === "Todos" ? "Todos" : filters.status}
           onSelectStatus={(s) => updateFilter("status", s)}
-          topAlert={alerts[0] ?? null}
+          topAlert={topAlert}
+          topAlertPrinter={topAlertPrinter}
           alertsRest={Math.max(alerts.length - 1, 0)}
           onViewAlerts={() => router.push("/alerts")}
           onSelectAlert={handleAlertSelect}
@@ -69,7 +77,10 @@ export default function DashboardPage() {
         ) : (
           <PrinterTable
             printers={filteredPrinters}
-            totalCount={printers.length}
+            // Frota ativa, como o card "Frota monitorada" e a rota /printers.
+            // Com `printers.length` a tabela dizia "278 equipamentos" ao lado
+            // de um total de 134, contando as que sumiram do Print Server.
+            totalCount={activeFleet.length}
             filters={filters}
             onFilterChange={updateFilter}
             onOpenDetails={setSelectedPrinter}

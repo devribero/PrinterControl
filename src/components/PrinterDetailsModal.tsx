@@ -3,7 +3,7 @@
 /**
  * Dependências externas: react (useEffect/useState, para o mês selecionado
  * no gráfico) e lucide-react (ícones). Dependências locais: Modal (casca
- * genérica), PrinterStatusBadge, lib/tonerColor (cores por canal/nível).
+ * genérica), PrinterStatusBadge, lib/tonerColor (cor de cada canal de toner).
  * O bloco "Impressões por mês" lê printer.monthlyPages — populado a partir
  * da planilha em modo demo, ou do relatório mensal real do backend em
  * produção (ver lib/fetchMonthlyReport.ts).
@@ -13,7 +13,7 @@ import { ExternalLink, FileText, Lightbulb, Printer as PrinterIcon } from "lucid
 import type { Printer } from "../types";
 import Modal from "./Modal";
 import PrinterStatusBadge from "./PrinterStatusBadge";
-import { tonerChannelColor, tonerLevelColor } from "../lib/tonerColor";
+import { tonerChannelColor } from "../lib/tonerColor";
 import { useToast } from "../lib/toast";
 import { useTheme } from "../lib/theme";
 import { cn } from "../lib/cn";
@@ -75,20 +75,20 @@ export default function PrinterDetailsModal({ printer, onClose }: PrinterDetails
             <FileText size={16} />
             Imprimir página de teste
           </button>
-          <a href={`http://${printer.ip}`} target="_blank" rel="noreferrer" className={styles.footerLink}>
+          <a href={`http://${printer.ip}`} target="_blank" rel="noreferrer" className={styles.footerLinkPrimary}>
             <ExternalLink size={16} />
             Acessar via web
           </a>
         </>
       }
     >
-      <div className={styles.summary}>
-        <div className={styles.summaryIcon}>
+      <div className={styles.infoCard}>
+        <div className={styles.infoIcon}>
           <PrinterIcon size={20} />
         </div>
-        <div className={styles.summaryText}>
-          <p className={styles.summaryIp}>{printer.ip}</p>
-          <p className={styles.summaryDept}>{printer.department}</p>
+        <div className={styles.infoText}>
+          <p className={styles.infoIp}>{printer.ip}</p>
+          <p className={styles.infoDept}>{printer.department}</p>
         </div>
         <PrinterStatusBadge status={printer.status} />
       </div>
@@ -107,7 +107,7 @@ export default function PrinterDetailsModal({ printer, onClose }: PrinterDetails
       </div>
 
       {monthly.length > 0 && (
-        <div className={styles.monthlyCard}>
+        <div className={styles.monthlyBlock}>
           <div className={styles.monthlyHeader}>
             <p className={styles.factLabel}>Impressões por mês</p>
             {activeMonth && (
@@ -127,14 +127,14 @@ export default function PrinterDetailsModal({ printer, onClose }: PrinterDetails
                   className={styles.monthlyBarButton}
                   title={`${m.month}: ${m.pages.toLocaleString("pt-BR")} páginas`}
                 >
-                  <span className={cn(styles.monthlyBarLabel, active ? styles.monthlyBarLabelActive : styles.monthlyBarLabelInactive)}>
+                  <span className={cn(styles.monthlyBarValue, active ? styles.monthlyBarValueActive : styles.monthlyBarValueInactive)}>
                     {m.pages > 999 ? `${Math.round(m.pages / 1000)}k` : m.pages}
                   </span>
                   <div
                     className={cn(styles.monthlyBar, active ? styles.monthlyBarActive : styles.monthlyBarInactive)}
                     style={{ height: `${8 + (m.pages / maxMonthPages) * 64}px` }}
                   />
-                  <span className={cn(styles.monthlyBarMonth, active ? styles.monthlyBarMonthActive : styles.monthlyBarMonthInactive)}>
+                  <span className={cn(styles.monthlyBarLabel, active ? styles.monthlyBarLabelActive : styles.monthlyBarLabelInactive)}>
                     {m.month}
                   </span>
                 </button>
@@ -145,22 +145,26 @@ export default function PrinterDetailsModal({ printer, onClose }: PrinterDetails
       )}
 
       {printer.toner && printer.toner.length > 0 && (
-        <div className={styles.supplySection}>
-          <p className={styles.factLabel}>Níveis de suprimento</p>
-          <div className={styles.supplyList}>
-            {printer.toner.map((t) => (
-              <div key={t.color}>
-                <div className={styles.supplyRow}>
-                  <span className={styles.supplyLabel}>{t.label}</span>
-                  <span className={styles.supplyPercent} style={{ color: tonerLevelColor(t.percent) }}>
-                    {t.percent}%
-                  </span>
+        <div className={styles.tonerBlock}>
+          <p className={styles.tonerBlockLabel}>Níveis de toner</p>
+          <div className={styles.tonerBlockList}>
+            {printer.toner.map((t) => {
+              const cor = tonerChannelColor(t.color, theme);
+              return (
+                <div key={t.color}>
+                  <div className={styles.tonerRow}>
+                    <span className={styles.tonerRowLabel}>
+                      <span className={styles.tonerDot} style={{ backgroundColor: cor }} />
+                      {t.label}
+                    </span>
+                    <span className={styles.tonerRowPercent}>{t.percent}%</span>
+                  </div>
+                  <div className={styles.tonerTrack}>
+                    <div className={styles.tonerFill} style={{ width: `${t.percent}%`, backgroundColor: cor }} />
+                  </div>
                 </div>
-                <div className={styles.supplyTrack}>
-                  <div className={styles.supplyFill} style={{ width: `${t.percent}%`, backgroundColor: tonerChannelColor(t.color, theme) }} />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

@@ -325,13 +325,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       setApiAlerts(null);
       setUsingRealData(false);
       setApiError(ANONYMOUS_MESSAGE);
+      setMonthlyReport(null);
       setInitialLoading(false);
-      loadMonthlyReport().then((report) => {
-        if (!cancelled && report) setMonthlyReport(report);
-      });
-      return () => {
-        cancelled = true;
-      };
+      // Sem sessão só a tela de login é renderizada e nada consome o relatório
+      // mensal. Buscar aqui o /data/monthly-report.json legado (que nada gera
+      // mais) só servia para deixar um 404 no console da tela de login.
+      return;
     }
 
     setInitialLoading(true);
@@ -496,20 +495,23 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     () => apiAlerts ?? deriveAlerts(printers),
     [apiAlerts, printers],
   );
-  const globalToner = useMemo(() => deriveGlobalToner(printers) ?? undefined, [printers]);
+  // Resumo de toner e "pior impressora" sobre a frota ATIVA, como `stats`
+  // (QA-02): sobre `printers`, uma impressora que sumiu do Print Server havia
+  // semanas podia virar o "Toner baixo" do Dashboard com uma leitura velha.
+  const globalToner = useMemo(() => deriveGlobalToner(activeFleet) ?? undefined, [activeFleet]);
   // Sobre activeFleet, não sobre printers: a listagem precisa bater com as
   // contagens das abas de status (QA-02).
   const filteredPrinters = useMemo(() => filterPrinters(activeFleet, filters), [activeFleet, filters]);
   const departments = useMemo(() => Array.from(new Set(printers.map((p) => p.department))).sort(), [printers]);
   const worstPrinter = useMemo(() => {
-    const withToner = printers.filter((p) => p.toner && p.toner.length > 0);
+    const withToner = activeFleet.filter((p) => p.toner && p.toner.length > 0);
     if (withToner.length === 0) return null;
     return withToner.reduce((worst, p) => {
       const worstPct = Math.min(...worst.toner!.map((t) => t.percent));
       const pPct = Math.min(...p.toner!.map((t) => t.percent));
       return pPct < worstPct ? p : worst;
     });
-  }, [printers]);
+  }, [activeFleet]);
 
   function updateFilter<K extends keyof PrinterFilters>(key: K, value: PrinterFilters[K]) {
     setFilters((f) => ({ ...f, [key]: value }));

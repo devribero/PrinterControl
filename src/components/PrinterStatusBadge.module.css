@@ -1,44 +1,45 @@
+/* Pílula com fundo e contorno no tom do status (antes só "Atenção" tinha
+   fundo, e "Online"/"Offline" eram texto solto na coluna). */
 .badge {
+  --tone: var(--text-secondary);
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
   border-radius: 999px;
-  padding: 0.25rem 0.625rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
+  padding: 0.1875rem 0.625rem 0.1875rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 11%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 22%, transparent);
 }
 
 .dot {
-  height: 0.5rem;
-  width: 0.5rem;
+  width: 0.4375rem;
+  height: 0.4375rem;
   border-radius: 999px;
+  background: currentColor;
 }
 
-.dotSuccess {
-  background: var(--success);
+.toneOnline {
+  --tone: var(--success);
+}
+
+.toneOnline .dot {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--success) 22%, transparent);
   animation: soft-pulse 3s ease-in-out infinite;
 }
 
-.dotFaint {
+.toneOffline {
+  --tone: var(--text-secondary);
+}
+
+.toneOffline .dot {
   background: var(--text-muted);
 }
 
-.dotWarning {
-  background: var(--warning);
-}
-
-.textSuccess {
-  color: var(--success);
-}
-
-.textSoft {
-  color: var(--text-secondary);
-}
-
-.textWarning {
-  color: var(--warning);
-}
-
-.bgWarning {
-  background: var(--tint-warning);
+.toneAttention {
+  --tone: var(--warning);
 }

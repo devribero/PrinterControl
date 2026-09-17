@@ -123,9 +123,14 @@
 }
 
 .navItemActive {
-  background: var(--tint-link);
-  color: var(--link-hover);
-  box-shadow: inset 2px 0 0 var(--link-hover);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--link-hover) 17%, transparent) 0%,
+    color-mix(in srgb, var(--link-hover) 3%, transparent) 100%
+  );
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--link-hover);
 }
 
 .navItemInactive {
@@ -239,7 +244,10 @@
 
 .networkCard {
   border-radius: 1rem;
-  background: var(--divider);
+  background:
+    radial-gradient(120% 100% at 0% 0%, color-mix(in srgb, var(--link-hover) 16%, transparent) 0%, transparent 60%),
+    var(--divider);
+  box-shadow: inset 0 0 0 1px var(--glass-border);
   padding: 1rem;
 }
 
