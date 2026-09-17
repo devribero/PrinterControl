@@ -127,6 +127,7 @@ def enrich_discovered_printers(
             client_factory = lambda: SNMPClient(
                 community=settings.snmp_community,
                 timeout=settings.snmp_timeout,
+                retries=settings.snmp_retries,
             )
         else:
             raise ValueError(f"modo de Print Server inválido: {mode!r}")

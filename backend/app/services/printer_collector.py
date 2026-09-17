@@ -6,23 +6,22 @@ Separa as tres responsabilidades da Etapa 6:
   2. processamento dos dados -> aqui
   3. persistencia            -> PrinterReading, via a mesma tabela ja existente
 """
+import json
 import re
+from dataclasses import asdict
+from datetime import datetime
 
 from sqlmodel import Session, select
 
 from app.config import settings
 from app.models.printer import Printer, PrinterReading
 from app.services.alert_engine import evaluate_reading
-from app.services.snmp import SNMPClient, SNMPResult
+from app.services.snmp import LABEL_RE, SNMPClient, SNMPResult
 from app.services.snmp_fleet_mock import FleetMockClient
 from app.services.snmp_mock import MockSNMPClient
 
 # Impressoras coloridas (PS1: $modelo -match 'color|M6530' -or $p.Name -match 'color')
 COLOR_RE = re.compile(r"color|M6530", re.I)
-
-# Etiquetadoras/portateis: nao expoem Printer-MIB, o PS1 pula o SNMP nelas
-# (PS1: $modelo -notmatch 'TT042|Honeywell' -and $p.Name -notmatch 'TT042|Honeywell|Etiqueta|Elgin')
-LABEL_RE = re.compile(r"TT042|Honeywell|Etiqueta|Zebra|Argox|Sewoo|RP4f", re.I)
 
 
 class PrinterCollector:
@@ -116,16 +115,12 @@ class PrinterCollector:
                 result = client.collect(printer.ip, is_color=is_color)
             elif self.mode == "real" and self.is_label_printer(printer):
                 # PS1 pula SNMP nesses modelos; registra so a conectividade.
-                result = SNMPResult(
-                    status="online" if SNMPClient()._ping(printer.ip) else "offline",
-                    reachable=True,
-                    snmp_responded=False,
-                    error="etiquetadora/portatil: SNMP nao consultado",
-                )
-                result.reachable = result.status == "online"
+                result = self.client.check_connectivity(printer.ip)
             else:
                 result = self.client.collect(printer.ip, is_color=is_color)
 
+            self.apply_device_info(printer, result)
+            session.add(printer)
             reading = self._result_to_reading(printer_id, result)
             session.add(reading)
 
@@ -163,6 +158,17 @@ class PrinterCollector:
                 "snmp_responded": result.snmp_responded,
                 "uptime": result.uptime,
                 "error": result.error,
+                "status_reason": result.status_reason,
+                "device_status": result.device_status,
+                "printer_state": result.printer_state,
+                "error_states": result.error_states,
+                "display_text": result.display_text,
+                "serial_number": result.serial_number,
+                "snmp_model": result.device_model,
+                "snmp_description": result.sys_description,
+                "snmp_name": result.sys_name,
+                "snmp_location": result.sys_location,
+                "paper_trays": [asdict(t) for t in result.paper_trays],
                 "timestamp": reading.timestamp.isoformat(),
                 "alerts": {k: v for k, v in alert_actions.items() if v != "none" and v != "skipped"},
             }
@@ -190,7 +196,32 @@ class PrinterCollector:
             toner_m=levels.get("M"),
             toner_y=levels.get("Y"),
             uptime=result.uptime,
+            device_status=result.device_status,
+            printer_state=result.printer_state,
+            error_states=",".join(result.error_states) or None,
         )
+
+    @staticmethod
+    def apply_device_info(printer: Printer, result: SNMPResult) -> None:
+        """
+        Atualiza o retrato SNMP da impressora. Identificacao so e trocada por
+        valor lido, para resposta parcial nao apagar o serial; painel e
+        bandejas refletem sempre a ultima resposta.
+        """
+        if not result.snmp_responded:
+            return
+        for campo, valor in (
+            ("serial_number", result.serial_number),
+            ("snmp_model", result.device_model),
+            ("snmp_description", result.sys_description),
+            ("snmp_name", result.sys_name),
+            ("snmp_location", result.sys_location),
+        ):
+            if valor:
+                setattr(printer, campo, valor)
+        printer.display_text = result.display_text
+        printer.paper_trays = json.dumps([asdict(t) for t in result.paper_trays]) if result.paper_trays else None
+        printer.snmp_updated_at = datetime.utcnow()
 
     @staticmethod
     def list_mock_scenarios() -> list[str]:

@@ -19,7 +19,7 @@ set "DATABASE_URL="
 
 if not exist "%ROOT%backend\venv\Scripts\activate.bat" (
     echo [ERRO] Nao encontrei o venv em backend\venv
-    echo Crie o venv antes: cd backend ^&^& python -m venv venv ^&^& venv\Scripts\pip install -r requirements.txt
+    echo Crie o venv antes: cd backend ^&^& py -m venv venv ^&^& venv\Scripts\pip install -r requirements.txt
     pause
     exit /b 1
 )
@@ -27,7 +27,7 @@ if not exist "%ROOT%backend\venv\Scripts\activate.bat" (
 echo Iniciando PrinterControl...
 echo.
 
-start "PrinterControl - Backend" cmd /k "cd /d "%ROOT%backend" && set "DATABASE_URL=" && call venv\Scripts\activate.bat && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload"
+start "PrinterControl - Backend" cmd /k "cd /d "%ROOT%backend" && set "DATABASE_URL=" && call venv\Scripts\activate.bat && py -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload"
 
 start "PrinterControl - Frontend" cmd /k "cd /d "%ROOT%" && npm run dev"
 

@@ -40,7 +40,7 @@ from sqlmodel import Session, select
 from app.config import settings
 from app.database import engine
 from app.services.monthly_report import month_bounds, month_period, pages_from_readings, upsert_printer_monthly
-from app.services.printer_fleet import collect_fleet
+from app.services.printer_fleet import FleetCollectionBusyError, collect_fleet
 
 logger = logging.getLogger("printercontrol.scheduler")
 
@@ -63,12 +63,16 @@ def run_collection_cycle() -> None:
     )
 
     with Session(engine) as session:
-        result = collect_fleet(
-            session,
-            mode=mode,
-            mock_scenario=settings.collection_scenario,
-            max_workers=settings.collection_max_workers,
-        )
+        try:
+            result = collect_fleet(
+                session,
+                mode=mode,
+                mock_scenario=settings.collection_scenario,
+                max_workers=settings.collection_max_workers,
+            )
+        except FleetCollectionBusyError:
+            logger.warning("Ciclo ignorado: outra coleta da frota ainda esta em andamento")
+            return
 
     logger.info(
         "Ciclo concluido | frota=%s ips_unicos=%s sucesso=%s falha=%s status=%s alertas_criados=%s alertas_resolvidos=%s",

@@ -46,6 +46,16 @@ class Printer(SQLModel, table=True):
     active: bool = Field(default=True, index=True)
     last_seen_at: Optional[datetime] = Field(default=None)
 
+    # Lido da propria impressora via SNMP; so muda quando o SNMP responde.
+    serial_number: Optional[str] = Field(default=None)
+    snmp_model: Optional[str] = Field(default=None)  # hrDeviceDescr
+    snmp_description: Optional[str] = Field(default=None)  # sysDescr
+    snmp_name: Optional[str] = Field(default=None)  # sysName
+    snmp_location: Optional[str] = Field(default=None)  # sysLocation
+    display_text: Optional[str] = Field(default=None)
+    paper_trays: Optional[str] = Field(default=None)  # JSON: [{index, name, level, max_capacity}]
+    snmp_updated_at: Optional[datetime] = Field(default=None)
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
@@ -65,6 +75,9 @@ class PrinterReading(SQLModel, table=True):
     # ou "N/A"). Coluna adicionada via migracao aditiva — leituras anteriores
     # a Etapa 7 ficam com uptime=NULL, nunca reescritas.
     uptime: str | None = None
+    device_status: str | None = None  # running | warning | testing | down | unknown
+    printer_state: str | None = None  # idle | printing | warmup | other | unknown
+    error_states: str | None = None  # codigos RFC 3805 separados por virgula, ex.: "noPaper,jammed"
     timestamp: datetime = Field(default_factory=datetime.utcnow, index=True)
 
 

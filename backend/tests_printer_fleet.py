@@ -192,11 +192,91 @@ settings.collection_enabled = True
 settings.collection_mode = "mock"
 settings.allow_mock_collect = True
 settings.collection_interval_minutes = 60
+import asyncio  # noqa: E402
+
+# AsyncIOScheduler.start() chama asyncio.get_event_loop(), que no Python 3.14 nao cria loop fora de um loop em execucao.
+asyncio.set_event_loop(asyncio.new_event_loop())
 sched = start_scheduler()
 job = sched.get_job(JOB_ID) if sched else None
 check_true("scheduler iniciado", sched is not None)
 check("max_instances=1 preservado", job.max_instances if job else None, 1)
 shutdown_scheduler()
+
+print("\n=== 7. modo real: dados do equipamento gravados na leitura e na impressora ===")
+from app.routes.printers import list_printers_with_status  # noqa: E402
+from app.services.snmp import PaperTrayInfo  # noqa: E402
+
+
+def fake_device_collect(self, ip, is_color=False):
+    return SNMPResult(
+        status="atencao",
+        page_count=4321,
+        toners=[],
+        uptime="2d, 0h, 0m",
+        reachable=True,
+        snmp_responded=True,
+        device_status="warning",
+        printer_state="idle",
+        error_states=["noPaper", "lowToner"],
+        serial_number=f"SER-{ip}",
+        device_model="Ricoh P502",
+        sys_description="RICOH P 502",
+        sys_name="RNP0026",
+        sys_location="Almoxarifado",
+        display_text="Sem papel",
+        paper_trays=[PaperTrayInfo(index=1, name="Bandeja 1", level=0, max_capacity=500)],
+    )
+
+
+with mock.patch.object(SNMPClient, "_ping", fake_ping), mock.patch.object(SNMPClient, "collect", fake_device_collect):
+    with Session(engine) as s:
+        collect_fleet(s, mode="real", max_workers=3)
+
+with Session(engine) as s:
+    solo = s.exec(select(Printer).where(Printer.name == "B_Solo")).one()
+    leitura = s.exec(
+        select(PrinterReading).where(PrinterReading.printer_id == solo.id).order_by(PrinterReading.id.desc())
+    ).first()
+    check("leitura.device_status", leitura.device_status, "warning")
+    check("leitura.printer_state", leitura.printer_state, "idle")
+    check("leitura.error_states", leitura.error_states, "noPaper,lowToner")
+    check("impressora.serial_number", solo.serial_number, "SER-10.0.0.2")
+    check("impressora.snmp_location", solo.snmp_location, "Almoxarifado")
+    check_true("impressora.snmp_updated_at preenchido", solo.snmp_updated_at is not None)
+
+    frota = {p.name: p for p in list_printers_with_status(limit=500, offset=0, session=s)}
+    check("with-status.status", frota["B_Solo"].status, "atencao")
+    check("with-status.error_states", frota["B_Solo"].error_states, ["noPaper", "lowToner"])
+    check("with-status.paper_trays[0].state", frota["B_Solo"].paper_trays[0].state, "vazia")
+    check("with-status.display_text", frota["B_Solo"].display_text, "Sem papel")
+    check("etiquetadora sem SNMP de impressora nao ganha serial", frota["D_Label1"].serial_number, None)
+    check("etiquetadora sem erro de equipamento", frota["D_Label1"].error_states, [])
+
+print("\n=== 8. trava: duas coletas da frota nao rodam ao mesmo tempo ===")
+from app.services.scheduler import run_collection_cycle  # noqa: E402
+
+printer_fleet._fleet_lock.acquire()
+try:
+    with Session(engine) as s:
+        try:
+            collect_fleet(s, mode="fleet")
+            recusada = False
+        except printer_fleet.FleetCollectionBusyError:
+            recusada = True
+    check("coleta simultanea recusada", recusada, True)
+
+    try:
+        run_collection_cycle()
+        scheduler_ok = True
+    except Exception as exc:  # noqa: BLE001
+        scheduler_ok = False
+        print(f"    scheduler levantou {type(exc).__name__}: {exc}")
+    check_true("scheduler ignora o ciclo em vez de quebrar", scheduler_ok)
+finally:
+    printer_fleet._fleet_lock.release()
+
+with Session(engine) as s:
+    check_true("trava liberada: coleta volta a rodar", collect_fleet(s, mode="fleet").total_printers == ACTIVE_COUNT)
 
 print(f"\nBanco de teste: {TEST_DB}")
 print("RESULTADO:", "TODOS OS TESTES PASSARAM" if not failures else f"FALHAS: {failures}")

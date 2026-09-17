@@ -43,6 +43,7 @@ padrao ja usado por PrinterCollector.collect_and_save), evitando qualquer
 uso concorrente da Session/engine SQLite.
 """
 import logging
+import threading
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
@@ -58,6 +59,22 @@ from app.services.snmp_fleet_mock import FleetMockClient
 from app.services.snmp_mock import MockSNMPClient
 
 logger = logging.getLogger("printercontrol.fleet")
+
+
+class FleetCollectionBusyError(RuntimeError):
+    """Ja existe um ciclo de coleta da frota em andamento neste processo."""
+
+
+# Scheduler e coleta manual compartilham a trava: dois ciclos ao mesmo tempo gravariam leituras duplicadas.
+_fleet_lock = threading.Lock()
+
+
+def _real_client() -> SNMPClient:
+    return SNMPClient(
+        community=settings.snmp_community,
+        timeout=settings.snmp_timeout,
+        retries=settings.snmp_retries,
+    )
 
 
 @dataclass
@@ -122,20 +139,11 @@ def _collect_ip_network(
 
     if mode == "real" and not full_snmp:
         # Etiquetadora/portatil (ou grupo so com elas): PS1 nao consulta
-        # SNMP, so a conectividade.
-        reachable = SNMPClient()._ping(ip)
-        result = SNMPResult(
-            status="online" if reachable else "offline",
-            reachable=True,
-            snmp_responded=False,
-            error="etiquetadora/portatil: SNMP nao consultado",
-        )
-        result.reachable = result.status == "online"
-        return result
+        # SNMP de impressora, so a conectividade.
+        return _real_client().check_connectivity(ip)
 
     if mode == "real":
-        client = SNMPClient(community=settings.snmp_community, timeout=settings.snmp_timeout)
-        return client.collect(ip, is_color=is_color)
+        return _real_client().collect(ip, is_color=is_color)
 
     if mode == "mock":
         client = MockSNMPClient(scenario=mock_scenario)
@@ -156,7 +164,23 @@ def collect_fleet(
     Nunca chama o Print Server nem sync_printers — a fonte e exclusivamente
     o banco, para nao arriscar aplicar a frota mock (7 impressoras) sobre as
     73 reais.
+
+    Levanta FleetCollectionBusyError se outro ciclo ja estiver rodando.
     """
+    if not _fleet_lock.acquire(blocking=False):
+        raise FleetCollectionBusyError("Ja existe uma coleta da frota em andamento. Aguarde ela terminar.")
+    try:
+        return _run_fleet_cycle(session, mode, mock_scenario, max_workers)
+    finally:
+        _fleet_lock.release()
+
+
+def _run_fleet_cycle(
+    session: Session,
+    mode: str,
+    mock_scenario: str,
+    max_workers: int | None,
+) -> FleetCollectionResult:
     max_workers = max_workers or settings.collection_max_workers
 
     printers = list(session.exec(select(Printer).where(Printer.active == True)))  # noqa: E712
@@ -213,6 +237,8 @@ def collect_fleet(
         snmp_result = raw_results[ip]
         for printer in members:
             try:
+                PrinterCollector.apply_device_info(printer, snmp_result)
+                session.add(printer)
                 reading = PrinterCollector._result_to_reading(printer.id, snmp_result)
                 session.add(reading)
                 session.commit()

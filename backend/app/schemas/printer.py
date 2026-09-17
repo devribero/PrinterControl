@@ -1,14 +1,54 @@
+import json
 from ipaddress import IPv4Address, AddressValueError
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, computed_field, field_validator
 from typing import Optional, List
 from datetime import datetime
+
+
+TONER_LABELS = {"K": "Preto", "C": "Ciano", "M": "Magenta", "Y": "Amarelo"}
 
 
 class TonerLevel(BaseModel):
     color: str
     label: str
     percent: int
+
+
+class PaperTray(BaseModel):
+    """Bandeja de papel lida por SNMP. `level` segue a Printer-MIB: -3 ha papel, -2 desconhecido, -1 outro."""
+
+    index: int
+    name: str
+    level: int
+    max_capacity: int
+
+    @computed_field
+    @property
+    def percent(self) -> Optional[int]:
+        if self.level < 0 or self.max_capacity <= 0:
+            return None
+        return max(0, min(100, round(self.level * 100 / self.max_capacity)))
+
+    @computed_field
+    @property
+    def state(self) -> str:
+        """vazia | com_papel | desconhecido"""
+        if self.level == 0:
+            return "vazia"
+        if self.level > 0 or self.level == -3:
+            return "com_papel"
+        return "desconhecido"
+
+
+def _paper_trays_from_db(value) -> list:
+    """printers.paper_trays e JSON em texto; vazio ou invalido vira lista vazia em vez de 500."""
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except json.JSONDecodeError:
+            return []
+    return value if isinstance(value, list) else []
 
 
 def _validate_ip(value: str) -> str:
@@ -23,6 +63,26 @@ def _validate_ip(value: str) -> str:
         return str(IPv4Address(value))
     except AddressValueError:
         raise ValueError(f"IP invalido: {value!r}. Use IPv4 (ex.: 10.150.6.11) ou 'N/A'.")
+
+
+def validate_probe_ip(value: str) -> str:
+    """IPv4 privado de impressora: a consulta ao vivo nao pode sondar a internet nem o proprio servidor."""
+    try:
+        ip = IPv4Address(value.strip())
+    except AddressValueError:
+        raise ValueError(f"IP invalido: {value!r}. Use IPv4 (ex.: 10.150.6.11).")
+    if (
+        not ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_unspecified
+        or ip.is_multicast
+        or ip.is_reserved
+    ):
+        raise ValueError(
+            f"IP nao permitido para consulta: {ip}. Use o IPv4 privado de uma impressora da rede interna."
+        )
+    return str(ip)
 
 
 def _recusar_nulo(value: Optional[str], campo: str) -> str:
@@ -120,6 +180,19 @@ class PrinterResponse(BaseModel):
     # marca active=False (ver printer_sync.py). Sem isto, a tela de
     # impressoras inativas nao tinha nenhuma data real pra mostrar.
     updated_at: datetime
+    serial_number: Optional[str] = None
+    snmp_model: Optional[str] = None
+    snmp_description: Optional[str] = None
+    snmp_name: Optional[str] = None
+    snmp_location: Optional[str] = None
+    display_text: Optional[str] = None
+    paper_trays: List[PaperTray] = []
+    snmp_updated_at: Optional[datetime] = None
+
+    @field_validator("paper_trays", mode="before")
+    @classmethod
+    def _paper_trays(cls, value):
+        return _paper_trays_from_db(value)
 
     class Config:
         from_attributes = True
@@ -135,6 +208,9 @@ class PrinterWithStatus(PrinterResponse):
     # Etapa 7: uptime formatado da ultima leitura (ex.: "45d, 3h, 22m"); None
     # quando nunca coletada ou quando a leitura e anterior a Etapa 7.
     uptime: Optional[str] = None
+    device_status: Optional[str] = None
+    printer_state: Optional[str] = None
+    error_states: List[str] = []
 
 
 # Estados que a coleta real (services/snmp.py) e capaz de produzir, e os

@@ -10,6 +10,7 @@ from app.services.alert_engine import evaluate_reading
 from app.services.environment_guard import bloquear_mock_em_producao
 from app.services.monthly_report import month_bounds, month_label, month_period, pages_from_readings
 from app.schemas.printer import (
+    TONER_LABELS,
     PrinterCreate,
     PrinterUpdate,
     PrinterResponse,
@@ -50,9 +51,6 @@ def list_printers(
         select(Printer).order_by(Printer.id).offset(offset).limit(limit)
     ).all()
     return printers
-
-
-TONER_LABELS = {"K": "Preto", "C": "Ciano", "M": "Magenta", "Y": "Amarelo"}
 
 
 def _inicio_da_janela(months: int) -> datetime:
@@ -135,6 +133,9 @@ def list_printers_with_status(
                 toner=toner,
                 last_seen=reading.timestamp.isoformat() if reading else None,
                 uptime=reading.uptime if reading else None,
+                device_status=reading.device_status if reading else None,
+                printer_state=reading.printer_state if reading else None,
+                error_states=reading.error_states.split(",") if reading and reading.error_states else [],
             )
         )
 

@@ -108,6 +108,7 @@ def create_db_and_tables():
     _migrate_alert_type()
     _migrate_alert_value()
     _migrate_reading_uptime()
+    _migrate_snmp_details()
     _migrate_user_rbac()
     _migrate_user_login_fields()
     _migrate_user_token_version()
@@ -159,6 +160,43 @@ def _migrate_reading_uptime():
         if cols and "uptime" not in cols:
             conn.execute(text("ALTER TABLE printer_readings ADD COLUMN uptime VARCHAR"))
             conn.commit()
+
+
+def _migrate_snmp_details():
+    """
+    Coleta SNMP estendida: estado do equipamento em printer_readings e
+    identificacao/ultimo retrato em printers. Aditiva e idempotente, mesmo
+    padrao de _migrate_reading_uptime(); linhas existentes ficam com NULL.
+    """
+    from sqlalchemy import text
+
+    novas_colunas = {
+        "printer_readings": {
+            "device_status": "VARCHAR",
+            "printer_state": "VARCHAR",
+            "error_states": "VARCHAR",
+        },
+        "printers": {
+            "serial_number": "VARCHAR",
+            "snmp_model": "VARCHAR",
+            "snmp_description": "VARCHAR",
+            "snmp_name": "VARCHAR",
+            "snmp_location": "VARCHAR",
+            "display_text": "VARCHAR",
+            "paper_trays": "VARCHAR",
+            "snmp_updated_at": "DATETIME",
+        },
+    }
+
+    with engine.connect() as conn:
+        for tabela, colunas in novas_colunas.items():
+            existentes = {row[1] for row in conn.execute(text(f"PRAGMA table_info({tabela})"))}
+            if not existentes:
+                continue
+            for nome, tipo in colunas.items():
+                if nome not in existentes:
+                    conn.execute(text(f"ALTER TABLE {tabela} ADD COLUMN {nome} {tipo}"))
+        conn.commit()
 
 
 def _migrate_user_rbac():

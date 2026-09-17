@@ -385,9 +385,33 @@ Não existe `DELETE`, no mesmo espírito de usuários e Print Servers.
 - Função: `collect_printer`
 - Auth: **operator**; `mode="mock"` exige **admin** além de `ALLOW_MOCK_COLLECT=true`
 - Service: `PrinterCollector.collect_and_save`
-- Banco/rede: SNMP real/mock, grava `printer_readings`, avalia alertas
+- Banco/rede: SNMP real/mock; grava `printer_readings` (status, contador, toner, uptime, `device_status`, `printer_state`, `error_states`), atualiza a identificação da impressora (`serial_number`, `snmp_*`, `display_text`, `paper_trays`) e avalia alertas
+- Retorno: os campos de `POST /api/collect/probe`, mais `reading_id`, `timestamp` e `alerts`
 - Frontend: não utilizado
 - Estado: backend funcional; mock depende de `ALLOW_MOCK_COLLECT`
+
+### `POST /api/collect/probe`
+
+- Arquivo: `backend/app/routes/collect.py`
+- Função: `probe_ip`
+- Auth: **operator**, com limite de ações de rede
+- Corpo: `{"ip": "10.150.26.40", "is_color": false}` — só IPv4 privado (recusa loopback, link-local, multicast, reservado e IP público)
+- Service: `SNMPClient.collect`
+- Banco/rede: ping + SNMP no IP informado; **não grava nada**
+- Retorno: `status`, `reachable`, `snmp_responded`, `status_reason`, `error`, `page_count`, `toner[]`, `uptime`, `device_status`, `printer_state`, `error_states[]`, `display_text`, `serial_number`, `snmp_model`, `snmp_description`, `snmp_name`, `snmp_location`, `paper_trays[]`, `duration_seconds`
+- Frontend: não utilizado
+- Estado: diagnóstico de uma impressora antes de cadastrar ou coletar
+
+### `POST /api/collect/fleet/real`
+
+- Arquivo: `backend/app/routes/collect.py`
+- Função: `collect_fleet_real`
+- Auth: **admin**, com limite de ações de rede
+- Service: `printer_fleet.collect_fleet(mode="real")` — o mesmo ciclo do scheduler (agrupado por IP, em paralelo)
+- Banco/rede: SNMP em todos os IPs da frota ativa; grava leituras e alertas. A segurança/EDR pode enxergar como varredura (`backend/.env`, D-08)
+- **409** quando o scheduler ou outra chamada já está coletando a frota
+- Frontend: não utilizado
+- Estado: coleta real sob demanda, sem ligar `COLLECTION_ENABLED`
 
 ### `POST /api/collect/fleet`
 
@@ -418,6 +442,22 @@ Não existe `DELETE`, no mesmo espírito de usuários e Print Servers.
 - Banco/rede: lê estado e conta impressoras ativas
 - Frontend: não utilizado
 - Estado: funcional para diagnóstico
+
+### Dados lidos por SNMP
+
+| Campo | Origem | Valores |
+|---|---|---|
+| `status` | derivado | `online`; `offline` (sem ping **e** sem SNMP); `atencao` (toner ≤ 20%, `device_status=down` ou erro bloqueante) |
+| `device_status` | hrDeviceStatus | `running`, `warning`, `testing`, `down`, `unknown` |
+| `printer_state` | hrPrinterStatus | `idle`, `printing`, `warmup`, `other`, `unknown` |
+| `error_states` | hrPrinterDetectedErrorState | bloqueantes (viram `atencao`): `noPaper`, `noToner`, `doorOpen`, `jammed`, `offline`, `serviceRequested`, `inputTrayMissing`, `outputTrayMissing`, `markerSupplyMissing`, `outputFull`; avisos: `lowPaper`, `lowToner`, `outputNearFull`, `inputTrayEmpty`, `overduePreventMaint` |
+| `serial_number` | prtGeneralSerialNumber | texto |
+| `snmp_model` / `snmp_description` | hrDeviceDescr / sysDescr | texto |
+| `snmp_name` / `snmp_location` | sysName / sysLocation | texto |
+| `display_text` | prtConsoleDisplayBufferText | linhas do painel unidas por ` \| ` |
+| `paper_trays[]` | prtInputTable | `name`, `level` (-3 há papel, -2 desconhecido), `max_capacity`, `percent`, `state` (`vazia`, `com_papel`, `desconhecido`) |
+
+Nível de toner `-3` ("há toner") ou `-2` ("desconhecido") não gera percentual. Quando o próprio equipamento se identifica como etiquetadora (TT042, Zebra, Honeywell, Argox…), toner e contador não são gravados (`status_reason=snmp_not_applicable`), mesmo que o cadastro diga outro modelo. Contador colorido × monocromático não tem OID padrão (varia por fabricante) e não é coletado. `GET /api/printers/{id}/readings` devolve `error_states` como texto separado por vírgula; `GET /api/printers/with-status` devolve como lista.
 
 ## Print Server
 
