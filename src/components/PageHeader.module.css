@@ -57,5 +57,8 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  /* Quebra em vez de espremer: com o seletor de servidor ao lado da barra de
+     verificacao, os dois nao cabem lado a lado em tela estreita. */
+  flex-wrap: wrap;
   flex-shrink: 0;
 }

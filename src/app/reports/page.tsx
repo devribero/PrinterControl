@@ -7,6 +7,7 @@
  */
 import { Download } from "lucide-react";
 import PageHeader from "../../components/PageHeader";
+import ServerSwitcher from "../../components/ServerSwitcher";
 import MonthlyCounters from "../../components/MonthlyCounters";
 import PrinterRanking from "../../components/PrinterRanking";
 import DepartmentBreakdown from "../../components/DepartmentBreakdown";
@@ -34,16 +35,19 @@ export default function ReportsPage() {
         title="Relatórios"
         subtitle="Contadores mensais, ranking de uso e consumo por departamento."
         actions={
-          <button
-            onClick={() => {
-              exportPrintersCsv(printers);
-              push({ variant: "success", title: "CSV exportado", description: `${printers.length} impressora(s) incluída(s) no arquivo.` });
-            }}
-            className={styles.exportButton}
-          >
-            <Download size={14} />
-            Exportar relatório (CSV)
-          </button>
+          <>
+            <ServerSwitcher />
+            <button
+              onClick={() => {
+                exportPrintersCsv(printers);
+                push({ variant: "success", title: "CSV exportado", description: `${printers.length} impressora(s) incluída(s) no arquivo.` });
+              }}
+              className={styles.exportButton}
+            >
+              <Download size={14} />
+              Exportar relatório (CSV)
+            </button>
+          </>
         }
       />
 

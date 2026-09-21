@@ -1,6 +1,7 @@
 "use client";
 
 import PageHeader from "../../components/PageHeader";
+import ServerSwitcher from "../../components/ServerSwitcher";
 import PrinterTable from "../../components/PrinterTable";
 import { useAppData } from "../../lib/app-data";
 
@@ -13,6 +14,7 @@ export default function PrintersPage() {
         section="Monitoramento"
         title="Impressoras"
         subtitle="Cadastro completo da frota monitorada, com status e nível de suprimento."
+        actions={<ServerSwitcher />}
       />
 
       <PrinterTable

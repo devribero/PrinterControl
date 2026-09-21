@@ -11,7 +11,7 @@
  */
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   printers as mockPrinters,
   monthlyUsage as mockMonthlyUsage,
@@ -25,17 +25,18 @@ import {
   fetchAlerts,
   fetchBackendEnvironment,
   fetchPrintersWithStatus,
+  fetchPrintServers,
   fetchUnreadNotificationCount,
   type BackendEnvironment,
 } from "./api";
 import { permissionsFor, type Permissions } from "./permissions";
-import { adaptAlert, adaptPrinter, loadMonthlyReportFromApi } from "./adaptApi";
+import { adaptAlert, adaptPrinter, adaptPrintServer, loadMonthlyReportFromApi } from "./adaptApi";
 import { loadMonthlyReport, mergeMonthlyReport } from "./fetchMonthlyReport";
 import { deriveAlerts, deriveGlobalToner } from "./deriveFromPrinters";
 import { leituraVelha } from "./adaptApi";
 import { DEFAULT_FILTERS, filterPrinters, type PrinterFilters } from "./filterPrinters";
 import { useToast } from "./toast";
-import type { Alert, DiscoveredPrinter, MonthlyReport, Printer, TonerLevel } from "../types";
+import type { Alert, DiscoveredPrinter, MonthlyReport, Printer, PrintServer, TonerLevel } from "../types";
 
 interface AppDataContextValue {
   /** Conta logada (null quando anonimo). Fonte: GET /api/auth/me. */
@@ -98,6 +99,36 @@ interface AppDataContextValue {
    */
   unreadNotifications: number;
   refreshUnreadNotifications: () => Promise<void>;
+
+  /**
+   * Escopo de servidor — o painel fala de UM Print Server por vez.
+   *
+   * `serverScope` e o host escolhido; `null` significa "todos os
+   * servidores" e `""` as impressoras cadastradas a mao (as que tem
+   * `Printer.server === ""`, sem servidor de origem). Tudo o que descreve a
+   * frota — `printers`, `activeFleet`, `stats`, `alerts`, toner,
+   * departamentos — ja sai filtrado por ele, para que nenhuma tela precise
+   * lembrar de aplicar o filtro (e nenhuma esqueca, que era o modo de isso
+   * dar errado: contagem de um servidor ao lado da lista de todos).
+   *
+   * A escolha e por dispositivo (localStorage), nao por conta: e ponto de
+   * vista de quem esta olhando, nao configuracao do sistema.
+   */
+  servers: PrintServer[];
+  serversLoading: boolean;
+  serversError: string | null;
+  refreshServers: () => Promise<void>;
+  serverScope: string | null;
+  setServerScope: (host: string | null) => void;
+  /**
+   * Impressoras ATIVAS por escopo, sempre sobre a frota inteira e nunca
+   * sobre o escopo atual — o seletor precisa dizer quantas ha em cada
+   * servidor, inclusive nos que nao estao selecionados. Chave = host;
+   * `""` = sem servidor.
+   */
+  serverCounts: Record<string, number>;
+  /** Ativas na frota inteira, ignorando o escopo. */
+  allActiveCount: number;
 
   filters: PrinterFilters;
   updateFilter: <K extends keyof PrinterFilters>(key: K, value: PrinterFilters[K]) => void;
@@ -170,6 +201,40 @@ const ANONYMOUS_MESSAGE = "Faça login para ver os dados reais da frota. Exibind
 // mais nova sem precisar clicar em nada ao trocar de aba.
 const AUTO_REFRESH_INTERVAL_MS = 2 * 60 * 1000;
 
+/**
+ * Escopo de servidor guardado por dispositivo.
+ *
+ * A AUSENCIA da chave e diferente de "todos": significa que ninguem
+ * escolheu ainda, e ai o painel abre no servidor padrao em vez da frota
+ * inteira. Por isso `lerEscopoSalvo` devolve tres coisas distintas —
+ * `undefined` (nunca escolheu), `null` (escolheu "todos") e a string do
+ * escopo —, e nao um `string | null` que confundiria os dois primeiros.
+ */
+const SERVER_SCOPE_KEY = "elgin_server_scope";
+const ESCOPO_TODOS = "__todos__";
+
+function lerEscopoSalvo(): string | null | undefined {
+  try {
+    const bruto = localStorage.getItem(SERVER_SCOPE_KEY);
+    if (bruto === null) return undefined;
+    return bruto === ESCOPO_TODOS ? null : bruto;
+  } catch {
+    // localStorage LANCA (nao devolve null) em navegador com dados de site
+    // bloqueados por politica de dominio — mesmo motivo do try/catch em
+    // lib/auth.ts. Sem escopo legivel, cai no padrao.
+    return undefined;
+  }
+}
+
+function salvarEscopo(host: string | null) {
+  try {
+    localStorage.setItem(SERVER_SCOPE_KEY, host ?? ESCOPO_TODOS);
+  } catch {
+    // Preferencia de visualizacao: nao conseguir guardar nao e erro, a
+    // sessao atual continua respeitando a escolha.
+  }
+}
+
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<Account | null>(null);
   const [sessionLoading, setSessionLoading] = useState(true);
@@ -191,6 +256,15 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [lastChecked, setLastChecked] = useState<Date>(() => new Date());
   const [initialLoading, setInitialLoading] = useState(true);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [servers, setServers] = useState<PrintServer[]>([]);
+  const [serversLoading, setServersLoading] = useState(false);
+  const [serversError, setServersError] = useState<string | null>(null);
+  const [serverScope, setServerScopeState] = useState<string | null>(null);
+  // So a PRIMEIRA carga da lista adota o escopo salvo (ou o servidor
+  // padrao); as seguintes apenas conferem se o escopo ainda existe. Sem
+  // isto, cada recarga da lista — e ela recarrega depois de todo sync —
+  // jogaria a pessoa de volta ao servidor padrao no meio do uso.
+  const escopoRestaurado = useRef(false);
   const { push } = useToast();
 
   // Restauracao da sessao: o token guardado so vale se o backend confirmar
@@ -255,10 +329,39 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   // Impressoras de fato usadas pela UI: base (mock ou real) + monthlyPages
   // do relatório mensal real, quando disponível. Derivado (não é estado)
   // para não depender da ordem em que os dois fetches abaixo terminam.
-  const printers = useMemo(() => {
+  const allPrinters = useMemo(() => {
     if (!usingRealData && semDadoRealEmProducao) return [];
     return mergeMonthlyReport(rawPrinters, monthlyReport);
   }, [rawPrinters, monthlyReport, usingRealData, semDadoRealEmProducao]);
+
+  /**
+   * O escopo em vigor. So vale sobre dado real: a frota de demonstracao tem
+   * `server: ""` em todas as linhas (data/printers.ts diz isso de
+   * proposito, ela nao vem de Print Server nenhum), entao aplicar um escopo
+   * de servidor ali esvaziaria a tela inteira sem que houvesse nada errado.
+   */
+  const escopoEfetivo = usingRealData ? serverScope : null;
+
+  /**
+   * A frota do servidor em foco — e ESTA que todas as telas consomem.
+   * `allPrinters` nao sai daqui, tirando as contagens abaixo, que precisam
+   * justamente ignorar o escopo para poder descreve-lo.
+   */
+  const printers = useMemo(
+    () => (escopoEfetivo === null ? allPrinters : allPrinters.filter((p) => p.server === escopoEfetivo)),
+    [allPrinters, escopoEfetivo],
+  );
+
+  const serverCounts = useMemo(() => {
+    const contagem: Record<string, number> = {};
+    for (const p of allPrinters) {
+      if (!p.active) continue;
+      contagem[p.server] = (contagem[p.server] ?? 0) + 1;
+    }
+    return contagem;
+  }, [allPrinters]);
+
+  const allActiveCount = useMemo(() => allPrinters.filter((p) => p.active).length, [allPrinters]);
   const monthlyUsage =
     monthlyReport && monthlyReport.monthlyUsage.length > 0
       ? monthlyReport.monthlyUsage
@@ -299,6 +402,69 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   // A dependencia e o e-mail (string estavel), nao o objeto `account`, para
   // nao refazer a carga a cada re-render do provider.
   const accountKey = account?.email ?? null;
+
+  /**
+   * Lista de Print Servers. Vive aqui, e nao no NetworkView, porque agora
+   * duas coisas dependem dela: a tela de mapeamento e o seletor de escopo
+   * do cabecalho — e as duas precisam concordar sobre qual servidor esta em
+   * foco. GET /api/servers exige apenas sessao ativa (qualquer papel).
+   */
+  const refreshServers = useCallback(async () => {
+    if (!accountKey) {
+      setServers([]);
+      setServersError(null);
+      return;
+    }
+    setServersLoading(true);
+    try {
+      setServers((await fetchPrintServers()).map(adaptPrintServer));
+      setServersError(null);
+    } catch (error) {
+      setServers([]);
+      setServersError(error instanceof Error ? error.message : "Falha ao carregar os Print Servers.");
+    } finally {
+      setServersLoading(false);
+    }
+  }, [accountKey]);
+
+  useEffect(() => {
+    if (sessionLoading) return;
+    void refreshServers();
+  }, [sessionLoading, refreshServers]);
+
+  // Reconcilia o escopo com a lista que chegou do backend.
+  useEffect(() => {
+    if (servers.length === 0) return;
+
+    if (!escopoRestaurado.current) {
+      escopoRestaurado.current = true;
+      const salvo = lerEscopoSalvo();
+      // `""` (sem servidor) e um escopo legitimo e nao esta na lista de
+      // servidores — conferir a lista o descartaria como inexistente.
+      const existe = (escopo: string) => escopo === "" || servers.some((s) => s.host === escopo);
+      setServerScopeState(
+        salvo === undefined
+          ? (servers.find((s) => s.isDefault) ?? servers[0]).host
+          : salvo !== null && existe(salvo)
+            ? salvo
+            : null,
+      );
+      return;
+    }
+
+    // Servidor excluido enquanto a aba estava aberta: volta para "todos" em
+    // vez de deixar o painel presa num escopo que nao existe mais — o que
+    // apareceria como frota vazia, sem explicacao nenhuma na tela.
+    setServerScopeState((atual) =>
+      atual !== null && atual !== "" && !servers.some((s) => s.host === atual) ? null : atual,
+    );
+  }, [servers]);
+
+  const setServerScope = useCallback((host: string | null) => {
+    escopoRestaurado.current = true;
+    setServerScopeState(host);
+    salvarEscopo(host);
+  }, []);
 
   // Ambiente do backend: uma vez, no mount, sem depender de sessao. Precisa
   // valer ANTES do login para que a tela de entrada de uma instancia de
@@ -491,10 +657,16 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   // Alertas reais do backend quando ele responde; senão, os derivados dos
   // dados de demonstração (mesmo comportamento de antes).
-  const alerts = useMemo(
-    () => apiAlerts ?? deriveAlerts(printers),
-    [apiAlerts, printers],
-  );
+  // O escopo tambem vale para alerta: um painel que anuncia "elgjunprt" no
+  // cabecalho nao pode ter no sino um alerta de impressora de outro
+  // servidor. Os derivados do mock ja nascem escopados (saem de `printers`);
+  // os do backend chegam da frota inteira e sao filtrados aqui.
+  const alerts = useMemo(() => {
+    if (apiAlerts === null) return deriveAlerts(printers);
+    if (escopoEfetivo === null) return apiAlerts;
+    const noEscopo = new Set(printers.map((p) => p.id));
+    return apiAlerts.filter((a) => noEscopo.has(a.printerId));
+  }, [apiAlerts, printers, escopoEfetivo]);
   // Resumo de toner e "pior impressora" sobre a frota ATIVA, como `stats`
   // (QA-02): sobre `printers`, uma impressora que sumiu do Print Server havia
   // semanas podia virar o "Toner baixo" do Dashboard com uma leitura velha.
@@ -543,6 +715,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setDiscoveredPrinters(null);
     setDiscoverySource(null);
     setDiscoveryServer(null);
+    // A lista de servidores e dado autenticado como qualquer outro; o
+    // escopo escolhido NAO e limpo de proposito, e preferencia do
+    // dispositivo e sobrevive ao proximo login.
+    setServers([]);
+    setServersError(null);
   }
 
   function handleLogout() {
@@ -663,6 +840,15 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
     unreadNotifications,
     refreshUnreadNotifications,
+
+    servers,
+    serversLoading,
+    serversError,
+    refreshServers,
+    serverScope,
+    setServerScope,
+    serverCounts,
+    allActiveCount,
 
     filters,
     updateFilter,

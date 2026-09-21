@@ -7,6 +7,7 @@
 import { useRouter } from "next/navigation";
 import PageHeader from "../components/PageHeader";
 import ScanBar from "../components/ScanBar";
+import ServerSwitcher from "../components/ServerSwitcher";
 import VitalsStrip from "../components/VitalsStrip";
 import PrinterTable from "../components/PrinterTable";
 import RightPanel from "../components/RightPanel";
@@ -36,7 +37,20 @@ export default function DashboardPage() {
     monthlyUsage,
     usingRealMonthlyReport,
     handleRefresh,
+    servers,
+    serverScope,
   } = useAppData();
+
+  // O subtitulo precisa dizer de QUAL frota estes numeros falam: com um
+  // escopo de servidor ativo, "estado consolidado da frota" descreveria algo
+  // que a tela nao esta mostrando.
+  const servidorEmFoco = servers.find((s) => s.host === serverScope) ?? null;
+  const subtitulo =
+    serverScope === null
+      ? "Estado consolidado da frota, suprimentos e consumo de páginas."
+      : serverScope === ""
+        ? "Impressoras cadastradas à mão, fora de qualquer Print Server."
+        : `Frota de ${servidorEmFoco?.name ?? serverScope} — suprimentos e consumo de páginas.`;
 
   const topAlert = alerts[0] ?? null;
   // A mensagem do backend nem sempre cita a impressora ("Impressora offline
@@ -48,8 +62,13 @@ export default function DashboardPage() {
       <PageHeader
         section="Monitoramento"
         title="Visão geral"
-        subtitle="Estado consolidado da frota, suprimentos e consumo de páginas."
-        actions={<ScanBar lastChecked={lastChecked} scanning={scanning} onRefresh={handleRefresh} />}
+        subtitle={subtitulo}
+        actions={
+          <>
+            <ServerSwitcher />
+            <ScanBar lastChecked={lastChecked} scanning={scanning} onRefresh={handleRefresh} />
+          </>
+        }
       />
 
       {initialLoading ? (

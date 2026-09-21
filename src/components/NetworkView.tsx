@@ -18,7 +18,7 @@
  * Dependências externas: react e lucide-react. Locais: Modal e
  * DiscoveryResults (reaproveitados), lib/api, lib/adaptApi, lib/apiErrors.
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   RadioTower,
   RefreshCw,
@@ -34,18 +34,19 @@ import {
   Pencil,
   Power,
   Trash2,
+  Layers,
+  Unplug,
 } from "lucide-react";
 import {
   createPrintServer,
   deletePrintServer,
   discoverServer,
-  fetchPrintServers,
   syncServer,
   updatePrintServer,
   type ApiDiscoveryResponse,
   type PrintServerUpdateInput,
 } from "../lib/api";
-import { adaptPrintServer, adaptSyncResult, parseApiDate } from "../lib/adaptApi";
+import { adaptSyncResult, parseApiDate } from "../lib/adaptApi";
 import { useApiErrorReporter } from "../lib/apiErrors";
 import { useAppData } from "../lib/app-data";
 import { useToast } from "../lib/toast";
@@ -121,14 +122,29 @@ const STATUS_SERVIDOR: Record<PrintServer["lastStatus"], string> = {
 };
 
 export default function NetworkView() {
-  const { can, printers, usingRealData, handleRefresh } = useAppData();
+  /**
+   * A lista de servidores e o servidor em foco NAO sao estado desta tela:
+   * vivem no AppDataProvider, porque o mesmo escopo manda no painel inteiro
+   * (ver `serverScope` la). Escolher um servidor aqui e escolher no
+   * cabecalho do Dashboard sao a mesma acao — era isso ou manter duas
+   * nocoes de "servidor selecionado" que se contradiriam na primeira troca.
+   */
+  const {
+    can,
+    printers,
+    usingRealData,
+    handleRefresh,
+    servers,
+    serversLoading,
+    serversError,
+    refreshServers,
+    serverScope,
+    setServerScope,
+    serverCounts,
+    allActiveCount,
+  } = useAppData();
   const { push } = useToast();
   const relatarErro = useApiErrorReporter();
-
-  const [servers, setServers] = useState<PrintServer[] | null>(null);
-  const [loadingServers, setLoadingServers] = useState(true);
-  const [serversError, setServersError] = useState<string | null>(null);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   // Descoberta — transitória, nunca persistida.
   const [discovering, setDiscovering] = useState(false);
@@ -159,40 +175,22 @@ export default function NetworkView() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deletingBusy, setDeletingBusy] = useState(false);
 
-  const carregarServidores = useCallback(async () => {
-    setLoadingServers(true);
-    try {
-      const data = (await fetchPrintServers()).map(adaptPrintServer);
-      setServers(data);
-      setServersError(null);
-      // Seleciona o padrão na primeira carga, só para a tela não abrir vazia.
-      // Isto NÃO dispara descoberta nem sync — apenas escolhe o servidor.
-      setSelectedId((atual) => {
-        if (atual !== null && data.some((s) => s.id === atual)) return atual;
-        return (data.find((s) => s.isDefault) ?? data[0])?.id ?? null;
-      });
-    } catch (error) {
-      setServers(null);
-      setServersError(relatarErro(error, "Falha ao carregar os Print Servers"));
-    } finally {
-      setLoadingServers(false);
-    }
-  }, [relatarErro]);
-
-  useEffect(() => {
-    void carregarServidores();
-  }, [carregarServidores]);
-
   const selected = useMemo(
-    () => (servers ?? []).find((s) => s.id === selectedId) ?? null,
-    [servers, selectedId],
+    () => servers.find((s) => s.host === serverScope) ?? null,
+    [servers, serverScope],
   );
 
-  /** Impressoras já cadastradas neste servidor — a relação servidor↔frota. */
-  const printersDoServidor = useMemo(() => {
-    if (!selected) return [];
-    return printers.filter((p) => p.server === selected.host);
-  }, [printers, selected]);
+  /**
+   * As impressoras listadas no rodape da tela. `printers` JA vem escopado
+   * pelo provider, entao em "Todos os servidores" esta e a frota inteira e
+   * com um servidor em foco e so a dele — nao ha filtro a aplicar aqui, e
+   * aplicar um segundo por cima e que arriscaria divergir do resto do
+   * painel.
+   */
+  const printersDoEscopo = printers;
+
+  /** So aparece quando existe: cadastro a mao e excecao, nao categoria fixa. */
+  const semServidor = serverCounts[""] ?? 0;
 
   /** Contagem por estado do que a descoberta encontrou. */
   const resumoDescoberta = useMemo(() => {
@@ -208,9 +206,9 @@ export default function NetworkView() {
 
   // Trocar de servidor descarta o resultado anterior: mostrar a descoberta de
   // um servidor sob o cabeçalho de outro seria mentir para o usuário.
-  function selecionar(id: number) {
-    if (id === selectedId) return;
-    setSelectedId(id);
+  function selecionar(escopo: string | null) {
+    if (escopo === serverScope) return;
+    setServerScope(escopo);
     limparResultados();
   }
 
@@ -273,7 +271,7 @@ export default function NetworkView() {
         }
 
         const atualizado = await updatePrintServer(editing.id, mudancas);
-        await carregarServidores();
+        await refreshServers();
         push({
           variant: "success",
           title: "Print Server atualizado",
@@ -285,11 +283,11 @@ export default function NetworkView() {
           name: form.name.trim(),
           mode: form.mode,
         });
-        await carregarServidores();
+        await refreshServers();
         // Passa a operar sobre o que acabou de registrar; resultados do
         // servidor anterior não valem mais para este cabeçalho.
         limparResultados();
-        setSelectedId(criado.id);
+        setServerScope(criado.host);
         push({
           variant: "success",
           title: "Print Server registrado",
@@ -312,7 +310,7 @@ export default function NetworkView() {
     setAlternando(true);
     try {
       const atualizado = await updatePrintServer(alvo.id, { active: !alvo.active });
-      await carregarServidores();
+      await refreshServers();
       push({
         variant: "success",
         title: atualizado.active ? "Print Server reativado" : "Print Server desativado",
@@ -345,11 +343,13 @@ export default function NetworkView() {
     setDeleteError(null);
     try {
       await deletePrintServer(deleting.id, deleteConfirmText.trim());
-      setServers((atuais) => (atuais ?? []).filter((s) => s.id !== deleting.id));
-      if (selectedId === deleting.id) {
-        setSelectedId(null);
+      if (serverScope === deleting.host) {
+        // O escopo apontava para o que acabou de sumir: volta para a frota
+        // inteira em vez de deixar o painel num servidor inexistente.
+        setServerScope(null);
         limparResultados();
       }
+      await refreshServers();
       push({
         variant: "success",
         title: "Print Server excluído",
@@ -377,11 +377,11 @@ export default function NetworkView() {
       });
       // O servidor guarda o desfecho (last_status/last_seen_at) — relê para
       // o cartão refletir o que acabou de acontecer.
-      void carregarServidores();
+      void refreshServers();
     } catch (error) {
       setDiscovery(null);
       setDiscoveryError(relatarErro(error, "Falha na descoberta"));
-      void carregarServidores();
+      void refreshServers();
     } finally {
       setDiscovering(false);
     }
@@ -402,13 +402,13 @@ export default function NetworkView() {
           `${resultado.created} criada(s), ${resultado.updated} atualizada(s), ` +
           `${resultado.deactivated} desativada(s).`,
       });
-      void carregarServidores();
+      void refreshServers();
       // A frota em memória ficou desatualizada depois de gravar no banco.
       if (usingRealData) void handleRefresh();
     } catch (error) {
       setSyncError(relatarErro(error, "Falha na sincronização"));
       setConfirmOpen(false);
-      void carregarServidores();
+      void refreshServers();
     } finally {
       setSyncing(false);
     }
@@ -422,14 +422,14 @@ export default function NetworkView() {
           <div>
             <h2 className={styles.cardTitle}>Print Servers</h2>
             <p className={styles.cardSubtitle}>
-              {servers
-                ? `${servers.length} servidor(es) registrado(s). Selecione um para operar.`
-                : "Carregando servidores..."}
+              {serversLoading && servers.length === 0
+                ? "Carregando servidores..."
+                : `${servers.length} servidor(es) registrado(s). O selecionado vale para o painel inteiro.`}
             </p>
           </div>
           <div className={styles.headerActions}>
-            <button onClick={() => void carregarServidores()} disabled={loadingServers} className={styles.secondaryButton}>
-              <RefreshCw size={15} className={loadingServers ? "animate-spin" : ""} />
+            <button onClick={() => void refreshServers()} disabled={serversLoading} className={styles.secondaryButton}>
+              <RefreshCw size={15} className={serversLoading ? "animate-spin" : ""} />
               Atualizar
             </button>
             {can.canAdmin && (
@@ -441,15 +441,15 @@ export default function NetworkView() {
           </div>
         </div>
 
-        {serversError && !loadingServers && <p className={styles.errorBox}>{serversError}</p>}
+        {serversError && !serversLoading && <p className={styles.errorBox}>{serversError}</p>}
 
-        {loadingServers && !servers && (
+        {serversLoading && servers.length === 0 && (
           <p className={styles.emptyState}>
             <Loader2 size={16} className="animate-spin" /> Carregando Print Servers...
           </p>
         )}
 
-        {servers && servers.length === 0 && (
+        {!serversLoading && servers.length === 0 && (
           <p className={styles.emptyState}>
             {can.canAdmin
               ? "Nenhum Print Server registrado. Use “Novo Print Server” para cadastrar o primeiro."
@@ -457,18 +457,43 @@ export default function NetworkView() {
           </p>
         )}
 
-        {servers && servers.length > 0 && (
+        {servers.length > 0 && (
           <div className={styles.serverGrid}>
+            {/* "Todos" e um escopo de verdade, nao a ausencia de escolha: e a
+                unica vista que mostra junto o que esta em servidores
+                diferentes. Descobrir e Sincronizar somem nela porque as duas
+                falam com UM Print Server — nao existe "descobrir em todos". */}
+            <div className={cn(styles.serverCard, serverScope === null && styles.serverCardActive)}>
+              <button
+                type="button"
+                onClick={() => selecionar(null)}
+                className={styles.serverSelect}
+                aria-pressed={serverScope === null}
+              >
+                <div className={styles.serverCardTop}>
+                  <Layers size={16} className={styles.serverIcon} />
+                  <span className={styles.serverHost}>Todos os servidores</span>
+                </div>
+                <p className={styles.serverName}>Frota inteira, sem separar por origem</p>
+                <p className={styles.serverCounts}>
+                  <strong>{allActiveCount}</strong> ativa(s) no total
+                </p>
+                <p className={styles.serverMeta}>
+                  <Info size={12} /> Descobrir e sincronizar exigem um servidor
+                </p>
+              </button>
+            </div>
+
             {servers.map((server) => (
               <div
                 key={server.id}
-                className={cn(styles.serverCard, server.id === selectedId && styles.serverCardActive)}
+                className={cn(styles.serverCard, server.host === serverScope && styles.serverCardActive)}
               >
                 <button
                   type="button"
-                  onClick={() => selecionar(server.id)}
+                  onClick={() => selecionar(server.host)}
                   className={styles.serverSelect}
-                  aria-pressed={server.id === selectedId}
+                  aria-pressed={server.host === serverScope}
                 >
                   <div className={styles.serverCardTop}>
                     <Server size={16} className={styles.serverIcon} />
@@ -534,6 +559,33 @@ export default function NetworkView() {
                 )}
               </div>
             ))}
+
+            {/* Cadastradas a mao (Printer.server === ""). Nao pertencem a
+                Print Server nenhum, entao sem este escopo elas so
+                apareceriam em "Todos" — invisiveis em qualquer vista por
+                servidor, que e onde alguem iria procura-las. */}
+            {semServidor > 0 && (
+              <div className={cn(styles.serverCard, serverScope === "" && styles.serverCardActive)}>
+                <button
+                  type="button"
+                  onClick={() => selecionar("")}
+                  className={styles.serverSelect}
+                  aria-pressed={serverScope === ""}
+                >
+                  <div className={styles.serverCardTop}>
+                    <Unplug size={16} className={styles.serverIcon} />
+                    <span className={styles.serverHost}>Sem servidor</span>
+                  </div>
+                  <p className={styles.serverName}>Cadastradas a mao, fora de qualquer Print Server</p>
+                  <p className={styles.serverCounts}>
+                    <strong>{semServidor}</strong> ativa(s)
+                  </p>
+                  <p className={styles.serverMeta}>
+                    <Info size={12} /> Nenhum sync as cria ou desativa
+                  </p>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </section>
@@ -695,70 +747,85 @@ export default function NetworkView() {
             </>
           )}
 
-          {/* ── Relação servidor ↔ impressoras cadastradas ─────────────── */}
-          <section className={styles.card}>
-            <div className={styles.cardHeader}>
-              <div>
-                <h2 className={styles.cardTitle}>Impressoras cadastradas em {selected.host}</h2>
-                <p className={styles.cardSubtitle}>
-                  {printersDoServidor.length} no cadastro
-                  {usingRealData ? "" : " · dados de demonstração"}
-                </p>
-              </div>
-            </div>
-
-            <div className={styles.tableWrap}>
-              <table className={styles.table}>
-                <thead>
-                  <tr className={styles.theadRow}>
-                    <th className={styles.thFirst}>Nome</th>
-                    <th className={styles.th}>IP</th>
-                    <th className={styles.th}>Modelo</th>
-                    <th className={styles.th}>Departamento</th>
-                    <th className={styles.th}>Estado</th>
-                    <th className={styles.th}>Cadastro</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {printersDoServidor.map((printer) => (
-                    <tr key={printer.id} className={styles.row}>
-                      <td className={styles.tdFirst}>{printer.name}</td>
-                      <td className={styles.td}>{printer.ip}</td>
-                      <td className={styles.td}>{printer.model}</td>
-                      <td className={styles.td}>{printer.department || "—"}</td>
-                      <td className={styles.td}>
-                        <span
-                          className={cn(
-                            styles.pill,
-                            printer.status === "online" && styles.pillOnline,
-                            printer.status === "atencao" && styles.pillAtencao,
-                            printer.status === "offline" && styles.pillOffline,
-                          )}
-                        >
-                          {printer.status}
-                        </span>
-                      </td>
-                      <td className={styles.td}>
-                        <span className={cn(styles.pill, printer.active ? styles.pillAtivo : styles.pillInativo)}>
-                          {printer.active ? "ativa" : "inativa"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {printersDoServidor.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className={styles.emptyState}>
-                        Nenhuma impressora cadastrada neste servidor. Use Descobrir para ver o que ele
-                        publica e Sincronizar para trazê-las ao cadastro.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
         </>
+      )}
+
+      {/* ── A frota do escopo ──────────────────────────────────────────
+          Fora do bloco acima de propósito: em "Todos os servidores" não há
+          `selected`, mas continua havendo frota para listar — e é
+          justamente a vista que mostra de onde veio cada impressora. */}
+      {servers.length > 0 && (
+        <section className={styles.card}>
+          <div className={styles.cardHeader}>
+            <div>
+              <h2 className={styles.cardTitle}>
+                {selected
+                  ? `Impressoras cadastradas em ${selected.host}`
+                  : serverScope === ""
+                    ? "Impressoras sem Print Server"
+                    : "Impressoras cadastradas (todos os servidores)"}
+              </h2>
+              <p className={styles.cardSubtitle}>
+                {printersDoEscopo.length} no cadastro
+                {usingRealData ? "" : " · dados de demonstração"}
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr className={styles.theadRow}>
+                  <th className={styles.thFirst}>Nome</th>
+                  {serverScope === null && <th className={styles.th}>Servidor</th>}
+                  <th className={styles.th}>IP</th>
+                  <th className={styles.th}>Modelo</th>
+                  <th className={styles.th}>Departamento</th>
+                  <th className={styles.th}>Estado</th>
+                  <th className={styles.th}>Cadastro</th>
+                </tr>
+              </thead>
+              <tbody>
+                {printersDoEscopo.map((printer) => (
+                  <tr key={printer.id} className={styles.row}>
+                    <td className={styles.tdFirst}>{printer.name}</td>
+                    {serverScope === null && <td className={styles.td}>{printer.server || "—"}</td>}
+                    <td className={styles.td}>{printer.ip}</td>
+                    <td className={styles.td}>{printer.model}</td>
+                    <td className={styles.td}>{printer.department || "—"}</td>
+                    <td className={styles.td}>
+                      <span
+                        className={cn(
+                          styles.pill,
+                          printer.status === "online" && styles.pillOnline,
+                          printer.status === "atencao" && styles.pillAtencao,
+                          printer.status === "offline" && styles.pillOffline,
+                        )}
+                      >
+                        {printer.status}
+                      </span>
+                    </td>
+                    <td className={styles.td}>
+                      <span className={cn(styles.pill, printer.active ? styles.pillAtivo : styles.pillInativo)}>
+                        {printer.active ? "ativa" : "inativa"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+
+                {printersDoEscopo.length === 0 && (
+                  <tr>
+                    <td colSpan={serverScope === null ? 7 : 6} className={styles.emptyState}>
+                      {selected
+                        ? "Nenhuma impressora cadastrada neste servidor. Use Descobrir para ver o que ele publica e Sincronizar para trazê-las ao cadastro."
+                        : "Nenhuma impressora no cadastro."}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
       )}
 
       {/* ── Registrar / editar Print Server ─────────────────────────── */}
@@ -926,11 +993,14 @@ export default function NetworkView() {
             desativa tudo que o simulador não publica. O dado volta com o
             próximo sync real, mas o painel fica vazio nesse meio-tempo — o
             usuário precisa saber ANTES de clicar. */}
-        {selected?.mode === "mock" && printersDoServidor.length > 0 && (
+        {/* `printersDoEscopo` aqui E a frota deste servidor: o sync so fica
+            disponivel com um servidor em foco, e nesse caso o escopo do
+            painel e exatamente ele. */}
+        {selected?.mode === "mock" && printersDoEscopo.length > 0 && (
           <p className={styles.confirmWarn}>
             <strong>Atenção:</strong> este servidor está em modo <strong>simulado</strong>. O
             simulador publica uma frota fictícia, então as{" "}
-            <strong>{printersDoServidor.length}</strong> impressoras já cadastradas que não
+            <strong>{printersDoEscopo.length}</strong> impressoras já cadastradas que não
             aparecerem nele serão marcadas como <strong>inativas</strong> e sumirão do painel. Elas
             voltam ao sincronizar com o servidor em modo real.
           </p>
