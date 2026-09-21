@@ -454,11 +454,17 @@ export default function SettingsView() {
                   credencial é exposta aqui. */}
               <div className={styles.field}>
                 <span className={styles.label}>Backend em uso</span>
-                <code className={styles.code}>{API_BASE_URL}</code>
+                {/* Vazio nao e "nao configurado": e o modo proxy, em que o
+                    painel chama a API no proprio endereco e o servidor Next
+                    repassa. Imprimir uma string vazia aqui pareceria defeito. */}
+                <code className={styles.code}>
+                  {API_BASE_URL || "mesma origem (proxy do painel)"}
+                </code>
                 <span className={styles.hint}>
-                  Definido no build (<code>NEXT_PUBLIC_API_URL</code>). Configurações sensíveis do
-                  servidor — chaves, credenciais, webhook — ficam no <code>.env</code> do backend e
-                  nunca são expostas na interface.
+                  Definido no build (<code>NEXT_PUBLIC_API_URL</code>); vazio significa que as
+                  chamadas passam pelo próprio painel e são repassadas ao backend. Configurações
+                  sensíveis do servidor — chaves, credenciais, webhook — ficam no <code>.env</code>{" "}
+                  do backend e nunca são expostas na interface.
                 </span>
               </div>
             </div>
