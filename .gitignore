@@ -36,6 +36,7 @@ backend/*.db
 
 # Env / secrets
 .env
+.dominio
 backend/.env
 .claude/scheduled_tasks.lock
 
