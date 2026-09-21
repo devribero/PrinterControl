@@ -43,34 +43,26 @@ function QuickAction({
   );
 }
 
-const GAUGE_RADIUS = 24;
-const GAUGE_CIRCUMFERENCE = 2 * Math.PI * GAUGE_RADIUS;
-
-function TonerGauge({ level, color }: { level: TonerLevel; color: string }) {
+/** Uma cor de toner: ponto de identidade, barra de severidade, valor. */
+function TonerRow({ level, color }: { level: TonerLevel; color: string }) {
   const percent = Math.max(0, Math.min(100, level.percent));
-  const state = percent <= 15 ? styles.gaugeCritical : percent <= 35 ? styles.gaugeLow : "";
+  const state = percent <= 15 ? styles.tonerCritical : percent <= 35 ? styles.tonerLow : "";
   return (
-    <div className={cn(styles.gauge, state)} role="img" aria-label={`${level.label}: ${level.percent}%`}>
-      <div className={styles.gaugeRingWrap}>
-        <svg viewBox="0 0 60 60" className={styles.gaugeRing} aria-hidden="true">
-          <circle cx="30" cy="30" r={GAUGE_RADIUS} className={styles.gaugeTrack} />
-          <circle
-            cx="30"
-            cy="30"
-            r={GAUGE_RADIUS}
-            className={styles.gaugeValue}
-            style={{ stroke: color }}
-            strokeDasharray={`${(percent / 100) * GAUGE_CIRCUMFERENCE} ${GAUGE_CIRCUMFERENCE}`}
-            transform="rotate(-90 30 30)"
-          />
-        </svg>
-        <span className={styles.gaugePercent} aria-hidden="true">
-          {level.percent}%
-        </span>
-      </div>
-      <span className={styles.gaugeLabel} aria-hidden="true">
-        <span className={styles.gaugeDot} style={{ backgroundColor: color }} />
+    <div
+      className={cn(styles.tonerRow, state)}
+      role="img"
+      aria-label={`${level.label}: ${level.percent}%`}
+    >
+      <span className={styles.tonerDot} style={{ backgroundColor: color }} aria-hidden="true" />
+      <span className={styles.tonerLabel} aria-hidden="true">
         {level.label.split(" ")[0]}
+      </span>
+      <span className={styles.tonerTrack} aria-hidden="true">
+        <span className={styles.tonerFill} style={{ width: `${percent}%` }} />
+      </span>
+      <span className={styles.tonerValue} aria-hidden="true">
+        {percent <= 15 && <TriangleAlert size={13} className={styles.tonerWarnIcon} />}
+        {level.percent}%
       </span>
     </div>
   );
@@ -93,7 +85,12 @@ export default function RightPanel({ alertCount, globalToner, worstPrinter, onOp
   // `worstPrinter`, então nome e número do card sempre batem. Antes pegava o
   // PRIMEIRO canal abaixo de 20% na ordem K/C/M/Y, que podia ser de outra
   // impressora que não a exibida pelo botão.
-  const lowest = toner.length > 0 ? toner.reduce((min, t) => (t.percent < min.percent ? t : min)) : null;
+  // Do menor para o maior: a cor que vai acabar primeiro fica no topo, que e
+  // a unica ordem util aqui. Copia antes de ordenar — `sort` altera o array
+  // no lugar, e este vem do provider, que outras telas consomem na ordem
+  // K/C/M/Y.
+  const tonerOrdenado = [...toner].sort((a, b) => a.percent - b.percent);
+  const lowest = tonerOrdenado[0] ?? null;
   const critical = lowest && lowest.percent <= 20 ? lowest : null;
 
   return (
@@ -110,9 +107,9 @@ export default function RightPanel({ alertCount, globalToner, worstPrinter, onOp
         </div>
 
         {toner.length > 0 ? (
-          <div className={styles.gaugeGrid}>
-            {toner.map((t) => (
-              <TonerGauge key={t.color} level={t} color={tonerChannelColor(t.color, theme)} />
+          <div className={styles.tonerList}>
+            {tonerOrdenado.map((t) => (
+              <TonerRow key={t.color} level={t} color={tonerChannelColor(t.color, theme)} />
             ))}
           </div>
         ) : (

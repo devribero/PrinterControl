@@ -1,7 +1,7 @@
-/* Faixa de resumo do Dashboard: frota (anel + distribuição), três status
-   clicáveis (filtram a tabela) e o alerta mais urgente. As cores de status
-   passam por --tone para que cada bloco pinte ícone, número e barra com a
-   mesma variável. O layout em grade fica no fim do arquivo. */
+/* Faixa de resumo do Dashboard: frota (figura + barra empilhada), os três
+   status como linhas clicáveis (filtram a tabela) e o alerta mais urgente.
+   Cada status pinta só o seu marcador via --tone; número e rótulo ficam em
+   cor de texto. O layout em grade fica no fim do arquivo. */
 .strip {
   position: relative;
   isolation: isolate;
@@ -9,25 +9,11 @@
   grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  background:
-    radial-gradient(90% 140% at 0% 0%, color-mix(in srgb, var(--link-hover) 13%, transparent) 0%, transparent 55%),
-    var(--glass-bg-elevated);
+  border-radius: 14px;
+  background: var(--glass-bg-elevated);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-shadow);
-}
-
-/* Grade de pontos sutil, só no canto do bloco da frota. */
-.strip::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: radial-gradient(color-mix(in srgb, var(--text-primary) 9%, transparent) 1px, transparent 1.2px);
-  background-size: 18px 18px;
-  mask-image: radial-gradient(55% 120% at 0% 0%, #000 0%, transparent 70%);
 }
 
 /* ---------- Frota ---------- */
@@ -36,18 +22,18 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1.125rem;
+  gap: 0.875rem;
   min-width: 0;
-  padding: 1.25rem 1.5rem;
+  padding: 1.375rem 1.5rem;
 }
 
 .fleetButton {
   display: flex;
-  align-items: center;
-  gap: 1.125rem;
-  margin: -0.5rem;
-  padding: 0.5rem;
-  border-radius: 0.875rem;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: -0.375rem -0.5rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.625rem;
   text-align: left;
   transition: background-color 0.15s;
 }
@@ -56,82 +42,23 @@
   background: var(--glass-hover);
 }
 
-.fleetButtonActive {
-  background: color-mix(in srgb, var(--link-hover) 9%, transparent);
-}
-
+.fleetButtonActive,
 .fleetButtonActive:hover {
-  background: color-mix(in srgb, var(--link-hover) 13%, transparent);
-}
-
-.ring {
-  flex-shrink: 0;
-  width: 4.75rem;
-  height: 4.75rem;
-  overflow: visible;
-}
-
-.ringGood {
-  --ring-color: var(--success);
-}
-
-.ringFair {
-  --ring-color: var(--warning);
-}
-
-.ringPoor {
-  --ring-color: var(--danger);
-}
-
-.ringTrack {
-  fill: none;
-  stroke: var(--track);
-  stroke-width: 6;
-}
-
-.ringValue {
-  fill: none;
-  stroke: var(--ring-color);
-  stroke-width: 6;
-  stroke-linecap: round;
-  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--ring-color) 45%, transparent));
-  transition: stroke-dasharray 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.ringText {
-  font-family: var(--font-mono);
-  font-size: 15px;
-  font-weight: 600;
-  fill: var(--text-primary);
-}
-
-.ringCaption {
-  font-family: var(--font-sans);
-  font-size: 7.5px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  fill: var(--text-secondary);
-}
-
-.fleetText {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+  background: color-mix(in srgb, var(--link-hover) 10%, transparent);
 }
 
 .eyebrow {
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--navy-text);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
 }
 
-.totalValue {
-  margin-top: 0.375rem;
-  font-family: var(--font-mono);
-  font-size: 2.625rem;
+/* Figura principal da tela: sans, e SEM tabular-nums de propósito — em corpo
+   grande a largura fixa de dígito deixa o número solto. */
+.heroValue {
+  margin-top: 0.25rem;
+  font-size: 3rem;
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -139,31 +66,26 @@
 }
 
 .fleetHint {
-  margin-top: 0.4375rem;
-  display: flex;
-  align-items: center;
-  gap: 0.3125rem;
-  font-size: 0.75rem;
+  margin-top: 0.3125rem;
+  font-size: 0.8125rem;
   color: var(--text-secondary);
 }
 
-.staleNote {
-  color: var(--warning);
-}
-
+/* Barra empilhada: 2px de respiro entre as faixas, pelo fundo da superfície,
+   para as fatias não se fundirem quando duas cores vizinhas se encostam. */
 .distribution {
   display: flex;
-  gap: 3px;
+  gap: 2px;
   height: 6px;
-  overflow: hidden;
   border-radius: 999px;
   background: var(--track);
+  overflow: hidden;
 }
 
 .distribution > span {
-  min-width: 4px;
+  min-width: 3px;
   border-radius: 999px;
-  transition: flex-grow 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: flex-grow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .segOnline {
@@ -178,42 +100,62 @@
   background: var(--text-muted);
 }
 
+.staleNote {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--warning);
+}
+
 /* ---------- Status ---------- */
 
 .statusGroup {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-content: center;
-  gap: 0.625rem;
-  padding: 1.125rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.75rem 0.75rem;
   border-top: 1px solid var(--glass-border);
 }
 
-.statusTile {
+.statusRow {
   --tone: var(--text-muted);
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-  min-width: 0;
-  border-radius: 0.875rem;
-  padding: 0.875rem;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.625rem;
+  padding: 0.6875rem 0.75rem;
   text-align: left;
-  background: color-mix(in srgb, var(--tone) 6%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 16%, transparent);
-  transition: background-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  transition: background-color 0.12s ease-out;
 }
 
-.statusTile:hover {
-  background: color-mix(in srgb, var(--tone) 11%, transparent);
-  transform: translateY(-1px);
+/* Fio de separação entre as linhas — some na primeira e quando a linha está
+   ativa (aí o próprio fundo já delimita). */
+.statusRow + .statusRow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0.75rem;
+  right: 0.75rem;
+  height: 1px;
+  background: var(--glass-border);
 }
 
-.statusTileActive,
-.statusTileActive:hover {
-  background: color-mix(in srgb, var(--tone) 14%, transparent);
-  box-shadow:
-    inset 0 0 0 1.5px var(--tone),
-    0 10px 24px -16px var(--tone);
+.statusRow:hover {
+  background: var(--glass-hover);
+}
+
+.statusRow:hover::before,
+.statusRowActive::before,
+.statusRowActive + .statusRow::before {
+  opacity: 0;
+}
+
+.statusRowActive,
+.statusRowActive:hover {
+  background: color-mix(in srgb, var(--tone) 12%, transparent);
 }
 
 .toneOnline {
@@ -228,69 +170,47 @@
   --tone: var(--text-muted);
 }
 
-.statusHead {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-width: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
+/* O marcador é o único elemento que veste a cor do dado. */
+.statusDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--tone);
+}
+
+.statusRowActive .statusDot {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone) 25%, transparent);
+}
+
+.statusLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 0.8125rem;
+  font-weight: 500;
   color: var(--text-secondary);
 }
 
-.statusIcon {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 1.625rem;
-  height: 1.625rem;
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--tone) 16%, transparent);
-  color: var(--tone);
+.statusRowActive .statusLabel {
+  color: var(--text-primary);
 }
 
-.statusValueRow {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.375rem;
-}
-
+/* Coluna de números: aqui `tabular-nums` é o certo — são três valores
+   empilhados que precisam alinhar na vertical. */
 .statusValue {
-  font-family: var(--font-mono);
-  font-size: 1.625rem;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.125rem;
   font-weight: 600;
   line-height: 1;
-  color: var(--tone);
-}
-
-/* Cinza "muted" como número grande some no fundo; o tom fica no ícone e na barra. */
-.toneOffline .statusValue {
   color: var(--text-primary);
 }
 
 .statusPct {
-  font-family: var(--font-mono);
+  min-width: 2.5rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
   font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-
-.statusBar {
-  display: block;
-  height: 4px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: var(--track);
-}
-
-.statusBarFill {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--tone);
-  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text-muted);
 }
 
 /* ---------- Alerta mais urgente ---------- */
@@ -302,13 +222,8 @@
   justify-content: center;
   gap: 0.5rem;
   min-width: 0;
-  padding: 1.125rem 1.5rem;
+  padding: 1.25rem 1.5rem;
   border-top: 1px solid var(--glass-border);
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--tone) 11%, transparent) 0%,
-    color-mix(in srgb, var(--tone) 3%, transparent) 100%
-  );
 }
 
 .clearPanel {
@@ -318,45 +233,18 @@
 .alertHead {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4375rem;
 }
 
-.alertIcon {
-  position: relative;
-  display: flex;
+.alertHeadIcon {
   flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 1.625rem;
-  height: 1.625rem;
-  border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--tone) 16%, transparent);
   color: var(--tone);
 }
 
-.alertPanel:not(.clearPanel) .alertIcon::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  animation: alertPing 2.4s ease-out infinite;
-}
-
-@keyframes alertPing {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--danger) 45%, transparent);
-  }
-  70%,
-  100% {
-    box-shadow: 0 0 0 8px color-mix(in srgb, var(--danger) 0%, transparent);
-  }
-}
-
 .alertEyebrow {
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   color: var(--tone);
 }
 
@@ -364,11 +252,11 @@
   margin-left: auto;
   flex-shrink: 0;
   border-radius: 999px;
-  padding: 0.125rem 0.5rem;
-  font-family: var(--font-mono);
+  padding: 0.0625rem 0.4375rem;
+  font-variant-numeric: tabular-nums;
   font-size: 0.6875rem;
   font-weight: 600;
-  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  background: color-mix(in srgb, var(--tone) 12%, transparent);
   color: var(--tone);
 }
 
@@ -438,24 +326,23 @@
 /* ---------- Layout ---------- */
 
 @media (max-width: 639px) {
+  .fleet {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .heroValue {
+    font-size: 2.75rem;
+  }
+
   .statusGroup {
-    gap: 0.5rem;
-    padding: 1rem;
-  }
-
-  .statusTile {
-    padding: 0.75rem 0.625rem;
-  }
-
-  .statusValue {
-    font-size: 1.375rem;
+    padding: 0.5rem;
   }
 }
 
 /* Tablet/notebook: frota | status lado a lado, alerta embaixo ocupando tudo. */
 @media (min-width: 768px) {
   .strip {
-    grid-template-columns: minmax(15rem, 0.9fr) minmax(0, 1.5fr);
+    grid-template-columns: minmax(14rem, 0.85fr) minmax(0, 1.2fr);
   }
 
   .statusGroup {
@@ -471,7 +358,7 @@
 /* Tela larga: as três partes na mesma linha. */
 @media (min-width: 1280px) {
   .strip {
-    grid-template-columns: minmax(15rem, 0.85fr) minmax(0, 1.45fr) minmax(17rem, 1fr);
+    grid-template-columns: minmax(14rem, 0.8fr) minmax(0, 1.1fr) minmax(17rem, 1fr);
   }
 
   .alertPanel {
