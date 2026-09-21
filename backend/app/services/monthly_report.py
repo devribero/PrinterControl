@@ -14,7 +14,7 @@ lugares nao arrisquem calcular a mesma coisa de tres formas diferentes.
 """
 from datetime import datetime
 
-from sqlmodel import Session, select
+from sqlmodel import Session, func, select
 
 from app.models.printer import PrinterMonthly, PrinterReading
 
@@ -67,28 +67,93 @@ def pages_from_readings(
     na conta. Impressora sem nenhuma leitura no periodo nao aparece no
     dict retornado.
     """
+    # So as duas colunas usadas, e sem as leituras sem contador (offline,
+    # etiquetadora): esta consulta roda a cada carga do painel e a tabela
+    # cresce ~1,4 milhao de linhas por mes com a frota atual. Carregar cada
+    # linha como objeto ORM completo custava ~1s a cada 6 dias de leitura —
+    # uns 25s por chamada no fim do mes. O resultado e identico.
     readings = session.exec(
-        select(PrinterReading)
+        select(PrinterReading.printer_id, PrinterReading.page_count)
         .where(PrinterReading.timestamp >= month_start)
         .where(PrinterReading.timestamp < month_end)
+        .where(PrinterReading.page_count > 0)
         .order_by(PrinterReading.printer_id, PrinterReading.id)
     ).all()
 
     total: dict[int, int] = {}
     ultimo_contador: dict[int, int] = {}
-    for r in readings:
-        if not r.page_count:
-            continue
-        anterior = ultimo_contador.get(r.printer_id)
-        if anterior is not None and r.page_count > anterior:
-            total[r.printer_id] = total.get(r.printer_id, 0) + (r.page_count - anterior)
-        elif r.printer_id not in total:
+    for printer_id, page_count in readings:
+        anterior = ultimo_contador.get(printer_id)
+        if anterior is not None and page_count > anterior:
+            total[printer_id] = total.get(printer_id, 0) + (page_count - anterior)
+        elif printer_id not in total:
             # Primeira leitura valida da impressora no mes: ainda nao ha
             # "salto" para somar, so o registro do ponto de partida.
-            total[r.printer_id] = 0
-        ultimo_contador[r.printer_id] = r.page_count
+            total[printer_id] = 0
+        ultimo_contador[printer_id] = page_count
 
     return total
+
+
+def close_pending_months(session: Session, now: datetime | None = None) -> dict[str, int]:
+    """
+    Congela em PrinterMonthly todo mes JA TERMINADO que tem leitura e ainda
+    nao foi fechado. Devolve {periodo: impressoras_fechadas}; faz commit.
+
+    POR QUE EXISTE (21/09/2026)
+    ---------------------------
+    O fechamento dependia de um unico disparo, no ultimo dia do mes as
+    23:50, e isso falhava de dois jeitos:
+
+      1. Mes errado. O scheduler roda no fuso de Sao Paulo, mas a conta de
+         mes e em UTC (`utcnow`, como todo timestamp de leitura). 23:50 em
+         Brasilia ja e 02:50 do DIA 1 em UTC — o job congelava o mes que
+         estava COMECANDO, quase vazio, e o que terminou nunca era gravado.
+
+      2. Maquina desligada. O backend roda num PC de mesa. Desligado na
+         virada, nada fechava — e como GET /monthly-report so calcula ao
+         vivo o mes CORRENTE, o mes anterior sumia do relatorio inteiro,
+         embora as leituras continuassem no banco.
+
+    Rodar "feche o que falta" em vez de "feche o mes de agora" resolve os
+    dois: nao importa em que fuso nem com quantos dias de atraso roda.
+
+    QUANDO UM MES CONTA COMO FECHADO
+    --------------------------------
+    Qualquer linha em PrinterMonthly para o periodo. Mes fechado nunca e
+    recalculado — nem o importado de planilha (import_historico_planilha.py),
+    que e a fonte oficial dos meses antigos, nem o congelado aqui. Isso
+    tambem mantem a funcao barata: cada mes custa uma leitura das leituras
+    uma unica vez na vida, e nas chamadas seguintes e so a consulta de
+    periodos ja fechados.
+    """
+    now = now or datetime.utcnow()
+    atual = month_period(now)
+
+    primeira = session.exec(select(func.min(PrinterReading.timestamp))).one()
+    if primeira is None:
+        return {}
+    if isinstance(primeira, str):  # SQLite pode devolver o agregado cru
+        primeira = datetime.fromisoformat(primeira)
+
+    ja_fechados = set(session.exec(select(PrinterMonthly.month).distinct()).all())
+
+    fechados: dict[str, int] = {}
+    cursor = datetime(primeira.year, primeira.month, 1)
+    while month_period(cursor) < atual:
+        inicio, fim = month_bounds(cursor)
+        periodo = month_period(cursor)
+        if periodo not in ja_fechados:
+            paginas = pages_from_readings(session, inicio, fim)
+            for printer_id, total in paginas.items():
+                upsert_printer_monthly(session, printer_id, periodo, total, inicio, fim)
+            if paginas:
+                fechados[periodo] = len(paginas)
+        cursor = fim
+
+    if fechados:
+        session.commit()
+    return fechados
 
 
 def upsert_printer_monthly(

@@ -1,17 +1,19 @@
-"""
+r"""
 Fase 12 - fechamento mensal automatico do scheduler.
 
 Cobre: os dois jobs novos (snapshot dia 1, fechamento ultimo dia) sao
 registrados com o cron certo quando o scheduler liga; run_month_close()
-congela o mes corrente em PrinterMonthly; rodar de novo no mesmo mes
-ATUALIZA em vez de duplicar (upsert por printer_id+month); meses
-anteriores (fechados antes, ou importados de planilha) nunca sao tocados.
+fecha os meses JA TERMINADOS em PrinterMonthly e nunca o mes em andamento;
+mes fechado e definitivo (nao duplica nem recalcula); meses importados de
+planilha nunca sao tocados; e meses que ninguem fechou (maquina desligada
+na virada) sao fechados com atraso.
 
 Executar:  .\\venv\\Scripts\\python.exe tests_scheduler_monthly.py
 """
+import asyncio
 import os
 import tempfile
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest import mock
 
 DB = os.path.join(tempfile.gettempdir(), "test_scheduler_monthly.db")
@@ -42,6 +44,10 @@ def check(label, got, expected):
 
 create_db_and_tables()
 
+# Python 3.14 nao cria mais event loop implicito: AsyncIOScheduler.start()
+# fora de um loop quebrava o teste antes de qualquer verificacao.
+asyncio.set_event_loop(asyncio.new_event_loop())
+
 with Session(engine) as s:
     p1 = Printer(server="srvtest", name="Fechamento_A", ip="10.6.6.1", model="X", department="TI", active=True)
     s.add(p1)
@@ -60,43 +66,56 @@ check("snapshot roda dia 1", str(job_start.trigger.fields[2]), "1")  # indice 2 
 check("fechamento roda no ultimo dia (day='last')", str(job_close.trigger.fields[2]), "last")
 scheduler.shutdown_scheduler()
 
-print("\n--- 2. run_month_close() forca uma coleta final e congela o mes corrente ---")
+print("\n--- 2. run_month_close() forca coleta final e fecha o mes que TERMINOU ---")
 # run_collection_cycle mockado aqui: em modo mock ele grava um contador FIXO
 # (online_mono = sempre 5000), o que contaminaria as contas abaixo. O
 # proprio disparo de run_collection_cycle() e verificado pelo call_count;
 # a agregacao e testada isolada, com leituras que eu controlo.
+#
+# 21/09/2026: o job fechava "o mes de agora" em UTC — que, disparado as
+# 23:50 de Brasilia, ja e o mes SEGUINTE. Agora fecha os meses terminados
+# que faltam. As leituras abaixo ficam no mes ANTERIOR ao corrente.
+agora = datetime.utcnow()
+inicio_atual = datetime(agora.year, agora.month, 1)
+mes_passado = inicio_atual - timedelta(days=10)  # algum dia do mes anterior
+PASSADO = month_period(mes_passado)
+ATUAL = month_period(agora)
+
 with Session(engine) as s:
-    hoje = datetime.utcnow()
-    s.add(PrinterReading(printer_id=P1, status="online", page_count=1000, timestamp=hoje))
-    s.add(PrinterReading(printer_id=P1, status="online", page_count=1400, timestamp=hoje))
+    s.add(PrinterReading(printer_id=P1, status="online", page_count=1000, timestamp=mes_passado))
+    s.add(PrinterReading(printer_id=P1, status="online", page_count=1400, timestamp=mes_passado + timedelta(hours=1)))
+    # Mes corrente, ainda em andamento: NAO pode ser congelado.
+    s.add(PrinterReading(printer_id=P1, status="online", page_count=2000, timestamp=agora))
+    s.add(PrinterReading(printer_id=P1, status="online", page_count=2300, timestamp=agora))
     s.commit()
 
 with mock.patch.object(scheduler, "run_collection_cycle") as cycle_mock:
     scheduler.run_month_close()
 check("run_month_close() forca uma coleta final", cycle_mock.call_count, 1)
 
-periodo = month_period(datetime.utcnow())
-with Session(engine) as s:
-    row = s.exec(
-        select(PrinterMonthly).where(PrinterMonthly.printer_id == P1).where(PrinterMonthly.month == periodo)
-    ).first()
-check("PrinterMonthly criado pro mes corrente", row is not None, True)
-check("pages_printed = maior-menor contador", row.pages_printed if row else None, 400)
 
-print("\n--- 3. rodar de novo no mesmo mes ATUALIZA, nao duplica ---")
+def linhas(periodo):
+    with Session(engine) as s:
+        return s.exec(
+            select(PrinterMonthly).where(PrinterMonthly.printer_id == P1).where(PrinterMonthly.month == periodo)
+        ).all()
+
+
+check("mes anterior congelado", len(linhas(PASSADO)), 1)
+check("pages_printed do mes anterior = soma dos saltos (1400-1000)", linhas(PASSADO)[0].pages_printed, 400)
+check("mes corrente, ainda em andamento, NAO e congelado", len(linhas(ATUAL)), 0)
+
+print("\n--- 3. rodar de novo nao duplica nem recalcula mes fechado ---")
 with Session(engine) as s:
-    s.add(PrinterReading(printer_id=P1, status="online", page_count=1900, timestamp=datetime.utcnow()))
+    # Leitura atrasada caindo no mes ja fechado: mes fechado e definitivo.
+    s.add(PrinterReading(printer_id=P1, status="online", page_count=1900, timestamp=mes_passado + timedelta(hours=2)))
     s.commit()
 
 with mock.patch.object(scheduler, "run_collection_cycle"):
     scheduler.run_month_close()
 
-with Session(engine) as s:
-    rows = s.exec(
-        select(PrinterMonthly).where(PrinterMonthly.printer_id == P1).where(PrinterMonthly.month == periodo)
-    ).all()
-check("continua uma unica linha pro mes (upsert, nao duplicou)", len(rows), 1)
-check("valor atualizado com a nova leitura (1900-1000)", rows[0].pages_printed, 900)
+check("continua uma unica linha pro mes (nao duplicou)", len(linhas(PASSADO)), 1)
+check("mes fechado nao foi recalculado", linhas(PASSADO)[0].pages_printed, 400)
 
 print("\n--- 4. mes anterior ja fechado (ex.: importado de planilha) fica intocado ---")
 with Session(engine) as s:
@@ -107,11 +126,21 @@ with Session(engine) as s:
 with mock.patch.object(scheduler, "run_collection_cycle"):
     scheduler.run_month_close()
 
+check("mes de Janeiro/26 nao foi alterado pelo fechamento", linhas("2026-01")[0].pages_printed, 12345)
+
+print("\n--- 5. maquina desligada na virada: fecha com atraso, varios meses ---")
 with Session(engine) as s:
-    antigo = s.exec(
-        select(PrinterMonthly).where(PrinterMonthly.printer_id == P1).where(PrinterMonthly.month == "2026-01")
-    ).first()
-check("mes de Janeiro/26 nao foi alterado pelo fechamento do mes corrente", antigo.pages_printed, 12345)
+    for dias_atras, contadores in ((75, (100, 350)), (45, (500, 520))):
+        dia = inicio_atual - timedelta(days=dias_atras)
+        for i, c in enumerate(contadores):
+            s.add(PrinterReading(printer_id=P1, status="online", page_count=c, timestamp=dia + timedelta(hours=i)))
+    s.commit()
+
+scheduler.run_close_pending_months()
+for dias_atras, esperado in ((75, 250), (45, 20)):
+    periodo = month_period(inicio_atual - timedelta(days=dias_atras))
+    got = linhas(periodo)
+    check(f"mes {periodo} fechado com atraso", got[0].pages_printed if got else None, esperado)
 
 print(f"\nBanco de teste: {DB}")
 print("RESULTADO:", "TODOS OS TESTES PASSARAM" if not failures else f"FALHAS: {failures}")

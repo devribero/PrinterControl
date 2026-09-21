@@ -32,14 +32,13 @@ Dois jobs novos, no MESMO scheduler:
     aquele mes, em vez de recalcular ao vivo toda vez.
 """
 import logging
-from datetime import datetime
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlmodel import Session, select
 
 from app.config import settings
 from app.database import engine
-from app.services.monthly_report import month_bounds, month_period, pages_from_readings, upsert_printer_monthly
+from app.services.monthly_report import close_pending_months
 from app.services.printer_fleet import FleetCollectionBusyError, collect_fleet
 
 logger = logging.getLogger("printercontrol.scheduler")
@@ -98,38 +97,38 @@ def run_month_start_snapshot() -> None:
     """
     logger.info("Snapshot de inicio de mes: coleta extra")
     run_collection_cycle()
+    # Segunda chance de fechar o mes anterior, caso o fechamento da noite
+    # anterior nao tenha rodado (processo reiniciando, maquina desligada).
+    run_close_pending_months()
+
+
+def run_close_pending_months() -> None:
+    """Congela todo mes ja terminado que ainda nao foi fechado (ver close_pending_months)."""
+    try:
+        with Session(engine) as session:
+            fechados = close_pending_months(session)
+    except Exception:
+        # Nunca derruba o scheduler: o proximo disparo (ou a proxima subida)
+        # tenta de novo, e a funcao so fecha o que ainda falta.
+        logger.exception("Fechamento de meses pendentes falhou")
+        return
+    if fechados:
+        logger.info("Meses fechados | %s", fechados)
 
 
 def run_month_close() -> None:
     """
     Ultimo dia de cada mes, a noite: forca uma coleta final (garante
-    leitura bem no fim do mes) e congela o resultado do mes que esta
-    terminando em PrinterMonthly — maior contador do mes menos o menor,
-    mesma conta de pages_from_readings() usada por GET /monthly-report.
+    leitura bem no fim do mes) e fecha o que estiver pendente.
 
-    Upsert por (printer_id, month): rodar de novo no mesmo mes (ex.:
-    reiniciar o processo perto da meia-noite) atualiza o numero em vez de
-    duplicar. So mexe no mes corrente — nunca recalcula ou apaga meses
-    anteriores, sejam eles fechados por este job ou importados de planilha.
+    O disparo e 23:50 em Brasilia — ja 02:50 do dia 1 em UTC, fuso de todas
+    as leituras. Ate 21/09/2026 este job congelava "o mes de agora" em UTC,
+    ou seja, o mes que estava COMECANDO. Agora ele fecha os meses ja
+    terminados que faltam, o que inclui o que acabou de terminar.
     """
-    logger.info("Fechamento mensal: coleta final antes de congelar o mes")
+    logger.info("Fechamento mensal: coleta final antes de fechar o mes")
     run_collection_cycle()
-
-    with Session(engine) as session:
-        hoje = datetime.utcnow()
-        mes_inicio, mes_fim = month_bounds(hoje)
-        periodo = month_period(hoje)
-
-        paginas_por_impressora = pages_from_readings(session, mes_inicio, mes_fim)
-        for printer_id, paginas in paginas_por_impressora.items():
-            upsert_printer_monthly(session, printer_id, periodo, paginas, mes_inicio, hoje)
-        session.commit()
-
-    logger.info(
-        "Fechamento mensal concluido | mes=%s impressoras_fechadas=%s",
-        periodo,
-        len(paginas_por_impressora),
-    )
+    run_close_pending_months()
 
 
 def start_scheduler() -> AsyncIOScheduler | None:
@@ -193,6 +192,16 @@ def start_scheduler() -> AsyncIOScheduler | None:
         max_instances=1,
         coalesce=True,
         misfire_grace_time=3600,
+    )
+
+    # Na subida: fecha o que ficou pendente enquanto o processo estava fora
+    # do ar. Como job avulso, e nao direto no startup, para nao segurar a
+    # subida do backend lendo um mes inteiro de leituras.
+    _scheduler.add_job(
+        run_close_pending_months,
+        trigger="date",
+        id="close_pending_months_boot",
+        max_instances=1,
     )
 
     _scheduler.start()
