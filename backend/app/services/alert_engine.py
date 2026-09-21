@@ -57,6 +57,46 @@ def _active(session: Session, printer_id: int, alert_type: str) -> Alert | None:
     ).first()
 
 
+def resolve_alerts_for_printers(session: Session, printer_ids: list[int], now: datetime | None = None) -> int:
+    """
+    Resolve os alertas abertos das impressoras informadas. NAO faz commit —
+    roda dentro da transacao de quem chamou (o sync), para desativar a
+    impressora e fechar os alertas dela serem uma coisa so.
+
+    Existe porque o alerta so e reavaliado quando chega uma leitura nova
+    (`evaluate_reading`), e impressora desativada nao e mais coletada: sem
+    isto, o alerta de "offline" aberto no dia em que ela sumiu do Print
+    Server ficava aberto para sempre. Em 17/09/2026 eram 110 dos 156 alertas
+    criticos de "offline" do painel — todos de impressoras inativas.
+    """
+    if not printer_ids:
+        return 0
+    now = now or datetime.utcnow()
+    abertos = session.exec(
+        select(Alert)
+        .where(Alert.printer_id.in_(printer_ids))
+        .where(Alert.resolved_at == None)  # noqa: E711
+    ).all()
+    for alerta in abertos:
+        alerta.resolved_at = now
+        session.add(alerta)
+    return len(abertos)
+
+
+def resolve_orphan_alerts(session: Session) -> int:
+    """
+    Fecha os alertas abertos de impressoras que ja estao inativas e faz
+    commit. Idempotente: roda na subida do backend para limpar o que ficou
+    de antes da correcao em `printer_sync` (e qualquer caminho futuro que
+    desative impressora sem passar por la). Sem orfaos, nao escreve nada.
+    """
+    inativas = session.exec(select(Printer.id).where(Printer.active == False)).all()  # noqa: E712
+    fechados = resolve_alerts_for_printers(session, list(inativas))
+    if fechados:
+        session.commit()
+    return fechados
+
+
 def _sync_condition(
     session: Session,
     printer_id: int,

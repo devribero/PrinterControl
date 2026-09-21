@@ -20,6 +20,7 @@ from sqlmodel import Session, select
 from app.config import settings
 from app.models.print_server import PrintServer
 from app.models.printer import Printer
+from app.services.alert_engine import resolve_alerts_for_printers
 from app.services.print_server import PrintServerError, discover_printers
 from app.services.printer_rules import obter_modelo, obter_tipo_impressora
 
@@ -138,13 +139,21 @@ def sync_printers(
         session.add(printer)
         updated += 1
 
-    deactivated = 0
+    deactivated_ids: list[int] = []
     for key, printer in existing.items():
         if key not in seen_keys and printer.active:
             printer.active = False
             printer.updated_at = now
             session.add(printer)
-            deactivated += 1
+            deactivated_ids.append(printer.id)
+    deactivated = len(deactivated_ids)
+
+    # Impressora desativada deixa de ser coletada, e o alerta so e
+    # reavaliado quando chega leitura nova — entao os alertas dela fecham
+    # aqui, na mesma transacao, ou ficariam abertos para sempre.
+    alertas_fechados = resolve_alerts_for_printers(session, deactivated_ids, now)
+    if alertas_fechados:
+        logger.info("sync %s: %d alerta(s) de impressoras desativadas resolvido(s)", server, alertas_fechados)
 
     session.commit()
 

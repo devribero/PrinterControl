@@ -6,12 +6,14 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
+from sqlmodel import Session
 
 from app.config import settings
 from app.database import create_db_and_tables, engine
 from app.logging_config import setup_logging
 from app.routes import audit_log, auth, printers, alerts, collect, servers, users, notifications, ping
 from app.routes import health
+from app.services.alert_engine import resolve_orphan_alerts
 from app.services.scheduler import scheduler_status, shutdown_scheduler, start_scheduler
 
 setup_logging()
@@ -36,6 +38,11 @@ async def lifespan(app: FastAPI):
     )
     create_db_and_tables()
     logger.info("Database initialized")
+    # Limpa alertas presos em impressoras inativas (ver resolve_orphan_alerts).
+    with Session(engine) as session:
+        fechados = resolve_orphan_alerts(session)
+    if fechados:
+        logger.info("Subida: %d alerta(s) orfao(s) de impressoras inativas resolvido(s)", fechados)
     start_scheduler()
     yield
     logger.info("Encerrando")
