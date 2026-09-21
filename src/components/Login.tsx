@@ -30,7 +30,6 @@ import { useTheme, type ThemePreference } from "../lib/theme";
 import { ApiError } from "../lib/api";
 import { useToast } from "../lib/toast";
 import ElginLogo from "./ElginLogo";
-import ClickSmoke from "./ClickSmoke";
 import { cn } from "../lib/cn";
 import styles from "./Login.module.css";
 
@@ -223,9 +222,6 @@ export default function Login({ onSuccess }: LoginProps) {
         <NetworkMap />
         <div className={styles.glowTop} aria-hidden="true" />
         <div className={styles.glowBottom} aria-hidden="true" />
-        {/* Clicar/tocar em qualquer ponto do painel solta uma nuvem de fumaça. */}
-        <ClickSmoke />
-
         <div className={styles.heroLogo}>
           <ElginLogo height={36} tone="white" />
           <p className={styles.heroLogoSubtitle}>Impressoras</p>
