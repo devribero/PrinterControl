@@ -13,6 +13,8 @@
  */
 import type { MonthlyReport } from "../types";
 
+const IPV4 = /^(\d{1,3}\.){3}\d{1,3}$/;
+
 function isValidReport(value: unknown): value is MonthlyReport {
   if (typeof value !== "object" || value === null) return false;
   const r = value as Record<string, unknown>;
@@ -59,7 +61,9 @@ export async function loadMonthlyReport(): Promise<MonthlyReport | null> {
  * última — 100 e 250 viravam 250 e 250. O erro não aparecia como falha:
  * aparecia como um número mensal plausível e errado.
  */
-export function mergeMonthlyReport<T extends { id?: string; ip: string; monthlyPages?: unknown }>(
+export function mergeMonthlyReport<
+  T extends { id?: string; ip: string; monthlyPages?: unknown; deviceMonthlyPages?: unknown },
+>(
   printers: T[],
   report: MonthlyReport | null
 ): T[] {
@@ -74,8 +78,20 @@ export function mergeMonthlyReport<T extends { id?: string; ip: string; monthlyP
     report.printers.filter((p) => p.id === undefined).map((p) => [p.ip, p.monthlyPages])
   );
 
+  // Histórico por EQUIPAMENTO: o relatório real traz uma fila por IP (a
+  // representante). As outras filas do mesmo IP mostram o mesmo gráfico em
+  // `deviceMonthlyPages`. Só IPv4 — porta sem IP ("JUN_LOG_HONEY_19") não
+  // identifica equipamento nenhum.
+  const porEquipamento = new Map(
+    report.printers
+      .filter((p) => p.id !== undefined && IPV4.test(p.ip))
+      .map((p) => [p.ip, p.monthlyPages]),
+  );
+
   return printers.map((p) => {
     const monthlyPages = (p.id !== undefined ? byId.get(p.id) : undefined) ?? byIp.get(p.ip);
-    return monthlyPages ? { ...p, monthlyPages } : p;
+    if (monthlyPages) return { ...p, monthlyPages };
+    const doEquipamento = porEquipamento.get(p.ip);
+    return doEquipamento ? { ...p, deviceMonthlyPages: doEquipamento } : p;
   });
 }

@@ -11,8 +11,9 @@ import {
   type ApiPrinterWithStatus,
   type ApiSyncResult,
   type ApiTonerLevel,
+  type ApiUnit,
 } from "./api";
-import type { Alert, MonthlyReport, Notification, Printer, PrintServer, PrinterStatus, SyncResult, TonerLevel } from "../types";
+import type { Alert, MonthlyReport, Notification, Printer, PrintServer, PrinterStatus, SyncResult, TonerLevel, Unit } from "../types";
 
 const VALID_STATUS: PrinterStatus[] = ["online", "offline", "atencao"];
 const VALID_COLORS = ["K", "C", "M", "Y"] as const;
@@ -126,6 +127,10 @@ export function adaptPrinter(p: ApiPrinterWithStatus): Printer {
     // idade da leitura mais tarde (QA-02) — `lastSeen` é texto de tela.
     lastSeenAt: p.last_seen ?? null,
     lastSeen: formatLastSeen(p.last_seen),
+    driverName: p.driver_name ?? "",
+    shareName: p.share_name ?? "",
+    printerType: p.printer_type ?? null,
+    testPrintSupported: p.test_print_supported === true,
   };
 }
 
@@ -143,6 +148,22 @@ export function adaptPrintServer(s: ApiPrintServer): PrintServer {
     printerCount: s.printer_count,
     activePrinterCount: s.active_printer_count,
     isDefault: s.is_default,
+    unitId: typeof s.unit_id === "number" ? s.unit_id : null,
+    unitName: s.unit_name ?? null,
+  };
+}
+
+export function adaptUnit(u: ApiUnit): Unit {
+  return {
+    id: u.id,
+    name: u.name,
+    active: u.active,
+    webhookConfigured: u.webhook_configured,
+    webhookHost: u.webhook_host ?? "",
+    serverHosts: Array.isArray(u.server_hosts) ? u.server_hosts : [],
+    serverCount: u.server_count,
+    userCount: u.user_count,
+    createdAt: u.created_at,
   };
 }
 
@@ -180,6 +201,8 @@ export function adaptAlert(a: ApiAlert): Alert {
     message: a.message,
     printerId: String(a.printer_id),
     timestamp: a.created_at,
+    readAt: a.read_at ?? null,
+    readBy: a.read_by ?? null,
   };
 }
 
@@ -187,7 +210,14 @@ export function adaptAlert(a: ApiAlert): Alert {
 
 interface ApiMonthlyReport {
   generated_at: string;
-  monthly_usage: { month: string; pages: number; period: string }[];
+  monthly_usage: {
+    month: string;
+    pages: number;
+    period: string;
+    estimated?: number;
+    in_progress?: boolean;
+    devices?: number;
+  }[];
   printers: {
     id: number;
     ip: string;
@@ -214,7 +244,14 @@ export async function loadMonthlyReportFromApi(): Promise<MonthlyReport | null> 
 
     return {
       generatedAt: data.generated_at,
-      monthlyUsage: data.monthly_usage,
+      monthlyUsage: data.monthly_usage.map((m) => ({
+        month: m.month,
+        pages: m.pages,
+        period: m.period,
+        estimated: m.estimated ?? 0,
+        inProgress: m.in_progress === true,
+        devices: m.devices,
+      })),
       printers: data.printers.map((p) => ({
         id: p.id === undefined ? undefined : String(p.id),
         ip: p.ip,

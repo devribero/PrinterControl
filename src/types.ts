@@ -52,6 +52,22 @@ export interface Printer {
    */
   lastSeenAt?: string | null;
   monthlyPages?: MonthlyPageCount[];
+  /**
+   * Histórico do EQUIPAMENTO quando esta fila não é a representante dele.
+   * O relatório mensal conta cada equipamento (IP) uma vez só, pela fila
+   * com mais leituras; as outras filas do mesmo IP recebem o mesmo gráfico
+   * aqui, para exibição. Fica fora de `monthlyPages` de propósito: somas
+   * (ranking, matriz, totais) continuam contando o equipamento uma vez.
+   */
+  deviceMonthlyPages?: MonthlyPageCount[];
+  /** "A4" | "Etiqueta" | "Portatil" — decidido no sync pelo modelo. */
+  printerType?: string | null;
+  /** Driver da fila no print server. Opcional: o conjunto de demonstração não tem. */
+  driverName?: string;
+  /** Nome de compartilhamento no print server ("" até o próximo sync). */
+  shareName?: string;
+  /** Pode receber a página de teste direto no IP (só laser PCL). Decidido no backend. */
+  testPrintSupported?: boolean;
 }
 
 export interface DiscoveredPrinter {
@@ -88,6 +104,27 @@ export interface PrintServer {
   printerCount: number;
   activePrinterCount: number;
   isDefault: boolean;
+  /** Unidade dona do servidor; null = sem unidade. */
+  unitId: number | null;
+  unitName: string | null;
+}
+
+/**
+ * Unidade (ex.: "Manaus"): agrupa Print Servers e usuarios. Todo mundo
+ * enxerga a frota inteira — a unidade so decide o escopo PADRAO do painel e
+ * para onde vao os alertas daquela regiao (webhook proprio).
+ */
+export interface Unit {
+  id: number;
+  name: string;
+  active: boolean;
+  webhookConfigured: boolean;
+  /** Host do webhook, para exibicao. A URL completa nunca chega ao painel. */
+  webhookHost: string;
+  serverHosts: string[];
+  serverCount: number;
+  userCount: number;
+  createdAt: string;
 }
 
 /** Resultado de um sync — o que efetivamente mudou no banco. */
@@ -134,6 +171,13 @@ export interface Alert {
   message: string;
   printerId: string;
   timestamp: string;
+  /**
+   * "Marcar como lido" (so alertas reais do backend; os derivados dos dados
+   * de demonstracao deixam indefinido e nao oferecem a acao).
+   * null = nao lido.
+   */
+  readAt?: string | null;
+  readBy?: string | null;
 }
 
 export interface MonthlyUsage {
@@ -143,6 +187,12 @@ export interface MonthlyUsage {
 
 export interface MonthlyUsageEntry extends MonthlyUsage {
   period: string;
+  /** Quanto de `pages` e estimativa (dias sem coleta no comeco do mes). So o relatorio real traz. */
+  estimated?: number;
+  /** Mes ainda em andamento: o total cresce ate o fechamento. */
+  inProgress?: boolean;
+  /** Equipamentos com dado no mes — comparar meses so faz sentido com cobertura parecida. */
+  devices?: number;
 }
 
 /**

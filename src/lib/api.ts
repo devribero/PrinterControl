@@ -230,6 +230,19 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   return data as T;
 }
 
+/**
+ * Versao dos dados da frota (GET /api/updates/version). Muda a cada leitura
+ * nova gravada no backend; o painel so recarrega quando ela muda.
+ */
+export interface ApiDataVersion {
+  version: number;
+  changed_at: string;
+}
+
+export async function fetchDataVersion(): Promise<ApiDataVersion> {
+  return apiRequest<ApiDataVersion>("/api/updates/version");
+}
+
 /* ── Contratos do backend (snake_case, como o FastAPI devolve) ───────────── */
 
 export interface ApiTonerLevel {
@@ -255,6 +268,14 @@ export interface ApiPrinterWithStatus {
   page_count: number;
   toner: ApiTonerLevel[] | null;
   last_seen: string | null;
+  /** Driver da fila no print server ("" em cadastro manual). */
+  driver_name?: string;
+  /** Nome de compartilhamento no print server; null ate o proximo sync. */
+  share_name?: string | null;
+  /** Pode receber a pagina de teste PCL? Regra no backend (services/test_print.py). */
+  test_print_supported?: boolean;
+  /** "A4" | "Etiqueta" | "Portatil", decidido no sync pelo modelo. */
+  printer_type?: string | null;
 }
 
 export interface ApiAlert {
@@ -265,6 +286,9 @@ export interface ApiAlert {
   message: string;
   created_at: string;
   resolved_at: string | null;
+  /** "Marcar como lido": informativo, compartilhado pela equipe. null = nao lido. */
+  read_at?: string | null;
+  read_by?: string | null;
 }
 
 export interface ApiPrinterReading {
@@ -339,6 +363,14 @@ export const fetchPrintersWithStatus = (signal?: AbortSignal) =>
 export const fetchAlerts = (resolved = false, signal?: AbortSignal) =>
   api.get<ApiAlert[]>(`/api/alerts?resolved=${resolved}`, { signal });
 
+/** Marca/desmarca um alerta como lido. Nao resolve o alerta. */
+export const markAlertRead = (alertId: number) => api.patch<ApiAlert>(`/api/alerts/${alertId}/read`);
+export const markAlertUnread = (alertId: number) => api.patch<ApiAlert>(`/api/alerts/${alertId}/unread`);
+
+/** Marca varios como lidos; sem `ids`, todos os ativos nao lidos. */
+export const markAlertsRead = (ids?: number[]) =>
+  api.post<{ updated: number }>("/api/alerts/read-all", ids ? { ids } : undefined);
+
 /** Historico de leituras de uma impressora, mais recentes primeiro. */
 export const fetchPrinterReadings = (printerId: string | number, limit = 100, signal?: AbortSignal) =>
   api.get<ApiPrinterReading[]>(`/api/printers/${printerId}/readings?limit=${limit}`, { signal });
@@ -365,6 +397,19 @@ export const createPrinter = (data: PrinterInput) =>
 export const updatePrinter = (printerId: string | number, data: Partial<PrinterInput>) =>
   api.patch<ApiPrinterWithStatus>(`/api/printers/${printerId}`, data);
 
+/** Resultado da pagina de teste enviada direto ao IP (porta 9100). */
+export interface ApiTestPrintResult {
+  printer_id: number;
+  ip: string;
+  sent: boolean;
+  /** "enviado" | "porta_fechada" | "sem_resposta" | "erro_de_rede" */
+  detail: string;
+}
+
+/** Pagina de teste PCL direto no IP — so laser; exige operador. */
+export const sendTestPrint = (printerId: string | number) =>
+  api.post<ApiTestPrintResult>(`/api/printers/${printerId}/test-print`);
+
 /* ── Gestao de contas (/api/users) — somente admin ───────────────────────── */
 
 /** `UserResponse` do backend. Nunca traz hash de senha. */
@@ -379,6 +424,10 @@ export interface ApiUser {
   /** Troca de senha pendente — ver Account.mustChangePassword em lib/auth.ts. */
   must_change_password: boolean;
   created_at: string;
+  /** Unidade da conta (so o admin define). Opcional enquanto o backend de
+   *  unidades nao estiver no ar: ausente e tratado como "sem unidade". */
+  unit_id?: number | null;
+  unit_name?: string | null;
 }
 
 export interface UserCreateInput {
@@ -388,6 +437,8 @@ export interface UserCreateInput {
   name: string;
   password: string;
   role: string;
+  /** null/ausente = sem unidade (TI central). */
+  unit_id?: number | null;
 }
 
 /** Campos que o admin pode alterar. Todos opcionais (PATCH parcial). */
@@ -399,6 +450,8 @@ export interface UserUpdateInput {
   /** Redefinicao de senha pelo admin; enviada em claro e hasheada no backend.
    * Liga `must_change_password` na conta alterada. */
   password?: string;
+  /** null desvincula da unidade. Ausente = mantem. */
+  unit_id?: number | null;
 }
 
 export const fetchUsers = (signal?: AbortSignal) => api.get<ApiUser[]>("/api/users", { signal });
@@ -420,6 +473,10 @@ export interface ApiPrintServer {
   printer_count: number;
   active_printer_count: number;
   is_default: boolean;
+  /** Unidade dona do servidor; null = sem unidade. Opcional ate o backend
+   *  de unidades estar no ar. */
+  unit_id?: number | null;
+  unit_name?: string | null;
 }
 
 /** O que o sync mudou no banco. */
@@ -458,6 +515,7 @@ export interface PrintServerCreateInput {
   /** Rotulo legivel. Vazio faz o backend cair no proprio host. */
   name?: string;
   mode?: "mock" | "real";
+  unit_id?: number | null;
 }
 
 /**
@@ -473,6 +531,8 @@ export interface PrintServerUpdateInput {
   mode?: "mock" | "real";
   /** false = exclusao logica: o registro e o historico ficam, a operacao para. */
   active?: boolean;
+  /** null desvincula da unidade. Ausente = mantem. */
+  unit_id?: number | null;
 }
 
 /** Registra um Print Server. O host e unico — 409 se ja existir. Exige admin. */
@@ -553,6 +613,25 @@ export const markNotificationRead = (notificationId: number) =>
 export const markAllNotificationsRead = () =>
   api.post<{ marked: number }>("/api/notifications/read-all");
 
+/** Desfecho do webhook no teste. Nunca traz a URL (ela carrega assinatura). */
+export interface ApiWebhookTestResult {
+  configured: boolean;
+  sent: boolean;
+  /** "enviado" | "nao_configurado" | "http_<status>" | "timeout" | "erro_de_rede" */
+  detail: string;
+}
+
+export interface ApiTestAlertResult {
+  notification: ApiNotification;
+  webhook: ApiWebhookTestResult;
+}
+
+/**
+ * Botao "Testar alerta": notificacao critica na caixa de quem clicou + card
+ * de teste no webhook, numa chamada so. Exige admin.
+ */
+export const sendTestAlert = () => api.post<ApiTestAlertResult>("/api/notifications/test");
+
 /** Envia para N destinatarios — uma notificacao por pessoa. Exige admin. */
 export const createNotifications = (data: NotificationCreateInput) =>
   api.post<ApiNotification[]>("/api/notifications", data);
@@ -570,3 +649,54 @@ export const updateUser = (userId: number, data: UserUpdateInput) =>
  */
 export const deleteUser = (userId: number, confirmEmail: string) =>
   api.delete<void>(`/api/users/${userId}`, { confirm_email: confirmEmail });
+
+
+/* -- Unidades (/api/units) ------------------------------------------------ */
+
+/**
+ * `UnitResponse` do backend. A URL do webhook NUNCA volta (carrega
+ * assinatura): so `webhook_configured` e o host, para o admin reconhecer
+ * para onde os alertas vao.
+ */
+export interface ApiUnit {
+  id: number;
+  name: string;
+  active: boolean;
+  webhook_configured: boolean;
+  webhook_host: string;
+  server_hosts: string[];
+  server_count: number;
+  user_count: number;
+  created_at: string;
+}
+
+export interface UnitCreateInput {
+  name: string;
+  /** Precisa comecar com https:// (422 caso contrario). */
+  webhook_url?: string;
+}
+
+/**
+ * PATCH parcial. `webhook_url` ausente mantem o atual; `""` remove.
+ */
+export interface UnitUpdateInput {
+  name?: string;
+  webhook_url?: string;
+  active?: boolean;
+}
+
+/** Todas as unidades, por nome. Leitura — qualquer papel autenticado. */
+export const listUnits = (signal?: AbortSignal) => api.get<ApiUnit[]>("/api/units", { signal });
+
+/** 409 nome duplicado, 422 URL invalida. Exige admin. */
+export const createUnit = (data: UnitCreateInput) => api.post<ApiUnit>("/api/units", data);
+
+export const updateUnit = (unitId: number, data: UnitUpdateInput) =>
+  api.patch<ApiUnit>(`/api/units/${unitId}`, data);
+
+/** Apaga a unidade; o backend desvincula servidores e usuarios. Exige admin. */
+export const deleteUnit = (unitId: number) => api.delete<void>(`/api/units/${unitId}`);
+
+/** Card de teste no webhook da unidade. Mesmo formato do teste global. */
+export const testUnitWebhook = (unitId: number) =>
+  api.post<ApiWebhookTestResult>(`/api/units/${unitId}/test-webhook`);

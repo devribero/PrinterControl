@@ -40,6 +40,13 @@ export interface Account {
    * cosmetico: e o reflexo de uma trava que ja existe no servidor.
    */
   mustChangePassword: boolean;
+  /**
+   * Unidade da conta (definida so pelo admin). Decide o escopo PADRAO do
+   * painel ao entrar — nao restringe o que a pessoa pode ver. null = sem
+   * unidade (TI central).
+   */
+  unitId: number | null;
+  unitName: string | null;
 }
 
 const ACCOUNT_KEY = "elgin_auth_account";
@@ -53,6 +60,8 @@ interface ApiUser {
   role: string;
   is_active: boolean;
   must_change_password: boolean;
+  unit_id?: number | null;
+  unit_name?: string | null;
 }
 
 interface LoginResponse {
@@ -72,6 +81,8 @@ function toAccount(user: ApiUser): Account {
     role: parseRole(user.role),
     isActive: user.is_active,
     mustChangePassword: user.must_change_password === true,
+    unitId: typeof user.unit_id === "number" ? user.unit_id : null,
+    unitName: typeof user.unit_name === "string" ? user.unit_name : null,
   };
 }
 
@@ -119,6 +130,8 @@ function readCachedAccount(): Account | null {
       // Sessao nao verificada e so um fallback de exibicao — o backend
       // continua sendo a autoridade assim que /me responder de novo.
       mustChangePassword: parsed.mustChangePassword === true,
+      unitId: typeof parsed.unitId === "number" ? parsed.unitId : null,
+      unitName: typeof parsed.unitName === "string" ? parsed.unitName : null,
     };
   } catch {
     return null;

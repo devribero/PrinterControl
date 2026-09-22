@@ -5,6 +5,7 @@
  * entre temas porque um preto quase puro sobre fundo escuro fica invisível.
  */
 import type { TonerLevel } from "../types";
+import { levelBand } from "../components/toner/tonerModel";
 
 const CHANNEL_COLOR_LIGHT: Record<TonerLevel["color"], string> = {
   K: "#3a332c",
@@ -24,8 +25,14 @@ export function tonerChannelColor(channel: TonerLevel["color"], theme: "light" |
   return (theme === "dark" ? CHANNEL_COLOR_DARK : CHANNEL_COLOR_LIGHT)[channel];
 }
 
+/**
+ * Cor da faixa de nível. Os cortes (≤10% crítico, ≤20% baixo) vêm de
+ * components/toner/tonerModel.ts — os mesmos dos alertas de toner do backend —
+ * para Dashboard, tabela, Suprimentos e sino contarem igual. Eram 15/35 aqui.
+ */
 export function tonerLevelColor(percent: number): string {
-  if (percent <= 15) return "var(--danger)";
-  if (percent <= 35) return "var(--warning)";
+  const band = levelBand(percent);
+  if (band === "critical") return "var(--danger)";
+  if (band === "low") return "var(--warning)";
   return "var(--success)";
 }

@@ -12,7 +12,7 @@ export const NAV_ROUTES: Record<string, string> = {
   history: "/history",
   network: "/network",
   users: "/users",
+  units: "/units",
   notifications: "/notifications",
-  integrations: "/integrations",
   settings: "/settings",
 };

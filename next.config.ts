@@ -74,6 +74,17 @@ const BACKEND_ORIGIN = (process.env.BACKEND_ORIGIN?.trim() || "http://127.0.0.1:
 const nextConfig: NextConfig = {
   allowedDevOrigins: origensDeDesenvolvimento(),
 
+  experimental: {
+    /**
+     * Quanto o proxy do Next espera o backend antes de devolver 500.
+     * O padrao e 30s (router-utils/proxy-request.js), e a descoberta de
+     * print servers remotos passa disso: no elgmao3-ad01 so Get-Printer +
+     * Get-PrinterPort levam ~33s, antes ainda do SNMP. O navegador recebia
+     * "500" enquanto o backend terminava a descoberta com sucesso.
+     */
+    proxyTimeout: 180_000,
+  },
+
   /**
    * O painel chama a API pelo proprio endereco (`/api/...`, `/health`) e o
    * Next repassa para o backend.
