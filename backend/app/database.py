@@ -107,13 +107,38 @@ def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
     _migrate_alert_type()
     _migrate_alert_value()
+    _migrate_alert_read()
     _migrate_reading_uptime()
     _migrate_snmp_details()
+    _migrate_printer_share_name()
     _migrate_user_rbac()
     _migrate_user_login_fields()
     _migrate_user_token_version()
     _migrate_print_servers()
     _migrate_child_foreign_keys()
+    _migrate_units()
+
+
+def _migrate_units():
+    """
+    Unidades (21/09/2026): `print_servers.unit_id` e `users.unit_id`.
+
+    A tabela `units` e criada pelo create_all. Aqui so entram as duas colunas
+    novas em bancos que ja existiam — aditiva e idempotente, mesmo padrao de
+    _migrate_printer_share_name(). Linhas existentes ficam NULL (sem unidade),
+    que e exatamente o comportamento anterior: servidor sem unidade manda
+    alerta so para a central, usuario sem unidade recebe tudo.
+    """
+    from sqlalchemy import text
+
+    with engine.connect() as conn:
+        for tabela in ("print_servers", "users"):
+            cols = {row[1] for row in conn.execute(text(f"PRAGMA table_info({tabela})"))}
+            if cols and "unit_id" not in cols:
+                conn.execute(text(f"ALTER TABLE {tabela} ADD COLUMN unit_id INTEGER REFERENCES units(id)"))
+                conn.execute(text(f"CREATE INDEX IF NOT EXISTS ix_{tabela}_unit_id ON {tabela} (unit_id)"))
+                conn.commit()
+                logger.warning("Migracao Unidades: coluna %s.unit_id criada.", tabela)
 
 
 def _migrate_alert_type():
@@ -143,6 +168,24 @@ def _migrate_alert_value():
         if cols and "value" not in cols:
             conn.execute(text("ALTER TABLE alerts ADD COLUMN value INTEGER"))
             conn.commit()
+
+
+def _migrate_alert_read():
+    """
+    Adiciona alerts.read_at e alerts.read_by ("marcar como lido"). Aditiva e
+    idempotente, mesmo padrao de _migrate_alert_value(). Alertas existentes
+    ficam NULL, ou seja, nao lidos.
+    """
+    from sqlalchemy import text
+
+    with engine.connect() as conn:
+        cols = {row[1] for row in conn.execute(text("PRAGMA table_info(alerts)"))}
+        if not cols:
+            return
+        for nome, tipo in (("read_at", "DATETIME"), ("read_by", "VARCHAR")):
+            if nome not in cols:
+                conn.execute(text(f"ALTER TABLE alerts ADD COLUMN {nome} {tipo}"))
+        conn.commit()
 
 
 def _migrate_reading_uptime():
@@ -197,6 +240,27 @@ def _migrate_snmp_details():
                 if nome not in existentes:
                     conn.execute(text(f"ALTER TABLE {tabela} ADD COLUMN {nome} {tipo}"))
         conn.commit()
+
+
+def _migrate_printer_share_name():
+    """
+    printers.share_name (21/09/2026): nome de compartilhamento da fila, para
+    o painel montar o caminho de instalacao no PC do usuario. Aditiva e
+    idempotente; linhas existentes ficam NULL ate o proximo sync.
+    """
+    from sqlalchemy import text
+
+    with engine.connect() as conn:
+        existentes = {row[1] for row in conn.execute(text("PRAGMA table_info(printers)"))}
+        if existentes and "share_name" not in existentes:
+            conn.execute(text("ALTER TABLE printers ADD COLUMN share_name VARCHAR"))
+            conn.commit()
+        # printer_monthly.estimated_pages (21/09/2026): parte estimada do mes.
+        # Linhas antigas ficam 0 — eram medidas ou importadas da planilha.
+        mensais = {row[1] for row in conn.execute(text("PRAGMA table_info(printer_monthly)"))}
+        if mensais and "estimated_pages" not in mensais:
+            conn.execute(text("ALTER TABLE printer_monthly ADD COLUMN estimated_pages INTEGER NOT NULL DEFAULT 0"))
+            conn.commit()
 
 
 def _migrate_user_rbac():

@@ -11,7 +11,8 @@ from sqlmodel import Session
 from app.config import settings
 from app.database import create_db_and_tables, engine
 from app.logging_config import setup_logging
-from app.routes import audit_log, auth, printers, alerts, collect, servers, users, notifications, ping
+from app.routes import audit_log, auth, printers, alerts, collect, servers, users, notifications, ping, units, updates
+from app.routes import levantamento
 from app.routes import health
 from app.services.alert_engine import resolve_orphan_alerts
 from app.services.scheduler import scheduler_status, shutdown_scheduler, start_scheduler
@@ -57,6 +58,7 @@ TAGS_METADATA = [
     {"name": "collect", "description": "Disparo manual de coleta e estado do agendador. Coleta real exige operator; coleta simulada e o agendador exigem admin."},
         {"name": "notifications", "description": "Caixa pessoal de notificacoes do usuario logado. Admin envia; cada um le a sua."},
     {"name": "servers", "description": "Print Server: descoberta e sincronizacao de impressoras (Get-Printer/Get-PrinterPort). Operacoes administrativas."},
+    {"name": "units", "description": "Unidades: agrupam Print Servers e usuarios e roteiam os avisos (webhook da unidade + central). Leitura exige sessao; o resto exige admin."},
 ]
 
 DESCRIPTION = """
@@ -124,8 +126,11 @@ app.include_router(printers.router, prefix=settings.api_prefix)
 app.include_router(alerts.router, prefix=settings.api_prefix)
 app.include_router(collect.router, prefix=settings.api_prefix)
 app.include_router(servers.router, prefix=settings.api_prefix)
+app.include_router(units.router, prefix=settings.api_prefix)
 app.include_router(audit_log.router, prefix=settings.api_prefix)
 app.include_router(ping.router, prefix=settings.api_prefix)
+app.include_router(updates.router, prefix=settings.api_prefix)
+app.include_router(levantamento.router, prefix=settings.api_prefix)
 app.include_router(health.router)
 
 

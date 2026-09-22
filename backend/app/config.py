@@ -4,6 +4,7 @@ from typing import Annotated
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode
 from pathlib import Path
+import sys
 
 
 # Raiz do backend (…/backend), independente de onde o uvicorn foi iniciado.
@@ -78,6 +79,26 @@ class Settings(BaseSettings):
     print_server_host: str = "elgjunprt"
     print_server_timeout_seconds: int = 30
 
+    # Sync automatico dos Print Servers registrados com mode='real' (ver
+    # services/print_server_autosync.py). 0 desliga o periodico; o sync logo
+    # apos cadastrar o servidor continua.
+    print_server_sync_hours: int = 6
+
+    # Leitura rapida so do contador de paginas entre as coletas completas
+    # (services/fast_counter.py). 0 desliga.
+    fast_counter_interval_seconds: int = 30
+
+    # Pagina de teste: "moderna" (logo Elgin; versao colorida nas coloridas)
+    # ou "classica" (a de 21/09/2026, mantida como reserva).
+    test_page_style: str = "moderna"
+
+    # Levantamento mensal em Excel (services/levantamento.py): pasta da
+    # planilha base e dos arquivos gerados. Vazio = backend/data/levantamento
+    # (fora do git — dado interno da empresa).
+    levantamento_dir: str = ""
+    # Geracao automatica do periodo que acabou de fechar (dia 4, ~01:00).
+    levantamento_auto: bool = True
+
     @field_validator("print_server_mode")
     @classmethod
     def _print_server_mode_conhecido(cls, value: str) -> str:
@@ -100,6 +121,22 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     webhook_url: str = ""
     webhook_timeout_seconds: float = 5.0
+
+    # ------------------------------------------------------------------
+    # Alerta de offline so depois de N coletas SEGUIDAS sem resposta.
+    # Com 1 (o comportamento antigo), 43% dos alertas de offline de
+    # setembro/2026 se resolveram sozinhos em ate 10 min — queda de rede ou
+    # etiquetadora dormindo — e cada um virava notificacao para todo mundo.
+    # 3 coletas = ~15 min com o intervalo padrao de 5.
+    # ------------------------------------------------------------------
+    offline_alert_consecutive: int = 3
+
+    @field_validator("offline_alert_consecutive")
+    @classmethod
+    def _offline_consecutivas_valida(cls, value: int) -> int:
+        if value < 1:
+            raise ValueError("OFFLINE_ALERT_CONSECUTIVE deve ser 1 ou mais.")
+        return value
 
     @property
     def is_production(self) -> bool:
@@ -473,3 +510,11 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Os scripts tests_*.py importam este modulo e leem o mesmo backend/.env da
+# producao. Com a URL real ali, os testes de RBAC/ambiente mandavam "AVISO
+# MANUAL DE TONER" de impressoras ficticias para o Teams a cada execucao
+# (21/09/2026). Teste que precisa de webhook troca settings.webhook_url por
+# uma URL falsa ou usa mock depois do import.
+if Path(sys.argv[0] if sys.argv else "").name.startswith("tests_"):
+    settings.webhook_url = ""
