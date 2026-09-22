@@ -10,7 +10,7 @@
  * Tailwind — callers que passavam "max-w-xl" etc. precisam passar o rem
  * equivalente (max-w-lg=32rem, max-w-xl=36rem, max-w-2xl=42rem).
  */
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { X } from "lucide-react";
 import styles from "./Modal.module.css";
 
@@ -35,6 +35,22 @@ interface ModalProps {
 export default function Modal({ open, onClose, title, subtitle, children, footer, maxWidth = "32rem" }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * `onClose` mais recente, lido pelo listener de teclado sem ser dependência
+   * do efeito abaixo.
+   *
+   * Os callers passam `onClose` como função criada na hora
+   * (`onClose={() => setOpen(false)}`), ou seja, uma função NOVA a cada
+   * render. Com ela nas dependências, cada tecla digitada num campo do
+   * diálogo re-renderizava o pai, o efeito rodava de novo e o foco pulava
+   * para o primeiro focável (o botão fechar) — o campo perdia o foco a cada
+   * caractere. Com a ref, o efeito roda só ao abrir e ao fechar.
+   */
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (!open) return;
 
@@ -51,7 +67,7 @@ export default function Modal({ open, onClose, title, subtitle, children, footer
      */
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== "Tab" || !dialogRef.current) return;
@@ -93,7 +109,9 @@ export default function Modal({ open, onClose, title, subtitle, children, footer
       document.body.style.overflow = "";
       anterior?.focus?.();
     };
-  }, [open, onClose]);
+    // So `open`: ver onCloseRef acima. Incluir onClose aqui devolve o bug do
+    // campo que perde o foco a cada tecla.
+  }, [open]);
 
   if (!open) return null;
 
@@ -106,7 +124,9 @@ export default function Modal({ open, onClose, title, subtitle, children, footer
         aria-modal="true"
         aria-labelledby="modal-title"
         className={`${styles.dialog} animate-modal-in`}
-        style={{ maxWidth }}
+        // Variável CSS em vez de `maxWidth` inline: no celular o diálogo vira
+        // folha de tela cheia e a largura máxima do caller deixa de valer.
+        style={{ "--modal-max-width": maxWidth } as CSSProperties}
       >
         <div className={styles.header}>
           <div>

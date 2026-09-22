@@ -6,12 +6,13 @@
  */
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Mail, MessageCircle, TriangleAlert, FlaskConical } from "lucide-react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import PrinterDetailsModal from "./PrinterDetailsModal";
+import TestPrintDialog from "./TestPrintDialog";
 import Modal from "./Modal";
 import { useAppData } from "../lib/app-data";
 import { useToast } from "../lib/toast";
@@ -34,6 +35,24 @@ export default function AppShell({ children }: { children: ReactNode }) {
   } = useAppData();
   const { push } = useToast();
 
+  /**
+   * Gaveta de navegação no celular (< 1024px): Escape fecha e a página de
+   * trás não rola enquanto ela está aberta. Navegar e tocar no véu já fecham
+   * pelo próprio Sidebar (onNavigate / onCloseMobile).
+   */
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setMobileMenuOpen(false);
+    }
+    document.addEventListener("keydown", handleKey);
+    document.documentElement.classList.add("scroll-locked");
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.documentElement.classList.remove("scroll-locked");
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <div className={styles.shell}>
       <div className={styles.aurora} aria-hidden="true">
@@ -46,11 +65,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
         mobileOpen={mobileMenuOpen}
         onCloseMobile={() => setMobileMenuOpen(false)}
         onNavigate={() => setMobileMenuOpen(false)}
-        onOpenHelp={() => setHelpOpen(true)}
+        onOpenHelp={() => {
+          setMobileMenuOpen(false);
+          setHelpOpen(true);
+        }}
       />
 
       <div className={styles.main}>
-        <Topbar onOpenMobileMenu={() => setMobileMenuOpen(true)} />
+        <Topbar mobileMenuOpen={mobileMenuOpen} onOpenMobileMenu={() => setMobileMenuOpen(true)} />
 
         <main className={styles.content}>
           {/* Faixa PERMANENTE de instância de demonstração (Fase 9).
@@ -155,6 +177,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <PrinterDetailsModal printer={selectedPrinter} onClose={() => setSelectedPrinter(null)} />
+      <TestPrintDialog />
 
       <Modal open={helpOpen} onClose={() => setHelpOpen(false)} title="Central de Ajuda" subtitle="Estamos aqui para ajudar">
         <div className={styles.helpList}>

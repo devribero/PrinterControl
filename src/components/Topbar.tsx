@@ -9,6 +9,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Search, Bell, Inbox, Download, RadioTower, ChevronDown, Menu, LogOut, Settings, User, Loader2, TriangleAlert, Sun, Moon } from "lucide-react";
+import ElginLogo from "./ElginLogo";
 import { useTheme } from "../lib/theme";
 import { useAppData } from "../lib/app-data";
 import { useToast } from "../lib/toast";
@@ -17,9 +18,14 @@ import { ROLE_LABELS } from "../lib/permissions";
 import { cn } from "../lib/cn";
 import styles from "./Topbar.module.css";
 
-export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => void }) {
+interface TopbarProps {
+  mobileMenuOpen: boolean;
+  onOpenMobileMenu: () => void;
+}
+
+export default function Topbar({ mobileMenuOpen, onOpenMobileMenu }: TopbarProps) {
   const { theme, toggleTheme } = useTheme();
-  const { account, can, alerts, filters, updateFilter, handleDiscovery, discoveryScanning, handleLogout, handleAlertSelect, filteredPrinters, unreadNotifications } = useAppData();
+  const { account, can, alerts, unreadAlertCount, filters, updateFilter, handleDiscovery, discoveryScanning, handleLogout, handleAlertSelect, filteredPrinters, unreadNotifications } = useAppData();
   const { push } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -62,9 +68,20 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
 
   return (
     <header className={styles.header}>
-      <button onClick={onOpenMobileMenu} className={styles.menuButton}>
-        <Menu size={20} />
+      <button
+        onClick={onOpenMobileMenu}
+        className={styles.menuButton}
+        aria-label="Abrir menu de navegação"
+        aria-expanded={mobileMenuOpen}
+        aria-controls="app-sidebar"
+      >
+        <Menu size={22} />
       </button>
+
+      {/* Marca no celular: com a sidebar recolhida, é o que diz onde se está. */}
+      <Link href="/" className={styles.mobileBrand} aria-label="Ir para o Dashboard">
+        <ElginLogo height={20} />
+      </Link>
 
       <div className={styles.searchWrap}>
         <div className={styles.searchBox}>
@@ -92,9 +109,16 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
         </button>
 
         <div className={styles.dropdownAnchor} ref={notifRef}>
-          <button onClick={() => setNotifOpen((o) => !o)} className={cn(styles.iconButton, styles.relative)}>
+          <button
+            onClick={() => setNotifOpen((o) => !o)}
+            className={cn(styles.iconButton, styles.relative)}
+            aria-label={unreadAlertCount > 0 ? `Alertas da frota: ${unreadAlertCount} não lido(s)` : "Alertas da frota"}
+            aria-expanded={notifOpen}
+          >
             <Bell size={18} />
-            {alerts.length > 0 && <span className={styles.notifBadge}>{alerts.length}</span>}
+            {unreadAlertCount > 0 && (
+              <span className={styles.notifBadge}>{unreadAlertCount > 99 ? "99+" : unreadAlertCount}</span>
+            )}
           </button>
           {notifOpen && (
             <div className={cn(styles.dropdown, styles.dropdownNotif)}>
@@ -170,7 +194,12 @@ export default function Topbar({ onOpenMobileMenu }: { onOpenMobileMenu: () => v
         )}
 
         <div className={styles.dropdownAnchor} ref={menuRef}>
-          <button onClick={() => setMenuOpen((o) => !o)} className={styles.accountButton}>
+          <button
+            onClick={() => setMenuOpen((o) => !o)}
+            className={styles.accountButton}
+            aria-label="Menu da conta"
+            aria-expanded={menuOpen}
+          >
             <div className={styles.avatar}>{initials}</div>
             <div className={styles.accountText}>
               <p className={styles.accountName}>{account.name}</p>

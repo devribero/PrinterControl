@@ -7,7 +7,7 @@
   border-radius: 1rem;
   border: 1px dashed var(--border-strong);
   background: var(--bg-surface);
-  padding: 5rem 1.5rem;
+  padding: 3rem 1.25rem;
   text-align: center;
   box-shadow: var(--shadow-sm);
 }
@@ -41,4 +41,10 @@
   margin-top: 0.75rem;
   font-size: 0.8125rem;
   color: var(--text-secondary);
+}
+
+@media (min-width: 640px) {
+  .wrap {
+    padding: 5rem 1.5rem;
+  }
 }

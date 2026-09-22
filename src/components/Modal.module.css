@@ -1,11 +1,14 @@
+/* Mobile-first: abaixo de 640px o diálogo é uma folha de tela cheia, com
+   cabeçalho e rodapé fixos e só o corpo rolando — as ações do rodapé ficam
+   sempre ao alcance do polegar. A partir de 640px volta a ser o cartão
+   centralizado de sempre, com a largura máxima escolhida pelo caller. */
 .overlay {
   position: fixed;
   inset: 0;
   z-index: 90;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  padding: 1rem;
 }
 
 .backdrop {
@@ -17,26 +20,29 @@
 
 .dialog {
   position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
-  border-radius: 1rem;
-  border: 1px solid var(--border);
+  height: 100%;
+  max-height: 100dvh;
+  overflow: hidden;
   background: var(--bg-surface);
   box-shadow: var(--shadow-lg);
 }
 
 .header {
   display: flex;
+  flex-shrink: 0;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   border-bottom: 1px solid var(--border);
-  padding: 1.25rem 1.5rem;
+  padding: calc(0.875rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right)) 0.875rem
+    calc(1rem + env(safe-area-inset-left));
 }
 
 .title {
-  font-size: 1.125rem;
+  font-size: 1.0625rem;
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -48,9 +54,14 @@
 }
 
 .closeButton {
+  display: inline-flex;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  margin: -0.5rem -0.5rem -0.5rem 0;
   border-radius: 0.5rem;
-  padding: 0.375rem;
   color: var(--text-muted);
 }
 
@@ -60,14 +71,72 @@
 }
 
 .body {
-  padding: 1.25rem 1.5rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem calc(1rem + env(safe-area-inset-right)) 1.25rem calc(1rem + env(safe-area-inset-left));
 }
 
 .footer {
   display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 0.625rem;
   border-top: 1px solid var(--border);
-  padding: 1rem 1.5rem;
+  background: var(--bg-surface);
+  padding: 0.75rem calc(1rem + env(safe-area-inset-right)) calc(0.75rem + env(safe-area-inset-bottom))
+    calc(1rem + env(safe-area-inset-left));
+}
+
+/* Botões do rodapé dividem a largura no celular e ganham altura de toque. */
+@media (max-width: 639px) {
+  .footer > * {
+    flex: 1 1 auto;
+  }
+
+  .footer :where(button, a) {
+    justify-content: center;
+    min-height: 2.75rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .overlay {
+    align-items: center;
+    padding: 1rem;
+  }
+
+  .dialog {
+    height: auto;
+    max-width: var(--modal-max-width, 32rem);
+    max-height: 85vh;
+    border-radius: 1rem;
+    border: 1px solid var(--border);
+  }
+
+  .header {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .title {
+    font-size: 1.125rem;
+  }
+
+  .closeButton {
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0.375rem;
+  }
+
+  .body {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .footer {
+    padding: 1rem 1.5rem;
+  }
 }

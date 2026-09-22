@@ -25,11 +25,11 @@ import {
   History,
   Network,
   UserCog,
+  Building2,
   Bell,
-  Plug,
   Settings,
   LifeBuoy,
-  Menu,
+  X,
 } from "lucide-react";
 import { networkHistory } from "../data/printers";
 import ElginLogo from "./ElginLogo";
@@ -72,7 +72,7 @@ export default function Sidebar({ mobileOpen, onCloseMobile, onNavigate, onOpenH
   const { theme } = useTheme();
   const chartColors = getChartColors(theme);
   const pathname = usePathname();
-  const { alerts, can, activeFleet, backendEnv } = useAppData();
+  const { unreadAlertCount, can, activeFleet, backendEnv } = useAppData();
 
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
@@ -117,15 +117,19 @@ export default function Sidebar({ mobileOpen, onCloseMobile, onNavigate, onOpenH
 
   return (
     <>
-      {mobileOpen && <div className={styles.backdrop} onClick={onCloseMobile} />}
-      <aside className={cn(styles.aside, mobileOpen ? styles.asideOpen : styles.asideClosed)}>
+      {mobileOpen && <div className={styles.backdrop} onClick={onCloseMobile} aria-hidden="true" />}
+      <aside
+        id="app-sidebar"
+        aria-label="Navegação principal"
+        className={cn(styles.aside, mobileOpen ? styles.asideOpen : styles.asideClosed)}
+      >
         <div className={styles.header}>
           <div className={styles.logoWrap}>
             <ElginLogo height={29} />
             <p className={styles.logoSubtitle}>Impressoras</p>
           </div>
-          <button onClick={onCloseMobile} className={styles.closeButton}>
-            <Menu size={18} />
+          <button onClick={onCloseMobile} className={styles.closeButton} aria-label="Fechar menu de navegação">
+            <X size={20} />
           </button>
         </div>
 
@@ -139,7 +143,7 @@ export default function Sidebar({ mobileOpen, onCloseMobile, onNavigate, onOpenH
               icon={<AlertTriangle size={18} />}
               label="Alertas"
               href="/alerts"
-              badge={alerts.length}
+              badge={unreadAlertCount}
               active={isActive("/alerts")}
               onNavigate={onNavigate}
             />
@@ -148,8 +152,7 @@ export default function Sidebar({ mobileOpen, onCloseMobile, onNavigate, onOpenH
             <NavItem icon={<Network size={18} />} label="Mapeamento de Rede" href="/network" active={isActive("/network")} onNavigate={onNavigate} />
           </nav>
 
-          {/* Área administrativa. As quatro telas ainda são placeholders
-              (ComingSoon), mas todas descrevem operações que o backend já
+          {/* Área administrativa. Todas descrevem operações que o backend
               trata como admin — deixá-las visíveis para viewer/operator só
               prometeria acesso que eles não terão. */}
           {can.canAdmin && (
@@ -157,8 +160,8 @@ export default function Sidebar({ mobileOpen, onCloseMobile, onNavigate, onOpenH
               <p className={cn(styles.sectionLabel, styles.sectionLabelSpaced)}>CONFIGURAÇÕES</p>
               <nav className={styles.nav}>
                 <NavItem icon={<UserCog size={18} />} label="Usuários" href="/users" active={isActive("/users")} onNavigate={onNavigate} />
+                <NavItem icon={<Building2 size={18} />} label="Unidades" href="/units" active={isActive("/units")} onNavigate={onNavigate} />
                 <NavItem icon={<Bell size={18} />} label="Notificações" href="/notifications" active={isActive("/notifications")} onNavigate={onNavigate} />
-                <NavItem icon={<Plug size={18} />} label="Integrações" href="/integrations" active={isActive("/integrations")} onNavigate={onNavigate} />
                 <NavItem icon={<Settings size={18} />} label="Configurações" href="/settings" active={isActive("/settings")} onNavigate={onNavigate} />
               </nav>
             </>

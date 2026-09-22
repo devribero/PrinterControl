@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Public_Sans, Source_Serif_4, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
@@ -29,6 +29,19 @@ export const metadata: Metadata = {
   title: "Elgin Impressoras · Painel de Monitoramento",
   description: "Painel de monitoramento de impressoras em rede — status, toner, alertas e relatórios em tempo real.",
   icons: { icon: "/favicon.png" },
+};
+
+/* Viewport explícito: device-width + escala 1 (o padrão do Next) e
+   viewportFit "cover" para que env(safe-area-inset-*) tenha valor em
+   celulares com entalhe. Zoom do usuário continua permitido (acessibilidade). */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f3ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#060607" },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

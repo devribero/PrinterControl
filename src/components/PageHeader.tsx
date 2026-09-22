@@ -13,7 +13,7 @@ export default function PageHeader({ section, title, subtitle, actions }: PageHe
     <div className={styles.header}>
       <div className={styles.titleBlock}>
         <span className={styles.accentBar} aria-hidden="true" />
-        <div>
+        <div className={styles.titleText}>
           <div className={styles.crumb}>
             <span>{section}</span>
             <span className={styles.crumbSep}>/</span>

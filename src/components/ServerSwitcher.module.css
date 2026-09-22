@@ -81,13 +81,9 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* Alinhado a esquerda quando nao ha espaco a direita (cabecalho estreito). */
-@media (max-width: 30rem) {
-  .dropdown {
-    right: auto;
-    left: 0;
-    width: min(19rem, calc(100vw - 2rem));
-  }
+.scrim,
+.sheetHandle {
+  display: none;
 }
 
 .dropdownHint {
@@ -121,6 +117,7 @@
 }
 
 .itemIcon {
+  display: flex;
   margin-top: 0.125rem;
   flex-shrink: 0;
   color: var(--text-muted);
@@ -177,4 +174,79 @@
   margin: 0.375rem 0.625rem;
   height: 1px;
   background: var(--divider);
+}
+
+/* Celular: o gatilho ocupa a linha inteira (alvo de toque confortável) e a
+   lista vira uma folha presa à base da tela, em vez de um dropdown que
+   escaparia pela lateral. */
+@media (max-width: 639px) {
+  .anchor {
+    display: block;
+    width: 100%;
+  }
+
+  .trigger {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .triggerText {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .triggerValue {
+    max-width: 100%;
+    font-size: 0.875rem;
+  }
+
+  .scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: color-mix(in srgb, var(--text-primary) 35%, transparent);
+  }
+
+  .dropdown {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 81;
+    width: 100%;
+    max-height: 75dvh;
+    border-radius: 1rem 1rem 0 0;
+    border-bottom: none;
+    padding: 0.5rem 0.5rem calc(0.75rem + env(safe-area-inset-bottom));
+  }
+
+  .sheetHandle {
+    display: block;
+    width: 2.5rem;
+    height: 4px;
+    margin: 0.25rem auto 0.5rem;
+    border-radius: 999px;
+    background: var(--border-strong);
+  }
+
+  .dropdownHint {
+    font-size: 0.8125rem;
+  }
+
+  .item {
+    min-height: 3rem;
+    align-items: center;
+    padding: 0.625rem 0.75rem;
+  }
+
+  .itemTitle {
+    font-size: 0.9375rem;
+  }
+
+  .itemMeta {
+    font-size: 0.75rem;
+  }
 }

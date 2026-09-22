@@ -125,6 +125,27 @@ body {
   height: 100%;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Rede de segurança contra rolagem horizontal da PÁGINA no celular. `clip`
+   (e não `hidden`) não cria contêiner de rolagem, então position: sticky do
+   Topbar continua funcionando. Tabelas largas rolam dentro do próprio
+   contêiner — isto só impede que um elemento esquecido estique a página. */
+body {
+  overflow-x: clip;
+}
+
+/* Trava de rolagem enquanto a gaveta de navegação do celular está aberta
+   (AppShell alterna a classe na <html>). */
+html.scroll-locked,
+html.scroll-locked body {
+  overflow: hidden;
+}
+
 body {
   margin: 0;
   background: var(--bg-page);
@@ -164,6 +185,16 @@ select,
 textarea {
   font: inherit;
   color: inherit;
+}
+
+/* Celular: campos com menos de 16px fazem o Safari do iOS dar zoom na página
+   ao focar. 1rem respeita a escala de texto escolhida nas Configurações. */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: max(1rem, 16px);
+  }
 }
 
 * {
