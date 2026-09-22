@@ -70,6 +70,9 @@ tsconfig.tsbuildinfo
 # Operacao em producao (Fase 10)
 backend/logs/
 backend/backups/
+# Levantamento mensal em Excel (services/levantamento.py): planilha base e
+# arquivos gerados — dado interno da empresa, nunca no repositorio.
+backend/data/
 # Companheiros do modo WAL do SQLite — estado transitorio, nunca versionado.
 *.db-wal
 *.db-shm

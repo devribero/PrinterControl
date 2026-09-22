@@ -10,6 +10,7 @@ Executar:  .\\venv\\Scripts\\python.exe tests_import_historico.py
 """
 import os
 import tempfile
+from datetime import datetime
 
 DB = os.path.join(tempfile.gettempdir(), "test_import_historico.db")
 if os.path.exists(DB):
@@ -87,15 +88,25 @@ with Session(engine) as s:
     s.refresh(p_ok)
 
     # 10.2.2.2 (site teste 2) propositalmente NAO existe no banco.
+    # 21/09/2026: 10.1.1.2 com duas filas deixou de ser "ambiguo" — um IP e
+    # UM equipamento, e o historico vai para uma fila so (a de menor id).
     resultado = importar_para_banco(s, impressoras, ano=2026, aplicar=False)
-    check("1 impressora casada (so 10.1.1.1 e unica)", resultado["importados"], 1)
+    check("2 equipamentos casados (10.1.1.1 e o de duas filas)", resultado["importados"], 2)
     check("1 IP nao encontrado (10.2.2.2)", len(resultado["nao_encontrados"]), 1)
-    check("1 IP ambiguo (10.1.1.2, duas impressoras)", len(resultado["ambiguos"]), 1)
+    check("nenhum ambiguo", len(resultado["ambiguos"]), 0)
+    check("equipamento de duas filas listado", len(resultado["multiplas_filas"]), 1)
     check("simulacao nao grava nada no banco", s.exec(select(PrinterMonthly)).all(), [])
 
     resultado2 = importar_para_banco(s, impressoras, ano=2026, aplicar=True)
     s.commit()
-    check("com --aplicar, grava de verdade", len(s.exec(select(PrinterMonthly)).all()), 2)
+    check("com --aplicar, grava 2 meses x 2 equipamentos", len(s.exec(select(PrinterMonthly)).all()), 4)
+    hist_dup = {
+        m.printer_id for m in s.exec(select(PrinterMonthly).where(PrinterMonthly.printer_id.in_([p_dup1.id, p_dup2.id])))
+    }
+    check("historico do IP de duas filas so na de menor id", hist_dup, {p_dup1.id})
+    s.refresh(p_dup2)
+    check("departamento vai para as duas filas do equipamento", p_dup2.department, "RH — Site Teste 1")
+    check("serial preenchido onde o banco nao tinha", p_dup2.serial_number, "SER2")
     jan = s.exec(
         select(PrinterMonthly).where(PrinterMonthly.printer_id == p_ok.id).where(PrinterMonthly.month == "2026-01")
     ).first()
@@ -116,6 +127,97 @@ with Session(engine) as s:
     ).all()
     check("continua 1 linha so (upsert)", len(linhas_jan), 1)
     check("valor atualizado pro novo numero da planilha", linhas_jan[0].pages_printed, 888)
+
+print("\n--- 5. v8: serial primeiro, conflito de SNMP, mes nao fechado, MAC, Total na coluna D ---")
+with Session(engine) as s:
+    # Equipamento que MUDOU de IP: o SNMP ja o conhece (serial) no IP novo.
+    movida = Printer(server="x", name="Colorida_nova", ip="10.9.9.6", model="M", department="", active=True,
+                     serial_number="V9Z5Y00033")
+    # No IP antigo hoje ha outro equipamento, identificado pelo SNMP.
+    outra = Printer(server="x", name="Etiqueta_no_ip_antigo", ip="10.9.9.254", model="M", department="", active=True,
+                    serial_number="99001007")
+    # IP cujo SNMP diz um serial que a planilha nao conhece em lugar nenhum.
+    trocada = Printer(server="x", name="Trocada", ip="10.9.9.7", model="M", department="", active=True,
+                      serial_number="AAA111")
+    pantum = Printer(server="x", name="Pantum_VLO", ip="10.9.9.40", model="M", department="", active=True)
+    for p in (movida, outra, trocada, pantum):
+        s.add(p)
+    s.commit()
+
+    # Leitura com posicao de coluna: rotulo "Total" na coluna D, como na planilha real.
+    linhas_v8 = [
+        ["COLORIDAS"],
+        ["IP", "Modelo", "Serial", "Departamento", "Janeiro", "Fevereiro", "Março"],
+        ["10.9.9.254", "Kyocera M6530cdn", "V9Z5Y00033", "Logística Jundiaí", "10", "20", "0"],
+        ["10.9.9.7", "Kyocera M2040", "ZZZ999", "Qualidade", "5", "5", "0"],
+        ["10.9.9.40", "SP_BM5100ADW", "84:BA:3B:05:B7:FC", "Diretoria (P&B)", "7", "8", "0"],
+        [None, None, None, "Total", "22", "33", "0"],
+    ]
+    itens, avisos_v8 = _parse_blocos(linhas_v8)
+    check("Total na coluna D reconhecido (sem aviso de IP invalido)", [a for a in avisos_v8 if "None" in a], [])
+    r = importar_para_banco(s, itens, ano=2026, aplicar=True)
+    s.commit()
+
+    check("so meses com dado na frota (Marco zerado fica de fora)", r["meses"], ["Janeiro", "Fevereiro"])
+    check("casado pelo serial, no IP novo", len(r["casados_por_serial"]), 1)
+    hist_movida = s.exec(select(PrinterMonthly).where(PrinterMonthly.printer_id == movida.id)).all()
+    check("historico da colorida foi para o equipamento certo (IP novo)", len(hist_movida), 2)
+    check("nada para quem esta no IP antigo", s.exec(select(PrinterMonthly).where(PrinterMonthly.printer_id == outra.id)).all(), [])
+    check("conflito de SNMP nao importado", len(r["conflitos"]), 1)
+    check("nada gravado na trocada", s.exec(select(PrinterMonthly).where(PrinterMonthly.printer_id == trocada.id)).all(), [])
+    s.refresh(movida)
+    s.refresh(pantum)
+    check("departamento com unidade no equipamento movido", movida.department, "Logística Jundiaí — Coloridas (multi-site)")
+    check("MAC nao vira serial", pantum.serial_number, None)
+    check("MAC listado como ignorado", len(r["seriais_ignorados"]), 1)
+
+print("\n--- 6. periodos da planilha e autocorrecao de historico em registro velho ---")
+from import_historico_planilha import periodos_da_planilha  # noqa: E402
+
+tabela = [
+    [None, None, None, "Mês", "Período", "Impressões"],
+    [None, None, None, "Agosto", "04/08/26 a 03/09/26", "183250"],
+]
+per = periodos_da_planilha(tabela, 2026)
+check("agosto comeca 04/08", per["Agosto"][0], datetime(2026, 8, 4))
+check("agosto termina (exclusivo) em 04/09", per["Agosto"][1], datetime(2026, 9, 4))
+
+with Session(engine) as s:
+    # Registro velho, INATIVO, no IP antigo: recebeu historico e serial numa
+    # importacao anterior que casou pelo IP. Depois o SNMP leu o mesmo serial
+    # no equipamento ativo, no IP novo.
+    velho = Printer(server="", name="Velho_IP_antigo", ip="10.7.7.251", model="M", department="X", active=False,
+                    serial_number="5875Z710245")
+    novo = Printer(server="srv", name="Novo_IP_atual", ip="10.7.7.108", model="M", department="", active=True,
+                   serial_number="5875Z710245", snmp_updated_at=datetime(2026, 9, 21))
+    s.add(velho)
+    s.add(novo)
+    s.commit()
+    s.add(PrinterMonthly(printer_id=velho.id, month="2026-08", pages_printed=500,
+                          month_start=datetime(2026, 8, 1), month_end=datetime(2026, 9, 1)))
+    s.commit()
+
+    itens_v, _ = _parse_blocos([
+        ["JUNDIAÍ - LOGÍSTICA"],
+        ["IP", "Modelo", "Serial", "Departamento", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto"],
+        ["10.7.7.251", "Ricoh P311", "5875Z710245", "Operação Solar", "0", "0", "0", "0", "0", "0", "0", "500"],
+        ["Total:", "0", "0", "0", "0", "0", "0", "0", "500"],
+    ])
+    r6 = importar_para_banco(s, itens_v, ano=2026, aplicar=True, periodos=per)
+    s.commit()
+    s.refresh(velho)
+    s.refresh(novo)
+    ago_novo = s.exec(select(PrinterMonthly).where(PrinterMonthly.printer_id == novo.id)
+                      .where(PrinterMonthly.month == "2026-08")).first()
+    ago_velho = s.exec(select(PrinterMonthly).where(PrinterMonthly.printer_id == velho.id)
+                       .where(PrinterMonthly.month == "2026-08")).first()
+
+check("historico foi para o equipamento ativo (serial via SNMP)", ago_novo.pages_printed if ago_novo else None, 500)
+check("fim do periodo = o da planilha (04/09)", ago_novo.month_end if ago_novo else None, datetime(2026, 9, 4))
+check("historico saiu do registro velho", ago_velho, None)
+check("serial duplicado saiu do registro velho inativo", velho.serial_number, None)
+check("departamento foi para o equipamento ativo", novo.department, "Operação Solar — Jundiaí")
+check("autocorrecao listada no relatorio", len(r6["realocados"]) >= 1, True)
 
 print(f"\nBanco de teste: {DB}")
 print("RESULTADO:", "TODOS OS TESTES PASSARAM" if not failures else f"FALHAS: {failures}")
