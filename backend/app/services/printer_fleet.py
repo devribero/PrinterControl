@@ -52,6 +52,7 @@ from sqlmodel import Session, select
 
 from app.config import settings
 from app.models.printer import Printer, PrinterReading
+from app.services import data_version
 from app.services.alert_engine import evaluate_reading
 from app.services.printer_collector import PrinterCollector
 from app.services.snmp import SNMPClient, SNMPResult
@@ -170,9 +171,12 @@ def collect_fleet(
     if not _fleet_lock.acquire(blocking=False):
         raise FleetCollectionBusyError("Ja existe uma coleta da frota em andamento. Aguarde ela terminar.")
     try:
-        return _run_fleet_cycle(session, mode, mock_scenario, max_workers)
+        resultado = _run_fleet_cycle(session, mode, mock_scenario, max_workers)
     finally:
         _fleet_lock.release()
+    # Painel recarrega quando a versao muda (data_version).
+    data_version.bump()
+    return resultado
 
 
 def _run_fleet_cycle(

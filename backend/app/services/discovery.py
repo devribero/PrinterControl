@@ -1,6 +1,7 @@
 """Enriquecimento transitório de filas descobertas com telemetria SNMP."""
 
 import re
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from ipaddress import IPv4Address, AddressValueError
 from typing import Callable
@@ -62,6 +63,9 @@ def _empty_result(reason: str, error: str | None = None) -> SNMPResult:
         error=error,
         status_reason=reason,
     )
+
+
+_SNMP_WORKERS_DESCOBERTA = 16
 
 
 def _result_for_ip(
@@ -132,9 +136,17 @@ def enrich_discovered_printers(
         else:
             raise ValueError(f"modo de Print Server inválido: {mode!r}")
 
-    results: dict[str, SNMPResult] = {
-        ip: _result_for_ip(ip, members, client_factory) for ip, members in groups.items()
-    }
+    # Um IP por thread (22/09/2026): em sequencia, os 124 IPs do elgmcprt
+    # levavam 90s, e cada impressora desligada gastava o timeout inteiro
+    # antes de passar para a proxima. Cada IP usa o proprio cliente
+    # (client_factory), entao nada e compartilhado entre as threads.
+    workers = max(1, min(_SNMP_WORKERS_DESCOBERTA, len(groups)))
+    with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="discovery-snmp") as pool:
+        futuros = {
+            ip: pool.submit(_result_for_ip, ip, members, client_factory)
+            for ip, members in groups.items()
+        }
+        results: dict[str, SNMPResult] = {ip: f.result() for ip, f in futuros.items()}
     enriched: list[EnrichedDiscoveredPrinter] = []
     for printer in printers:
         ip = _normalize_ip(printer.ip)

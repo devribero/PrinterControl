@@ -455,6 +455,37 @@ def main():
     check("percentual", [t.percent for t in r.toners], [60])
     agent.stop()
 
+    print("\n[13b] Kyocera: contador do fabricante vale antes do prtMarkerLifeCount")
+    kyocera = dict(device_oids())
+    kyocera[SNMPClient.OID_PAGE_COUNT_FABRICANTE[0]] = (TAG_COUNTER32, 120000)
+    agent = iniciar(FakeAgent(supplies=[(1, 6000, 10000, "Black Toner")], extra=kyocera))
+    r = LocalSNMPClient(agent.port).collect("127.0.0.1", is_color=False)
+    check("page_count do fabricante", r.page_count, 120000)
+    agent.stop()
+
+    print("\n[13c] Ricoh: capacidade desconhecida (-2) e nivel ja em porcentagem")
+    for bulk in (True, False):
+        agent = iniciar(FakeAgent(supplies=[(1, 93, -2, "Black Cartridge")], support_bulk=bulk, extra=device_oids()))
+        r = LocalSNMPClient(agent.port).collect("127.0.0.1", is_color=False)
+        check(f"93% ({'GETBULK' if bulk else 'GET um a um'})", [(t.color, t.percent) for t in r.toners], [("K", 93)])
+        agent.stop()
+    agent = iniciar(FakeAgent(supplies=[(1, 40, -2, "Drum Unit")], extra=device_oids()))
+    r = LocalSNMPClient(agent.port).collect("127.0.0.1", is_color=False)
+    check("-2 em consumivel que nao e cartucho nao vira toner", r.toners, [])
+    agent.stop()
+
+    print("\n[13d] Diagnostico de toner sem nivel")
+    for supplies, esperado in (
+        ([(1, -2, -2, "")], "não identifica o cartucho"),
+        ([(1, -3, 21000, "TK-3182")], "Há toner"),
+        ([(1, 5000, 10000, "Black Toner")], None),
+    ):
+        agent = iniciar(FakeAgent(supplies=supplies))
+        nota = LocalSNMPClient(agent.port).diagnostico_toner("127.0.0.1")
+        check(f"nota para {supplies[0][1]}/{supplies[0][2]}",
+              esperado in nota if esperado and nota else nota, True if esperado else None)
+        agent.stop()
+
     print("\n[14] Sem ping e SNMP mudo: offline com um unico pedido")
     agent = iniciar(FakeAgent(supplies=[], mute=True))
     r = LocalSNMPClient(agent.port, ping_ok=False, timeout=0.2, retries=1).collect("127.0.0.1")

@@ -244,12 +244,26 @@ def parse_varbinds(data: bytes) -> list[tuple[str, int, bytes]]:
     return parse_response(data)[1]
 
 
+# Descricao de cartucho de toner, para aceitar o nivel em porcentagem quando
+# a capacidade vem "desconhecida" (ver _build_toner).
+_CARTUCHO_RE = re.compile(r"toner|cartridge|cartucho|\btk-", re.IGNORECASE)
+
+
 class SNMPClient:
     """Cliente SNMP para coleta de impressoras (Printer-MIB, RFC 3805)."""
 
     # OIDs — identicos aos do Coletar-Impressoras.ps1
     OID_UPTIME = "1.3.6.1.2.1.1.3.0"  # sysUpTime
     OID_PAGE_COUNT = "1.3.6.1.2.1.43.10.2.1.4.1.1"  # prtMarkerLifeCount
+    # Contador do fabricante que vale ANTES do padrao, quando existe.
+    # Kyocera (22/09/2026): o prtMarkerLifeCount fica 0,7% a 1,5% acima do
+    # "total" que a propria impressora imprime no relatorio de contadores —
+    # P3055dn 10.36.0.15: padrao 1.065.427, relatorio 1.049.289, e o OID
+    # abaixo 1.049.307 (o relatorio + as folhas de teste do dia). Mesmo
+    # desvio nas M3040idn e M6530cdn. Ricoh bate nos dois; nao precisa.
+    OID_PAGE_COUNT_FABRICANTE = (
+        "1.3.6.1.4.1.1347.43.10.1.1.12.1.1",  # Kyocera: contador total
+    )
     OID_TONER_LEVEL = "1.3.6.1.2.1.43.11.1.1.9.1"  # prtMarkerSuppliesLevel
     OID_TONER_MAX = "1.3.6.1.2.1.43.11.1.1.8.1"  # prtMarkerSuppliesMaxCapacity
     OID_TONER_DESC = "1.3.6.1.2.1.43.11.1.1.6.1"  # prtMarkerSuppliesDescription
@@ -262,6 +276,15 @@ class SNMPClient:
     OID_HR_PRINTER_STATUS = "1.3.6.1.2.1.25.3.5.1.1"  # .hrDeviceIndex
     OID_HR_PRINTER_ERRORS = "1.3.6.1.2.1.25.3.5.1.2"  # .hrDeviceIndex
     OID_SERIAL_NUMBER = "1.3.6.1.2.1.43.5.1.1.17"  # prtGeneralSerialNumber.hrDeviceIndex
+    # Serial em MIB do fabricante, tentado so quando o padrao vem vazio.
+    # Ricoh P 311 / M 320F deixam prtGeneralSerialNumber vazio e so informam
+    # o serial aqui (verificado em 21/09/2026: P 311 em 10.2.0.108 devolveu
+    # 5875Z710245 so neste OID; a P 502 responde nos dois). Sem serial, a
+    # planilha de inventario nao conseguia reconhecer o equipamento depois
+    # que ele mudou de IP.
+    OID_SERIAL_FALLBACKS = (
+        "1.3.6.1.4.1.367.3.2.1.2.1.4.0",  # Ricoh
+    )
     OID_CONSOLE_TEXT = "1.3.6.1.2.1.43.16.5.1.2"  # prtConsoleDisplayBufferText.hrDeviceIndex.linha
     OID_INPUT_MAX = "1.3.6.1.2.1.43.8.2.1.9"  # prtInputMaxCapacity.hrDeviceIndex.bandeja
     OID_INPUT_LEVEL = "1.3.6.1.2.1.43.8.2.1.10"  # prtInputCurrentLevel.hrDeviceIndex.bandeja
@@ -336,7 +359,7 @@ class SNMPClient:
                 label_device = self._is_label_device(result)
 
                 if not label_device:
-                    page_count = self._get_numeric(sock, ip, self.OID_PAGE_COUNT)
+                    page_count = self._page_count(sock, ip)
                     if page_count is not None:
                         result.snmp_responded = True
                         result.page_count = page_count
@@ -551,7 +574,9 @@ class SNMPClient:
             if level is not None or maximum is not None:
                 responded = True
 
-            if level is None or maximum is None or maximum <= 0:
+            # Maximo -2 ("desconhecido") segue: _build_toner decide se o
+            # nivel ja e porcentagem (Ricoh).
+            if level is None or maximum is None or (maximum <= 0 and maximum != -2):
                 consecutive_fails += 1
                 if consecutive_fails >= self.MAX_CONSECUTIVE_FAILS:
                     break
@@ -576,14 +601,22 @@ class SNMPClient:
         self, index: int, level: int, maximum: int, desc: str, is_color: bool
     ) -> Optional[TonerInfo]:
         """Aplica os filtros do PS1 e monta um candidato a toner."""
-        if maximum <= 0:
-            return None
         # -3 ("ha toner") e -2 ("desconhecido") nao sao nivel mensuravel.
         if level < 0:
             return None
         if IGNORE_SUPPLY_RE.search(desc):
             return None
-        percent = max(0, min(100, round((level / maximum) * 100)))
+        if maximum > 0:
+            percent = max(0, min(100, round((level / maximum) * 100)))
+        elif maximum == -2 and level <= 100 and _CARTUCHO_RE.search(desc):
+            # Capacidade "desconhecida" com nivel 0-100: o nivel JA E a
+            # porcentagem. Ricoh P 311 / M 320F (22/09/2026): "Black
+            # Cartridge", maximo -2, nivel 93 — o painel da impressora mostra
+            # 93%. Eram 9 equipamentos sem toner no painel so por isso. Exige
+            # descricao de cartucho para nao ler outro consumivel como toner.
+            percent = level
+        else:
+            return None
         return TonerInfo(
             color=self._detect_color(desc, index, is_color),
             percent=percent,
@@ -654,6 +687,10 @@ class SNMPClient:
 
         result.device_model = self._get_string(sock, ip, f"{self.OID_HR_DEVICE_DESCR}.{device_index}") or None
         result.serial_number = self._get_string(sock, ip, f"{self.OID_SERIAL_NUMBER}.{device_index}") or None
+        for oid in self.OID_SERIAL_FALLBACKS:
+            if result.serial_number:
+                break
+            result.serial_number = (self._get_string(sock, ip, oid) or "").strip() or None
         result.display_text = self._display_text(sock, ip, device_index)
         result.paper_trays = self._paper_trays(sock, ip, device_index)
 
@@ -706,6 +743,51 @@ class SNMPClient:
     # ─────────────────────────────────────────────────────────────────────
     #  Primitivas SNMP
     # ─────────────────────────────────────────────────────────────────────
+    def diagnostico_toner(self, ip: str) -> Optional[str]:
+        """
+        Por que a impressora nao deu nivel de toner, em texto para a folha de
+        teste. So le (GETs da tabela de suprimentos); None quando nao ha o
+        que explicar ou o agente nao responde.
+        """
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(self.timeout)
+        try:
+            linhas = []
+            for index in range(1, 5):
+                nivel = self._get_printer_mib_int(sock, ip, f"{self.OID_TONER_LEVEL}.{index}")
+                if nivel is None:
+                    break
+                desc = self._get_string(sock, ip, f"{self.OID_TONER_DESC}.{index}") or ""
+                if not IGNORE_SUPPLY_RE.search(desc):
+                    linhas.append((nivel, desc))
+        finally:
+            sock.close()
+        if not linhas:
+            return "A impressora não informa suprimentos pela rede."
+        if any(nivel == -3 for nivel, _ in linhas):
+            return "Há toner, mas a impressora não informa o nível exato."
+        if any(nivel == -2 and not desc for nivel, desc in linhas):
+            return "A impressora não identifica o cartucho (não original ou sem chip) e não informa o nível."
+        if any(nivel == -2 for nivel, _ in linhas):
+            return "A impressora não informa o nível deste cartucho."
+        return None
+
+    def _page_count(self, sock: socket.socket, ip: str) -> Optional[int]:
+        """
+        Contador de paginas: o do fabricante quando o agente o tem (ver
+        OID_PAGE_COUNT_FABRICANTE), senao o prtMarkerLifeCount. Quem nao e
+        Kyocera responde noSuchObject na hora, sem esperar timeout.
+
+        Trocar a fonte faz o contador "voltar" alguns milhares numa leitura;
+        o relatorio mensal soma so saltos positivos (monthly_report), entao
+        essa leitura conta zero em vez de virar pico ou perda.
+        """
+        for oid in self.OID_PAGE_COUNT_FABRICANTE:
+            valor = self._get_numeric(sock, ip, oid)
+            if valor:
+                return valor
+        return self._get_numeric(sock, ip, self.OID_PAGE_COUNT)
+
     def _get_numeric(self, sock: socket.socket, ip: str, oid: str) -> Optional[int]:
         """GET de um valor numerico (INTEGER, Counter32, Gauge32, TimeTicks)."""
         vb = self._get_varbind(sock, ip, oid)
