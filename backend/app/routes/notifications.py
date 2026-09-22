@@ -22,6 +22,7 @@ from app.models.alert import Alert
 from app.models.notification import SEVERITIES, Notification
 from app.models.user import User
 from app.schemas.common import RecursoId
+from app.services.webhook_notifier import send_test_webhook
 
 router = APIRouter(
     prefix="/notifications",
@@ -98,6 +99,20 @@ class NotificationCreate(BaseModel):
 
 class UnreadCount(BaseModel):
     unread: int
+
+
+class WebhookTestResult(BaseModel):
+    """Desfecho do envio ao webhook. Nunca carrega a URL (tem assinatura)."""
+
+    configured: bool
+    sent: bool
+    # "enviado", "nao_configurado", "http_<status>", "timeout", "erro_de_rede"
+    detail: str
+
+
+class TestAlertResult(BaseModel):
+    notification: "NotificationResponse"
+    webhook: WebhookTestResult
 
 
 class ReadAllResult(BaseModel):
@@ -294,3 +309,44 @@ def create_notifications(
         session.refresh(n)
 
     return [_to_response(session, n) for n in criadas]
+
+
+@router.post("/test", response_model=TestAlertResult, status_code=status.HTTP_201_CREATED)
+def send_test_alert(
+    session: Session = Depends(get_session),
+    admin: User = Depends(require_admin),
+):
+    """
+    Botao "Testar alerta" da aba Notificacoes: confere os dois canais de
+    aviso de uma vez, sem esperar uma impressora cair.
+
+      1. Notificacao critica na caixa de QUEM CLICOU — so dele: mandar para
+         todos a cada teste encheria a caixa dos colegas.
+      2. Card de teste no webhook (Teams/Power Automate), marcado como TESTE
+         no titulo e no texto para ninguem no canal confundir com toner real.
+
+    Os dois desfechos voltam separados: a notificacao e gravada mesmo que o
+    webhook falhe, e a tela diz o que chegou e o que nao chegou. Nada e
+    criado em /alerts — nao ha impressora nem alerta real por tras.
+
+    Exige admin, como qualquer envio para a caixa (POST /notifications).
+    """
+    hora = datetime.now().strftime("%H:%M")
+    notificacao = Notification(
+        user_id=admin.id,
+        message=(
+            f"Alerta de teste enviado as {hora}. Se ele apareceu aqui e no contador "
+            "do cabecalho, as notificacoes estao funcionando."
+        ),
+        severity="critical",
+    )
+    session.add(notificacao)
+    session.commit()
+    session.refresh(notificacao)
+
+    enviado, motivo = send_test_webhook(requested_by=f"{admin.name} ({admin.email})")
+
+    return TestAlertResult(
+        notification=_to_response(session, notificacao),
+        webhook=WebhookTestResult(configured=motivo != "nao_configurado", sent=enviado, detail=motivo),
+    )

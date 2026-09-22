@@ -23,6 +23,16 @@ class Alert(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
     resolved_at: datetime | None = None
 
+    # "Marcar como lido" (22/09/2026). Puramente informativo: NAO resolve o
+    # alerta nem mexe no alert_engine. E um estado do alerta (compartilhado
+    # pela equipe), nao por usuario — a caixa pessoal com read_at por pessoa
+    # e a Notification. Re-alerta de toner cria uma LINHA NOVA (a anterior e
+    # resolvida), entao a nova queda ja nasce como nao lida sem limpar nada.
+    read_at: datetime | None = None
+    # Nome (ou e-mail, se sem nome) de quem marcou; texto livre de proposito
+    # para sobreviver a exclusao/renomeacao da conta.
+    read_by: str | None = None
+
 
 class TonerHistory(SQLModel, table=True):
     __tablename__ = "toner_history"

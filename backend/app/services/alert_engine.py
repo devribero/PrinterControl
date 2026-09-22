@@ -8,8 +8,11 @@ identificado por Alert.alert_type:
     "offline"   -> impressora nao respondeu
     "toner:K"   -> nivel do toner preto (idem C, M, Y)
 
-Offline: se a condicao continua, o alerta existente e mantido (nada e
-criado). Se a condicao some, o alerta e resolvido automaticamente.
+Offline: o alerta so abre depois de OFFLINE_ALERT_CONSECUTIVE coletas
+seguidas sem resposta (padrao 3, ~15 min) — com uma so, quase metade dos
+alertas era queda de poucos minutos que se resolvia sozinha. Se a condicao
+continua, o alerta existente e mantido (nada e criado). A primeira resposta
+resolve o alerta na hora.
 
 Toner (Fase 11): a partir de TONER_ALERT_THRESHOLD (10%), qualquer leitura
 com percentual MENOR que o do alerta ativo dispara um novo alerta — mesmo
@@ -20,9 +23,11 @@ cruzar o limiar e ficar em silencio dali para baixo. Uma leitura igual ou
 maior (mas ainda dentro da zona) nao re-avisa; sair da zona (>10%) resolve.
 
 Canais de notificacao (Fase 11):
-  - Site (sino, Notification): offline E toner, para todos os usuarios
-    ativos — fan-out, uma linha por pessoa (ver models/notification.py).
-  - Teams (webhook): SO toner. Offline nunca dispara webhook — decisao
+  - Site (sino, Notification): offline E toner, para os usuarios ativos da
+    central e da unidade da impressora (todos, se ela nao tem unidade) —
+    fan-out, uma linha por pessoa (ver models/notification.py e
+    services/units.py).
+  - Teams (webhook): SO toner, para o webhook da unidade + o central. Offline nunca dispara webhook — decisao
     explicita para nao lotar o canal da equipe com um evento que ja e bem
     visivel no proprio painel.
 """
@@ -31,10 +36,11 @@ from datetime import datetime
 
 from sqlmodel import Session, select
 
+from app.config import settings
 from app.models.alert import Alert
 from app.models.notification import Notification
 from app.models.printer import Printer, PrinterReading
-from app.models.user import User
+from app.services.units import notification_recipients, unit_for_printer, unit_webhook_url
 from app.services.webhook_notifier import send_toner_alert_webhook
 
 logger = logging.getLogger("printercontrol.alert_engine")
@@ -45,6 +51,31 @@ logger = logging.getLogger("printercontrol.alert_engine")
 TONER_ALERT_THRESHOLD = 10
 
 TONER_FIELDS = {"K": "toner_k", "C": "toner_c", "M": "toner_m", "Y": "toner_y"}
+
+
+def _ultimas_offline(session: Session, printer_id: int, quantas: int) -> bool:
+    """
+    True se as `quantas` leituras mais recentes da impressora sao todas
+    offline. A leitura atual ja esta gravada (ou pendente na sessao, que da
+    autoflush antes do SELECT) quando evaluate_reading roda, entao ela e a
+    primeira da lista.
+
+    Menos leituras que `quantas` = impressora recem-cadastrada: ainda nao da
+    para confirmar, espera as proximas coletas.
+    """
+    status = session.exec(
+        select(PrinterReading.status)
+        .where(PrinterReading.printer_id == printer_id)
+        .order_by(PrinterReading.id.desc())
+        .limit(quantas)
+    ).all()
+    return len(status) == quantas and all(s == "offline" for s in status)
+
+
+def _motivo_offline(seguidas: int) -> str:
+    if seguidas == 1:
+        return "sem resposta na ultima coleta"
+    return f"sem resposta nas ultimas {seguidas} coletas"
 
 
 def _active(session: Session, printer_id: int, alert_type: str) -> Alert | None:
@@ -169,13 +200,24 @@ def _sync_toner_condition(
     return ("escalated" if existing else "created"), novo
 
 
-def _notify_all_active_users(session: Session, message: str, severity: str, alert_id: int | None) -> None:
+def _notify_all_active_users(
+    session: Session,
+    message: str,
+    severity: str,
+    alert_id: int | None,
+    printer: Printer | None = None,
+) -> None:
     """
     Fan-out de uma Notification por usuario ativo (Fase 11) — e o canal
     "site" dos alertas automaticos. Contas desativadas nao recebem: a caixa
     delas nunca sera aberta.
+
+    Unidades (21/09/2026): com a impressora informada, so avisa a central
+    (usuario sem unidade) e quem e da unidade dela. Impressora sem unidade
+    avisa todos os ativos, como antes. Ver services/units.py.
     """
-    usuarios = session.exec(select(User).where(User.is_active == True)).all()  # noqa: E712
+    unit = unit_for_printer(session, printer) if printer is not None else None
+    usuarios = notification_recipients(session, unit)
     if not usuarios:
         return
     for usuario in usuarios:
@@ -193,13 +235,21 @@ def evaluate_reading(session: Session, printer_id: int, reading: PrinterReading)
 
     # status possiveis: "online", "atencao", "offline" (ver services/snmp.py)
     offline = reading.status == "offline"
+    seguidas = settings.offline_alert_consecutive
+    # Abrir exige N coletas seguidas sem resposta; um alerta que JA esta
+    # aberto so continua enquanto a impressora segue offline. Fechar
+    # continua imediato: a primeira resposta resolve.
+    offline_confirmado = offline and (
+        _active(session, printer_id, "offline") is not None
+        or _ultimas_offline(session, printer_id, seguidas)
+    )
     offline_action, offline_alert = _sync_condition(
         session,
         printer_id,
         "offline",
-        active=offline,
+        active=offline_confirmado,
         severity="critical",
-        message="Impressora offline (sem resposta na ultima coleta)",
+        message=f"Impressora offline ({_motivo_offline(seguidas)})",
     )
     actions["offline"] = offline_action
 
@@ -230,21 +280,26 @@ def evaluate_reading(session: Session, printer_id: int, reading: PrinterReading)
         nome = printer.name if printer else f"impressora #{printer_id}"
         _notify_all_active_users(
             session,
-            message=f"{nome} ficou offline (sem resposta na ultima coleta).",
+            message=f"{nome} ficou offline ({_motivo_offline(seguidas)}).",
             severity="critical",
             alert_id=offline_alert.id,
+            printer=printer,
         )
 
     # Toner: site + Teams para cada evento novo/escalado desta leitura.
     if critical_toner_events:
         printer = session.get(Printer, printer_id)
         if printer:
+            # Teams: webhook da unidade da impressora + central (deduplicado
+            # em webhook_notifier). Resolvido uma vez por leitura.
+            unit_url = unit_webhook_url(unit_for_printer(session, printer))
             for color, percent, alert in critical_toner_events:
                 _notify_all_active_users(
                     session,
                     message=f"Toner {color} de {printer.name} em {percent}%.",
                     severity="critical",
                     alert_id=alert.id,
+                    printer=printer,
                 )
                 try:
                     send_toner_alert_webhook(
@@ -253,6 +308,7 @@ def evaluate_reading(session: Session, printer_id: int, reading: PrinterReading)
                         color=color,
                         level_text=f"{percent}%",
                         manual=False,
+                        unit_url=unit_url,
                     )
                 except Exception:
                     # send_toner_alert_webhook ja captura tudo internamente;

@@ -157,11 +157,15 @@ with Session(engine) as s:
     reset_alerts_and_readings(s)
     with mock.patch.object(webhook_notifier.httpx, "post") as off_mock:
         off_mock.return_value = mock.Mock(status_code=200)
-        r4 = make_offline_reading()
-        s.add(r4)
-        s.commit()
-        s.refresh(r4)
-        actions_off = alert_engine.evaluate_reading(s, PRINTER_ID, r4)
+        # O alerta de offline so abre depois de OFFLINE_ALERT_CONSECUTIVE
+        # (padrao 3) leituras seguidas offline: avalia uma a uma, e a acao
+        # que importa e a da ultima.
+        for _ in range(settings.offline_alert_consecutive):
+            r4 = make_offline_reading()
+            s.add(r4)
+            s.commit()
+            s.refresh(r4)
+            actions_off = alert_engine.evaluate_reading(s, PRINTER_ID, r4)
 check("alerta offline criado", actions_off["offline"], "created")
 check("offline nao dispara webhook", off_mock.call_count, 0)
 

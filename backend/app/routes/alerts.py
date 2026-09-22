@@ -6,9 +6,12 @@ from app.dependencies import require_active_user, require_operator
 from app.models.alert import Alert
 from app.models.printer import Printer
 from app.models.user import User
+from app.services.units import unit_for_printer, unit_webhook_url
 from app.services.webhook_notifier import send_toner_alert_webhook
 from typing import List
+from pydantic import BaseModel, Field
 from app.schemas.common import RecursoId
+from app.services import audit_log
 
 # Fase 2: alertas expoem estado da frota — exigem sessao em todas as rotas.
 # As acoes (notify/resolve) continuam declarando require_operator por cima.
@@ -56,6 +59,101 @@ def list_alerts(
     return alerts
 
 
+class ReadAllRequest(BaseModel):
+    """Corpo opcional de POST /alerts/read-all. Sem `ids` = todos os ativos."""
+
+    ids: List[int] | None = Field(default=None, max_length=1000)
+
+
+def _leitor(user: User) -> str:
+    return (user.name or "").strip() or user.email
+
+
+@router.post("/read-all")
+def mark_all_alerts_read(
+    body: ReadAllRequest | None = None,
+    session: Session = Depends(get_session),
+    user: User = Depends(require_active_user),
+):
+    """
+    Marca como lidos varios alertas de uma vez. Com `ids`, so esses (o painel
+    manda os que estao visiveis no filtro atual); sem `ids`, todos os alertas
+    ATIVOS ainda nao lidos. Alertas ja lidos ficam como estao (preserva quem
+    leu primeiro). Informativo: nunca resolve nada. Fica na trilha de
+    auditoria por ser uma acao em massa.
+    """
+    query = select(Alert).where(Alert.read_at == None)  # noqa: E711
+    ids = body.ids if body is not None else None
+    if ids is not None:
+        if not ids:
+            return {"updated": 0}
+        query = query.where(Alert.id.in_(ids))
+    else:
+        query = query.where(Alert.resolved_at == None)  # noqa: E711
+
+    alertas = session.exec(query).all()
+    agora = datetime.utcnow()
+    leitor = _leitor(user)
+    for alerta in alertas:
+        alerta.read_at = agora
+        alerta.read_by = leitor
+        session.add(alerta)
+
+    if alertas:
+        audit_log.record(
+            session,
+            user,
+            "alert.read_all",
+            "alert",
+            0,
+            after={"ids": [a.id for a in alertas], "count": len(alertas), "scope": "ids" if ids is not None else "all_active"},
+        )
+    session.commit()
+    return {"updated": len(alertas)}
+
+
+@router.patch("/{alert_id}/read")
+def mark_alert_read(
+    alert_id: RecursoId,
+    session: Session = Depends(get_session),
+    user: User = Depends(require_active_user),
+):
+    """
+    Marca um alerta como lido. Idempotente: se ja estava lido, mantem o
+    primeiro read_at/read_by. Nao resolve o alerta — ele continua ativo ate a
+    condicao sumir (alert_engine) ou alguem resolver.
+    """
+    alert = session.get(Alert, alert_id)
+    if not alert:
+        raise HTTPException(status_code=404, detail="Alerta não encontrado")
+    if alert.read_at is None:
+        alert.read_at = datetime.utcnow()
+        alert.read_by = _leitor(user)
+        session.add(alert)
+        session.commit()
+        session.refresh(alert)
+    return alert
+
+
+@router.patch("/{alert_id}/unread")
+def mark_alert_unread(
+    alert_id: RecursoId,
+    session: Session = Depends(get_session),
+    _user: User = Depends(require_active_user),
+):
+    """Desfaz o "lido". Idempotente."""
+    alert = session.get(Alert, alert_id)
+    if not alert:
+        raise HTTPException(status_code=404, detail="Alerta não encontrado")
+    if alert.read_at is not None or alert.read_by is not None:
+        alert.read_at = None
+        alert.read_by = None
+        session.add(alert)
+        session.commit()
+        session.refresh(alert)
+    return alert
+
+
 @router.get("/{alert_id}")
 def get_alert(alert_id: RecursoId, session: Session = Depends(get_session)):
     alert = session.get(Alert, alert_id)
@@ -92,6 +190,9 @@ def notify_alert(
         color=color,
         level_text=alert.message,
         manual=True,
+        # Unidades (21/09/2026): mesmo roteamento do automatico — webhook da
+        # unidade da impressora + central, sem repetir URL.
+        unit_url=unit_webhook_url(unit_for_printer(session, printer)),
     )
 
     return {

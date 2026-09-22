@@ -80,7 +80,24 @@ with Session(engine) as s:
     collect(s, "online_mono")
     check("alertas ativos", len(active(s)), 0)
 
-    print("\n--- 2. offline: cria alerta critical + notifica usuarios ativos ---")
+    print("\n--- 2a. offline por 1 e 2 coletas: ainda NAO alerta (queda curta) ---")
+    # OFFLINE_ALERT_CONSECUTIVE padrao = 3. As duas primeiras falhas nao
+    # abrem alerta nem notificam: e o que corta o ruido de quedas de poucos
+    # minutos.
+    # O coletor so devolve as acoes que mudaram algo ("none" e filtrado).
+    for n in (1, 2):
+        r = collect(s, "offline")
+        check(f"nenhuma acao de offline na falha {n}", r["alerts"].get("offline"), None)
+    check("nenhum alerta offline ainda", len(active(s, "offline")), 0)
+    check("nenhuma notificacao ainda", len(notifications(s)), 0)
+
+    print("\n--- 2b. volta antes da 3a falha: nada a resolver, contagem zera ---")
+    collect(s, "online_mono")
+    for n in (1, 2):
+        r = collect(s, "offline")
+        check(f"apos voltar, falha {n} ainda nao alerta", r["alerts"].get("offline"), None)
+
+    print("\n--- 2c. 3a coleta seguida offline: cria alerta critical + notifica ---")
     r = collect(s, "offline")
     check("acao", r["alerts"].get("offline"), "created")
     a = active(s, "offline")
