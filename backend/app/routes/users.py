@@ -17,10 +17,12 @@ from sqlmodel import Session, func, select
 from app.database import get_session
 from app.dependencies import require_admin
 from app.models.notification import Notification
+from app.models.unit import Unit
 from app.models.user import Role, User
 from app.schemas.user import UserCreate, UserDelete, UserResponse, UserUpdate
 from app.services import audit_log
 from app.services.auth import hash_password
+from app.services.units import user_response
 from app.schemas.common import RecursoId
 
 
@@ -33,7 +35,14 @@ def _snapshot_user(user: User) -> dict:
         "role": user.role,
         "is_active": user.is_active,
         "must_change_password": user.must_change_password,
+        "unit_id": user.unit_id,
     }
+
+
+def _unidade_existe_ou_404(session: Session, unit_id: int | None) -> None:
+    """Unidade informada no corpo precisa existir (null = sem unidade)."""
+    if unit_id is not None and not session.get(Unit, unit_id):
+        raise HTTPException(status_code=404, detail="Unidade nao encontrada")
 
 router = APIRouter(
     prefix="/users",
@@ -84,7 +93,7 @@ def _ensure_not_last_admin(session: Session, target: User, update: UserUpdate) -
 @router.get("", response_model=list[UserResponse])
 def list_users(session: Session = Depends(get_session)):
     """Todas as contas, mais recentes por ultimo (ordem estavel de cadastro)."""
-    return session.exec(select(User).order_by(User.id)).all()
+    return [user_response(session, u) for u in session.exec(select(User).order_by(User.id)).all()]
 
 
 @router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
@@ -121,6 +130,8 @@ def create_user(
                 detail=f"Ja existe uma conta com o nome de usuario {user_data.username}.",
             )
 
+    _unidade_existe_ou_404(session, user_data.unit_id)
+
     user = User(
         email=user_data.email,
         username=user_data.username,
@@ -128,13 +139,14 @@ def create_user(
         name=user_data.name,
         role=Role(user_data.role).value,
         must_change_password=True,
+        unit_id=user_data.unit_id,
     )
     session.add(user)
     session.flush()  # atribui o id sem commitar, para o registro de auditoria abaixo
     audit_log.record(session, admin, "user.create", "user", user.id, after=_snapshot_user(user))
     session.commit()
     session.refresh(user)
-    return user
+    return user_response(session, user)
 
 
 @router.patch("/{user_id}", response_model=UserResponse)
@@ -198,6 +210,13 @@ def update_user(
     else:
         data.pop("role", None)
 
+    # Unidade: null E valor valido (tira da unidade), por isso fora do laco
+    # abaixo, que ignora None.
+    if "unit_id" in data:
+        unit_id = data.pop("unit_id")
+        _unidade_existe_ou_404(session, unit_id)
+        user.unit_id = unit_id
+
     for field, value in data.items():
         if value is not None:
             setattr(user, field, value)
@@ -206,7 +225,7 @@ def update_user(
     audit_log.record(session, admin, "user.update", "user", user.id, before=before, after=_snapshot_user(user))
     session.commit()
     session.refresh(user)
-    return user
+    return user_response(session, user)
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)

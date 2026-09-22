@@ -70,6 +70,10 @@ class PrintServer(SQLModel, table=True):
     #: descoberta para de rodar contra ele.
     active: bool = Field(default=True, index=True)
 
+    #: Unidade dona deste servidor (21/09/2026). Nula = sem unidade: os
+    #: alertas das impressoras daqui vao so para a central. Ver models/unit.py.
+    unit_id: int | None = Field(default=None, foreign_key="units.id", index=True)
+
     last_status: str = Field(default=STATUS_UNKNOWN)
     last_error: str | None = Field(default=None)
     #: Ultima descoberta bem-sucedida.

@@ -98,6 +98,12 @@ class User(SQLModel, table=True):
     # decode_token, que trata ausencia como incompativel de proposito.
     token_version: int = Field(default=0)
 
+    # Unidade da pessoa (21/09/2026), definida SO por admin. Nula = central/TI:
+    # recebe no sino os alertas de todas as unidades. Com unidade, o sino so
+    # traz os alertas das impressoras dela. Nao restringe o que se ve no
+    # painel — so o filtro padrao e o roteamento. Ver models/unit.py.
+    unit_id: int | None = Field(default=None, foreign_key="units.id", index=True)
+
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     def has_role(self, *required: str) -> bool:

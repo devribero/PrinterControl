@@ -96,6 +96,8 @@ def main():
                set(lista[0]) == {
                    "id", "email", "username", "name", "role", "is_active",
                    "must_change_password", "created_at",
+                   # Unidades (21/09/2026)
+                   "unit_id", "unit_name",
                },
                str(sorted(lista[0])))
     check_true("password_hash ausente na listagem",

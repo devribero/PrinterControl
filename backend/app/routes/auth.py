@@ -18,6 +18,7 @@ from app.schemas.user import (
 )
 from app.services.auth import create_access_token, hash_password, verify_password
 from app.services.rate_limit import RateLimiter
+from app.services.units import user_response
 
 logger = logging.getLogger("printercontrol.auth")
 
@@ -180,13 +181,13 @@ def login(
     # username existe. Ver models/user.py (User.username) para o resto da
     # decisao.
     access_token = create_access_token(data={"sub": user.email, "ver": user.token_version})
-    return TokenResponse(access_token=access_token, user=UserResponse.model_validate(user))
+    return TokenResponse(access_token=access_token, user=user_response(session, user))
 
 
 @router.get("/me", response_model=UserResponse)
-def read_current_user(user: User = Depends(require_user)):
-    """Conta autenticada e seu papel — usado para decidir o que exibir/permitir."""
-    return UserResponse.model_validate(user)
+def read_current_user(user: User = Depends(require_user), session: Session = Depends(get_session)):
+    """Conta autenticada, papel e unidade — usado para decidir o que exibir/permitir."""
+    return user_response(session, user)
 
 
 @router.patch("/me", response_model=UserResponse)
@@ -210,7 +211,7 @@ def update_current_user(
     session.add(user)
     session.commit()
     session.refresh(user)
-    return UserResponse.model_validate(user)
+    return user_response(session, user)
 
 
 @router.post("/change-password", response_model=PasswordChangeResponse)

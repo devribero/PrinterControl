@@ -38,6 +38,8 @@ class UserCreate(BaseModel):
     name: str = Field(min_length=1)
     # Sem papel explicito a conta nasce somente-leitura.
     role: Role = Role.VIEWER
+    # Unidade (21/09/2026). Nula = central/TI. A rota confere se existe.
+    unit_id: int | None = None
 
     @field_validator("name")
     @classmethod
@@ -146,6 +148,9 @@ class UserUpdate(BaseModel):
     # `must_change_password` (ver routes/users.py): quem definiu esta senha
     # foi o admin, nao o dono da conta.
     password: str | None = Field(default=None, min_length=8)
+    # Unidade (21/09/2026). Omitido = mantem; null = tira da unidade
+    # (vira central/TI). A rota confere se a unidade existe.
+    unit_id: int | None = None
 
     @field_validator("name")
     @classmethod
@@ -206,6 +211,10 @@ class UserResponse(BaseModel):
     # tela de troca — ver AuthGate.tsx.
     must_change_password: bool
     created_at: datetime
+    # Unidade (21/09/2026). `unit_name` e preenchido pela rota (ver
+    # services/units.user_response); null = sem unidade (central/TI).
+    unit_id: int | None = None
+    unit_name: str | None = None
 
     class Config:
         from_attributes = True
