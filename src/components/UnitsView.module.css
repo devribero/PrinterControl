@@ -1,4 +1,4 @@
-/* Gestão de contas — mesma linguagem visual de PrinterTable/AlertsView. */
+/* Unidades — mesma linguagem visual de UsersView (tabela + diálogo). */
 .card {
   min-width: 0;
   overflow: hidden;
@@ -24,11 +24,7 @@
   }
 }
 
-.title {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
+
 
 .subtitle {
   font-size: 0.8125rem;
@@ -42,32 +38,11 @@
   gap: 0.75rem;
 }
 
-.searchBox {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--border);
-  background: var(--divider);
-  padding: 0.625rem 0.875rem;
-  color: var(--text-muted);
-  flex: 1;
-  min-width: 200px;
-}
 
-.searchInput {
-  flex: 1;
-  min-width: 0;
-  background: transparent;
-  color: var(--text-primary);
-  border: none;
-  outline: none;
-  font-size: 0.875rem;
-}
 
-.searchInput::placeholder {
-  color: var(--text-muted);
-}
+
+
+
 
 .primaryButton {
   display: inline-flex;
@@ -187,74 +162,6 @@
   color: var(--text-secondary);
 }
 
-.tdMuted {
-  padding: 1rem 0.75rem;
-  vertical-align: middle;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-
-.userName {
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.lastAdminTag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-left: 0.5rem;
-  border-radius: 9999px;
-  background: var(--tint-link);
-  padding: 0.125rem 0.5rem;
-  font-size: 0.625rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--link);
-  vertical-align: middle;
-}
-
-.roleBadge {
-  display: inline-block;
-  border-radius: 9999px;
-  padding: 0.1875rem 0.625rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.role_admin {
-  background: var(--tint-link);
-  color: var(--link);
-}
-
-.role_operator {
-  background: var(--tint-warning);
-  color: var(--warning);
-}
-
-.role_viewer {
-  background: var(--track);
-  color: var(--text-secondary);
-}
-
-.statusBadge {
-  display: inline-block;
-  border-radius: 9999px;
-  padding: 0.1875rem 0.625rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.statusOn {
-  background: var(--tint-success);
-  color: var(--success);
-}
-
-.statusOff {
-  background: var(--track);
-  color: var(--text-muted);
-}
 
 .actionsRow {
   display: flex;
@@ -275,6 +182,9 @@
 }
 
 .toggleButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
   border-radius: 0.5rem;
   border: 1px solid var(--border);
   padding: 0.375rem 0.75rem;
@@ -388,7 +298,109 @@
   color: var(--text-secondary);
 }
 
-/* ── Celular: busca e botões em largura cheia; cada conta vira um cartão ── */
+.confirmText + .confirmText {
+  margin-top: 0.75rem;
+}
+
+/* ── Específico de unidades ─────────────────────────────────────────────── */
+
+.rowInactive .unitName,
+.rowInactive .hostChip {
+  opacity: 0.6;
+}
+
+.unitName {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.unitIcon {
+  color: var(--text-muted);
+}
+
+.tagOff {
+  margin-left: 0.5rem;
+  border-radius: 9999px;
+  background: var(--danger-bg);
+  padding: 0.0625rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--danger);
+  vertical-align: middle;
+}
+
+.hostList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.hostChip {
+  border-radius: 0.375rem;
+  background: var(--track);
+  padding: 0.125rem 0.4375rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.webhookOn {
+  color: var(--text-secondary);
+}
+
+.webhookHost {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+}
+
+.footnote {
+  border-top: 1px solid var(--border);
+  padding: 0.875rem 1.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.footnote a {
+  color: var(--link);
+  font-weight: 600;
+}
+
+.footnote a:hover {
+  text-decoration: underline;
+}
+
+.inlineDanger {
+  align-self: flex-start;
+  margin-top: -0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.inlineDanger:hover {
+  text-decoration: underline;
+}
+
+.inlineLink {
+  font-weight: 600;
+  color: var(--link);
+}
+
+.inlineLink:hover {
+  text-decoration: underline;
+}
+
+/* ── Celular: botões em largura cheia; cada unidade vira um cartão ──────── */
 @media (max-width: 639px) {
   .header {
     padding: 1rem;
@@ -396,12 +408,6 @@
 
   .subtitle {
     font-size: 0.875rem;
-  }
-
-  .searchBox {
-    flex-basis: 100%;
-    min-width: 0;
-    min-height: 2.75rem;
   }
 
   .controls > .primaryButton,
@@ -444,14 +450,12 @@
     font-size: 0.9375rem;
   }
 
-  .row > .td,
-  .row > .tdMuted {
+  .row > .td {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 1rem;
     padding: 0.25rem 0;
-    white-space: normal;
     text-align: right;
     overflow-wrap: anywhere;
   }
@@ -465,13 +469,24 @@
     text-align: left;
   }
 
+  .hostList {
+    justify-content: flex-end;
+  }
+
   .row > .tdActions {
     padding-top: 0.625rem;
   }
 
   .tdActions .actionsRow {
     width: 100%;
-    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .toggleButton {
+    flex: 1 1 8rem;
+    justify-content: center;
+    min-height: 2.75rem;
+    font-size: 0.875rem;
   }
 
   .actionButton {
@@ -481,12 +496,6 @@
     min-width: 2.75rem;
     min-height: 2.75rem;
     border: 1px solid var(--border);
-  }
-
-  .toggleButton {
-    flex: 1;
-    min-height: 2.75rem;
-    font-size: 0.875rem;
   }
 
   .emptyState {
@@ -502,7 +511,8 @@
     min-height: 2.75rem;
   }
 
-  .hint {
+  .hint,
+  .footnote {
     font-size: 0.8125rem;
   }
 

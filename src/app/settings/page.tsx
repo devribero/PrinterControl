@@ -4,15 +4,11 @@ import SettingsView from "../../components/SettingsView";
 /**
  * Rota "/settings" — Configurações.
  *
- * Sem RequireRole, e a remoção é o ponto da Fase 8: a página estava restrita
- * a admin desde quando era um placeholder de "preferências gerais". Isso
- * deixava viewer e operator sem acesso às PRÓPRIAS preferências — perfil,
- * senha, tema e acessibilidade.
- *
- * O que é administrativo continua protegido em dois níveis: a seção de
- * Administração só é renderizada para `can.canAdmin` (dentro do
- * SettingsView) e não edita nada crítico — apenas aponta para /users e
- * /network, onde as ações vivem e o backend as autoriza.
+ * Sem RequireRole: todo papel acessa as PRÓPRIAS preferências (perfil,
+ * senha, tema, acessibilidade) e as informações do sistema, que são só de
+ * leitura. O que é administrativo aparece apenas para `can.canAdmin` (dentro
+ * do SettingsView) e não edita nada crítico — só aponta para /users, /units
+ * e /network, onde as ações vivem e o backend as autoriza.
  */
 export default function SettingsPage() {
   return (
@@ -20,7 +16,7 @@ export default function SettingsPage() {
       <PageHeader
         section="Administração"
         title="Configurações"
-        subtitle="Perfil, segurança, aparência e acessibilidade."
+        subtitle="Sua conta, preferências deste dispositivo e informações do sistema."
       />
 
       <SettingsView />

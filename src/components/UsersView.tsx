@@ -42,6 +42,8 @@ interface FormState {
   email: string;
   password: string;
   role: Role;
+  /** null = sem unidade (TI central, recebe os alertas de todas). */
+  unitId: number | null;
 }
 
 const FORM_VAZIO: FormState = {
@@ -49,6 +51,7 @@ const FORM_VAZIO: FormState = {
   email: "",
   password: "",
   role: "viewer",
+  unitId: null,
 };
 
 const SENHA_MINIMA = 8;
@@ -62,7 +65,7 @@ function formatarData(iso: string): string {
 }
 
 export default function UsersView() {
-  const { account } = useAppData();
+  const { account, units, refreshUnits, applyAccountUpdate } = useAppData();
   const { push } = useToast();
   // 401 desloga, 403 nao — regra da Fase 2, compartilhada com as demais
   // telas administrativas (lib/apiErrors.ts).
@@ -114,7 +117,10 @@ export default function UsersView() {
     const termo = query.trim().toLowerCase();
     if (!termo) return users;
     return users.filter(
-      (u) => u.name.toLowerCase().includes(termo) || u.email.toLowerCase().includes(termo),
+      (u) =>
+        u.name.toLowerCase().includes(termo) ||
+        u.email.toLowerCase().includes(termo) ||
+        (u.unit_name ?? "").toLowerCase().includes(termo),
     );
   }, [users, query]);
 
@@ -142,6 +148,7 @@ export default function UsersView() {
       email: user.email,
       password: "",
       role: parseRole(user.role),
+      unitId: user.unit_id ?? null,
     });
     setFormError(null);
     setDialogOpen(true);
@@ -175,6 +182,7 @@ export default function UsersView() {
         if (form.name.trim() !== editing.name) mudancas.name = form.name.trim();
         if (form.role !== editing.role) mudancas.role = form.role;
         if (form.password) mudancas.password = form.password;
+        if (form.unitId !== (editing.unit_id ?? null)) mudancas.unit_id = form.unitId;
 
         if (Object.keys(mudancas).length === 0) {
           setDialogOpen(false);
@@ -183,6 +191,19 @@ export default function UsersView() {
 
         const atualizado = await updateUser(editing.id, mudancas);
         setUsers((atuais) => (atuais ?? []).map((u) => (u.id === atualizado.id ? atualizado : u)));
+        if (mudancas.unit_id !== undefined) {
+          void refreshUnits();
+          // A propria unidade mudou: reflete na conta logada sem esperar o
+          // proximo /me. Nao troca o escopo em uso — so o padrao das
+          // proximas entradas.
+          if (account && atualizado.id === account.id) {
+            applyAccountUpdate({
+              ...account,
+              unitId: atualizado.unit_id ?? null,
+              unitName: atualizado.unit_name ?? null,
+            });
+          }
+        }
         push({ variant: "success", title: "Usuário atualizado", description: atualizado.name });
       } else {
         const criado = await createUser({
@@ -190,8 +211,10 @@ export default function UsersView() {
           name: form.name.trim(),
           password: form.password,
           role: form.role,
+          ...(form.unitId !== null ? { unit_id: form.unitId } : {}),
         });
         setUsers((atuais) => [...(atuais ?? []), criado]);
+        if (form.unitId !== null) void refreshUnits();
         push({ variant: "success", title: "Usuário criado", description: `${criado.name} (${ROLE_LABELS[parseRole(criado.role)]}).` });
       }
       setDialogOpen(false);
@@ -269,7 +292,7 @@ export default function UsersView() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar por nome ou e-mail..."
+              placeholder="Buscar por nome, e-mail ou unidade..."
               className={styles.searchInput}
             />
           </div>
@@ -300,6 +323,7 @@ export default function UsersView() {
               <th className={styles.thFirst}>Nome</th>
               <th className={styles.th}>E-mail</th>
               <th className={styles.th}>Perfil</th>
+              <th className={styles.th}>Unidade</th>
               <th className={styles.th}>Status</th>
               <th className={styles.th}>Criado em</th>
               <th className={styles.th}>Ações</th>
@@ -308,7 +332,7 @@ export default function UsersView() {
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={6} className={styles.emptyState}>
+                <td colSpan={7} className={styles.emptyState}>
                   <Loader2 size={16} className="animate-spin" /> Carregando usuários...
                 </td>
               </tr>
@@ -327,19 +351,22 @@ export default function UsersView() {
                         </span>
                       )}
                     </td>
-                    <td className={styles.td}>{user.email}</td>
-                    <td className={styles.td}>
+                    <td className={styles.td} data-label="E-mail">{user.email}</td>
+                    <td className={styles.td} data-label="Perfil">
                       <span className={cn(styles.roleBadge, styles[`role_${role}`])}>{ROLE_LABELS[role]}</span>
                     </td>
-                    <td className={styles.td}>
+                    <td className={user.unit_name ? styles.td : styles.tdMuted} data-label="Unidade">
+                      {user.unit_name ?? "TI central"}
+                    </td>
+                    <td className={styles.td} data-label="Status">
                       <span className={cn(styles.statusBadge, user.is_active ? styles.statusOn : styles.statusOff)}>
                         {user.is_active ? "Ativo" : "Inativo"}
                       </span>
                     </td>
-                    <td className={styles.tdMuted}>{formatarData(user.created_at)}</td>
-                    <td className={styles.td}>
+                    <td className={styles.tdMuted} data-label="Criado em">{formatarData(user.created_at)}</td>
+                    <td className={cn(styles.td, styles.tdActions)}>
                       <div className={styles.actionsRow}>
-                        <button onClick={() => abrirEdicao(user)} className={styles.actionButton} title="Editar">
+                        <button onClick={() => abrirEdicao(user)} className={styles.actionButton} title="Editar" aria-label={`Editar ${user.name}`}>
                           <Pencil size={15} />
                         </button>
                         <button
@@ -360,6 +387,7 @@ export default function UsersView() {
                           onClick={() => abrirExclusao(user)}
                           disabled={ehUltimoAdmin(user)}
                           className={styles.actionButton}
+                          aria-label={`Excluir ${user.name}`}
                           title={
                             ehUltimoAdmin(user)
                               ? "É o único administrador ativo — promova outro antes de excluir"
@@ -376,7 +404,7 @@ export default function UsersView() {
 
             {!loading && visiveis.length === 0 && (
               <tr>
-                <td colSpan={6} className={styles.emptyState}>
+                <td colSpan={7} className={styles.emptyState}>
                   {users && users.length > 0 ? "Nenhum usuário para esta busca." : "Nenhum usuário cadastrado."}
                 </td>
               </tr>
@@ -457,6 +485,28 @@ export default function UsersView() {
             </select>
             <span className={styles.hint}>
               Administrador gerencia contas e a rede · Operador executa coletas e alertas · Visualização só lê.
+            </span>
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.label}>Unidade</span>
+            <select
+              value={form.unitId === null ? "" : String(form.unitId)}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, unitId: e.target.value === "" ? null : Number(e.target.value) }))
+              }
+              className={styles.select}
+            >
+              <option value="">Nenhuma (TI central — recebe tudo)</option>
+              {units.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.active ? u.name : `${u.name} (desativada)`}
+                </option>
+              ))}
+            </select>
+            <span className={styles.hint}>
+              O painel abre filtrado na unidade da pessoa, e ela recebe os alertas dos servidores dela. Ela
+              continua podendo ver a frota inteira.
             </span>
           </label>
 

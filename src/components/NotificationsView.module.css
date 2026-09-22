@@ -418,3 +418,113 @@
   font-size: 0.8125rem;
   color: var(--danger);
 }
+
+/* ── Celular ──────────────────────────────────────────────────────────
+   Ações do cabeçalho em grade de duas colunas com altura de toque; o botão
+   "marcar como lida" desce para baixo do texto, alinhado à direita, para a
+   mensagem usar a largura toda. Destinatários do diálogo empilham e-mail
+   sob o nome. */
+@media (max-width: 639px) {
+  .cardHeader {
+    padding: 1rem;
+  }
+
+  .cardSubtitle {
+    font-size: 0.875rem;
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .headerActions > .toggle {
+    flex-basis: 100%;
+    min-height: 2.75rem;
+    font-size: 0.875rem;
+  }
+
+  .headerActions > .primaryButton,
+  .headerActions > .secondaryButton {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-height: 2.75rem;
+  }
+
+  .checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .item {
+    flex-wrap: wrap;
+    padding: 0.875rem 1rem;
+  }
+
+  .itemMessage {
+    font-size: 0.9375rem;
+  }
+
+  .itemMeta {
+    font-size: 0.8125rem;
+  }
+
+  .alertLink {
+    min-height: 2rem;
+    font-size: 0.75rem;
+  }
+
+  .readButton {
+    margin-left: auto;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.875rem;
+  }
+
+  .errorBox {
+    margin: 1rem 1rem 0;
+  }
+
+  .footnote {
+    padding: 0.875rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .label {
+    font-size: 0.875rem;
+  }
+
+  .input,
+  .select {
+    min-height: 2.75rem;
+  }
+
+  .hint {
+    font-size: 0.8125rem;
+  }
+
+  .recipientList {
+    max-height: 14rem;
+  }
+
+  .recipient {
+    flex-wrap: wrap;
+    min-height: 2.75rem;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .recipientEmail {
+    flex-basis: 100%;
+    margin-left: 1.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .dialogFooter {
+    width: 100%;
+  }
+
+  .dialogFooter > .primaryButton,
+  .dialogFooter > .secondaryButton {
+    flex: 1 1 0;
+    min-height: 2.75rem;
+  }
+}

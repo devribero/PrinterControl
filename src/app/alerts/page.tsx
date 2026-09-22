@@ -6,7 +6,7 @@ import AlertsView from "../../components/AlertsView";
 import { useAppData } from "../../lib/app-data";
 
 export default function AlertsPage() {
-  const { alerts, printers, setSelectedPrinter } = useAppData();
+  const { alerts, printers, setSelectedPrinter, setAlertsRead } = useAppData();
 
   return (
     <>
@@ -17,7 +17,7 @@ export default function AlertsPage() {
         actions={<ServerSwitcher />}
       />
 
-      <AlertsView alerts={alerts} printers={printers} onSelectPrinter={setSelectedPrinter} />
+      <AlertsView alerts={alerts} printers={printers} onSelectPrinter={setSelectedPrinter} onSetRead={setAlertsRead} />
     </>
   );
 }

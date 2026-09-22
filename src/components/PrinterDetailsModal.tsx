@@ -9,19 +9,75 @@
  * produção (ver lib/fetchMonthlyReport.ts).
  */
 import { useEffect, useState } from "react";
-import { ExternalLink, FileText, Lightbulb, Printer as PrinterIcon } from "lucide-react";
+import { Copy, ExternalLink, FileText, Lightbulb, MonitorDown, Printer as PrinterIcon } from "lucide-react";
 import type { Printer } from "../types";
 import Modal from "./Modal";
 import PrinterStatusBadge from "./PrinterStatusBadge";
 import { tonerChannelColor } from "../lib/tonerColor";
 import { useToast } from "../lib/toast";
 import { useTheme } from "../lib/theme";
+import { useAppData } from "../lib/app-data";
+import { installPath, isGenericDriver } from "../lib/printerInstall";
+import { testPrintBlockReason } from "../lib/testPrint";
 import { cn } from "../lib/cn";
 import styles from "./PrinterDetailsModal.module.css";
 
 interface PrinterDetailsModalProps {
   printer: Printer | null;
   onClose: () => void;
+}
+
+/**
+ * Copia texto para a área de transferência. A API moderna só existe em
+ * contexto seguro (HTTPS ou localhost) — aberto pelo IP da rede
+ * (http://10.x.x.x:3000) `navigator.clipboard` nem existe, então cai no
+ * método antigo com um campo temporário.
+ */
+async function copiarTexto(texto: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(texto);
+      return true;
+    }
+  } catch {
+    // cai no método antigo abaixo
+  }
+  const campo = document.createElement("textarea");
+  campo.value = texto;
+  campo.setAttribute("readonly", "");
+  campo.style.position = "fixed";
+  campo.style.opacity = "0";
+  document.body.appendChild(campo);
+  campo.select();
+  try {
+    return document.execCommand("copy");
+  } catch {
+    return false;
+  } finally {
+    document.body.removeChild(campo);
+  }
+}
+
+const IPV4 = /^(\d{1,3}\.){3}\d{1,3}$/;
+
+/**
+ * Por que esta impressora não tem gráfico mensal. O histórico sai do
+ * contador de páginas lido por SNMP (e da planilha para os meses antigos);
+ * sem contador não há o que contar, e o card diz o motivo em vez de sumir.
+ */
+function motivoSemHistorico(printer: Printer): string {
+  if (printer.printerType === "Etiqueta" || printer.printerType === "Portatil") {
+    return "Etiquetadoras e portáteis não informam contador de páginas pela rede, então não entram no relatório mensal.";
+  }
+  if (!IPV4.test(printer.ip)) {
+    return `A porta desta fila (${printer.ip}) não tem IP, então não há equipamento para ler o contador.`;
+  }
+  if (!printer.lastSeenAt || printer.pagesPrinted <= 0) {
+    return printer.status === "offline"
+      ? "Sem leitura de contador ainda: a impressora não responde a partir do servidor do sistema. O gráfico aparece assim que ela for lida."
+      : "Sem leitura de contador ainda: a impressora responde, mas não informou o contador de páginas (SNMP desligado ou sem suporte).";
+  }
+  return "Contador lido, mas ainda sem leituras suficientes para fechar o mês. O gráfico aparece nas próximas coletas.";
 }
 
 function Fact({ label, value }: { label: string; value: string }) {
@@ -36,6 +92,7 @@ function Fact({ label, value }: { label: string; value: string }) {
 export default function PrinterDetailsModal({ printer, onClose }: PrinterDetailsModalProps) {
   const { push } = useToast();
   const { theme } = useTheme();
+  const { can, usingRealData, requestTestPrint } = useAppData();
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,20 +103,24 @@ export default function PrinterDetailsModal({ printer, onClose }: PrinterDetails
 
   const lowest = printer.toner ? [...printer.toner].sort((a, b) => a.percent - b.percent)[0] : null;
   const needsAttention = lowest && lowest.percent <= 20;
-  const monthly = printer.monthlyPages ?? [];
+  const doEquipamento = !printer.monthlyPages?.length && !!printer.deviceMonthlyPages?.length;
+  const monthly = (printer.monthlyPages?.length ? printer.monthlyPages : printer.deviceMonthlyPages) ?? [];
   const activeMonth = monthly.find((m) => m.month === selectedMonth) ?? monthly[monthly.length - 1] ?? null;
   const maxMonthPages = Math.max(1, ...monthly.map((m) => m.pages));
 
-  // QA-06: ver a nota em PrinterTable.handleTestPage — não há rota de
-  // impressão no backend, e o toast de sucesso anterior anunciava um job
-  // que nunca era enviado.
-  function handleTestPage() {
-    push({
-      variant: "info",
-      title: "Impressão de teste indisponível",
-      description: `Ainda não é possível enviar um job para ${printer!.name} por aqui. Use a interface web da impressora.`,
-    });
-    onClose();
+  // Página de teste real (direto no IP). O pedido fecha este modal e abre a
+  // confirmação global (TestPrintDialog, no AppShell) no lugar dele.
+  const bloqueioTeste = testPrintBlockReason(printer, { canOperate: can.canOperate, usingRealData });
+  const caminho = installPath(printer);
+
+  async function copiarCaminho() {
+    if (!caminho) return;
+    const ok = await copiarTexto(caminho);
+    push(
+      ok
+        ? { variant: "success", title: "Caminho copiado", description: "Agora Win+R, cole e Enter." }
+        : { variant: "warning", title: "Não foi possível copiar", description: "Selecione o caminho e copie com Ctrl+C." },
+    );
   }
 
   return (
@@ -71,7 +132,12 @@ export default function PrinterDetailsModal({ printer, onClose }: PrinterDetails
       maxWidth="36rem"
       footer={
         <>
-          <button onClick={handleTestPage} className={styles.footerButton}>
+          <button
+            onClick={() => requestTestPrint(printer)}
+            disabled={bloqueioTeste !== null}
+            title={bloqueioTeste ?? "Envia 1 página de teste direto ao IP da impressora"}
+            className={styles.footerButton}
+          >
             <FileText size={16} />
             Imprimir página de teste
           </button>
@@ -106,6 +172,64 @@ export default function PrinterDetailsModal({ printer, onClose }: PrinterDetails
         <Fact label="Endereço IP" value={printer.ip} />
       </div>
 
+      {/* Fila no print server: driver e como instalar no próprio PC. Só para
+          impressora que veio de um servidor — cadastro manual não tem fila. */}
+      {printer.server && (
+        <div className={styles.queueBlock}>
+          <div className={styles.queueFacts}>
+            <div>
+              <p className={styles.factLabel}>Servidor</p>
+              <p className={styles.factValue}>{printer.server}</p>
+            </div>
+            {printer.driverName && (
+              <div>
+                <p className={styles.factLabel}>Driver</p>
+                <p className={styles.factValue}>
+                  {printer.driverName}
+                  {isGenericDriver(printer.driverName) && (
+                    <span
+                      className={styles.genericTag}
+                      title="Driver que só repassa texto cru: normal para etiquetadora, suspeito para impressora A4."
+                    >
+                      genérico
+                    </span>
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {caminho && (
+            <div className={styles.installBlock}>
+              <p className={styles.installTitle}>
+                <MonitorDown size={15} aria-hidden="true" />
+                Instalar no meu computador
+              </p>
+              <div className={styles.installPathRow}>
+                <code className={styles.installPath}>{caminho}</code>
+                <button type="button" onClick={() => void copiarCaminho()} className={styles.copyButton}>
+                  <Copy size={14} aria-hidden="true" />
+                  Copiar
+                </button>
+              </div>
+              <p className={styles.installHint}>
+                Aperte <kbd>Win</kbd> + <kbd>R</kbd>, cole o caminho e dê Enter. O Windows instala a impressora e
+                o driver direto do servidor, sem precisar de administrador.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {monthly.length === 0 && (
+        <div className={styles.monthlyBlock}>
+          <div className={styles.monthlyHeader}>
+            <p className={styles.factLabel}>Impressões por mês</p>
+          </div>
+          <p className={styles.monthlyEmpty}>{motivoSemHistorico(printer)}</p>
+        </div>
+      )}
+
       {monthly.length > 0 && (
         <div className={styles.monthlyBlock}>
           <div className={styles.monthlyHeader}>
@@ -117,6 +241,11 @@ export default function PrinterDetailsModal({ printer, onClose }: PrinterDetails
             )}
           </div>
           {activeMonth && <p className={styles.monthlyPeriod}>Período: {activeMonth.period}</p>}
+          {doEquipamento && (
+            <p className={styles.monthlyPeriod}>
+              Mesmo equipamento de outra fila com este IP; o relatório conta o equipamento uma vez.
+            </p>
+          )}
           <div className={styles.monthlyBars}>
             {monthly.map((m) => {
               const active = activeMonth?.month === m.month;

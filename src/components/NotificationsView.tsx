@@ -26,6 +26,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  BellRing,
   Inbox,
   RefreshCw,
   Loader2,
@@ -43,13 +44,16 @@ import {
   fetchUsers,
   markAllNotificationsRead,
   markNotificationRead,
+  sendTestAlert,
   type ApiUser,
+  type ApiWebhookTestResult,
 } from "../lib/api";
 import { adaptNotification, parseApiDate } from "../lib/adaptApi";
 import { useApiErrorReporter } from "../lib/apiErrors";
 import { useAppData } from "../lib/app-data";
 import { useToast } from "../lib/toast";
 import { cn } from "../lib/cn";
+import { motivoFalhaWebhook } from "../lib/webhookTest";
 import Modal from "./Modal";
 import type { Notification } from "../types";
 import styles from "./NotificationsView.module.css";
@@ -93,8 +97,33 @@ function formatarMomento(iso: string): string {
   });
 }
 
+/** Texto do aviso depois do teste, conforme o que aconteceu no webhook. */
+function avisoDoTeste(webhook: ApiWebhookTestResult) {
+  if (webhook.sent) {
+    return {
+      variant: "success" as const,
+      title: "Alerta de teste enviado",
+      description: "Chegou na sua caixa e foi entregue ao webhook do Teams.",
+    };
+  }
+  if (!webhook.configured) {
+    return {
+      variant: "warning" as const,
+      title: "Teste só na caixa",
+      description:
+        "O backend não tem WEBHOOK_URL configurado. Se você acabou de preencher no backend/.env, reinicie o backend para ele ler o valor novo.",
+    };
+  }
+  const motivo = motivoFalhaWebhook(webhook.detail);
+  return {
+    variant: "warning" as const,
+    title: "Webhook não recebeu o teste",
+    description: `A notificação chegou na sua caixa, mas ${motivo}. Detalhes no log do backend.`,
+  };
+}
+
 export default function NotificationsView() {
-  const { can, refreshUnreadNotifications } = useAppData();
+  const { account, can, refreshUnreadNotifications } = useAppData();
   const { push } = useToast();
   // 401 desloga, 403 não — regra da Fase 2, compartilhada com as demais telas.
   const relatarErro = useApiErrorReporter();
@@ -112,6 +141,7 @@ export default function NotificationsView() {
   const [formError, setFormError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [usuarios, setUsuarios] = useState<ApiUser[] | null>(null);
+  const [testando, setTestando] = useState(false);
 
   const carregar = useCallback(async () => {
     setLoading(true);
@@ -240,6 +270,32 @@ export default function NotificationsView() {
     }
   }
 
+  /**
+   * Alerta de teste: confere os dois canais de aviso de uma vez, sem esperar
+   * uma impressora cair — a notificação crítica na caixa de quem clicou e o
+   * card de TESTE no webhook do Teams (POST /api/notifications/test).
+   *
+   * Só na caixa de quem clicou, de propósito: mandar para todos a cada
+   * teste encheria a caixa dos colegas. Nada é criado em /alerts.
+   *
+   * O backend devolve o desfecho de cada canal separado; o aviso na tela
+   * diz o que chegou e, quando o webhook falha, o provável motivo.
+   */
+  async function enviarTeste() {
+    if (!account) return;
+    setTestando(true);
+    try {
+      const { webhook } = await sendTestAlert();
+      push(avisoDoTeste(webhook));
+      await carregar();
+      void refreshUnreadNotifications();
+    } catch (error) {
+      relatarErro(error, "Não foi possível enviar o alerta de teste");
+    } finally {
+      setTestando(false);
+    }
+  }
+
   const ativos = useMemo(() => (usuarios ?? []).filter((u) => u.is_active), [usuarios]);
 
   return (
@@ -286,6 +342,19 @@ export default function NotificationsView() {
               <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
               Atualizar
             </button>
+            {/* Envio exige admin no backend (POST /api/notifications), então
+                o teste aparece só para quem pode enviar. */}
+            {can.canAdmin && account && (
+              <button
+                onClick={() => void enviarTeste()}
+                disabled={testando}
+                className={styles.secondaryButton}
+                title="Envia um alerta de teste para a sua caixa e para o webhook do Teams"
+              >
+                {testando ? <Loader2 size={15} className="animate-spin" /> : <BellRing size={15} />}
+                Testar alerta
+              </button>
+            )}
             {can.canAdmin && (
               <button onClick={() => void abrirEnvio()} className={styles.primaryButton}>
                 <Send size={15} />

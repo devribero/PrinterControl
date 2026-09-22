@@ -1,102 +1,215 @@
-/* Configurações (Fase 8).
+/* Configurações.
 
-   Duas famílias visuais numa página só: cartões pessoais (neutros) e o
-   cartão de administração, que ganha uma faixa lateral para a separação ser
-   perceptível sem depender de ler o cabeçalho do grupo. */
+   Mobile-first: no celular a navegação é uma fileira de abas roláveis acima
+   do conteúdo; a partir de 1024px vira uma lista lateral fixa. Visual sóbrio,
+   só com os tokens do projeto: bordas, superfícies e uma cor de destaque. */
 
-.page {
+/* ── Layout ──────────────────────────────────────────────────────────── */
+
+.layout {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-width: 52rem;
+  min-width: 0;
 }
 
-/* ── Cabeçalho de grupo (Pessoal / Administração) ────────────────────── */
-
-.groupHeader {
-  padding: 0.5rem 0.25rem 0;
+@media (min-width: 1024px) {
+  .layout {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr);
+    align-items: start;
+    gap: 2rem;
+  }
 }
 
-.groupHeader:not(:first-child) {
-  margin-top: 1.25rem;
-  border-top: 1px solid var(--border);
-  padding-top: 1.75rem;
+.content {
+  min-width: 0;
+  max-width: 48rem;
 }
 
-.groupTitle {
-  font-size: 0.9375rem;
+/* ── Navegação por seções ────────────────────────────────────────────── */
+
+.nav {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border);
+}
+
+.nav::-webkit-scrollbar {
+  display: none;
+}
+
+.navItem {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+
+.navItem:hover {
+  color: var(--text-primary);
+}
+
+.navItemActive {
+  border-bottom-color: var(--link-hover);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.navIcon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.navItemActive .navIcon {
+  color: var(--link-hover);
+}
+
+@media (min-width: 1024px) {
+  .nav {
+    position: sticky;
+    top: 1rem;
+    flex-direction: column;
+    gap: 0.125rem;
+    overflow: visible;
+    border-bottom: none;
+  }
+
+  .navItem {
+    min-height: 2.5rem;
+    margin-bottom: 0;
+    border-bottom: none;
+    border-radius: 0.625rem;
+    padding: 0 0.75rem;
+  }
+
+  .navItem:hover {
+    background: var(--divider);
+  }
+
+  /* Faixa lateral + fundo: o estado ativo não depende só de cor. */
+  .navItemActive,
+  .navItemActive:hover {
+    background: var(--tint-link);
+    box-shadow: inset 3px 0 0 var(--link-hover);
+  }
+}
+
+/* ── Painel ──────────────────────────────────────────────────────────── */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+.panelHeader {
+  padding-bottom: 0.25rem;
+}
+
+.panelTitle {
+  font-size: 1.0625rem;
   font-weight: 700;
   color: var(--text-primary);
 }
 
-.groupSubtitle {
+.panelDescription {
   margin-top: 0.25rem;
   font-size: 0.8125rem;
+  line-height: 1.5;
   color: var(--text-muted);
 }
 
 /* ── Cartão ──────────────────────────────────────────────────────────── */
 
 .card {
-  border-radius: 1rem;
+  border-radius: 0.875rem;
   border: 1px solid var(--border);
   background: var(--bg-surface);
   box-shadow: var(--shadow-xs);
   overflow: hidden;
 }
 
-/* Administração: faixa lateral. O sinal não depende de cor sozinha nem de
-   ter lido o título do grupo — vale para quem chegou rolando a página. */
-.cardAdmin {
-  box-shadow: inset 4px 0 0 var(--warning), var(--shadow-xs);
-}
-
 .cardHeader {
   display: flex;
   align-items: flex-start;
+  justify-content: space-between;
   gap: 0.75rem;
   border-bottom: 1px solid var(--border);
-  padding: 1.125rem 1.5rem;
+  padding: 1rem;
 }
 
-.cardIcon {
-  flex-shrink: 0;
-  margin-top: 0.125rem;
-  color: var(--link-hover);
-}
-
-.cardIconAdmin {
-  flex-shrink: 0;
-  margin-top: 0.125rem;
-  color: var(--warning);
+.cardHeading {
+  min-width: 0;
 }
 
 .cardTitle {
   font-size: 0.9375rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
-.cardSubtitle {
+.cardDescription {
   margin-top: 0.1875rem;
   font-size: 0.8125rem;
   line-height: 1.5;
   color: var(--text-muted);
 }
 
+.readOnlyTag {
+  flex-shrink: 0;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border);
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
 .cardBody {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  padding: 1.25rem 1.5rem;
+  gap: 1rem;
+  padding: 1rem;
 }
 
 .cardFooter {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column-reverse;
+  gap: 0.5rem;
   border-top: 1px solid var(--border);
   background: var(--divider);
-  padding: 0.875rem 1.5rem;
+  padding: 0.75rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .cardHeader,
+  .cardBody {
+    padding-inline: 1.25rem;
+  }
+
+  .cardFooter {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    padding-inline: 1.25rem;
+  }
 }
 
 /* ── Campos ──────────────────────────────────────────────────────────── */
@@ -105,12 +218,25 @@
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
+  min-width: 0;
 }
 
 .fieldRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .fieldRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fieldset {
+  min-width: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .label {
@@ -121,23 +247,40 @@
 
 .input {
   width: 100%;
-  border-radius: 0.75rem;
+  min-height: 2.75rem;
+  border-radius: 0.625rem;
   border: 1px solid var(--border);
-  background: var(--divider);
-  padding: 0.625rem 0.875rem;
-  font-size: 0.875rem;
+  background: var(--bg-surface);
+  padding: 0.5rem 0.75rem;
+  /* 16px evita o zoom automático do iOS ao focar. */
+  font-size: 1rem;
   color: var(--text-primary);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+@media (min-width: 768px) {
+  .input {
+    min-height: 2.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+.input:hover {
+  border-color: var(--border-strong);
 }
 
 .input:focus {
   border-color: var(--link-hover);
+  box-shadow: 0 0 0 3px var(--tint-link);
 }
 
-.input:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
+.input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px var(--danger-bg);
 }
 
 .input::placeholder {
@@ -150,59 +293,223 @@
   color: var(--text-muted);
 }
 
-.hint a {
+.hint a,
+.factHint a {
   color: var(--link-hover);
   font-weight: 500;
 }
 
-.hint a:hover {
+.hint a:hover,
+.factHint a:hover {
   text-decoration: underline;
 }
 
+.fieldError {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--danger);
+}
+
 .note {
-  border-radius: 0.75rem;
+  border-radius: 0.625rem;
   border: 1px solid var(--border);
   background: var(--divider);
-  padding: 0.625rem 0.875rem;
-  font-size: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.8125rem;
   line-height: 1.5;
   color: var(--text-secondary);
 }
 
 .formError {
-  border-radius: 0.75rem;
+  border-radius: 0.625rem;
   border: 1px solid var(--danger);
   background: var(--danger-bg);
-  padding: 0.625rem 0.875rem;
+  padding: 0.625rem 0.75rem;
   font-size: 0.8125rem;
   color: var(--danger);
 }
 
-.roleRow {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  flex-wrap: wrap;
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+  padding: 0;
+  margin: -1px;
 }
 
-.roleBadge {
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.8125em;
+}
+
+.breakable {
+  overflow-wrap: anywhere;
+}
+
+/* ── Fatos somente leitura ───────────────────────────────────────────── */
+
+.factList {
+  display: flex;
+  flex-direction: column;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.fact:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.fact:last-child {
+  padding-bottom: 0;
+}
+
+@media (min-width: 640px) {
+  .fact {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    gap: 1rem;
+  }
+}
+
+.factLabel {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.factValue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  min-width: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.factHint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* ── Marcador de estado ──────────────────────────────────────────────── */
+
+.pill {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.375rem;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: var(--divider);
-  padding: 0.1875rem 0.625rem;
+  padding: 0.125rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
+  white-space: nowrap;
   color: var(--text-secondary);
 }
 
-.code {
-  border-radius: 0.5rem;
-  border: 1px solid var(--border);
-  background: var(--track);
-  padding: 0.375rem 0.625rem;
-  font-family: var(--font-ibm-plex-mono), monospace;
+.pillDot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 999px;
+  background: var(--text-muted);
+}
+
+.pillOk .pillDot {
+  background: var(--success);
+}
+
+.pillWarn .pillDot {
+  background: var(--warning);
+}
+
+.pillDanger {
+  color: var(--danger);
+}
+
+.pillDanger .pillDot {
+  background: var(--danger);
+}
+
+/* ── Listas (servidores, unidades, atalhos) ──────────────────────────── */
+
+.itemList,
+.linkList {
+  display: flex;
+  flex-direction: column;
+}
+
+.item,
+.linkRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.item:first-child,
+.linkRow:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.item:last-child,
+.linkRow:last-child {
+  padding-bottom: 0;
+}
+
+.linkRow {
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--text-muted);
+}
+
+.linkRow:hover .itemTitle {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+.itemMain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.itemTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.itemMeta {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  line-height: 1.5;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.itemError {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--danger);
   overflow-wrap: anywhere;
 }
 
@@ -210,31 +517,57 @@
 
 .optionGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
-  gap: 0.625rem;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .optionGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .option {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25rem;
-  border-radius: 0.875rem;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.125rem;
+  min-height: 3rem;
+  border-radius: 0.75rem;
   border: 1px solid var(--border);
-  background: var(--divider);
-  padding: 0.875rem;
-  text-align: left;
+  background: var(--bg-surface);
+  padding: 0.75rem;
   color: var(--text-secondary);
-  transition: all 0.15s;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.option > input + * {
+  grid-row: span 2;
 }
 
 .option:hover {
-  border-color: var(--link-hover);
+  border-color: var(--border-strong);
 }
 
-/* Selecionado: borda + anel + fundo. Três sinais somados, porque um anel de
-   cor sozinho é frágil para quem não distingue matizes. */
-.optionActive {
+.option:has(input:focus-visible) {
+  outline: 2px solid var(--link-hover);
+  outline-offset: 2px;
+}
+
+@media (min-width: 640px) {
+  .option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+/* Selecionado: borda + anel + fundo — mais de um sinal além da cor. */
+.optionActive,
+.optionActive:hover {
   border-color: var(--link-hover);
   background: var(--tint-link);
   box-shadow: 0 0 0 1px var(--link-hover);
@@ -242,7 +575,7 @@
 }
 
 .optionLabel {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -252,14 +585,13 @@
 }
 
 .optionHint {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   line-height: 1.45;
   color: var(--text-muted);
 }
 
-/* Amostra "Aa" da escala de texto. Em rem de propósito: ela cresce junto
-   com a preferência aplicada, então o botão mostra o efeito real. */
 .escalaAmostra {
+  min-width: 1.75rem;
   font-weight: 700;
   line-height: 1.2;
   color: var(--text-primary);
@@ -269,73 +601,67 @@
 
 .switchRow {
   display: flex;
-  align-items: flex-start;
-  gap: 0.625rem;
-  border-radius: 0.875rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.75rem;
+  border-radius: 0.75rem;
   border: 1px solid var(--border);
-  background: var(--divider);
-  padding: 0.875rem;
+  padding: 0.75rem;
   cursor: pointer;
   transition: border-color 0.15s;
 }
 
 .switchRow:hover {
-  border-color: var(--link-hover);
-}
-
-.checkbox {
-  flex-shrink: 0;
-  margin-top: 0.125rem;
-  width: 1rem;
-  height: 1rem;
-  accent-color: var(--link-hover);
-  cursor: pointer;
+  border-color: var(--border-strong);
 }
 
 .switchBody {
   display: flex;
   flex-direction: column;
   gap: 0.1875rem;
+  min-width: 0;
 }
 
 .switchLabel {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-/* ── Atalhos administrativos ─────────────────────────────────────────── */
-
-.linkGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-  gap: 0.625rem;
+.switch {
+  appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--track);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
 }
 
-.adminLink {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  border-radius: 0.875rem;
-  border: 1px solid var(--border);
-  background: var(--divider);
-  padding: 0.875rem;
-  transition: all 0.15s;
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-xs);
+  transition: transform 0.15s;
 }
 
-.adminLink:hover {
+.switch:checked {
   border-color: var(--link-hover);
-  background: var(--tint-link);
+  background: var(--link-hover);
 }
 
-.adminLinkIcon {
-  color: var(--text-secondary);
-}
-
-.adminLinkTitle {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--text-primary);
+.switch:checked::after {
+  transform: translateX(1rem);
 }
 
 /* ── Botões ──────────────────────────────────────────────────────────── */
@@ -346,11 +672,19 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 0.75rem;
-  padding: 0.625rem 1rem;
+  min-height: 2.75rem;
+  border-radius: 0.625rem;
+  padding: 0 1rem;
   font-size: 0.875rem;
   white-space: nowrap;
-  transition: all 0.15s;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+@media (min-width: 768px) {
+  .primaryButton,
+  .secondaryButton {
+    min-height: 2.5rem;
+  }
 }
 
 .primaryButton {
@@ -372,12 +706,29 @@
 }
 
 .secondaryButton:hover:not(:disabled) {
-  border-color: var(--link-hover);
+  border-color: var(--border-strong);
   color: var(--text-primary);
 }
 
 .primaryButton:disabled,
 .secondaryButton:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
+}
+
+.textButton {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  border-radius: 0.5rem;
+  padding: 0 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--link-hover);
+}
+
+.textButton:hover {
+  text-decoration: underline;
 }
