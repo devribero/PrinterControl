@@ -1,14 +1,31 @@
+import logging
+import re
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, func, select
 from app.database import get_session
-from app.dependencies import require_active_user, require_admin, require_operator
+from pydantic import BaseModel
+
+from app.dependencies import rate_limited_action, require_active_user, require_admin, require_operator
 from app.models.user import User
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from app.models.printer import Printer, PrinterMonthly, PrinterReading
+from app.config import settings
 from app.services.alert_engine import evaluate_reading
+from app.services.printer_collector import PrinterCollector
+from app.services.snmp import SNMPClient
+from app.services import audit_log, data_version
+from app.services.test_print import TestPageInfo, build_test_page, is_supported as is_test_print_supported, send_raw
 from app.services.environment_guard import bloquear_mock_em_producao
-from app.services.monthly_report import month_bounds, month_label, month_period, pages_from_readings
+from app.services.monthly_report import (
+    device_monthly_history,
+    filas_com_o_mesmo_serial,
+    month_bounds,
+    month_label,
+    month_pages,
+    month_period,
+)
 from app.schemas.printer import (
     TONER_LABELS,
     PrinterCreate,
@@ -20,6 +37,8 @@ from app.schemas.printer import (
 )
 from typing import List
 from app.schemas.common import RecursoId
+
+logger = logging.getLogger("printercontrol.printers")
 
 # Fase 2: TODA rota de impressoras exige sessao. A dependencia fica no
 # router para que nenhuma rota nova nasca publica por esquecimento; as rotas
@@ -179,19 +198,31 @@ def monthly_report(
     # (printer_id, period) -> paginas. PrinterMonthly primeiro (autoridade),
     # depois o mes em andamento so preenche o que ainda nao esta la.
     por_impressora_periodo: dict[tuple[int, str], int] = {}
+    # Parte estimada de cada mes (dias sem coleta no comeco do mes, pela
+    # media diaria — ver monthly_report.month_pages). O painel mostra isso
+    # ao lado do total para ninguem ler estimativa como medicao.
+    estimado_por_periodo: dict[str, int] = {}
 
     fechados = session.exec(
         select(PrinterMonthly).where(PrinterMonthly.month_start >= inicio)
     ).all()
     for row in fechados:
         por_impressora_periodo[(row.printer_id, row.month)] = row.pages_printed
+        if row.estimated_pages:
+            estimado_por_periodo[row.month] = estimado_por_periodo.get(row.month, 0) + row.estimated_pages
 
     hoje = datetime.utcnow()
     periodo_atual = month_period(hoje)
     if periodo_atual >= month_period(inicio):
         mes_ini, mes_fim = month_bounds(hoje)
-        for printer_id, pages in pages_from_readings(session, mes_ini, mes_fim).items():
-            por_impressora_periodo.setdefault((printer_id, periodo_atual), pages)
+        mes_atual = month_pages(session, mes_ini, mes_fim)
+        for printer_id, pages in mes_atual.pages.items():
+            if (printer_id, periodo_atual) in por_impressora_periodo:
+                continue
+            por_impressora_periodo[(printer_id, periodo_atual)] = pages
+            estimado = mes_atual.estimated.get(printer_id, 0)
+            if estimado:
+                estimado_por_periodo[periodo_atual] = estimado_por_periodo.get(periodo_atual, 0) + estimado
 
     if not por_impressora_periodo:
         return {
@@ -203,6 +234,9 @@ def monthly_report(
 
     per_printer: dict[int, list[dict]] = {}
     per_month: dict[str, int] = {}
+    # Uma entrada por impressora e periodo ja e uma por EQUIPAMENTO: o mes
+    # ao vivo so traz a fila representante, e o fechamento grava so ela.
+    equipamentos_por_periodo: dict[str, int] = {}
     # departamento -> periodo -> paginas
     per_department: dict[str, dict[str, int]] = {}
 
@@ -214,10 +248,28 @@ def monthly_report(
             {"month": month_label(period), "pages": pages, "period": period}
         )
         per_month[period] = per_month.get(period, 0) + pages
+        equipamentos_por_periodo[period] = equipamentos_por_periodo.get(period, 0) + 1
 
         departamento = printer.department or "Sem departamento"
         per_department.setdefault(departamento, {})
         per_department[departamento][period] = per_department[departamento].get(period, 0) + pages
+
+    # Equipamento que mudou de IP: o historico da planilha ficou no cadastro
+    # INATIVO do IP antigo. O grafico da impressora atual (mesmo serie lido
+    # por SNMP) mostra esses meses tambem. So o `printers` do payload muda —
+    # os totais acima ja contam cada mes uma vez, e cadastro inativo nao
+    # aparece no painel, entao nada e somado em dobro.
+    for printer_id in list(per_printer):
+        printer = printers.get(printer_id)
+        if not printer or not printer.active:
+            continue
+        meses = {m["period"] for m in per_printer[printer_id]}
+        for outro in filas_com_o_mesmo_serial(session, printer, somente_inativas=True):
+            for m in per_printer.get(outro, []):
+                if m["period"] not in meses:
+                    per_printer[printer_id].append(dict(m))
+                    meses.add(m["period"])
+        per_printer[printer_id].sort(key=lambda m: m["period"])
 
     department_usage = [
         {
@@ -235,7 +287,19 @@ def monthly_report(
     return {
         "generated_at": datetime.utcnow().isoformat(),
         "monthly_usage": [
-            {"month": month_label(period), "pages": pages, "period": period}
+            {
+                "month": month_label(period),
+                "pages": pages,
+                "period": period,
+                # Quanto de `pages` e estimativa; 0 = medido de ponta a ponta.
+                "estimated": estimado_por_periodo.get(period, 0),
+                # Mes ainda em andamento: o total cresce ate o fechamento.
+                "in_progress": period == periodo_atual,
+                # Equipamentos com dado no mes. Comparar meses so faz sentido
+                # com cobertura parecida: em set/2026 a coleta ao vivo ainda
+                # nao alcancava unidades inteiras que a planilha de agosto tinha.
+                "devices": equipamentos_por_periodo.get(period, 0),
+            }
             for period, pages in sorted(per_month.items())
         ],
         "printers": [
@@ -404,3 +468,195 @@ def create_printer_reading(
     evaluate_reading(session, printer_id, reading)
     session.refresh(reading)
     return reading
+
+
+class TestPrintResponse(BaseModel):
+    printer_id: int
+    ip: str
+    sent: bool
+    # "enviado", "porta_fechada", "sem_resposta", "erro_de_rede"
+    detail: str
+
+
+_COLORIDA_RE = re.compile(r"colou?r|\bc\d{3,4}\b|\d{3,4}c(dn|dw|dnw|i|idn|fdw)?\b|\b(mp|im|mc) c", re.IGNORECASE)
+
+
+def _e_colorida(printer: Printer, leitura: PrinterReading | None) -> bool:
+    """
+    Colorida pela LEITURA (tem toner ciano/magenta/amarelo) e, sem leitura de
+    toner, pelo modelo ("M6530cdn", "IM C3000", "Color LaserJet").
+    """
+    if leitura and any(v is not None for v in (leitura.toner_c, leitura.toner_m, leitura.toner_y)):
+        return True
+    campos = " ".join(c for c in (printer.snmp_model, printer.model, printer.driver_name) if c)
+    return bool(_COLORIDA_RE.search(campos))
+
+
+def _replicar_leitura_nas_filas_do_ip(session: Session, printer: Printer) -> None:
+    """
+    Copia a leitura ao vivo recem-gravada para as outras filas ativas do
+    mesmo IP — o mesmo equipamento, o mesmo contador. E o que a coleta da
+    frota ja faz (le uma vez por IP, grava em cada fila).
+
+    Sem isto, a leitura ao vivo so existia na fila em que se imprimiu; se
+    outra fila do IP tivesse mais historico no mes, era ELA que representava
+    o equipamento no relatorio (monthly_report._one_per_device) e a leitura
+    nova ficava invisivel ate a proxima coleta agendada. Nao reavalia
+    alertas nas copias: a coleta agendada faz isso para todas as filas.
+    """
+    leitura = session.exec(
+        select(PrinterReading).where(PrinterReading.printer_id == printer.id).order_by(PrinterReading.id.desc())
+    ).first()
+    if not leitura or (datetime.utcnow() - leitura.timestamp) > timedelta(minutes=1):
+        return
+    irmas = session.exec(
+        select(Printer).where(Printer.ip == printer.ip).where(Printer.id != printer.id).where(Printer.active == True)  # noqa: E712
+    ).all()
+    for irma in irmas:
+        session.add(
+            PrinterReading(
+                printer_id=irma.id,
+                status=leitura.status,
+                page_count=leitura.page_count,
+                toner_k=leitura.toner_k,
+                toner_c=leitura.toner_c,
+                toner_m=leitura.toner_m,
+                toner_y=leitura.toner_y,
+                uptime=leitura.uptime,
+                device_status=leitura.device_status,
+                printer_state=leitura.printer_state,
+                error_states=leitura.error_states,
+                timestamp=leitura.timestamp,
+            )
+        )
+    if irmas:
+        session.commit()
+
+
+@router.post("/{printer_id}/test-print", response_model=TestPrintResponse)
+def test_print(
+    printer_id: RecursoId,
+    session: Session = Depends(get_session),
+    user: User = Depends(rate_limited_action("test_print", require=require_operator)),
+):
+    """
+    Envia uma pagina de teste PCL direto ao IP da impressora (porta 9100).
+
+    So laser — etiquetadora recebe 422, porque PCL nela imprime lixo (ver
+    services/test_print.py, onde mora a regra e o porque de nao ir pela fila
+    do print server). Operador pode disparar; o limite por usuario e o mesmo
+    das outras acoes de rede, e cada disparo fica na trilha de auditoria —
+    imprimir gasta papel num lugar fisico, entao "quem mandou" importa.
+
+    `sent=True` quer dizer que o equipamento aceitou os dados na porta RAW;
+    nao ha como saber, por este caminho, se o papel de fato saiu.
+    """
+    printer = session.get(Printer, printer_id)
+    if not printer:
+        raise HTTPException(status_code=404, detail="Impressora não encontrada")
+    if not printer.active:
+        raise HTTPException(status_code=409, detail="Impressora inativa: ela sumiu do Print Server no último sync.")
+    if not is_test_print_supported(
+        ip=printer.ip,
+        name=printer.name,
+        model=printer.model,
+        driver_name=printer.driver_name,
+        printer_type=printer.printer_type,
+        snmp_model=printer.snmp_model,
+        snmp_description=printer.snmp_description,
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Impressão de teste disponível só para impressoras laser (PCL). "
+                "Esta parece ser uma etiquetadora ou um modelo não reconhecido."
+            ),
+        )
+
+    # Leitura AO VIVO antes de montar a folha (21/09/2026). A coleta agendada
+    # roda a cada 5 minutos; sem isto, varias folhas seguidas saiam todas com
+    # o mesmo contador e o mesmo total do mes, porque nenhuma coleta tinha
+    # passado entre elas. A leitura e gravada como qualquer outra, entao o
+    # relatorio mensal tambem fica em dia. So em coleta real: em modo
+    # simulado ela gravaria contador inventado no banco. Nunca impede a folha
+    # — se a impressora nao responder ao SNMP, vale a ultima leitura boa.
+    if settings.collection_mode == "real":
+        try:
+            PrinterCollector(mode="real").collect_and_save(printer.id, session)
+            _replicar_leitura_nas_filas_do_ip(session, printer)
+            data_version.bump()
+        except Exception:
+            logger.exception("Leitura ao vivo antes da pagina de teste falhou (printer_id=%s)", printer.id)
+
+    ultima = session.exec(
+        select(PrinterReading).where(PrinterReading.printer_id == printer.id).order_by(PrinterReading.id.desc())
+    ).first()
+    # Contador e toner da ultima leitura COM contador: uma leitura em que o
+    # SNMP nao respondeu nao pode zerar a folha.
+    ultima_valida = session.exec(
+        select(PrinterReading)
+        .where(PrinterReading.printer_id == printer.id)
+        .where(PrinterReading.page_count > 0)
+        .order_by(PrinterReading.id.desc())
+    ).first() or ultima
+    toner = None
+    if ultima_valida:
+        toner = [
+            (TONER_LABELS[cor], valor)
+            for cor, valor in (
+                ("K", ultima_valida.toner_k),
+                ("C", ultima_valida.toner_c),
+                ("M", ultima_valida.toner_m),
+                ("Y", ultima_valida.toner_y),
+            )
+            if valor is not None
+        ]
+    # Sem nivel: pergunta a impressora por que, para a folha explicar em vez
+    # de so dizer "nao informado" (cartucho nao original, nivel sem numero).
+    toner_note = None
+    if not toner and settings.collection_mode == "real":
+        try:
+            toner_note = SNMPClient(
+                community=settings.snmp_community,
+                timeout=settings.snmp_timeout,
+                retries=settings.snmp_retries,
+            ).diagnostico_toner(printer.ip)
+        except Exception:
+            logger.exception("Diagnostico de toner falhou (printer_id=%s)", printer.id)
+    documento = build_test_page(
+        TestPageInfo(
+            printer_name=printer.name,
+            ip=printer.ip,
+            requested_by=f"{user.name} ({user.email})",
+            # O que o equipamento diz ser (SNMP) vale mais que o derivado do driver.
+            model=printer.snmp_model or printer.model,
+            serial=printer.serial_number,
+            department=printer.department,
+            location=printer.snmp_location,
+            server=printer.server,
+            share_name=printer.share_name or printer.name,
+            driver=printer.driver_name,
+            status=ultima.status if ultima else None,
+            page_count=ultima_valida.page_count if ultima_valida else None,
+            toner=toner or None,
+            toner_note=toner_note,
+            colorida=_e_colorida(printer, ultima_valida),
+            # timestamp e UTC ingenuo; a folha mostra a hora local de Brasilia.
+            last_reading=(ultima_valida.timestamp - timedelta(hours=3)) if ultima_valida else None,
+            # Mesmo historico do relatorio mensal, do equipamento inteiro.
+            monthly=device_monthly_history(session, printer.id) or None,
+        )
+    )
+    resultado = send_raw(printer.ip, documento)
+
+    audit_log.record(
+        session,
+        user,
+        "printer.test_print",
+        "printer",
+        printer.id,
+        after={"ip": printer.ip, "sent": resultado.sent, "detail": resultado.detail},
+    )
+    session.commit()
+
+    return TestPrintResponse(printer_id=printer.id, ip=printer.ip, sent=resultado.sent, detail=resultado.detail)

@@ -2,6 +2,8 @@ import json
 from ipaddress import IPv4Address, AddressValueError
 
 from pydantic import BaseModel, computed_field, field_validator
+
+from app.services.test_print import is_supported as is_test_print_supported
 from typing import Optional, List
 from datetime import datetime
 
@@ -168,6 +170,7 @@ class PrinterResponse(BaseModel):
     ip: str
     port_name: str
     driver_name: str
+    share_name: Optional[str] = None
     name: str
     model: str
     printer_type: Optional[str] = None
@@ -211,6 +214,24 @@ class PrinterWithStatus(PrinterResponse):
     device_status: Optional[str] = None
     printer_state: Optional[str] = None
     error_states: List[str] = []
+
+    @computed_field
+    @property
+    def test_print_supported(self) -> bool:
+        """
+        Pode receber a pagina de teste PCL (POST /{id}/test-print)? A regra
+        mora em services/test_print.py; o painel so a le, para habilitar o
+        botao sem duplicar a lista de marcas no frontend.
+        """
+        return is_test_print_supported(
+            ip=self.ip,
+            name=self.name,
+            model=self.model,
+            driver_name=self.driver_name,
+            printer_type=self.printer_type,
+            snmp_model=self.snmp_model,
+            snmp_description=self.snmp_description,
+        )
 
 
 # Estados que a coleta real (services/snmp.py) e capaz de produzir, e os
