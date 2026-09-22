@@ -52,8 +52,8 @@ check_true(
 print("\n--- 2. mesmo formato do modo real (mesmos campos) ---")
 sample = result[0]
 check_true(
-    "campos = name, server, port_name, ip, driver_name",
-    set(sample.__dataclass_fields__) == {"name", "server", "port_name", "ip", "driver_name"},
+    "campos = name, server, port_name, ip, driver_name, share_name",
+    set(sample.__dataclass_fields__) == {"name", "server", "port_name", "ip", "driver_name", "share_name"},
 )
 
 print("\n--- 3. impressoras compartilhando IP (necessario p/ agrupamento) ---")

@@ -22,7 +22,7 @@ from pydantic import BaseModel, Field, field_validator
 from sqlmodel import Session, func, select
 
 from app.config import settings
-from app.database import get_session
+from app.database import engine, get_session
 from app.dependencies import rate_limited_action, require_active_user, require_admin
 from app.models.alert import Alert, TonerHistory
 from app.models.notification import Notification
@@ -33,12 +33,25 @@ from app.models.print_server import (
     PrintServer,
 )
 from app.models.printer import Printer, PrinterMonthly, PrinterReading
+from app.models.unit import Unit
 from app.services import audit_log
 from app.services.environment_guard import bloquear_mock_em_producao
 from app.models.user import User
 from app.services.discovery import enrich_discovered_printers
-from app.services.print_server import PrintServerError, discover_printers, validar_host
+from app.services.print_server_autosync import (
+    SyncEmAndamento,
+    marcar_resultado,
+    sincronizar_em_segundo_plano,
+    sincronizar_servidor,
+)
+from app.services.print_server import (
+    PrintServerError,
+    discover_printers,
+    portas_conhecidas_do_cadastro,
+    validar_host,
+)
 from app.services.printer_sync import SyncBlockedError, sync_printers
+from app.services.units import unit_name as _unit_name
 from app.schemas.common import RecursoId
 
 router = APIRouter(prefix="/servers", tags=["servers"])
@@ -75,12 +88,17 @@ class PrintServerResponse(BaseModel):
     active_printer_count: int = 0
     #: True para o host de `PRINT_SERVER_HOST`, usado pelas rotas sem id.
     is_default: bool = False
+    #: Unidade dona do servidor (21/09/2026). null = sem unidade.
+    unit_id: int | None = None
+    unit_name: str | None = None
 
 
 class PrintServerCreate(BaseModel):
     host: str = Field(min_length=1)
     name: str = ""
     mode: str = "mock"
+    #: Unidade (21/09/2026). null = sem unidade. A rota confere se existe.
+    unit_id: int | None = None
 
     @field_validator("host", "name")
     @classmethod
@@ -129,6 +147,8 @@ class PrintServerUpdate(BaseModel):
     name: str | None = None
     mode: str | None = None
     active: bool | None = None
+    #: Unidade (21/09/2026). Omitido = mantem; null = tira da unidade.
+    unit_id: int | None = None
 
     @field_validator("mode")
     @classmethod
@@ -212,7 +232,15 @@ def _to_response(session: Session, server: PrintServer) -> PrintServerResponse:
         printer_count=total,
         active_printer_count=ativas,
         is_default=server.host == settings.print_server_host,
+        unit_id=server.unit_id,
+        unit_name=_unit_name(session, server.unit_id),
     )
+
+
+def _unidade_existe_ou_404(session: Session, unit_id: int | None) -> None:
+    """Unidade informada no corpo precisa existir (null = sem unidade)."""
+    if unit_id is not None and not session.get(Unit, unit_id):
+        raise HTTPException(status_code=404, detail="Unidade nao encontrada")
 
 
 def _get_or_404(session: Session, server_id: int) -> PrintServer:
@@ -222,23 +250,7 @@ def _get_or_404(session: Session, server_id: int) -> PrintServer:
     return server
 
 
-def _marcar_resultado(
-    session: Session, server: PrintServer, *, erro: str | None, sincronizou: bool = False
-) -> None:
-    """Registra o desfecho da ultima descoberta/sync no proprio servidor."""
-    agora = datetime.utcnow()
-    if erro:
-        server.last_status = STATUS_ERROR
-        server.last_error = erro
-    else:
-        server.last_status = STATUS_ONLINE
-        server.last_error = None
-        server.last_seen_at = agora
-        if sincronizou:
-            server.last_sync_at = agora
-    server.updated_at = agora
-    session.add(server)
-    session.commit()
+_marcar_resultado = marcar_resultado
 
 
 def _executar_discover(server_host: str, mode: str) -> DiscoverResponse:
@@ -253,7 +265,15 @@ def _executar_discover(server_host: str, mode: str) -> DiscoverResponse:
             "mude para 'real' em /network.",
         )
 
-    found = discover_printers(server_host, mode=mode)
+    # Pela tela: reaproveita o IP ja gravado das portas de nome livre, que
+    # nos servidores de outras unidades custam 30s+ para consultar.
+    try:
+        with Session(engine) as leitura:
+            conhecidas = portas_conhecidas_do_cadastro(leitura, server_host)
+    except Exception:
+        # So acelera; sem ela a descoberta consulta as portas normalmente.
+        conhecidas = None
+    found = discover_printers(server_host, mode=mode, portas_conhecidas=conhecidas)
     enriched = enrich_discovered_printers(found, mode=mode)
     source = "print_server_real" if mode == "real" else "print_server_mock"
 
@@ -338,12 +358,14 @@ def create_server(
             "Informe mode='real' ao registrar o servidor.",
         )
 
-    server = PrintServer(host=data.host, name=data.name or data.host, mode=data.mode)
+    _unidade_existe_ou_404(session, data.unit_id)
+
+    server = PrintServer(host=data.host, name=data.name or data.host, mode=data.mode, unit_id=data.unit_id)
     session.add(server)
     session.flush()  # atribui o id sem commitar, para o registro de auditoria abaixo
     audit_log.record(
         session, admin, "server.create", "print_server", server.id,
-        after={"host": server.host, "name": server.name, "mode": server.mode},
+        after={"host": server.host, "name": server.name, "mode": server.mode, "unit_id": server.unit_id},
     )
     session.commit()
     session.refresh(server)
@@ -359,6 +381,10 @@ def create_server(
     if orfas:
         session.commit()
 
+    # Traz as filas sem ninguem precisar clicar Descobrir/Sincronizar.
+    if server.mode == "real":
+        sincronizar_em_segundo_plano(server.id, "cadastro")
+
     return _to_response(session, server)
 
 
@@ -371,9 +397,18 @@ def update_server(
 ):
     """Altera rotulo, modo e ativacao. `host` nao muda (ver PrintServerUpdate)."""
     server = _get_or_404(session, server_id)
-    before = {"host": server.host, "name": server.name, "mode": server.mode, "active": server.active}
+    before = {
+        "host": server.host, "name": server.name, "mode": server.mode,
+        "active": server.active, "unit_id": server.unit_id,
+    }
 
     data = update.model_dump(exclude_unset=True)
+    # Unidade: null E valor valido (tira da unidade), por isso fora do laco
+    # abaixo, que ignora None.
+    if "unit_id" in data:
+        unit_id = data.pop("unit_id")
+        _unidade_existe_ou_404(session, unit_id)
+        server.unit_id = unit_id
     if data.get("mode") == "mock":
         bloquear_mock_em_producao(
             "Mudar um Print Server para o modo simulado",
@@ -389,10 +424,19 @@ def update_server(
     audit_log.record(
         session, admin, "server.update", "print_server", server.id,
         before=before,
-        after={"host": server.host, "name": server.name, "mode": server.mode, "active": server.active},
+        after={
+            "host": server.host, "name": server.name, "mode": server.mode,
+            "active": server.active, "unit_id": server.unit_id,
+        },
     )
     session.commit()
     session.refresh(server)
+
+    # Virou real ou foi reativado: sincroniza ja, em segundo plano.
+    passou_a_valer = (before["mode"] != "real" or not before["active"])
+    if server.mode == "real" and server.active and passou_a_valer:
+        sincronizar_em_segundo_plano(server.id, "ativado")
+
     return _to_response(session, server)
 
 
@@ -557,10 +601,13 @@ def sync_server(
         )
 
     try:
-        result = sync_printers(session, server=server.host, mode=server.mode)
+        result = sincronizar_servidor(session, server, usar_portas_conhecidas=True)
+    except SyncEmAndamento:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"{server.host} ja esta sincronizando (sync automatico). Tente de novo em instantes.",
+        )
     except PrintServerError as exc:
-        _marcar_resultado(session, server, erro=f"[{exc.category}] {exc}")
         return _print_server_failure(exc)
 
-    _marcar_resultado(session, server, erro=None, sincronizou=True)
     return SyncResponse(**result.__dict__)

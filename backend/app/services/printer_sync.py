@@ -21,7 +21,7 @@ from app.config import settings
 from app.models.print_server import PrintServer
 from app.models.printer import Printer
 from app.services.alert_engine import resolve_alerts_for_printers
-from app.services.print_server import PrintServerError, discover_printers
+from app.services.print_server import PrintServerError, discover_printers, portas_conhecidas_do_cadastro
 from app.services.printer_rules import obter_modelo, obter_tipo_impressora
 
 logger = logging.getLogger("printercontrol.printer_sync")
@@ -43,7 +43,7 @@ class SyncResult:
 
 
 def sync_printers(
-    session: Session, server: str | None = None, mode: str | None = None
+    session: Session, server: str | None = None, mode: str | None = None, usar_portas_conhecidas: bool = False
 ) -> SyncResult:
     """
     Executa um ciclo completo de sincronizacao para UM Print Server.
@@ -61,7 +61,11 @@ def sync_printers(
     primeiro `session.add`.
     """
     server = server or settings.print_server_host
-    discovered = discover_printers(server, mode=mode)
+    # usar_portas_conhecidas: sync pedido pela tela reaproveita o IP ja
+    # gravado das portas de nome livre (ver _real_discover); o automatico
+    # consulta todas.
+    conhecidas = portas_conhecidas_do_cadastro(session, server) if usar_portas_conhecidas and server else None
+    discovered = discover_printers(server, mode=mode, portas_conhecidas=conhecidas)
     now = datetime.utcnow()
 
     # Id do registro deste host, quando existir. Nao criamos o PrintServer
@@ -114,6 +118,7 @@ def sync_printers(
                 ip=d.ip,
                 port_name=d.port_name,
                 driver_name=d.driver_name,
+                share_name=d.share_name or None,
                 model=modelo,
                 printer_type=tipo,
                 department="",
@@ -131,6 +136,7 @@ def sync_printers(
         printer.ip = d.ip
         printer.port_name = d.port_name
         printer.driver_name = d.driver_name
+        printer.share_name = d.share_name or None
         printer.model = modelo
         printer.printer_type = tipo
         printer.active = True

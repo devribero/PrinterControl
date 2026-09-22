@@ -101,6 +101,34 @@ def validar_host(server: str) -> str:
     return limpo
 
 
+_IP_NO_NOME_RE = re.compile(r"(?<![\d.])((?:\d{1,3}\.){3}\d{1,3})(?![\d.])")
+
+
+_NOME_DE_PORTA_SEGURO_RE = re.compile(r"[\w .:,#()/\-]{1,200}")
+
+
+# Portas que o Get-PrinterPort devolve sem PrinterHostAddress: perguntar por
+# elas so custa tempo. WSD e Canon BJNP (CNBJNP_) sao descoberta por rede,
+# as outras sao locais. Visto em 22/09/2026: uma unica porta WSD no
+# elgmao3-ad01 fazia a descoberta levar 39s em vez de 4s.
+_PORTAS_SEM_ENDERECO = ("WSD-", "CNBJNP_", "USB", "LPT", "COM", "FILE:", "PORTPROMPT:", "NUL:", "TS0", "SHRFAX:")
+
+
+def _ip_do_nome_da_porta(port_name: str) -> str | None:
+    """
+    IPv4 contido no nome da porta, ou None.
+
+    "10.2.0.6" -> "10.2.0.6"; "IP_10.2.0.6" -> "10.2.0.6";
+    "10.2.0.6_1" -> "10.2.0.6"; "WSD-3f2a..." / "USB001" -> None.
+    """
+    m = _IP_NO_NOME_RE.search(port_name or "")
+    if not m:
+        return None
+    if all(0 <= int(parte) <= 255 for parte in m.group(1).split(".")):
+        return m.group(1)
+    return None
+
+
 def _escapar_powershell(valor: str) -> str:
     """
     Escapa aspas simples para string literal do PowerShell ('' = uma aspa).
@@ -121,6 +149,9 @@ class DiscoveredPrinter:
     port_name: str
     ip: str  # PrinterHostAddress (via PortName) ou o proprio PortName, como no Main.ps1
     driver_name: str
+    # Get-Printer ShareName: o que vai em \\servidor\compartilhamento. Pode
+    # diferir de `name`; vazio quando o servidor nao informa.
+    share_name: str = ""
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -288,7 +319,9 @@ def _run_powershell_json(command: str, timeout: int, *, server: str | None = Non
         log("Print Server resultado | %s", context)
 
 
-def _real_discover(server: str, timeout: int) -> list[DiscoveredPrinter]:
+def _real_discover(
+    server: str, timeout: int, portas_conhecidas: dict[str, str] | None = None
+) -> list[DiscoveredPrinter]:
     """
     Combina filas e portas do Print Server. Ping/SNMP pertencem ao
     enriquecimento posterior; nao ha dependencia de script legado.
@@ -302,15 +335,54 @@ def _real_discover(server: str, timeout: int) -> list[DiscoveredPrinter]:
 
     printers_cmd = (
         f"Get-Printer -ComputerName '{host_ps}' -ErrorAction Stop | "
-        "Select-Object Name, DriverName, PortName | ConvertTo-Json -Compress"
+        "Select-Object Name, DriverName, PortName, ShareName | ConvertTo-Json -Compress"
     )
+    printers = _run_powershell_json(printers_cmd, timeout, server=host, operation="Get-Printer")
+
+    # So as portas que o nome nao resolve (22/09/2026). Get-PrinterPort do
+    # servidor inteiro e a parte lenta da descoberta — 27s no elgmao3-ad01,
+    # mais de 60s no elgmaoprt — e quase toda fila usa porta TCP/IP padrao,
+    # cujo nome ja E o endereco ("10.1.2.3" / "IP_10.1.2.3"). Pergunta-se
+    # so pelas WSD/USB/nome livre; se nao houver nenhuma, nem consulta.
+    # `portas_conhecidas` (porta -> IP ja gravado no cadastro) deixa a
+    # descoberta disparada pela tela pular portas que o banco ja resolveu;
+    # o sync automatico passa None e consulta tudo, pegando porta que mudou
+    # de endereco.
+    conhecidas = portas_conhecidas or {}
+    # O nome vem do servidor remoto e entra no comando: so nomes com
+    # caracteres comuns (o PowerShell tambem fecha string com aspas curvas).
+    sem_ip_no_nome = sorted({
+        p.get("PortName") for p in printers
+        if p.get("PortName")
+        and not _ip_do_nome_da_porta(p.get("PortName"))
+        and _NOME_DE_PORTA_SEGURO_RE.fullmatch(p.get("PortName"))
+        and not p.get("PortName").upper().startswith(_PORTAS_SEM_ENDERECO)
+        and p.get("PortName") not in conhecidas
+    })
+    nomes_ps = ",".join(f"'{_escapar_powershell(n)}'" for n in sem_ip_no_nome)
     ports_cmd = (
-        f"Get-PrinterPort -ComputerName '{host_ps}' -ErrorAction Stop | "
+        f"Get-PrinterPort -ComputerName '{host_ps}' -Name {nomes_ps} -ErrorAction SilentlyContinue | "
         "Select-Object Name, PrinterHostAddress | ConvertTo-Json -Compress"
     )
 
-    printers = _run_powershell_json(printers_cmd, timeout, server=host, operation="Get-Printer")
-    ports = _run_powershell_json(ports_cmd, timeout, server=host, operation="Get-PrinterPort")
+    # Get-PrinterPort falhar NAO derruba a descoberta (21/09/2026): em
+    # 10.40.0.10 o Get-Printer respondeu em 2,8s e o Get-PrinterPort estourou
+    # os 30s, e a descoberta inteira caia por causa das portas. As filas ja
+    # sao conhecidas; o IP sai do nome da porta, que nas portas TCP/IP padrao
+    # do Windows e o proprio endereco ("10.1.2.3" ou "IP_10.1.2.3"). Porta sem
+    # IP no nome (WSD, USB, nome livre) fica com o nome, como sempre ficou.
+    try:
+        ports = (
+            _run_powershell_json(ports_cmd, timeout, server=host, operation="Get-PrinterPort")
+            if sem_ip_no_nome else []
+        )
+    except PrintServerError as exc:
+        logger.warning(
+            "Get-PrinterPort falhou em %s (%s); IP das filas derivado do nome da porta",
+            host,
+            exc.category,
+        )
+        ports = []
 
     # portMap[PortName] = PrinterHostAddress — mesma logica do Main.ps1.
     port_map = {
@@ -325,7 +397,10 @@ def _real_discover(server: str, timeout: int) -> list[DiscoveredPrinter]:
         port_name = p.get("PortName") or ""
         if not name:
             continue
-        ip = port_map.get(port_name) or port_name  # fallback identico ao Main.ps1
+        # Ordem: IP no nome da porta > endereco informado pela porta (so
+        # consultado para as portas sem IP no nome) > IP ja conhecido no
+        # cadastro > nome da porta.
+        ip = _ip_do_nome_da_porta(port_name) or port_map.get(port_name) or conhecidas.get(port_name) or port_name
         discovered.append(
             DiscoveredPrinter(
                 name=name,
@@ -333,6 +408,7 @@ def _real_discover(server: str, timeout: int) -> list[DiscoveredPrinter]:
                 port_name=port_name,
                 ip=ip,
                 driver_name=p.get("DriverName") or "",
+                share_name=p.get("ShareName") or "",
             )
         )
     return discovered
@@ -343,7 +419,7 @@ def _real_discover(server: str, timeout: int) -> list[DiscoveredPrinter]:
 # ─────────────────────────────────────────────────────────────────────────
 
 def discover_printers(
-    server: str | None = None, mode: str | None = None
+    server: str | None = None, mode: str | None = None, portas_conhecidas: dict[str, str] | None = None
 ) -> list[DiscoveredPrinter]:
     """
     Descobre as impressoras publicadas em um Print Server.
@@ -370,9 +446,24 @@ def discover_printers(
 
     if mode == "real":
         logger.info("Descoberta em modo real | server=%s", server)
-        return _real_discover(server, settings.print_server_timeout_seconds)
+        return _real_discover(server, settings.print_server_timeout_seconds, portas_conhecidas)
 
     raise PrintServerError(f"PRINT_SERVER_MODE invalido: {mode!r} (use 'mock' ou 'real')", "invalid_configuration")
+
+
+def portas_conhecidas_do_cadastro(session, server: str) -> dict[str, str]:
+    """Porta -> IP ja gravado nas filas do servidor, so para portas sem IP no nome."""
+    from sqlmodel import select
+
+    from app.models.printer import Printer
+
+    mapa: dict[str, str] = {}
+    for port_name, ip in session.exec(
+        select(Printer.port_name, Printer.ip).where(Printer.server == server)
+    ).all():
+        if port_name and not _ip_do_nome_da_porta(port_name) and _ip_do_nome_da_porta(ip or "") == ip:
+            mapa[port_name] = ip
+    return mapa
 
 
 def diagnose_print_server() -> dict:
