@@ -34,6 +34,11 @@ class Printer(SQLModel, table=True):
     ip: str = Field(index=True)  # NAO unico: impressoras podem compartilhar IP
     port_name: str = Field(default="")
     driver_name: str = Field(default="")
+    # Nome de COMPARTILHAMENTO da fila no print server (Get-Printer ShareName).
+    # Quase sempre igual a `name`, mas nao sempre (8 filas do elgmcprt em
+    # 21/09/2026) — e e ele que o Windows usa no caminho \\servidor\compartilhamento
+    # para instalar a impressora no PC do usuario. None ate o proximo sync.
+    share_name: Optional[str] = Field(default=None)
 
     # Obter-Modelo(driver_name) / Obter-TipoImpressora(name, model) do Main.ps1
     model: str
@@ -86,7 +91,11 @@ class PrinterMonthly(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     printer_id: int = Field(foreign_key="printers.id")
-    month: str  # "Jan", "Fev", etc
+    month: str  # periodo "2026-08"
     pages_printed: int
     month_start: datetime
     month_end: datetime
+    # Quanto de pages_printed e ESTIMATIVA (dias do mes antes da primeira
+    # leitura, pela media diaria — ver monthly_report.month_pages). 0 para
+    # mes medido de ponta a ponta ou importado da planilha.
+    estimated_pages: int = Field(default=0)
