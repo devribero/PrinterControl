@@ -37,6 +37,8 @@ backend/*.db
 # Env / secrets
 .env
 .dominio
+# Configs do dominio com URL de webhook e hosts internos (apagadas do repo em 21/09/2026): so locais.
+*.dominio
 backend/.env
 .claude/scheduled_tasks.lock
 
