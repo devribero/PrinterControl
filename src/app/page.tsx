@@ -1,9 +1,19 @@
 /**
  * Rota "/" — Dashboard. Equivalente ao bloco `activeNav === "dashboard"` que
- * antes vivia em App.tsx; os dados vêm do AppDataProvider (lib/app-data.tsx).
+ * antes vivia em App.tsx; os dados vêm do AppDataProvider (lib/app-data.tsx),
+ * já recortados pelo seletor global de servidor/unidade (ServerSwitcher).
+ *
+ * Ordem da tela = ordem das perguntas de quem opera a frota (22/09/2026):
+ * 1. faixa de resumo — quantas estão online / em atenção / offline;
+ * 2. "precisa de atenção" — alertas ativos, offline e toner baixo, cada um
+ *    com as poucas linhas que pedem ação (RightPanel);
+ * 3. a frota inteira (tabela) ao lado do volume de impressão mensal.
+ * Toda linha que cita uma impressora abre o PrinterDetailsModal global
+ * (`setSelectedPrinter` / `handleAlertSelect`).
  */
 "use client";
 
+import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import PageHeader from "../components/PageHeader";
 import ScanBar from "../components/ScanBar";
@@ -14,11 +24,13 @@ import RightPanel from "../components/RightPanel";
 import BottomCharts from "../components/BottomCharts";
 import { useAppData } from "../lib/app-data";
 import { NAV_ROUTES } from "../lib/routes";
+import { rotularEscopo } from "../lib/serverScope";
 import { cn } from "../lib/cn";
 import styles from "./page.module.css";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const fleetRef = useRef<HTMLDivElement>(null);
   const {
     lastChecked,
     scanning,
@@ -32,30 +44,34 @@ export default function DashboardPage() {
     printers,
     activeFleet,
     setSelectedPrinter,
-    globalToner,
-    worstPrinter,
     monthlyUsage,
     usingRealMonthlyReport,
     handleRefresh,
     servers,
     serverScope,
+    scopeUnit,
+    units,
   } = useAppData();
 
   // O subtitulo precisa dizer de QUAL frota estes numeros falam: com um
   // escopo de servidor ativo, "estado consolidado da frota" descreveria algo
   // que a tela nao esta mostrando.
-  const servidorEmFoco = servers.find((s) => s.host === serverScope) ?? null;
   const subtitulo =
     serverScope === null
       ? "Estado consolidado da frota, suprimentos e consumo de páginas."
       : serverScope === ""
         ? "Impressoras cadastradas à mão, fora de qualquer Print Server."
-        : `Frota de ${servidorEmFoco?.name ?? serverScope} — suprimentos e consumo de páginas.`;
+        : scopeUnit
+          ? `Frota da unidade ${scopeUnit.name} — suprimentos e consumo de páginas.`
+          : `Frota de ${rotularEscopo(serverScope, servers, units)} — suprimentos e consumo de páginas.`;
 
-  const topAlert = alerts[0] ?? null;
-  // A mensagem do backend nem sempre cita a impressora ("Impressora offline
-  // (sem resposta na última coleta)"), então o nome é resolvido à parte.
-  const topAlertPrinter = topAlert ? (printers.find((p) => p.id === topAlert.printerId)?.name ?? null) : null;
+  /** Card "Offline" → filtra a tabela e rola até ela. */
+  function mostrarOfflineNaTabela() {
+    updateFilter("status", stats.offline > 0 ? "offline" : "Todos");
+    const reduzirMovimento =
+      typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    fleetRef.current?.scrollIntoView({ behavior: reduzirMovimento ? "auto" : "smooth", block: "start" });
+  }
 
   return (
     <>
@@ -72,7 +88,7 @@ export default function DashboardPage() {
       />
 
       {initialLoading ? (
-        <div className={cn(styles.skeletonCard, styles.skeletonCardStrip, "animate-pulse")} />
+        <div className={cn(styles.skeletonCard, styles.skeletonCardStrip, "animate-pulse")} aria-hidden="true" />
       ) : (
         <VitalsStrip
           total={stats.total}
@@ -82,46 +98,46 @@ export default function DashboardPage() {
           stale={stats.stale}
           activeStatus={filters.status === "Todos" ? "Todos" : filters.status}
           onSelectStatus={(s) => updateFilter("status", s)}
-          topAlert={topAlert}
-          topAlertPrinter={topAlertPrinter}
-          alertsRest={Math.max(alerts.length - 1, 0)}
-          onViewAlerts={() => router.push("/alerts")}
-          onSelectAlert={handleAlertSelect}
         />
       )}
 
+      <RightPanel
+        loading={initialLoading}
+        alerts={alerts}
+        printers={printers}
+        fleet={activeFleet}
+        now={lastChecked}
+        onOpenDetails={setSelectedPrinter}
+        onSelectAlert={handleAlertSelect}
+        onViewAlerts={() => router.push(NAV_ROUTES.alerts ?? "/alerts")}
+        onViewToner={() => router.push(NAV_ROUTES.toner ?? "/toner")}
+        onShowOffline={mostrarOfflineNaTabela}
+      />
+
       <div className={styles.mainGrid}>
-        {initialLoading ? (
-          <div className={cn(styles.skeletonCard, styles.skeletonCardTable, "animate-pulse")} />
-        ) : (
-          <PrinterTable
-            printers={filteredPrinters}
-            // Frota ativa, como o card "Frota monitorada" e a rota /printers.
-            // Com `printers.length` a tabela dizia "278 equipamentos" ao lado
-            // de um total de 134, contando as que sumiram do Print Server.
-            totalCount={activeFleet.length}
-            filters={filters}
-            onFilterChange={updateFilter}
-            onOpenDetails={setSelectedPrinter}
-            compact
-          />
-        )}
-        <RightPanel
-          alertCount={alerts.length}
-          globalToner={globalToner}
-          worstPrinter={worstPrinter}
-          onOpenDetails={setSelectedPrinter}
-          onNavigate={(id) => router.push(NAV_ROUTES[id] ?? "/")}
+        <div ref={fleetRef} className={styles.fleet}>
+          {initialLoading ? (
+            <div className={cn(styles.skeletonCard, styles.skeletonCardTable, "animate-pulse")} aria-hidden="true" />
+          ) : (
+            <PrinterTable
+              printers={filteredPrinters}
+              // Frota ativa, como o card "Frota monitorada" e a rota /printers.
+              // Com `printers.length` a tabela dizia "278 equipamentos" ao lado
+              // de um total de 134, contando as que sumiram do Print Server.
+              totalCount={activeFleet.length}
+              filters={filters}
+              onFilterChange={updateFilter}
+              onOpenDetails={setSelectedPrinter}
+            />
+          )}
+        </div>
+
+        <BottomCharts
+          loading={initialLoading}
+          monthlyUsage={monthlyUsage}
+          monthlyFicticio={!usingRealMonthlyReport && monthlyUsage.length > 0}
         />
       </div>
-
-      <BottomCharts
-        attention={stats.attention}
-        total={stats.total}
-        monthlyUsage={monthlyUsage}
-        monthlyFicticio={!usingRealMonthlyReport && monthlyUsage.length > 0}
-        onViewAlerts={() => router.push("/alerts")}
-      />
     </>
   );
 }

@@ -1,0 +1,449 @@
+/* Mapeamento de Rede — peças comuns (cartão de seção, botões, avisos,
+   formulário). Mobile-first: a base vale para 375px; os @media min-width
+   (640/768/1024/1280) só abrem espaço. Cor só para estado (ok/atenção/erro);
+   o resto usa os neutros do tema. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .page {
+    gap: 1.25rem;
+  }
+}
+
+/* ── Cartão de seção ──────────────────────────────────────────────────── */
+
+.card {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Variante sem recorte: o menu de ações dos cartões de servidor abre por
+   cima da borda da seção. */
+.cardOpen {
+  overflow: visible;
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  padding: 1rem;
+}
+
+.cardHeaderText {
+  min-width: 0;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.cardSubtitle {
+  margin-top: 0.125rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.headerActions > button:not(.iconButton) {
+  flex: 1 1 0;
+}
+
+@media (min-width: 640px) {
+  .cardHeader {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.125rem 1.5rem;
+  }
+
+  .cardSubtitle {
+    font-size: 0.8125rem;
+  }
+
+  .headerActions > button {
+    flex: 0 0 auto;
+  }
+}
+
+.cardBody {
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .cardBody {
+    padding: 1.125rem 1.5rem;
+  }
+}
+
+.footnote {
+  border-top: 1px solid var(--border);
+  padding: 0.875rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+@media (min-width: 640px) {
+  .footnote {
+    padding: 0.875rem 1.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* ── Botões ───────────────────────────────────────────────────────────── */
+
+.primaryButton,
+.dangerButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+
+@media (min-width: 640px) {
+  .primaryButton,
+  .dangerButton,
+  .secondaryButton {
+    min-height: 2.5rem;
+  }
+}
+
+.primaryButton {
+  border-color: transparent;
+  background: var(--link);
+  color: #fff;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--navy);
+}
+
+.dangerButton {
+  border-color: transparent;
+  background: var(--danger);
+  color: #fff;
+}
+
+.dangerButton:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.secondaryButton {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.primaryButton:disabled,
+.dangerButton:disabled,
+.secondaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Botão só com ícone (fechar painel, menu). 40px de alvo de toque. */
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.625rem;
+  color: var(--text-muted);
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+
+.iconButton:hover:not(:disabled),
+.iconButton[aria-expanded="true"] {
+  background: var(--track);
+  color: var(--text-primary);
+}
+
+.iconButton:focus-visible,
+.primaryButton:focus-visible,
+.dangerButton:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}
+
+/* ── Avisos ───────────────────────────────────────────────────────────── */
+
+.errorBox,
+.warnBox,
+.infoBox {
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  padding: 0.75rem 0.875rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  overflow-wrap: anywhere;
+}
+
+.errorBox {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.warnBox {
+  border-color: var(--warning);
+  background: var(--tint-warning);
+}
+
+.infoBox {
+  background: var(--divider);
+  color: var(--text-secondary);
+}
+
+.errorBox strong {
+  color: var(--danger);
+}
+
+.rawError {
+  margin-top: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.rawError summary {
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.rawError code {
+  display: block;
+  margin-top: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.emptyIcon {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.emptyTitle {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* ── Barra de progresso indeterminada ─────────────────────────────────── */
+
+.progressTrack {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--track);
+}
+
+.progressBar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 35%;
+  border-radius: 999px;
+  background: var(--text-muted);
+  animation: progressSlide 1.6s ease-in-out infinite;
+}
+
+@keyframes progressSlide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(290%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressBar {
+    width: 100%;
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/* ── Diálogos ─────────────────────────────────────────────────────────── */
+
+.dialogFooter {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .dialogFooter {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+}
+
+.confirmText {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.confirmText + .confirmText {
+  margin-top: 0.75rem;
+}
+
+.confirmWarn {
+  margin-top: 0.875rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--warning);
+  background: var(--tint-warning);
+  padding: 0.75rem 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+/* Formulário — mesmas medidas do UsersView. */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.confirmText + .field {
+  margin-top: 1rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.input,
+.select {
+  width: 100%;
+  min-height: 2.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--divider);
+  padding: 0.625rem 0.875rem;
+  font-size: 1rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+@media (min-width: 640px) {
+  .label {
+    font-size: 0.8125rem;
+  }
+
+  .input,
+  .select {
+    min-height: 2.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+.input:focus,
+.select:focus {
+  border-color: var(--link);
+}
+
+.input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.hint {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+@media (min-width: 640px) {
+  .hint {
+    font-size: 0.75rem;
+  }
+}
+
+.formError {
+  border-radius: 0.75rem;
+  border: 1px solid var(--danger);
+  background: var(--danger-bg);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  color: var(--danger);
+}
+
+.field + .formError {
+  margin-top: 0.75rem;
+}

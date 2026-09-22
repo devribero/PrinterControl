@@ -15,7 +15,7 @@ export default function NetworkPage() {
       <PageHeader
         section="Monitoramento"
         title="Mapeamento de rede"
-        subtitle="Print Servers registrados, descoberta de filas e sincronização do cadastro."
+        subtitle="Print Servers registrados, o estado de cada um e as impressoras que eles publicam."
       />
 
       <NetworkView />

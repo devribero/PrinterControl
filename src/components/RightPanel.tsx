@@ -1,177 +1,309 @@
 /**
- * Dependência externa: lucide-react (ícones). Os níveis chegam prontos de
- * lib/deriveFromPrinters.ts: o MENOR nível de cada cor na frota ativa — por
- * isso o subtítulo do card diz isso com todas as letras.
+ * Faixa "Precisa de atenção" do Dashboard: três cards lado a lado — alertas
+ * ativos, impressoras offline e toner baixo — cada um com as poucas linhas
+ * que pedem ação agora e um link para a lista completa.
  *
- * Sem leitura nenhuma, o card agora diz que não há leitura. Antes o prop
- * caía no conjunto de demonstração de data/printers.ts e o Dashboard exibia
- * níveis inventados como se fossem da frota real.
+ * O arquivo guarda o nome histórico (era a coluna direita, com a lista de
+ * toner da frota inteira e "Ações rápidas"). Reorganizado em 22/09/2026:
+ * - a lista de toner de TODAS as impressoras repetia a tela Suprimentos; aqui
+ *   só entram as que estão baixas, da menor para a maior;
+ * - "Ações rápidas" repetia o menu lateral (e "Adicionar impressora" era um
+ *   aviso de "em breve") — saiu;
+ * - o alerta mais urgente, que ficava na faixa de resumo, virou o card de
+ *   alertas, com os primeiros por severidade.
+ *
+ * Toda linha que fala de uma impressora abre o PrinterDetailsModal (via
+ * `onOpenDetails` / `onSelectAlert`, o mesmo mecanismo da tabela).
  */
 "use client";
 
-import { ChevronRight, TriangleAlert, FileBarChart2, History, PlusCircle, Settings, Bell, Droplet } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { tonerChannelColor } from "../lib/tonerColor";
-import { useToast } from "../lib/toast";
+import { CRITICAL_MAX, LOW_MAX, levelBand } from "./toner/tonerModel";
 import { useTheme } from "../lib/theme";
 import { cn } from "../lib/cn";
-import type { Printer, TonerLevel } from "../types";
+import type { Alert, Printer, TonerLevel } from "../types";
 import styles from "./RightPanel.module.css";
 
-function QuickAction({
-  icon,
-  label,
-  badge,
-  onClick,
+/** Linhas por card: o bastante para agir, pouco para a faixa não virar lista. */
+const LIMITE = 5;
+/** Cortes da tela Suprimentos e dos alertas de toner do backend (≤10% / ≤20%). */
+const TONER_CRITICO = CRITICAL_MAX;
+const TONER_BAIXO = LOW_MAX;
+
+const PESO_SEVERIDADE: Record<Alert["severity"], number> = { critical: 0, warning: 1, info: 2 };
+
+/** Nível que decide a posição da impressora na lista: a cor que acaba primeiro. */
+function menorToner(printer: Printer): TonerLevel | null {
+  if (!printer.toner || printer.toner.length === 0) return null;
+  return printer.toner.reduce((min, t) => (t.percent < min.percent ? t : min));
+}
+
+/**
+ * Alerta do backend traz ISO (`created_at`); os derivados do conjunto de
+ * demonstração trazem texto pronto ("agora", "há 12 min"). ISO vira tempo
+ * relativo a `agora` (a última coleta, não o relógio — mantém o render puro);
+ * texto passa direto.
+ */
+function quando(ts: string, agora: Date): string {
+  const d = new Date(ts);
+  if (!/^\d{4}-\d{2}-\d{2}/.test(ts) || Number.isNaN(d.getTime())) return ts;
+  const min = Math.floor((agora.getTime() - d.getTime()) / 60000);
+  if (min < 1) return "agora";
+  if (min < 60) return `há ${min} min`;
+  if (min < 24 * 60) return `há ${Math.floor(min / 60)} h`;
+  return d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
+
+function Card({
+  title,
+  count,
+  tone,
+  meta,
+  loading,
+  footer,
+  children,
 }: {
-  icon: React.ReactNode;
-  label: string;
-  badge?: number;
-  onClick: () => void;
+  title: string;
+  count: number;
+  /** Cor do contador quando há itens; zero fica sempre neutro. */
+  tone: "danger" | "warning" | "neutral";
+  meta?: string;
+  loading: boolean;
+  footer: React.ReactNode;
+  children: React.ReactNode;
 }) {
   return (
-    <button type="button" onClick={onClick} className={styles.quickAction}>
-      <span className={styles.quickActionIcon} aria-hidden="true">
-        {icon}
-      </span>
-      <span className={styles.quickActionLabel}>{label}</span>
-      {badge ? (
-        <span className={styles.quickActionBadge}>{badge}</span>
-      ) : (
-        <ChevronRight size={15} className={styles.quickActionChevron} aria-hidden="true" />
-      )}
-    </button>
+    <section className={styles.card} aria-busy={loading || undefined}>
+      <header className={styles.cardHeader}>
+        <h3 className={styles.cardTitle}>{title}</h3>
+        {!loading && (
+          <span
+            className={cn(
+              styles.count,
+              count > 0 && tone === "danger" && styles.countDanger,
+              count > 0 && tone === "warning" && styles.countWarning,
+            )}
+          >
+            {count}
+          </span>
+        )}
+        {!loading && meta && <span className={styles.cardMeta}>{meta}</span>}
+      </header>
+      <div className={styles.cardBody}>
+        {loading ? (
+          <div className={styles.skeleton} aria-hidden="true">
+            {[0, 1, 2].map((i) => (
+              <span key={i} className={cn(styles.skeletonRow, "animate-pulse")} />
+            ))}
+          </div>
+        ) : (
+          children
+        )}
+      </div>
+      {!loading && <footer className={styles.cardFooter}>{footer}</footer>}
+    </section>
   );
 }
 
-/** Uma cor de toner: ponto de identidade, barra de severidade, valor. */
-function TonerRow({ level, color }: { level: TonerLevel; color: string }) {
-  const percent = Math.max(0, Math.min(100, level.percent));
-  const state = percent <= 15 ? styles.tonerCritical : percent <= 35 ? styles.tonerLow : "";
+function FooterLink({ label, onClick, rest }: { label: string; onClick: () => void; rest?: number }) {
   return (
-    <div
-      className={cn(styles.tonerRow, state)}
-      role="img"
-      aria-label={`${level.label}: ${level.percent}%`}
-    >
-      <span className={styles.tonerDot} style={{ backgroundColor: color }} aria-hidden="true" />
-      <span className={styles.tonerLabel} aria-hidden="true">
-        {level.label.split(" ")[0]}
-      </span>
-      <span className={styles.tonerTrack} aria-hidden="true">
-        <span className={styles.tonerFill} style={{ width: `${percent}%` }} />
-      </span>
-      <span className={styles.tonerValue} aria-hidden="true">
-        {percent <= 15 && <TriangleAlert size={13} className={styles.tonerWarnIcon} />}
-        {level.percent}%
-      </span>
-    </div>
+    <>
+      {(rest ?? 0) > 0 ? <span className={styles.rest}>e mais {rest}</span> : <span />}
+      <button type="button" onClick={onClick} className={styles.footerLink}>
+        {label}
+        <ArrowRight size={14} aria-hidden="true" />
+      </button>
+    </>
+  );
+}
+
+function Empty({ children }: { children: React.ReactNode }) {
+  return (
+    <p className={styles.empty}>
+      <span className={styles.emptyDot} aria-hidden="true" />
+      {children}
+    </p>
   );
 }
 
 interface RightPanelProps {
-  alertCount: number;
-  globalToner?: TonerLevel[];
-  worstPrinter: Printer | null;
+  loading: boolean;
+  alerts: Alert[];
+  /** Todas as impressoras do escopo (inclui desativadas) — resolve o nome do alerta. */
+  printers: Printer[];
+  /** Frota ativa (já no escopo de servidor). Base de "offline" e "toner baixo". */
+  fleet: Printer[];
+  /** Referência de "agora" para o tempo relativo dos alertas (última coleta). */
+  now: Date;
   onOpenDetails: (printer: Printer) => void;
-  onNavigate: (id: string) => void;
+  onSelectAlert: (alert: Alert) => void;
+  onViewAlerts: () => void;
+  onViewToner: () => void;
+  onShowOffline: () => void;
 }
 
-export default function RightPanel({ alertCount, globalToner, worstPrinter, onOpenDetails, onNavigate }: RightPanelProps) {
-  const { push } = useToast();
+export default function RightPanel({
+  loading,
+  alerts,
+  printers,
+  fleet,
+  now,
+  onOpenDetails,
+  onSelectAlert,
+  onViewAlerts,
+  onViewToner,
+  onShowOffline,
+}: RightPanelProps) {
   const { theme } = useTheme();
-  const toner = globalToner ?? [];
+  const nomes = new Map(printers.map((p) => [p.id, p.name]));
 
-  // O menor nível entre todas as cores — é esse o percentual da impressora
-  // `worstPrinter`, então nome e número do card sempre batem. Antes pegava o
-  // PRIMEIRO canal abaixo de 20% na ordem K/C/M/Y, que podia ser de outra
-  // impressora que não a exibida pelo botão.
-  // Do menor para o maior: a cor que vai acabar primeiro fica no topo, que e
-  // a unica ordem util aqui. Copia antes de ordenar — `sort` altera o array
-  // no lugar, e este vem do provider, que outras telas consomem na ordem
-  // K/C/M/Y.
-  const tonerOrdenado = [...toner].sort((a, b) => a.percent - b.percent);
-  const lowest = tonerOrdenado[0] ?? null;
-  const critical = lowest && lowest.percent <= 20 ? lowest : null;
+  // sort é estável: dentro da mesma severidade vale a ordem do backend.
+  const alertas = [...alerts].sort((a, b) => PESO_SEVERIDADE[a.severity] - PESO_SEVERIDADE[b.severity]);
+  const criticos = alerts.filter((a) => a.severity === "critical").length;
+
+  // Quem caiu por último primeiro: é a queda que ainda dá para investigar.
+  const offline = fleet
+    .filter((p) => p.status === "offline")
+    .sort((a, b) => (b.lastSeenAt ?? "").localeCompare(a.lastSeenAt ?? ""));
+
+  const comToner = fleet.filter((p) => p.toner && p.toner.length > 0).length;
+  const tonerBaixo = fleet
+    .map((printer) => ({ printer, nivel: menorToner(printer) }))
+    .filter((item): item is { printer: Printer; nivel: TonerLevel } => item.nivel !== null && levelBand(item.nivel.percent) !== "ok")
+    .sort((a, b) => a.nivel.percent - b.nivel.percent);
+  const tonerCritico = tonerBaixo.filter((t) => levelBand(t.nivel.percent) === "critical").length;
 
   return (
-    <div className={styles.root}>
-      <section className={styles.tonerCard}>
-        <div className={styles.cardHead}>
-          <div>
-            <h3 className={styles.cardTitle}>Níveis de toner</h3>
-            <p className={styles.cardSubtitle}>Menor nível de cada cor na frota</p>
-          </div>
-          <span className={styles.cardHeadIcon} aria-hidden="true">
-            <Droplet size={15} />
-          </span>
-        </div>
-
-        {toner.length > 0 ? (
-          <div className={styles.tonerList}>
-            {tonerOrdenado.map((t) => (
-              <TonerRow key={t.color} level={t} color={tonerChannelColor(t.color, theme)} />
-            ))}
-          </div>
+    <div className={styles.grid} role="region" aria-label="Precisa de atenção">
+      <Card
+        title="Alertas ativos"
+        count={alerts.length}
+        tone={criticos > 0 ? "danger" : "warning"}
+        meta={criticos > 0 ? `${criticos} ${criticos === 1 ? "crítico" : "críticos"}` : undefined}
+        loading={loading}
+        footer={<FooterLink label="Ver alertas" onClick={onViewAlerts} rest={alertas.length - LIMITE} />}
+      >
+        {alertas.length === 0 ? (
+          <Empty>Nenhum alerta ativo.</Empty>
         ) : (
-          <p className={styles.emptyText}>Nenhuma impressora ativa informou nível de toner ainda.</p>
+          <ul className={styles.list}>
+            {alertas.slice(0, LIMITE).map((a) => {
+              const nome = nomes.get(a.printerId);
+              return (
+                <li key={a.id}>
+                  <button type="button" onClick={() => onSelectAlert(a)} className={styles.row} disabled={!nome}>
+                    <span
+                      className={cn(
+                        styles.dot,
+                        a.severity === "critical" ? styles.dotDanger : a.severity === "warning" ? styles.dotWarning : styles.dotMuted,
+                      )}
+                      aria-label={a.severity === "critical" ? "Crítico" : a.severity === "warning" ? "Aviso" : "Informativo"}
+                    />
+                    <span className={styles.rowMain}>
+                      <span className={styles.rowTitle}>{nome ?? "Impressora removida"}</span>
+                      <span className={styles.rowSub}>{a.message}</span>
+                    </span>
+                    <span className={styles.rowAside}>{quando(a.timestamp, now)}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         )}
+      </Card>
 
-        <button type="button" onClick={() => onNavigate("printers")} className={styles.detailsLink}>
-          Ver detalhes
-          <ChevronRight size={15} aria-hidden="true" />
-        </button>
-      </section>
-
-      {critical && (
-        <section className={styles.criticalCard}>
-          <div className={styles.criticalHeader}>
-            <span className={styles.criticalIconWrap} aria-hidden="true">
-              <TriangleAlert size={18} />
-            </span>
-            <div className={styles.criticalHeadText}>
-              <p className={styles.criticalLabel}>Toner baixo</p>
-              <p className={styles.criticalValue}>
-                {critical.percent}%<span className={styles.criticalValueUnit}> restante</span>
-              </p>
-            </div>
-          </div>
-          <p className={styles.criticalDesc}>
-            {worstPrinter ? (
-              <>
-                <span className={styles.criticalPrinter}>{worstPrinter.name}</span> · {critical.label}. Considere
-                substituir em breve.
-              </>
-            ) : (
-              "Considere substituir em breve."
-            )}
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              if (worstPrinter) onOpenDetails(worstPrinter);
-              else push({ variant: "info", title: "Sem impressora associada a este alerta ainda." });
-            }}
-            className={styles.criticalButton}
-          >
-            {worstPrinter ? "Ver impressora" : "Ver recomendações"}
-          </button>
-        </section>
-      )}
-
-      <section className={styles.quickActionsCard}>
-        <h3 className={styles.quickActionsTitle}>Ações rápidas</h3>
-        <div className={styles.quickActionsList}>
-          <QuickAction icon={<FileBarChart2 size={16} />} label="Relatório de Impressoras" onClick={() => onNavigate("reports")} />
-          <QuickAction icon={<History size={16} />} label="Histórico de Alertas" badge={alertCount} onClick={() => onNavigate("alerts")} />
-          <QuickAction
-            icon={<PlusCircle size={16} />}
-            label="Adicionar Impressora"
-            onClick={() => push({ variant: "info", title: "Em breve", description: "Cadastro manual de impressoras chega numa próxima versão." })}
+      <Card
+        title="Offline"
+        count={offline.length}
+        tone="neutral"
+        meta={offline.length > 0 && fleet.length > 0 ? `${Math.round((offline.length / fleet.length) * 100)}% da frota` : undefined}
+        loading={loading}
+        footer={
+          <FooterLink
+            label={offline.length > 0 ? "Filtrar na tabela" : "Ver frota"}
+            onClick={onShowOffline}
+            rest={offline.length - LIMITE}
           />
-          <QuickAction icon={<Settings size={16} />} label="Configurações" onClick={() => onNavigate("settings")} />
-          <QuickAction icon={<Bell size={16} />} label="Notificações" onClick={() => onNavigate("notifications")} />
-        </div>
-      </section>
+        }
+      >
+        {offline.length === 0 ? (
+          <Empty>Todas as impressoras ativas estão respondendo.</Empty>
+        ) : (
+          <ul className={styles.list}>
+            {offline.slice(0, LIMITE).map((p) => (
+              <li key={p.id}>
+                <button type="button" onClick={() => onOpenDetails(p)} className={styles.row}>
+                  <span className={cn(styles.dot, styles.dotMuted)} aria-hidden="true" />
+                  <span className={styles.rowMain}>
+                    <span className={styles.rowTitle}>{p.name}</span>
+                    <span className={styles.rowSub}>
+                      <span className={styles.mono}>{p.ip}</span>
+                      {p.department ? ` · ${p.department}` : ""}
+                    </span>
+                  </span>
+                  <span className={styles.rowAside} title="Última leitura">
+                    {p.lastSeen}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
+      <Card
+        title="Toner baixo"
+        count={tonerBaixo.length}
+        tone={tonerCritico > 0 ? "danger" : "warning"}
+        meta={tonerCritico > 0 ? `${tonerCritico} ${tonerCritico === 1 ? "crítica" : "críticas"} (≤ ${TONER_CRITICO}%)` : `≤ ${TONER_BAIXO}%`}
+        loading={loading}
+        footer={<FooterLink label="Ver suprimentos" onClick={onViewToner} rest={tonerBaixo.length - LIMITE} />}
+      >
+        {comToner === 0 ? (
+          <Empty>Nenhuma impressora ativa informou nível de toner ainda.</Empty>
+        ) : tonerBaixo.length === 0 ? (
+          <Empty>Nenhum cartucho em {TONER_BAIXO}% ou menos.</Empty>
+        ) : (
+          <ul className={styles.list}>
+            {tonerBaixo.slice(0, LIMITE).map(({ printer, nivel }) => {
+              const percent = Math.max(0, Math.min(100, nivel.percent));
+              // Em impressora colorida, diz QUAL cor é a mais baixa; em
+              // monocromática só existe o preto e a marca seria ruído.
+              const colorida = (printer.toner?.length ?? 0) > 1;
+              return (
+                <li key={printer.id}>
+                  <button
+                    type="button"
+                    onClick={() => onOpenDetails(printer)}
+                    className={cn(styles.row, styles.tonerRow, levelBand(percent) === "critical" ? styles.levelCritical : styles.levelLow)}
+                    aria-label={`${printer.name}: ${nivel.label} em ${nivel.percent}%`}
+                  >
+                    <span className={styles.rowMain}>
+                      <span className={styles.rowTitle}>{printer.name}</span>
+                      <span className={styles.tonerTrack} aria-hidden="true">
+                        <span className={styles.tonerFill} style={{ width: `${percent}%` }} />
+                      </span>
+                    </span>
+                    <span className={styles.tonerValue}>
+                      {colorida && (
+                        <span className={styles.tonerChannel}>
+                          <span
+                            className={styles.tonerChannelDot}
+                            style={{ backgroundColor: tonerChannelColor(nivel.color, theme) }}
+                          />
+                          {nivel.color}
+                        </span>
+                      )}
+                      {nivel.percent}%
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </Card>
     </div>
   );
 }

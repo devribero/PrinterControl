@@ -1,27 +1,25 @@
 "use client";
 
 /**
- * Dependências externas: recharts (AreaChart/PieChart — os dois gráficos
- * deste arquivo) e lucide-react (ícones de tendência/seta). `monthlyUsage`
- * chega via prop agora (antes vinha fixo de src/data/printers.ts) para que
- * App.tsx possa injetar o relatório mensal REAL, vindo do backend
- * (GET /api/printers/monthly-report), sem precisar tocar aqui.
- * Cores dos gráficos vêm de lib/chartColors.ts (útil porque recharts recebe
- * cor como string literal, não enxerga os tokens CSS do tema escuro/claro).
+ * Card "Volume de impressão" do Dashboard: páginas por mês, com o mês
+ * corrente e o último mês fechado em destaque.
+ *
+ * Eram três cards (22/09/2026): o gráfico de área, "Impressões totais" (a
+ * soma da janela + mini-barras que redesenhavam o mesmo gráfico) e um donut
+ * "Dispositivos com alerta" que repetia o número "Atenção" da faixa de
+ * resumo. Ficou um card só.
+ *
+ * Barras em vez de área: cada mês é um total fechado, não uma série
+ * contínua, e a barra do mês EM ANDAMENTO sai mais clara — no dia 21 ele tem
+ * só parte do mês, e desenhá-lo igual aos outros sugeriria queda. Pelo mesmo
+ * motivo a variação percentual compara os dois últimos meses FECHADOS.
+ *
+ * `monthlyUsage` chega via prop (relatório real do backend, GET
+ * /api/printers/monthly-report, ou o conjunto de demonstração — nesse caso
+ * `monthlyFicticio` liga o selo). Cores dos gráficos vêm de
+ * lib/chartColors.ts: recharts recebe cor como string, não lê os tokens CSS.
  */
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
-import { TrendingUp, TrendingDown, ChevronRight } from "lucide-react";
+import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from "recharts";
 import type { MonthlyUsageEntry } from "../types";
 import { useTheme } from "../lib/theme";
 import { getChartColors } from "../lib/chartColors";
@@ -29,192 +27,149 @@ import { cn } from "../lib/cn";
 import DemoDataBadge from "./DemoDataBadge";
 import styles from "./BottomCharts.module.css";
 
-function PagesConsumedCard({
-  monthlyUsage,
-  monthlyFicticio = false,
-}: {
-  monthlyUsage: MonthlyUsageEntry[];
-  monthlyFicticio?: boolean;
-}) {
-  const { theme } = useTheme();
-  const c = getChartColors(theme);
-  const last = monthlyUsage[monthlyUsage.length - 1];
-  if (!last) {
-    return (
-      <div className={styles.card}>
-        <h3 className={styles.title}>Consumo de páginas (mês)</h3>
-        <p className={styles.emptyText}>
-          Ainda sem histórico mensal. O relatório se acumula sozinho a partir das leituras coletadas pelo backend — volte em alguns meses para o primeiro ponto aparecer aqui.
-        </p>
-      </div>
-    );
-  }
-  return (
-    <div className={styles.card}>
-      <div className={styles.pagesHeaderRow}>
-        <h3 className={styles.title}>Consumo de páginas (mês)</h3>
-        <DemoDataBadge
-          ficticio={monthlyFicticio}
-          motivo="O servidor ainda não tem leituras suficientes para fechar o mês, então o consumo mensal exibido é de demonstração."
-        />
-        <span className={styles.periodBadge}>
-          {last.month}: {last.pages.toLocaleString("pt-BR")}
-        </span>
-      </div>
-      <p className={styles.periodText}>Período: {last.period}</p>
-      <div className={styles.chartWrap}>
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={monthlyUsage} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="pagesFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={c.brand} stopOpacity={0.35} />
-                <stop offset="100%" stopColor={c.brand} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid stroke={c.grid} vertical={false} />
-            <XAxis dataKey="month" stroke={c.axis} tick={{ fill: c.tickText, fontSize: 12 }} axisLine={false} tickLine={false} />
-            <YAxis
-              stroke={c.axis}
-              tick={{ fill: c.tickText, fontSize: 12 }}
-              axisLine={false}
-              tickLine={false}
-              width={40}
-              tickFormatter={(v: number) => `${Math.round(v / 1000)}k`}
-            />
-            <Tooltip
-              contentStyle={{ background: c.tooltipBg, border: `1px solid ${c.tooltipBorder}`, borderRadius: 12, fontSize: 13 }}
-              labelStyle={{ color: c.tooltipLabel }}
-              itemStyle={{ color: c.brand }}
-              formatter={(value) => [Number(value).toLocaleString("pt-BR"), "Páginas"]}
-              labelFormatter={(label) => {
-                const entry = monthlyUsage.find((m) => m.month === label);
-                return entry ? `${label} · ${entry.period}` : String(label ?? "");
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="pages"
-              stroke={c.brand}
-              strokeWidth={2.5}
-              fill="url(#pagesFill)"
-              dot={{ r: 4, fill: c.brand, strokeWidth: 0 }}
-              activeDot={{ r: 6 }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
+const MOTIVO_FICTICIO =
+  "O servidor ainda não tem leituras suficientes para fechar o mês, então o consumo mensal exibido é de demonstração.";
+
+function fmt(n: number): string {
+  return n.toLocaleString("pt-BR");
 }
 
-function TotalPrintsCard({
-  monthlyUsage,
-  monthlyFicticio = false,
-}: {
-  monthlyUsage: MonthlyUsageEntry[];
-  monthlyFicticio?: boolean;
-}) {
-  const total = monthlyUsage.reduce((sum, m) => sum + m.pages, 0);
-  const last = monthlyUsage[monthlyUsage.length - 1];
-  const prev = monthlyUsage[monthlyUsage.length - 2];
-  const growth = last && prev && prev.pages > 0 ? ((last.pages - prev.pages) / prev.pages) * 100 : 0;
-  const isUp = growth >= 0;
-  const maxPages = Math.max(1, ...monthlyUsage.map((m) => m.pages));
-
-  return (
-    <div className={cn(styles.card, styles.cardFlexCol)}>
-      <h3 className={styles.title}>
-        Impressões totais <DemoDataBadge ficticio={monthlyFicticio} motivo="O servidor ainda não tem leituras suficientes para fechar o mês, então o consumo mensal exibido é de demonstração." />
-      </h3>
-      <p className={styles.totalValue}>{total.toLocaleString("pt-BR")}</p>
-      <div className={cn(styles.growthRow, isUp ? styles.growthUp : styles.growthDown)}>
-        {isUp ? <TrendingUp size={15} /> : <TrendingDown size={15} />}
-        {isUp ? "+" : ""}
-        {growth.toFixed(1)}%
-        <span className={styles.growthLabel}>vs mês anterior</span>
-      </div>
-      <div className={styles.barsRow} title="Páginas por mês (Jan–Jun)">
-        {monthlyUsage.map((m) => (
-          <div
-            key={m.month}
-            className={styles.bar}
-            style={{ height: `${8 + (m.pages / maxPages) * 82}px` }}
-            title={`${m.month}: ${m.pages.toLocaleString("pt-BR")}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-interface AlertsDonutCardProps {
-  attention: number;
-  total: number;
-  onViewAll: () => void;
-}
-
-function AlertsDonutCard({ attention, total, onViewAll }: AlertsDonutCardProps) {
-  const { theme } = useTheme();
-  const c = getChartColors(theme);
-  const ok = Math.max(total - attention, 0);
-  const pct = total > 0 ? Math.round((attention / total) * 100) : 0;
-  const donutData = [
-    { name: "Atenção", value: attention || 0.0001, color: c.warning },
-    { name: "OK", value: ok, color: c.surfaceSunken },
-  ];
-
-  return (
-    <div className={styles.card}>
-      <h3 className={styles.title}>Dispositivos com alerta</h3>
-      <div className={styles.donutRow}>
-        <div className={styles.donutWrap}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={donutData} dataKey="value" innerRadius={38} outerRadius={56} startAngle={90} endAngle={450} stroke="none">
-                {donutData.map((d) => (
-                  <Cell key={d.name} fill={d.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-          <div className={styles.donutCenter}>
-            <span className={styles.attentionValue}>{attention}</span>
-          </div>
-        </div>
-        <div>
-          <p className={styles.attentionValue}>{attention} Atenção</p>
-          <p className={styles.attentionPct}>{pct}% do total</p>
-          <button onClick={onViewAll} className={styles.viewAllButton}>
-            Ver todos
-            <ChevronRight size={15} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+function formatTick(v: number): string {
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1).replace(".", ",")}M`;
+  if (v >= 1000) return `${Math.round(v / 1000)}k`;
+  return String(v);
 }
 
 interface BottomChartsProps {
-  attention: number;
-  total: number;
   monthlyUsage: MonthlyUsageEntry[];
   /** True quando `monthlyUsage` veio do conjunto de demonstração (Fase 9). */
   monthlyFicticio?: boolean;
-  onViewAlerts: () => void;
+  loading?: boolean;
 }
 
-export default function BottomCharts({
-  attention,
-  total,
-  monthlyUsage,
-  monthlyFicticio = false,
-  onViewAlerts,
-}: BottomChartsProps) {
+export default function BottomCharts({ monthlyUsage, monthlyFicticio = false, loading = false }: BottomChartsProps) {
+  const { theme } = useTheme();
+  const c = getChartColors(theme);
+
+  const atual = monthlyUsage[monthlyUsage.length - 1];
+  const fechados = monthlyUsage.filter((m) => !m.inProgress);
+  const ultimoFechado = fechados[fechados.length - 1];
+  const penultimoFechado = fechados[fechados.length - 2];
+  const variacao =
+    ultimoFechado && penultimoFechado && penultimoFechado.pages > 0
+      ? ((ultimoFechado.pages - penultimoFechado.pages) / penultimoFechado.pages) * 100
+      : null;
+  // Com o mês corrente fechado (ou sem mês em andamento), os dois destaques
+  // seriam o mesmo mês — mostra só um.
+  const mostrarFechado = ultimoFechado && ultimoFechado !== atual;
+
   return (
-    <div className={styles.grid}>
-      <PagesConsumedCard monthlyUsage={monthlyUsage} monthlyFicticio={monthlyFicticio} />
-      <TotalPrintsCard monthlyUsage={monthlyUsage} monthlyFicticio={monthlyFicticio} />
-      <AlertsDonutCard attention={attention} total={total} onViewAll={onViewAlerts} />
-    </div>
+    <section className={styles.card} aria-busy={loading || undefined}>
+      <header className={styles.header}>
+        <h3 className={styles.title}>Volume de impressão</h3>
+        <DemoDataBadge ficticio={monthlyFicticio && !loading} motivo={MOTIVO_FICTICIO} />
+        <span className={styles.headerMeta}>Páginas por mês</span>
+      </header>
+
+      {loading ? (
+        <div className={styles.body} aria-hidden="true">
+          <span className={cn(styles.skeletonFigures, "animate-pulse")} />
+          <span className={cn(styles.skeletonChart, "animate-pulse")} />
+        </div>
+      ) : !atual ? (
+        <p className={styles.empty}>
+          Ainda sem histórico mensal. O relatório se acumula a partir das leituras coletadas — o primeiro mês aparece aqui
+          assim que houver dados.
+        </p>
+      ) : (
+        <div className={styles.body}>
+          <dl className={styles.figures}>
+            <div className={styles.figure}>
+              <dt className={styles.figureLabel}>
+                {atual.month}
+                {atual.inProgress ? " · em andamento" : ""}
+              </dt>
+              <dd className={styles.figureValue}>{fmt(atual.pages)}</dd>
+            </div>
+            {mostrarFechado && (
+              <div className={styles.figure}>
+                <dt className={styles.figureLabel}>{ultimoFechado.month} · fechado</dt>
+                <dd className={styles.figureValue}>
+                  {fmt(ultimoFechado.pages)}
+                  {variacao !== null && (
+                    <span
+                      className={styles.delta}
+                      title={`Comparado a ${penultimoFechado.month} (${fmt(penultimoFechado.pages)})`}
+                    >
+                      {variacao >= 0 ? "+" : "−"}
+                      {Math.abs(variacao).toFixed(1).replace(".", ",")}%
+                    </span>
+                  )}
+                </dd>
+              </div>
+            )}
+          </dl>
+
+          <div className={styles.chartWrap}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyUsage} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+                <CartesianGrid stroke={c.grid} vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  stroke={c.axis}
+                  tick={{ fill: c.tickText, fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  stroke={c.axis}
+                  tick={{ fill: c.tickText, fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={36}
+                  tickFormatter={formatTick}
+                />
+                <Tooltip
+                  cursor={{ fill: c.grid, opacity: 0.4 }}
+                  contentStyle={{
+                    background: c.tooltipBg,
+                    border: `1px solid ${c.tooltipBorder}`,
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
+                  labelStyle={{ color: c.tooltipLabel }}
+                  itemStyle={{ color: c.tooltipLabel }}
+                  formatter={(value) => [fmt(Number(value)), "Páginas"]}
+                  labelFormatter={(label) => {
+                    const entry = monthlyUsage.find((m) => m.month === label);
+                    if (!entry) return String(label ?? "");
+                    const extras = [
+                      entry.inProgress ? "em andamento" : null,
+                      entry.estimated ? `${fmt(entry.estimated)} estimadas` : null,
+                      entry.devices ? `${entry.devices} equip.` : null,
+                    ].filter(Boolean);
+                    return `${entry.period || label}${extras.length ? ` · ${extras.join(", ")}` : ""}`;
+                  }}
+                />
+                <Bar dataKey="pages" radius={[3, 3, 0, 0]} maxBarSize={36}>
+                  {monthlyUsage.map((m) => (
+                    <Cell key={m.period || m.month} fill={c.brand} fillOpacity={m.inProgress ? 0.35 : 0.85} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <p className={styles.meta}>
+            {atual.period}
+            {atual.devices ? ` · ${atual.devices} equipamentos` : ""}
+            {/* Parte estimada: dias sem coleta no começo do mês, pela média
+                diária medida (backend, monthly_report.month_pages). */}
+            {atual.estimated ? ` · inclui ${fmt(atual.estimated)} estimadas` : ""}
+          </p>
+        </div>
+      )}
+    </section>
   );
 }

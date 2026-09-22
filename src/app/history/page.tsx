@@ -6,18 +6,18 @@ import HistoryMatrix from "../../components/HistoryMatrix";
 import { useAppData } from "../../lib/app-data";
 
 export default function HistoryPage() {
-  const { printers } = useAppData();
+  const { activeFleet, servers, setSelectedPrinter } = useAppData();
 
   return (
     <>
       <PageHeader
         section="Monitoramento"
         title="Histórico"
-        subtitle="Contadores por impressora e por unidade, mês a mês."
+        subtitle="Páginas impressas por mês, de todas as impressoras, agrupadas por unidade."
         actions={<ServerSwitcher />}
       />
 
-      <HistoryMatrix printers={printers} />
+      <HistoryMatrix printers={activeFleet} servers={servers} onSelectPrinter={setSelectedPrinter} />
     </>
   );
 }

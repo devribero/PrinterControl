@@ -1,30 +1,33 @@
 "use client";
 
+import { Suspense } from "react";
 import PageHeader from "../../components/PageHeader";
 import ServerSwitcher from "../../components/ServerSwitcher";
-import PrinterTable from "../../components/PrinterTable";
+import ScanBar from "../../components/ScanBar";
+import PrinterFleet from "../../components/printers/PrinterFleet";
 import { useAppData } from "../../lib/app-data";
 
 export default function PrintersPage() {
-  const { filteredPrinters, activeFleet, stats, filters, updateFilter, setSelectedPrinter } = useAppData();
+  const { lastChecked, scanning, handleRefresh } = useAppData();
 
   return (
     <>
       <PageHeader
         section="Monitoramento"
         title="Impressoras"
-        subtitle="Cadastro completo da frota monitorada, com status e nível de suprimento."
-        actions={<ServerSwitcher />}
+        subtitle="Cadastro completo da frota monitorada: status, suprimento e última leitura."
+        actions={
+          <>
+            <ServerSwitcher />
+            <ScanBar lastChecked={lastChecked} scanning={scanning} onRefresh={handleRefresh} />
+          </>
+        }
       />
 
-      <PrinterTable
-        printers={filteredPrinters}
-        totalCount={activeFleet.length}
-        statusCounts={{ online: stats.online, offline: stats.offline, atencao: stats.attention }}
-        filters={filters}
-        onFilterChange={updateFilter}
-        onOpenDetails={setSelectedPrinter}
-      />
+      {/* PrinterFleet lê os filtros da URL (useSearchParams): precisa de Suspense. */}
+      <Suspense fallback={null}>
+        <PrinterFleet />
+      </Suspense>
     </>
   );
 }

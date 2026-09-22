@@ -295,3 +295,194 @@
   font-weight: 600;
   color: var(--link);
 }
+
+/* ---------- Controles (22/09/2026) ---------- */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.search {
+  display: flex;
+  flex: 1 1 18rem;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+}
+
+.search:focus-within {
+  border-color: var(--link);
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.segment {
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.segmentActive {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+}
+
+.nameButton {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.nameButton:hover {
+  color: var(--link);
+  text-decoration: underline;
+}
+
+.nameMeta {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.reason {
+  display: inline-block;
+  margin-top: 0.1875rem;
+  padding: 0.0625rem 0.4375rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+.rowMuted .nameButton,
+.rowMuted .ipCell,
+.rowMuted .deptCell {
+  opacity: 0.75;
+}
+
+.cellEmpty {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.footnote {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ---------- Celular ----------
+   A matriz mês a mês é tabular por natureza: continua rolando de lado, mas
+   DENTRO do card, com a primeira coluna (período/impressora) fixa para a
+   linha não perder o nome ao rolar. Botões e sanfona ganham altura de toque. */
+@media (max-width: 639px) {
+  .root {
+    gap: 1rem;
+  }
+
+  .summaryRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .summaryMeta {
+    font-size: 0.8125rem;
+  }
+
+  .actionsRow > .actionButton {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 2.75rem;
+    font-size: 0.875rem;
+  }
+
+  .siteToggle {
+    min-height: 3rem;
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem;
+  }
+
+  .siteToggleLeft {
+    flex-wrap: wrap;
+    row-gap: 0.125rem;
+  }
+
+  .siteTitle {
+    font-size: 0.9375rem;
+  }
+
+  .siteCount {
+    font-size: 0.75rem;
+  }
+
+  .siteTotal {
+    margin-left: 1.5rem;
+  }
+
+  .tableWrap,
+  .siteTableWrap {
+    overscroll-behavior-x: contain;
+  }
+
+  .siteTable {
+    min-width: 640px;
+  }
+
+  .thFirst,
+  .tdLabel,
+  .nameCell {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    max-width: 9rem;
+    padding-left: 1rem;
+    padding-right: 0.75rem;
+    background: var(--bg-surface);
+    box-shadow: inset -1px 0 0 var(--border);
+  }
+
+  .nameCell {
+    overflow-wrap: anywhere;
+  }
+
+  /* O subtotal ocupa três colunas (colSpan): fixá-lo cobriria os meses. */
+  .subtotalLabelCell {
+    padding-left: 1rem;
+  }
+
+  .deptCell {
+    max-width: 120px;
+  }
+}

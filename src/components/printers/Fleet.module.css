@@ -1,0 +1,527 @@
+/* Lista completa da frota (rota /printers): PrinterFleet + FleetToolbar +
+   FleetTable + PrinterRowActions. Mobile-first: abaixo de 640px cada linha é
+   um cartão; 640/1024/1280 abrem colunas. Cor só para status e toner. */
+
+.card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--glass-bg-elevated);
+  box-shadow: var(--glass-shadow);
+}
+
+.skeleton {
+  min-height: 24rem;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Barra de ferramentas ---------- */
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+@media (min-width: 1024px) {
+  .toolbar {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+  }
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  min-width: 0;
+  padding: 0 0.25rem 0 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-page);
+  color: var(--text-muted);
+  transition: border-color 0.12s ease-out;
+}
+
+@media (min-width: 1024px) {
+  .searchBox {
+    flex: 1 1 16rem;
+    max-width: 24rem;
+  }
+}
+
+.searchBox:focus-within {
+  border-color: var(--border-strong);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.375rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
+.searchInput::-webkit-search-cancel-button {
+  display: none;
+}
+
+.clearSearch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 6px;
+  color: var(--text-muted);
+}
+
+.clearSearch:hover {
+  background: var(--glass-hover);
+  color: var(--text-primary);
+}
+
+/* Filtros: duas colunas no celular, uma linha a partir de 640px. */
+.filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+}
+
+@media (min-width: 1024px) {
+  .filters {
+    flex: 0 1 auto;
+    margin-left: auto;
+    justify-content: flex-end;
+  }
+}
+
+.select {
+  min-width: 0;
+  min-height: 2.5rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: border-color 0.12s ease-out;
+}
+
+.select:hover {
+  border-color: var(--border-strong);
+}
+
+.select:focus-visible,
+.toggle:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 1px;
+}
+
+/* Filtro aplicado: só a borda muda — a cor fica para o status. */
+.selectActive,
+.selectActive:hover {
+  border-color: var(--link);
+}
+
+.toggle {
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-page);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: border-color 0.12s ease-out, color 0.12s ease-out;
+}
+
+.toggle:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.toggleActive,
+.toggleActive:hover {
+  border-color: var(--link);
+  background: var(--tint-link);
+  color: var(--link);
+}
+
+.sortField {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.sortField .select {
+  flex: 1;
+}
+
+.sortLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+@media (max-width: 639px) {
+  /* A ordenação ocupa a linha inteira. */
+  .sortField {
+    grid-column: 1 / -1;
+  }
+}
+
+.resultBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+  min-height: 2.5rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+@media (min-width: 1024px) {
+  .resultBar {
+    padding: 0 1.25rem;
+  }
+}
+
+.resultNum {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+.clearFilters {
+  min-height: 2.5rem;
+  padding: 0 0.25rem;
+  color: var(--link);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.clearFilters:hover {
+  color: var(--link-hover);
+}
+
+/* ---------- Tabela ---------- */
+
+/* Rede de segurança: se algo ainda não couber, rola o card, nunca a página. */
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+
+.table th {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--text-primary) 2.5%, transparent);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.table td {
+  padding: 0.625rem 0.75rem;
+  vertical-align: middle;
+  color: var(--text-secondary);
+}
+
+.table th:first-child,
+.table td:first-child {
+  padding-left: 1.25rem;
+}
+
+.table th:last-child,
+.table td:last-child {
+  padding-right: 1rem;
+}
+
+.alignRight {
+  text-align: right !important;
+}
+
+.row {
+  border-bottom: 1px solid var(--divider);
+  cursor: pointer;
+  transition: background-color 0.12s ease-out;
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.row:hover {
+  background: var(--glass-hover);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: -2px;
+}
+
+.cellName {
+  min-width: 0;
+  max-width: 20rem;
+}
+
+.name,
+.sub,
+.meta,
+.clip {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sub {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+/* IP · departamento · servidor sob o nome: só quando as colunas somem. */
+.meta {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.meta .mono {
+  font-size: inherit;
+}
+
+.colDept,
+.colServer {
+  max-width: 11rem;
+}
+
+.cellStatus,
+.cellToner,
+.cellReading {
+  white-space: nowrap;
+}
+
+.reading {
+  font-size: 0.75rem;
+}
+
+.readingStale {
+  color: var(--warning);
+}
+
+.cellActions {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.125rem;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 6px;
+  color: var(--text-muted);
+  transition: background-color 0.12s ease-out, color 0.12s ease-out;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: var(--track);
+  color: var(--link);
+}
+
+.actionButton:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 1px;
+}
+
+/* Teste indisponível (etiquetadora, papel sem permissão): o motivo vai no title. */
+.actionButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.empty {
+  padding: 3rem 1.5rem !important;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* Colunas por largura. */
+@media (max-width: 1279px) {
+  .colServer,
+  .colCounter {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .meta {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .colIp,
+  .colDept {
+    display: none;
+  }
+}
+
+/* Com a coluna Servidor visível, ele não se repete sob o nome. */
+@media (min-width: 1280px) {
+  .metaServer {
+    display: none;
+  }
+}
+
+/* ---------- Celular: cada linha vira um cartão ---------- */
+
+@media (max-width: 639px) {
+  .tableWrap {
+    overflow-x: visible;
+  }
+
+  .table,
+  .table tbody {
+    display: block;
+  }
+
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name status"
+      "toner reading"
+      "actions actions";
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    padding: 0.875rem 1rem 0.5rem;
+  }
+
+  .row > td {
+    display: block;
+    padding: 0 !important;
+  }
+
+  /* `.row > td` acima vence `.colIp` etc. em especificidade: esconder de novo. */
+  .row > .colIp,
+  .row > .colDept,
+  .row > .colServer,
+  .row > .colCounter {
+    display: none;
+  }
+
+  .cellName {
+    grid-area: name;
+    max-width: none;
+  }
+
+  .cellStatus {
+    grid-area: status;
+    justify-self: end;
+    align-self: start;
+  }
+
+  .cellToner {
+    grid-area: toner;
+  }
+
+  .cellReading {
+    grid-area: reading;
+    justify-self: end;
+  }
+
+  .cellActions {
+    grid-area: actions;
+    width: auto;
+    padding-top: 0.25rem !important;
+    border-top: 1px solid var(--divider);
+  }
+
+  .actions {
+    justify-content: flex-start;
+    gap: 0.25rem;
+  }
+
+  .actionButton {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .emptyRow,
+  .emptyRow > td {
+    display: block;
+  }
+}

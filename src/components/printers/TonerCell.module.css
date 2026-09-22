@@ -1,0 +1,61 @@
+.cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.track {
+  display: block;
+  width: 3.5rem;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.percent {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  min-width: 2.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.percentCritical {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.percentLow {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+/* Qual canal é o mais baixo — só em impressora colorida. */
+.channel {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.na {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 639px) {
+  .track {
+    width: 2.75rem;
+  }
+}

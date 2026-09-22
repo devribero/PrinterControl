@@ -1,139 +1,53 @@
 "use client";
 
 /**
- * Mapeamento de Rede (rota "/network") — ferramenta operacional sobre o
- * registro de Print Servers da Fase 4.
+ * Mapeamento de Rede (rota "/network") — orquestra os blocos de
+ * `components/network/`:
  *
- * A distinção que esta tela existe para deixar clara:
+ *   ServerGrid        -> escopos (Todos, cada Print Server, Sem servidor);
+ *                        selecionar é a ação principal, o resto fica no
+ *                        menu "⋯" de cada cartão (admin).
+ *   SyncPanel         -> andamento/resultado de "Sincronizar agora".
+ *   DiscoveryPanel    -> andamento/resultado de "Descobrir filas".
+ *   ScopePrinterTable -> impressoras cadastradas no escopo.
+ *   DriversCard       -> drivers em uso nas filas ativas do escopo.
  *
- *   DESCOBRIR  -> pergunta ao Print Server o que existe AGORA.
- *                 Não grava nada. É seguro repetir à vontade.
- *   SINCRONIZAR -> aplica esse resultado no banco: cria as novas, atualiza
- *                 as existentes e desativa as que sumiram. Muda dados.
+ * Servidores reais sincronizam sozinhos (backend: ao cadastrar e a cada
+ * 6 h), então Descobrir e Sincronizar são ações secundárias. As duas rodam
+ * em segundo plano: o estado vive nos hooks abaixo, não nos painéis, e o
+ * usuário pode trocar de escopo enquanto uma descoberta lenta termina.
  *
- * Por isso são dois blocos visualmente separados, com cores e textos
- * próprios, e o sync passa por confirmação explícita. Nada acontece ao
- * abrir a página — nem descoberta, nem sync.
- *
- * Dependências externas: react e lucide-react. Locais: Modal e
- * DiscoveryResults (reaproveitados), lib/api, lib/adaptApi, lib/apiErrors.
+ * A lista de servidores e o escopo NÃO são estado desta tela: vivem no
+ * AppDataProvider, porque o mesmo escopo manda no painel inteiro.
  */
 import { useMemo, useState } from "react";
-import {
-  RadioTower,
-  RefreshCw,
-  Loader2,
-  Server,
-  Database,
-  CircleCheck,
-  CircleAlert,
-  CircleX,
-  Info,
-  Clock,
-  Plus,
-  Pencil,
-  Power,
-  Trash2,
-  Layers,
-  Unplug,
-} from "lucide-react";
-import {
-  createPrintServer,
-  deletePrintServer,
-  discoverServer,
-  syncServer,
-  updatePrintServer,
-  type ApiDiscoveryResponse,
-  type PrintServerUpdateInput,
-} from "../lib/api";
-import { adaptSyncResult, parseApiDate } from "../lib/adaptApi";
-import { useApiErrorReporter } from "../lib/apiErrors";
 import { useAppData } from "../lib/app-data";
-import { useToast } from "../lib/toast";
-import { cn } from "../lib/cn";
-import Modal from "./Modal";
-import DiscoveryResults from "./DiscoveryResults";
-import type { DiscoveredPrinter, PrintServer, SyncResult } from "../types";
-import styles from "./NetworkView.module.css";
+import type { PrintServer } from "../types";
+import DiscoveryPanel from "./network/DiscoveryPanel";
+import DriversCard from "./network/DriversCard";
+import ScopePrinterTable from "./network/ScopePrinterTable";
+import SelectedServerNotice from "./network/SelectedServerNotice";
+import type { ServerAction } from "./network/ServerActionsMenu";
+import { DeleteServerModal, SyncConfirmModal, ToggleServerModal } from "./network/ServerConfirmModals";
+import ServerFormModal from "./network/ServerFormModal";
+import ServerGrid from "./network/ServerGrid";
+import SyncPanel from "./network/SyncPanel";
+import { useAutoSyncWatcher } from "./network/useAutoSyncWatcher";
+import { useServerDiscovery } from "./network/useServerDiscovery";
+import { useServerSync } from "./network/useServerSync";
+import shared from "./network/shared.module.css";
 
-/** Converte a resposta da API para o tipo que DiscoveryResults já consome. */
-function adaptDiscovered(data: ApiDiscoveryResponse): DiscoveredPrinter[] {
-  return data.printers.map((p) => ({
-    name: p.name,
-    server: p.server,
-    portName: p.port_name,
-    ip: p.ip,
-    driverName: p.driver_name,
-    source: p.source,
-    ipResolution: p.ip_resolution,
-    ipGroupSize: p.ip_group_size,
-    networkQueryReused: p.network_query_reused,
-    reachable: p.reachable,
-    snmpResponded: p.snmp_responded,
-    status: p.status,
-    statusReason: p.status_reason,
-    pageCount: p.page_count,
-    uptime: p.uptime,
-    toners: p.toners.map((t) => ({ color: t.color, percent: t.percent, description: t.description })),
-    error: p.error,
-  }));
-}
-
-function formatarMomento(iso: string | null): string {
-  if (!iso) return "nunca";
-  // parseApiDate e nao `new Date` (QA-09): o backend serializa UTC sem
-  // fuso, e `new Date` de uma string assim assume hora LOCAL — em
-  // America/Sao_Paulo isso adiantava todo horario exibido em 3h.
-  const data = parseApiDate(iso);
-  if (!data) return "desconhecido";
-  return data.toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-/**
- * Estado do formulario de registro/edicao (Fase 6).
- *
- * `active` NÃO está aqui de propósito, mesmo padrão do UsersView: desativar
- * um servidor para a operação contra ele e some com a frota do painel, então
- * tem fluxo próprio com confirmação, em vez de virar um campo que se salva
- * junto com uma troca de rótulo.
- */
-interface ServerFormState {
-  host: string;
-  name: string;
-  mode: "mock" | "real";
-}
-
-const FORM_VAZIO: ServerFormState = { host: "", name: "", mode: "mock" };
-
-const MODOS: { value: "mock" | "real"; label: string; hint: string }[] = [
-  { value: "mock", label: "Simulado", hint: "Frota fictícia, sem tocar a rede. Bom para testar." },
-  { value: "real", label: "Real", hint: "Consulta o Print Server de verdade via PowerShell/SNMP." },
-];
-
-const STATUS_SERVIDOR: Record<PrintServer["lastStatus"], string> = {
-  unknown: "Nunca consultado",
-  online: "Respondeu",
-  error: "Falhou",
-};
+/** Diálogo aberto no momento; um por vez. `server: null` em "form" = criar. */
+type Dialog =
+  | { kind: "form"; server: PrintServer | null }
+  | { kind: "toggle" | "delete" | "sync"; server: PrintServer }
+  | null;
 
 export default function NetworkView() {
-  /**
-   * A lista de servidores e o servidor em foco NAO sao estado desta tela:
-   * vivem no AppDataProvider, porque o mesmo escopo manda no painel inteiro
-   * (ver `serverScope` la). Escolher um servidor aqui e escolher no
-   * cabecalho do Dashboard sao a mesma acao — era isso ou manter duas
-   * nocoes de "servidor selecionado" que se contradiriam na primeira troca.
-   */
   const {
     can,
     printers,
     usingRealData,
-    handleRefresh,
     servers,
     serversLoading,
     serversError,
@@ -142,913 +56,126 @@ export default function NetworkView() {
     setServerScope,
     serverCounts,
     allActiveCount,
+    units,
+    scopeUnit,
   } = useAppData();
-  const { push } = useToast();
-  const relatarErro = useApiErrorReporter();
 
-  // Descoberta — transitória, nunca persistida.
-  const [discovering, setDiscovering] = useState(false);
-  const [discovery, setDiscovery] = useState<ApiDiscoveryResponse | null>(null);
-  const [discoveryError, setDiscoveryError] = useState<string | null>(null);
+  const discovery = useServerDiscovery();
+  const sync = useServerSync();
+  useAutoSyncWatcher();
 
-  // Sync — muda o banco, por isso passa por confirmação.
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [syncing, setSyncing] = useState(false);
-  const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
-  const [syncError, setSyncError] = useState<string | null>(null);
+  const [dialog, setDialog] = useState<Dialog>(null);
+  const closeDialog = () => setDialog(null);
 
-  // Registro/edição do servidor (Fase 6). `editing` null = criando.
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<PrintServer | null>(null);
-  const [form, setForm] = useState<ServerFormState>(FORM_VAZIO);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const selected = useMemo(() => servers.find((s) => s.host === serverScope) ?? null, [servers, serverScope]);
 
-  // Ativar/desativar — sensível, nunca em um clique só.
-  const [confirmandoAtivacao, setConfirmandoAtivacao] = useState<PrintServer | null>(null);
-  const [alternando, setAlternando] = useState(false);
-
-  // Exclusão definitiva — irreversível (apaga impressoras, leituras e
-  // alertas em cascata), por isso exige digitar o host do servidor.
-  const [deleting, setDeleting] = useState<PrintServer | null>(null);
-  const [deleteConfirmText, setDeleteConfirmText] = useState("");
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [deletingBusy, setDeletingBusy] = useState(false);
-
-  const selected = useMemo(
-    () => servers.find((s) => s.host === serverScope) ?? null,
-    [servers, serverScope],
-  );
-
-  /**
-   * As impressoras listadas no rodape da tela. `printers` JA vem escopado
-   * pelo provider, entao em "Todos os servidores" esta e a frota inteira e
-   * com um servidor em foco e so a dele — nao ha filtro a aplicar aqui, e
-   * aplicar um segundo por cima e que arriscaria divergir do resto do
-   * painel.
-   */
-  const printersDoEscopo = printers;
-
-  /** So aparece quando existe: cadastro a mao e excecao, nao categoria fixa. */
+  /** Só aparece quando existe: cadastro à mão é exceção, não categoria fixa. */
   const semServidor = serverCounts[""] ?? 0;
 
-  /** Contagem por estado do que a descoberta encontrou. */
-  const resumoDescoberta = useMemo(() => {
-    if (!discovery) return null;
-    const contagem = { online: 0, atencao: 0, offline: 0 };
-    for (const p of discovery.printers) {
-      if (p.status === "online") contagem.online++;
-      else if (p.status === "atencao") contagem.atencao++;
-      else contagem.offline++;
-    }
-    return contagem;
-  }, [discovery]);
-
-  // Trocar de servidor descarta o resultado anterior: mostrar a descoberta de
-  // um servidor sob o cabeçalho de outro seria mentir para o usuário.
-  function selecionar(escopo: string | null) {
-    if (escopo === serverScope) return;
-    setServerScope(escopo);
-    limparResultados();
-  }
-
-  /** Limpa o que era resultado do servidor anterior. */
-  function limparResultados() {
-    setDiscovery(null);
-    setDiscoveryError(null);
-    setSyncResult(null);
-    setSyncError(null);
-  }
-
-  function abrirCriacao() {
-    setEditing(null);
-    setForm(FORM_VAZIO);
-    setFormError(null);
-    setDialogOpen(true);
-  }
-
-  function abrirEdicao(server: PrintServer) {
-    setEditing(server);
-    // `name` cai no host quando vazio (adaptPrintServer); mostrar o host como
-    // se fosse rótulo digitado faria o admin "confirmar" um nome que ele não
-    // escreveu, então o campo abre vazio nesse caso.
-    setForm({
-      host: server.host,
-      name: server.name === server.host ? "" : server.name,
-      mode: server.mode,
-    });
-    setFormError(null);
-    setDialogOpen(true);
-  }
-
-  function validar(): string | null {
-    if (!editing && !form.host.trim()) return "Informe o host do Print Server.";
-    if (!editing && /\s/.test(form.host.trim())) return "O host não pode conter espaços.";
-    return null;
-  }
-
-  async function salvar() {
-    const invalido = validar();
-    if (invalido) {
-      setFormError(invalido);
-      return;
-    }
-
-    setSaving(true);
-    setFormError(null);
-    try {
-      if (editing) {
-        // Só o que mudou. `host` nunca é enviado — imutável por design.
-        const mudancas: PrintServerUpdateInput = {};
-        const rotulo = form.name.trim();
-        const rotuloAtual = editing.name === editing.host ? "" : editing.name;
-        if (rotulo !== rotuloAtual) mudancas.name = rotulo || editing.host;
-        if (form.mode !== editing.mode) mudancas.mode = form.mode;
-
-        if (Object.keys(mudancas).length === 0) {
-          setDialogOpen(false);
-          return;
-        }
-
-        const atualizado = await updatePrintServer(editing.id, mudancas);
-        await refreshServers();
-        push({
-          variant: "success",
-          title: "Print Server atualizado",
-          description: `${atualizado.name || atualizado.host} salvo.`,
-        });
-      } else {
-        const criado = await createPrintServer({
-          host: form.host.trim(),
-          name: form.name.trim(),
-          mode: form.mode,
-        });
-        await refreshServers();
-        // Passa a operar sobre o que acabou de registrar; resultados do
-        // servidor anterior não valem mais para este cabeçalho.
-        limparResultados();
-        setServerScope(criado.host);
-        push({
-          variant: "success",
-          title: "Print Server registrado",
-          description: `${criado.host} entrou no registro. Use Descobrir para ver o que ele publica.`,
-        });
-      }
-      setDialogOpen(false);
-    } catch (error) {
-      // 409 (host duplicado) e 422 (modo inválido) ficam no próprio
-      // formulário, onde dá para corrigir sem perder o que foi digitado.
-      setFormError(relatarErro(error, "Não foi possível salvar"));
-    } finally {
-      setSaving(false);
+  function handleAction(action: ServerAction, server: PrintServer) {
+    switch (action) {
+      case "edit":
+        setDialog({ kind: "form", server });
+        break;
+      case "discover":
+        // Seleciona o servidor para o resultado aparecer no contexto dele.
+        setServerScope(server.host);
+        void discovery.start(server);
+        break;
+      case "sync":
+        setDialog({ kind: "sync", server });
+        break;
+      case "toggle":
+        setDialog({ kind: "toggle", server });
+        break;
+      case "delete":
+        setDialog({ kind: "delete", server });
+        break;
     }
   }
 
-  async function confirmarAtivacao() {
-    if (!confirmandoAtivacao) return;
-    const alvo = confirmandoAtivacao;
-    setAlternando(true);
-    try {
-      const atualizado = await updatePrintServer(alvo.id, { active: !alvo.active });
-      await refreshServers();
-      push({
-        variant: "success",
-        title: atualizado.active ? "Print Server reativado" : "Print Server desativado",
-        description: atualizado.active
-          ? `${alvo.host} voltou a aceitar descoberta e sincronização.`
-          : `${alvo.host} para de ser consultado. As impressoras seguem no cadastro.`,
-      });
-      setConfirmandoAtivacao(null);
-    } catch (error) {
-      relatarErro(error, "Não foi possível alterar o status");
-      setConfirmandoAtivacao(null);
-    } finally {
-      setAlternando(false);
-    }
+  function confirmarSync(server: PrintServer) {
+    setServerScope(server.host);
+    void sync.start(server);
   }
 
-  function abrirExclusao(server: PrintServer) {
-    setDeleting(server);
-    setDeleteConfirmText("");
-    setDeleteError(null);
-  }
+  const discoveryJob = discovery.job;
+  const discoveryServer = discoveryJob ? (servers.find((s) => s.id === discoveryJob.serverId) ?? null) : null;
 
-  async function confirmarExclusao() {
-    if (!deleting) return;
-    if (deleteConfirmText.trim() !== deleting.host) {
-      setDeleteError("O host digitado não corresponde ao deste Print Server.");
-      return;
-    }
-    setDeletingBusy(true);
-    setDeleteError(null);
-    try {
-      await deletePrintServer(deleting.id, deleteConfirmText.trim());
-      if (serverScope === deleting.host) {
-        // O escopo apontava para o que acabou de sumir: volta para a frota
-        // inteira em vez de deixar o painel num servidor inexistente.
-        setServerScope(null);
-        limparResultados();
-      }
-      await refreshServers();
-      push({
-        variant: "success",
-        title: "Print Server excluído",
-        description: `${deleting.host} e suas impressoras foram apagados em definitivo.`,
-      });
-      setDeleting(null);
-    } catch (error) {
-      setDeleteError(relatarErro(error, "Não foi possível excluir"));
-    } finally {
-      setDeletingBusy(false);
-    }
-  }
-
-  async function executarDescoberta() {
-    if (!selected) return;
-    setDiscovering(true);
-    setDiscoveryError(null);
-    try {
-      const data = await discoverServer(selected.id);
-      setDiscovery(data);
-      push({
-        variant: "success",
-        title: "Descoberta concluída",
-        description: `${data.count} fila(s) encontrada(s) em ${selected.host}. Nada foi gravado.`,
-      });
-      // O servidor guarda o desfecho (last_status/last_seen_at) — relê para
-      // o cartão refletir o que acabou de acontecer.
-      void refreshServers();
-    } catch (error) {
-      setDiscovery(null);
-      setDiscoveryError(relatarErro(error, "Falha na descoberta"));
-      void refreshServers();
-    } finally {
-      setDiscovering(false);
-    }
-  }
-
-  async function executarSync() {
-    if (!selected) return;
-    setSyncing(true);
-    setSyncError(null);
-    try {
-      const resultado = adaptSyncResult(await syncServer(selected.id));
-      setSyncResult(resultado);
-      setConfirmOpen(false);
-      push({
-        variant: "success",
-        title: "Sincronização concluída",
-        description:
-          `${resultado.created} criada(s), ${resultado.updated} atualizada(s), ` +
-          `${resultado.deactivated} desativada(s).`,
-      });
-      void refreshServers();
-      // A frota em memória ficou desatualizada depois de gravar no banco.
-      if (usingRealData) void handleRefresh();
-    } catch (error) {
-      setSyncError(relatarErro(error, "Falha na sincronização"));
-      setConfirmOpen(false);
-      void refreshServers();
-    } finally {
-      setSyncing(false);
-    }
-  }
+  const scopeLabel = selected ? ` de ${selected.host}` : scopeUnit ? ` da unidade ${scopeUnit.name}` : "";
 
   return (
-    <div className={styles.page}>
-      {/* ── Servidores ──────────────────────────────────────────────── */}
-      <section className={styles.card}>
-        <div className={styles.cardHeader}>
-          <div>
-            <h2 className={styles.cardTitle}>Print Servers</h2>
-            <p className={styles.cardSubtitle}>
-              {serversLoading && servers.length === 0
-                ? "Carregando servidores..."
-                : `${servers.length} servidor(es) registrado(s). O selecionado vale para o painel inteiro.`}
-            </p>
-          </div>
-          <div className={styles.headerActions}>
-            <button onClick={() => void refreshServers()} disabled={serversLoading} className={styles.secondaryButton}>
-              <RefreshCw size={15} className={serversLoading ? "animate-spin" : ""} />
-              Atualizar
-            </button>
-            {can.canAdmin && (
-              <button onClick={abrirCriacao} className={styles.primaryButton}>
-                <Plus size={15} />
-                Novo Print Server
-              </button>
-            )}
-          </div>
-        </div>
+    <div className={shared.page}>
+      <ServerGrid
+        servers={servers}
+        loading={serversLoading}
+        error={serversError}
+        serverScope={serverScope}
+        canAdmin={can.canAdmin}
+        allActiveCount={allActiveCount}
+        unassignedCount={semServidor}
+        onSelect={setServerScope}
+        onRefresh={() => void refreshServers()}
+        onCreate={() => setDialog({ kind: "form", server: null })}
+        onAction={handleAction}
+        discoveringServerId={discovery.running && discoveryJob ? discoveryJob.serverId : null}
+        syncingServerId={sync.running && sync.job ? sync.job.serverId : null}
+      />
 
-        {serversError && !serversLoading && <p className={styles.errorBox}>{serversError}</p>}
+      {selected && <SelectedServerNotice server={selected} canAdmin={can.canAdmin} />}
 
-        {serversLoading && servers.length === 0 && (
-          <p className={styles.emptyState}>
-            <Loader2 size={16} className="animate-spin" /> Carregando Print Servers...
-          </p>
-        )}
+      {sync.job && <SyncPanel key={sync.job.id} job={sync.job} onDismiss={sync.dismiss} />}
 
-        {!serversLoading && servers.length === 0 && (
-          <p className={styles.emptyState}>
-            {can.canAdmin
-              ? "Nenhum Print Server registrado. Use “Novo Print Server” para cadastrar o primeiro."
-              : "Nenhum Print Server registrado. Peça a um administrador para cadastrar um."}
-          </p>
-        )}
-
-        {servers.length > 0 && (
-          <div className={styles.serverGrid}>
-            {/* "Todos" e um escopo de verdade, nao a ausencia de escolha: e a
-                unica vista que mostra junto o que esta em servidores
-                diferentes. Descobrir e Sincronizar somem nela porque as duas
-                falam com UM Print Server — nao existe "descobrir em todos". */}
-            <div className={cn(styles.serverCard, serverScope === null && styles.serverCardActive)}>
-              <button
-                type="button"
-                onClick={() => selecionar(null)}
-                className={styles.serverSelect}
-                aria-pressed={serverScope === null}
-              >
-                <div className={styles.serverCardTop}>
-                  <Layers size={16} className={styles.serverIcon} />
-                  <span className={styles.serverHost}>Todos os servidores</span>
-                </div>
-                <p className={styles.serverName}>Frota inteira, sem separar por origem</p>
-                <p className={styles.serverCounts}>
-                  <strong>{allActiveCount}</strong> ativa(s) no total
-                </p>
-                <p className={styles.serverMeta}>
-                  <Info size={12} /> Descobrir e sincronizar exigem um servidor
-                </p>
-              </button>
-            </div>
-
-            {servers.map((server) => (
-              <div
-                key={server.id}
-                className={cn(styles.serverCard, server.host === serverScope && styles.serverCardActive)}
-              >
-                <button
-                  type="button"
-                  onClick={() => selecionar(server.host)}
-                  className={styles.serverSelect}
-                  aria-pressed={server.host === serverScope}
-                >
-                  <div className={styles.serverCardTop}>
-                    <Server size={16} className={styles.serverIcon} />
-                    <span className={styles.serverHost}>{server.host}</span>
-                    {server.isDefault && <span className={styles.tagNeutral}>padrão</span>}
-                  </div>
-                  <p className={styles.serverName}>{server.name}</p>
-                  <div className={styles.serverTags}>
-                    <span className={cn(styles.tag, server.mode === "real" ? styles.tagReal : styles.tagMock)}>
-                      {server.mode === "real" ? "real" : "simulado"}
-                    </span>
-                    {!server.active && <span className={styles.tagOff}>desativado</span>}
-                    <span
-                      className={cn(
-                        styles.tag,
-                        server.lastStatus === "online" && styles.tagOk,
-                        server.lastStatus === "error" && styles.tagErro,
-                        server.lastStatus === "unknown" && styles.tagNeutral,
-                      )}
-                    >
-                      {STATUS_SERVIDOR[server.lastStatus]}
-                    </span>
-                  </div>
-                  <p className={styles.serverCounts}>
-                    <strong>{server.activePrinterCount}</strong> ativa(s) de{" "}
-                    <strong>{server.printerCount}</strong> cadastrada(s)
-                  </p>
-                  <p className={styles.serverMeta}>
-                    <Clock size={12} /> Último sync: {formatarMomento(server.lastSyncAt)}
-                  </p>
-                </button>
-
-                {/* Fora do botão de seleção: aninhar <button> em <button> é
-                    HTML inválido, então o card é um <div> e a seleção virou
-                    um botão irmão destas ações. */}
-                {can.canAdmin && (
-                  <div className={styles.serverActions}>
-                    <button
-                      type="button"
-                      onClick={() => abrirEdicao(server)}
-                      className={styles.cardActionButton}
-                      title="Editar rótulo e modo"
-                    >
-                      <Pencil size={13} /> Editar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setConfirmandoAtivacao(server)}
-                      className={cn(styles.cardActionButton, server.active && styles.cardActionDanger)}
-                      title={server.active ? "Desativar este Print Server" : "Reativar este Print Server"}
-                    >
-                      <Power size={13} /> {server.active ? "Desativar" : "Reativar"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => abrirExclusao(server)}
-                      className={cn(styles.cardActionButton, styles.cardActionDanger)}
-                      title="Excluir este Print Server em definitivo"
-                    >
-                      <Trash2 size={13} /> Excluir
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {/* Cadastradas a mao (Printer.server === ""). Nao pertencem a
-                Print Server nenhum, entao sem este escopo elas so
-                apareceriam em "Todos" — invisiveis em qualquer vista por
-                servidor, que e onde alguem iria procura-las. */}
-            {semServidor > 0 && (
-              <div className={cn(styles.serverCard, serverScope === "" && styles.serverCardActive)}>
-                <button
-                  type="button"
-                  onClick={() => selecionar("")}
-                  className={styles.serverSelect}
-                  aria-pressed={serverScope === ""}
-                >
-                  <div className={styles.serverCardTop}>
-                    <Unplug size={16} className={styles.serverIcon} />
-                    <span className={styles.serverHost}>Sem servidor</span>
-                  </div>
-                  <p className={styles.serverName}>Cadastradas a mao, fora de qualquer Print Server</p>
-                  <p className={styles.serverCounts}>
-                    <strong>{semServidor}</strong> ativa(s)
-                  </p>
-                  <p className={styles.serverMeta}>
-                    <Info size={12} /> Nenhum sync as cria ou desativa
-                  </p>
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </section>
-
-      {selected && (
-        <>
-          {/* ── Ações: descobrir ≠ sincronizar ────────────────────────── */}
-          <section className={styles.actionsGrid}>
-            <div className={cn(styles.actionCard, styles.actionDiscover)}>
-              <div className={styles.actionHeader}>
-                <RadioTower size={18} className={styles.actionIconDiscover} />
-                <h3 className={styles.actionTitle}>Descobrir</h3>
-                <span className={styles.badgeSafe}>não grava nada</span>
-              </div>
-              <p className={styles.actionText}>
-                Pergunta ao Print Server <strong>{selected.host}</strong> quais filas existem agora e
-                consulta o estado de cada uma. O resultado é temporário: nada é criado, alterado ou
-                removido no banco. Pode repetir à vontade.
-              </p>
-              {can.canAdmin ? (
-                <button
-                  onClick={() => void executarDescoberta()}
-                  disabled={discovering || !selected.active}
-                  className={styles.discoverButton}
-                  title={selected.active ? undefined : "Servidor desativado"}
-                >
-                  {discovering ? <Loader2 size={15} className="animate-spin" /> : <RadioTower size={15} />}
-                  {discovering ? "Consultando..." : "Descobrir agora"}
-                </button>
-              ) : (
-                <p className={styles.permissionNote}>
-                  <Info size={14} /> Ação exclusiva de administradores.
-                </p>
-              )}
-            </div>
-
-            <div className={cn(styles.actionCard, styles.actionSync)}>
-              <div className={styles.actionHeader}>
-                <Database size={18} className={styles.actionIconSync} />
-                <h3 className={styles.actionTitle}>Sincronizar</h3>
-                <span className={styles.badgeWrite}>grava no banco</span>
-              </div>
-              <p className={styles.actionText}>
-                Aplica o que o Print Server informa ao cadastro: <strong>cria</strong> as filas novas,{" "}
-                <strong>atualiza</strong> as existentes e <strong>desativa</strong> as que sumiram.
-                Nada é apagado — leituras e alertas são preservados. Afeta apenas{" "}
-                <strong>{selected.host}</strong>.
-              </p>
-              {can.canAdmin ? (
-                <button
-                  onClick={() => setConfirmOpen(true)}
-                  disabled={syncing || !selected.active}
-                  className={styles.syncButton}
-                  title={selected.active ? undefined : "Servidor desativado"}
-                >
-                  {syncing ? <Loader2 size={15} className="animate-spin" /> : <Database size={15} />}
-                  {syncing ? "Sincronizando..." : "Sincronizar..."}
-                </button>
-              ) : (
-                <p className={styles.permissionNote}>
-                  <Info size={14} /> Ação exclusiva de administradores.
-                </p>
-              )}
-            </div>
-          </section>
-
-          {!selected.active && (
-            <p className={styles.warnBox}>
-              Este Print Server está desativado: descobrir e sincronizar ficam bloqueados aqui, e o
-              backend também os recusa. {can.canAdmin
-                ? "Use Reativar no cartão dele acima para voltar a operar."
-                : "Peça a um administrador para reativá-lo."}
-            </p>
-          )}
-
-          {selected.lastStatus === "error" && selected.lastError && (
-            <p className={styles.errorBox}>
-              <strong>Última tentativa falhou:</strong> {selected.lastError}
-            </p>
-          )}
-
-          {/* ── Resultado do sync ──────────────────────────────────────── */}
-          {syncError && <p className={styles.errorBox}>{syncError}</p>}
-
-          {syncResult && (
-            <section className={styles.card}>
-              <div className={styles.cardHeader}>
-                <div>
-                  <h2 className={styles.cardTitle}>O que a sincronização mudou</h2>
-                  <p className={styles.cardSubtitle}>
-                    {syncResult.server} · {syncResult.discovered} fila(s) encontrada(s) no servidor
-                  </p>
-                </div>
-              </div>
-              <div className={styles.resultGrid}>
-                <div className={styles.resultItem}>
-                  <span className={styles.resultValue}>{syncResult.created}</span>
-                  <span className={styles.resultLabel}>criadas</span>
-                </div>
-                <div className={styles.resultItem}>
-                  <span className={styles.resultValue}>{syncResult.updated}</span>
-                  <span className={styles.resultLabel}>atualizadas</span>
-                </div>
-                <div className={styles.resultItem}>
-                  <span className={styles.resultValue}>{syncResult.reactivated}</span>
-                  <span className={styles.resultLabel}>reativadas</span>
-                </div>
-                <div className={styles.resultItem}>
-                  <span className={styles.resultValue}>{syncResult.deactivated}</span>
-                  <span className={styles.resultLabel}>desativadas</span>
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* ── Resultado da descoberta ────────────────────────────────── */}
-          {discoveryError && <p className={styles.errorBox}>{discoveryError}</p>}
-
-          {discovery && resumoDescoberta && (
-            <>
-              <section className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <div>
-                    <h2 className={styles.cardTitle}>Estado das filas descobertas</h2>
-                    <p className={styles.cardSubtitle}>
-                      {discovery.count} fila(s) · {discovery.unique_ips} IP(s) distinto(s) ·{" "}
-                      {discovery.mode === "real" ? "consulta real" : "simulação"}
-                    </p>
-                  </div>
-                </div>
-                <div className={styles.statusGrid}>
-                  <div className={cn(styles.statusItem, styles.statusOnline)}>
-                    <CircleCheck size={18} />
-                    <span className={styles.statusValue}>{resumoDescoberta.online}</span>
-                    <span className={styles.statusLabel}>online</span>
-                  </div>
-                  <div className={cn(styles.statusItem, styles.statusAtencao)}>
-                    <CircleAlert size={18} />
-                    <span className={styles.statusValue}>{resumoDescoberta.atencao}</span>
-                    <span className={styles.statusLabel}>atenção</span>
-                  </div>
-                  <div className={cn(styles.statusItem, styles.statusOffline)}>
-                    <CircleX size={18} />
-                    <span className={styles.statusValue}>{resumoDescoberta.offline}</span>
-                    <span className={styles.statusLabel}>offline</span>
-                  </div>
-                </div>
-                <p className={styles.footnote}>
-                  Este resultado é uma fotografia do servidor, não o cadastro. Para gravá-lo, use
-                  Sincronizar.
-                </p>
-              </section>
-
-              <DiscoveryResults
-                printers={adaptDiscovered(discovery)}
-                source={discovery.source}
-                server={discovery.server}
-              />
-            </>
-          )}
-
-        </>
+      {discoveryJob && (
+        <DiscoveryPanel
+          key={discoveryJob.id}
+          job={discoveryJob}
+          isCurrent={selected?.id === discoveryJob.serverId}
+          canRetry={discoveryServer?.active === true}
+          onShow={() => setServerScope(discoveryJob.host)}
+          onRetry={() => {
+            if (discoveryServer) void discovery.start(discoveryServer);
+          }}
+          onDismiss={discovery.dismiss}
+        />
       )}
 
-      {/* ── A frota do escopo ──────────────────────────────────────────
-          Fora do bloco acima de propósito: em "Todos os servidores" não há
-          `selected`, mas continua havendo frota para listar — e é
-          justamente a vista que mostra de onde veio cada impressora. */}
       {servers.length > 0 && (
-        <section className={styles.card}>
-          <div className={styles.cardHeader}>
-            <div>
-              <h2 className={styles.cardTitle}>
-                {selected
-                  ? `Impressoras cadastradas em ${selected.host}`
-                  : serverScope === ""
-                    ? "Impressoras sem Print Server"
-                    : "Impressoras cadastradas (todos os servidores)"}
-              </h2>
-              <p className={styles.cardSubtitle}>
-                {printersDoEscopo.length} no cadastro
-                {usingRealData ? "" : " · dados de demonstração"}
-              </p>
-            </div>
-          </div>
-
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr className={styles.theadRow}>
-                  <th className={styles.thFirst}>Nome</th>
-                  {serverScope === null && <th className={styles.th}>Servidor</th>}
-                  <th className={styles.th}>IP</th>
-                  <th className={styles.th}>Modelo</th>
-                  <th className={styles.th}>Departamento</th>
-                  <th className={styles.th}>Estado</th>
-                  <th className={styles.th}>Cadastro</th>
-                </tr>
-              </thead>
-              <tbody>
-                {printersDoEscopo.map((printer) => (
-                  <tr key={printer.id} className={styles.row}>
-                    <td className={styles.tdFirst}>{printer.name}</td>
-                    {serverScope === null && <td className={styles.td}>{printer.server || "—"}</td>}
-                    <td className={styles.td}>{printer.ip}</td>
-                    <td className={styles.td}>{printer.model}</td>
-                    <td className={styles.td}>{printer.department || "—"}</td>
-                    <td className={styles.td}>
-                      <span
-                        className={cn(
-                          styles.pill,
-                          printer.status === "online" && styles.pillOnline,
-                          printer.status === "atencao" && styles.pillAtencao,
-                          printer.status === "offline" && styles.pillOffline,
-                        )}
-                      >
-                        {printer.status}
-                      </span>
-                    </td>
-                    <td className={styles.td}>
-                      <span className={cn(styles.pill, printer.active ? styles.pillAtivo : styles.pillInativo)}>
-                        {printer.active ? "ativa" : "inativa"}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-
-                {printersDoEscopo.length === 0 && (
-                  <tr>
-                    <td colSpan={serverScope === null ? 7 : 6} className={styles.emptyState}>
-                      {selected
-                        ? "Nenhuma impressora cadastrada neste servidor. Use Descobrir para ver o que ele publica e Sincronizar para trazê-las ao cadastro."
-                        : "Nenhuma impressora no cadastro."}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        <ScopePrinterTable
+          printers={printers}
+          selected={selected}
+          serverScope={serverScope}
+          scopeUnit={scopeUnit}
+          usingRealData={usingRealData}
+        />
       )}
 
-      {/* ── Registrar / editar Print Server ─────────────────────────── */}
-      <Modal
-        open={dialogOpen}
-        onClose={() => (saving ? undefined : setDialogOpen(false))}
-        title={editing ? "Editar Print Server" : "Novo Print Server"}
-        subtitle={editing ? editing.host : "O host é a chave do servidor e não muda depois."}
-        maxWidth="30rem"
-        footer={
-          <div className={styles.dialogFooter}>
-            <button onClick={() => setDialogOpen(false)} disabled={saving} className={styles.secondaryButton}>
-              Cancelar
-            </button>
-            <button onClick={() => void salvar()} disabled={saving} className={styles.primaryButton}>
-              {saving ? <Loader2 size={15} className="animate-spin" /> : null}
-              {editing ? "Salvar alterações" : "Registrar"}
-            </button>
-          </div>
-        }
-      >
-        <div className={styles.form}>
-          <label className={styles.field}>
-            <span className={styles.label}>Host</span>
-            <input
-              type="text"
-              value={form.host}
-              onChange={(e) => setForm((f) => ({ ...f, host: e.target.value }))}
-              className={styles.input}
-              placeholder="SRV-IMPRESSAO01"
-              // Mesmo valor de `printers.server`: trocá-lo desligaria em
-              // silêncio todas as impressoras do servidor. O backend recusa.
-              disabled={editing !== null}
-              autoComplete="off"
-            />
-            <span className={styles.hint}>
-              {editing
-                ? "O host não pode ser alterado — é a chave que liga as impressoras a este servidor."
-                : "Nome de rede usado no -ComputerName do PowerShell. Precisa ser único."}
-            </span>
-          </label>
+      {servers.length > 0 && <DriversCard printers={printers} scopeLabel={scopeLabel} />}
 
-          <label className={styles.field}>
-            <span className={styles.label}>Rótulo (opcional)</span>
-            <input
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className={styles.input}
-              placeholder={form.host.trim() || "Como este servidor aparece no painel"}
-              autoComplete="off"
-            />
-            <span className={styles.hint}>Em branco, o painel mostra o próprio host.</span>
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Modo</span>
-            <select
-              value={form.mode}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, mode: e.target.value === "real" ? "real" : "mock" }))
-              }
-              className={styles.select}
-            >
-              {MODOS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
-            <span className={styles.hint}>{MODOS.find((m) => m.value === form.mode)?.hint}</span>
-          </label>
-
-          {/* Trocar para simulado num servidor com frota cadastrada é a
-              mesma armadilha do sync em modo mock: o próximo sync desativa
-              tudo que o simulador não publica. */}
-          {editing && form.mode === "mock" && editing.mode === "real" && editing.printerCount > 0 && (
-            <p className={styles.warning}>
-              Este servidor tem <strong>{editing.printerCount}</strong> impressora(s) cadastrada(s).
-              Em modo simulado, o próximo <strong>Sincronizar</strong> marcaria como inativas todas
-              as que o simulador não publicar.
-            </p>
-          )}
-
-          {formError && <p className={styles.formError}>{formError}</p>}
-        </div>
-      </Modal>
-
-      {/* ── Ativar / desativar ──────────────────────────────────────── */}
-      <Modal
-        open={confirmandoAtivacao !== null}
-        onClose={() => (alternando ? undefined : setConfirmandoAtivacao(null))}
-        title={confirmandoAtivacao?.active ? "Desativar este Print Server?" : "Reativar este Print Server?"}
-        subtitle={confirmandoAtivacao?.host}
-        maxWidth="28rem"
-        footer={
-          <div className={styles.dialogFooter}>
-            <button
-              onClick={() => setConfirmandoAtivacao(null)}
-              disabled={alternando}
-              className={styles.secondaryButton}
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={() => void confirmarAtivacao()}
-              disabled={alternando}
-              className={cn(styles.primaryButton, confirmandoAtivacao?.active && styles.dangerButton)}
-            >
-              {alternando ? <Loader2 size={15} className="animate-spin" /> : <Power size={15} />}
-              {confirmandoAtivacao?.active ? "Desativar" : "Reativar"}
-            </button>
-          </div>
-        }
-      >
-        {confirmandoAtivacao?.active ? (
-          <>
-            <p className={styles.confirmText}>
-              Descoberta e sincronização deixam de rodar contra{" "}
-              <strong>{confirmandoAtivacao.host}</strong>. O registro e o histórico permanecem — é
-              exclusão lógica, o mesmo que <em>desativar</em> faz com um usuário.
-            </p>
-            <p className={styles.confirmText}>
-              As <strong>{confirmandoAtivacao.printerCount}</strong> impressora(s) já cadastradas
-              continuam no banco e no painel; elas só param de ser atualizadas por este servidor.
-            </p>
-          </>
-        ) : (
-          <p className={styles.confirmText}>
-            <strong>{confirmandoAtivacao?.host}</strong> volta a aceitar descoberta e sincronização.
-            Nada é gravado agora — a próxima sincronização é que atualiza o cadastro.
-          </p>
-        )}
-      </Modal>
-
-      <Modal
-        open={confirmOpen}
-        onClose={() => (syncing ? undefined : setConfirmOpen(false))}
-        title="Sincronizar este Print Server?"
-        subtitle={selected?.host}
-        maxWidth="28rem"
-        footer={
-          <div className={styles.dialogFooter}>
-            <button onClick={() => setConfirmOpen(false)} disabled={syncing} className={styles.secondaryButton}>
-              Cancelar
-            </button>
-            <button onClick={() => void executarSync()} disabled={syncing} className={styles.syncButton}>
-              {syncing ? <Loader2 size={15} className="animate-spin" /> : <Database size={15} />}
-              Sincronizar
-            </button>
-          </div>
-        }
-      >
-        <p className={styles.confirmText}>
-          Esta ação <strong>altera o cadastro</strong>: filas novas serão criadas, as existentes
-          atualizadas e as que não aparecerem mais no servidor serão marcadas como inativas.
-        </p>
-        <p className={styles.confirmText}>
-          Nada é apagado — leituras e alertas são preservados, e uma impressora inativa volta a ficar
-          ativa se reaparecer. Apenas <strong>{selected?.host}</strong> é afetado; impressoras de
-          outros servidores não são tocadas.
-        </p>
-
-        {/* Sincronizar um servidor em modo simulado contra um cadastro real
-            desativa tudo que o simulador não publica. O dado volta com o
-            próximo sync real, mas o painel fica vazio nesse meio-tempo — o
-            usuário precisa saber ANTES de clicar. */}
-        {/* `printersDoEscopo` aqui E a frota deste servidor: o sync so fica
-            disponivel com um servidor em foco, e nesse caso o escopo do
-            painel e exatamente ele. */}
-        {selected?.mode === "mock" && printersDoEscopo.length > 0 && (
-          <p className={styles.confirmWarn}>
-            <strong>Atenção:</strong> este servidor está em modo <strong>simulado</strong>. O
-            simulador publica uma frota fictícia, então as{" "}
-            <strong>{printersDoEscopo.length}</strong> impressoras já cadastradas que não
-            aparecerem nele serão marcadas como <strong>inativas</strong> e sumirão do painel. Elas
-            voltam ao sincronizar com o servidor em modo real.
-          </p>
-        )}
-      </Modal>
-
-      <Modal
-        open={deleting !== null}
-        onClose={() => (deletingBusy ? undefined : setDeleting(null))}
-        title="Excluir este Print Server em definitivo?"
-        subtitle={deleting?.host}
-        maxWidth="28rem"
-        footer={
-          <div className={styles.dialogFooter}>
-            <button onClick={() => setDeleting(null)} disabled={deletingBusy} className={styles.secondaryButton}>
-              Cancelar
-            </button>
-            <button
-              onClick={() => void confirmarExclusao()}
-              disabled={deletingBusy || deleteConfirmText.trim() !== deleting?.host}
-              className={cn(styles.primaryButton, styles.dangerButton)}
-            >
-              {deletingBusy ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
-              Excluir em definitivo
-            </button>
-          </div>
-        }
-      >
-        <p className={styles.confirmText}>
-          Esta ação <strong>não pode ser desfeita</strong>. Diferente de <em>Desativar</em>, o registro
-          some junto com <strong>{deleting?.printerCount ?? 0}</strong> impressora(s) cadastrada(s) neste
-          servidor — e as leituras, alertas e histórico de toner delas.
-        </p>
-        <label className={styles.field}>
-          <span className={styles.label}>
-            Digite <strong>{deleting?.host}</strong> para confirmar
-          </span>
-          <input
-            type="text"
-            value={deleteConfirmText}
-            onChange={(e) => setDeleteConfirmText(e.target.value)}
-            className={styles.input}
-            placeholder={deleting?.host}
-            autoComplete="off"
-          />
-        </label>
-        {deleteError && <p className={styles.formError}>{deleteError}</p>}
-      </Modal>
+      {/* Diálogos: montados só enquanto abertos, com key estável — o estado
+          de cada formulário mora dentro dele (ver ServerFormModal). */}
+      {dialog?.kind === "form" && (
+        <ServerFormModal
+          key={dialog.server?.id ?? "novo"}
+          server={dialog.server}
+          units={units}
+          onClose={closeDialog}
+        />
+      )}
+      {dialog?.kind === "toggle" && (
+        <ToggleServerModal key={dialog.server.id} server={dialog.server} onClose={closeDialog} />
+      )}
+      {dialog?.kind === "delete" && (
+        <DeleteServerModal key={dialog.server.id} server={dialog.server} onClose={closeDialog} />
+      )}
+      {dialog?.kind === "sync" && (
+        <SyncConfirmModal
+          key={dialog.server.id}
+          server={dialog.server}
+          onClose={closeDialog}
+          onConfirm={confirmarSync}
+        />
+      )}
     </div>
   );
 }

@@ -1,161 +1,64 @@
-/* Faixa de resumo do Dashboard: frota (figura + barra empilhada), os três
-   status como linhas clicáveis (filtram a tabela) e o alerta mais urgente.
-   Cada status pinta só o seu marcador via --tone; número e rótulo ficam em
-   cor de texto. O layout em grade fica no fim do arquivo. */
-.strip {
-  position: relative;
-  isolation: isolate;
+/* Cartões de resumo: vidro com borda e brilho suave na cor do status
+   (--tone), ícone grande à esquerda, texto à direita, selo de % no canto. */
+
+.cards {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  overflow: hidden;
-  border: 1px solid var(--glass-border);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.card {
+  --tone: var(--link);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1.125rem 1.125rem 1.125rem 1.125rem;
+  text-align: left;
+  border: 1px solid color-mix(in srgb, var(--tone) 42%, transparent);
   border-radius: 14px;
-  background: var(--glass-bg-elevated);
+  /* Brilho vindo do canto do ícone, apagando em direção ao fundo de vidro. */
+  background:
+    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--tone) 16%, transparent) 0%, transparent 60%),
+    var(--glass-bg-elevated);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-shadow);
+  transition:
+    border-color 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    transform 0.15s ease-out;
 }
 
-/* ---------- Frota ---------- */
-
-.fleet {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.875rem;
-  min-width: 0;
-  padding: 1.375rem 1.5rem;
+.card:hover {
+  border-color: color-mix(in srgb, var(--tone) 65%, transparent);
+  transform: translateY(-1px);
 }
 
-.fleetButton {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin: -0.375rem -0.5rem;
-  padding: 0.375rem 0.5rem;
-  border-radius: 0.625rem;
-  text-align: left;
-  transition: background-color 0.15s;
+.card:focus-visible {
+  outline: 2px solid var(--tone);
+  outline-offset: 2px;
 }
 
-.fleetButton:hover {
-  background: var(--glass-hover);
+.cardActive,
+.cardActive:hover {
+  border-color: var(--tone);
+  box-shadow:
+    var(--glass-shadow),
+    0 0 0 1px color-mix(in srgb, var(--tone) 35%, transparent),
+    0 0 22px -6px color-mix(in srgb, var(--tone) 55%, transparent);
 }
 
-.fleetButtonActive,
-.fleetButtonActive:hover {
-  background: color-mix(in srgb, var(--link-hover) 10%, transparent);
-}
-
-.eyebrow {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--text-secondary);
-}
-
-/* Figura principal da tela: sans, e SEM tabular-nums de propósito — em corpo
-   grande a largura fixa de dígito deixa o número solto. */
-.heroValue {
-  margin-top: 0.25rem;
-  font-size: 3rem;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: var(--text-primary);
-}
-
-.fleetHint {
-  margin-top: 0.3125rem;
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-}
-
-/* Barra empilhada: 2px de respiro entre as faixas, pelo fundo da superfície,
-   para as fatias não se fundirem quando duas cores vizinhas se encostam. */
-.distribution {
-  display: flex;
-  gap: 2px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--track);
-  overflow: hidden;
-}
-
-.distribution > span {
-  min-width: 3px;
-  border-radius: 999px;
-  transition: flex-grow 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.segOnline {
-  background: var(--success);
-}
-
-.segAttention {
-  background: var(--warning);
-}
-
-.segOffline {
-  background: var(--text-muted);
-}
-
-.staleNote {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.75rem;
-  color: var(--warning);
-}
-
-/* ---------- Status ---------- */
-
-.statusGroup {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0.75rem 0.75rem;
-  border-top: 1px solid var(--glass-border);
-}
-
-.statusRow {
-  --tone: var(--text-muted);
-  position: relative;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: 0.75rem;
-  border-radius: 0.625rem;
-  padding: 0.6875rem 0.75rem;
-  text-align: left;
-  transition: background-color 0.12s ease-out;
-}
-
-/* Fio de separação entre as linhas — some na primeira e quando a linha está
-   ativa (aí o próprio fundo já delimita). */
-.statusRow + .statusRow::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0.75rem;
-  right: 0.75rem;
-  height: 1px;
-  background: var(--glass-border);
-}
-
-.statusRow:hover {
-  background: var(--glass-hover);
-}
-
-.statusRow:hover::before,
-.statusRowActive::before,
-.statusRowActive + .statusRow::before {
-  opacity: 0;
-}
-
-.statusRowActive,
-.statusRowActive:hover {
-  background: color-mix(in srgb, var(--tone) 12%, transparent);
+.toneFleet {
+  --tone: var(--link);
 }
 
 .toneOnline {
@@ -167,203 +70,111 @@
 }
 
 .toneOffline {
-  --tone: var(--text-muted);
-}
-
-/* O marcador é o único elemento que veste a cor do dado. */
-.statusDot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 999px;
-  background: var(--tone);
-}
-
-.statusRowActive .statusDot {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tone) 25%, transparent);
-}
-
-.statusLabel {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.statusRowActive .statusLabel {
-  color: var(--text-primary);
-}
-
-/* Coluna de números: aqui `tabular-nums` é o certo — são três valores
-   empilhados que precisam alinhar na vertical. */
-.statusValue {
-  font-variant-numeric: tabular-nums;
-  font-size: 1.125rem;
-  font-weight: 600;
-  line-height: 1;
-  color: var(--text-primary);
-}
-
-.statusPct {
-  min-width: 2.5rem;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-/* ---------- Alerta mais urgente ---------- */
-
-.alertPanel {
   --tone: var(--danger);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.875rem;
+  height: 2.875rem;
+  border: 1px solid color-mix(in srgb, var(--tone) 30%, transparent);
+  border-radius: 12px;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 16%, transparent);
+}
+
+.body {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
   min-width: 0;
-  padding: 1.25rem 1.5rem;
-  border-top: 1px solid var(--glass-border);
 }
 
-.clearPanel {
-  --tone: var(--success);
-}
-
-.alertHead {
+.head {
   display: flex;
   align-items: center;
-  gap: 0.4375rem;
-}
-
-.alertHeadIcon {
-  flex-shrink: 0;
-  color: var(--tone);
-}
-
-.alertEyebrow {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--tone);
-}
-
-.alertCount {
-  margin-left: auto;
-  flex-shrink: 0;
-  border-radius: 999px;
-  padding: 0.0625rem 0.4375rem;
-  font-variant-numeric: tabular-nums;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  background: color-mix(in srgb, var(--tone) 12%, transparent);
-  color: var(--tone);
-}
-
-.alertMessage {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
+  gap: 0.5rem;
   min-width: 0;
-  border-radius: 0.375rem;
-  text-align: left;
+  min-height: 1.625rem;
 }
 
-.alertPrinter {
+.label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.pct {
+  margin-left: auto;
+  padding: 0.1875rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 18%, transparent);
+}
+
+.value {
+  font-size: 2.125rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
   color: var(--text-primary);
 }
 
-.alertText {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+.sub {
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.8125rem;
-  line-height: 1.4;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
-.alertMessage:hover .alertPrinter,
-.alertMessage:hover .alertText:first-child {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.subWarn {
+  color: var(--warning);
 }
 
-.alertLink {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-top: 0.125rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--link);
-  transition: color 0.15s;
-}
-
-.alertLink svg {
-  transition: transform 0.15s;
-}
-
-.alertLink:hover {
-  color: var(--link-hover);
-}
-
-.alertLink:hover svg {
-  transform: translateX(2px);
-}
-
-.clearText {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-}
-
-/* ---------- Layout ---------- */
+/* ---------- Telas estreitas: 2x2, ícone em cima ---------- */
 
 @media (max-width: 639px) {
-  .fleet {
-    padding: 1.25rem 1.25rem;
+  .cards {
+    gap: 0.625rem;
   }
 
-  .heroValue {
-    font-size: 2.75rem;
+  .card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.625rem;
+    padding: 0.875rem;
   }
 
-  .statusGroup {
-    padding: 0.5rem;
-  }
-}
-
-/* Tablet/notebook: frota | status lado a lado, alerta embaixo ocupando tudo. */
-@media (min-width: 768px) {
-  .strip {
-    grid-template-columns: minmax(14rem, 0.85fr) minmax(0, 1.2fr);
+  .icon {
+    width: 2.375rem;
+    height: 2.375rem;
+    border-radius: 10px;
   }
 
-  .statusGroup {
-    border-top: 0;
-    border-left: 1px solid var(--glass-border);
+  .value {
+    font-size: 1.75rem;
   }
 
-  .alertPanel {
-    grid-column: 1 / -1;
+  .label,
+  .sub {
+    font-size: 0.75rem;
   }
 }
 
-/* Tela larga: as três partes na mesma linha. */
-@media (min-width: 1280px) {
-  .strip {
-    grid-template-columns: minmax(14rem, 0.8fr) minmax(0, 1.1fr) minmax(17rem, 1fr);
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
   }
 
-  .alertPanel {
-    grid-column: auto;
-    border-top: 0;
-    border-left: 1px solid var(--glass-border);
+  .card:hover {
+    transform: none;
   }
 }

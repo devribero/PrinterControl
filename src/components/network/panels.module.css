@@ -1,0 +1,100 @@
+/* Painéis de descoberta e sincronização. */
+
+.panelHeading {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  flex: 1 1 auto;
+}
+
+.panelIcon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  color: var(--text-muted);
+}
+
+/* No celular o cabeçalho empilha; o "fechar" fica no canto, não esticado. */
+.closeButton {
+  margin-left: auto;
+}
+
+.progressBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.progressNote {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+@media (min-width: 640px) {
+  .progressNote {
+    font-size: 0.8125rem;
+  }
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .statGrid {
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: 0.875rem;
+    padding: 1.125rem 1.5rem;
+  }
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--divider);
+  padding: 0.75rem 0.875rem;
+}
+
+.statDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+}
+
+.dotOnline {
+  background: var(--success);
+}
+
+.dotWarning {
+  background: var(--warning);
+}
+
+.dotError {
+  background: var(--danger);
+}
+
+.statValue {
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.statLabel {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+@media (min-width: 640px) {
+  .statLabel {
+    font-size: 0.75rem;
+  }
+}

@@ -1,29 +1,40 @@
-.skeletonCardStrip {
-  height: 108px;
-}
-
 .skeletonCard {
-  border-radius: 1rem;
-  border: 1px solid var(--border);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
   background: var(--bg-surface);
 }
 
-.skeletonCardStats {
-  height: 124px;
+.skeletonCardStrip {
+  height: 118px;
+}
+
+@media (max-width: 639px) {
+  .skeletonCardStrip {
+    height: 196px;
+  }
 }
 
 .skeletonCardTable {
   height: 520px;
 }
 
+/* Frota (tabela) + volume de impressão. Empilhados até 1280px; lado a lado
+   acima disso, com o volume numa coluna fixa. */
 .mainGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 1.25rem;
+  align-items: start;
 }
 
 @media (min-width: 1280px) {
   .mainGrid {
-    grid-template-columns: minmax(0, 1fr) 296px;
+    grid-template-columns: minmax(0, 1fr) 340px;
   }
+}
+
+/* Destino do "Filtrar na tabela" do card Offline: desconta a Topbar fixa. */
+.fleet {
+  min-width: 0;
+  scroll-margin-top: 5rem;
 }
