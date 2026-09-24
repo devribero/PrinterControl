@@ -110,6 +110,9 @@ class SNMPResult:
 
     status: str  # online | atencao | offline
     page_count: Optional[int] = None
+    # Os dois contadores, separados (ver PrinterReading.counter_vendor).
+    counter_vendor: Optional[int] = None
+    counter_std: Optional[int] = None
     toners: list[TonerInfo] = field(default_factory=list)
     uptime: str = "N/A"
     reachable: bool = True
@@ -359,9 +362,12 @@ class SNMPClient:
                 label_device = self._is_label_device(result)
 
                 if not label_device:
-                    page_count = self._page_count(sock, ip)
-                    if page_count is not None:
+                    fabricante, padrao = self._contadores(sock, ip)
+                    result.counter_vendor, result.counter_std = fabricante, padrao
+                    page_count = self._contador_exibido(ip, fabricante, padrao)
+                    if fabricante is not None or padrao is not None:
                         result.snmp_responded = True
+                    if page_count is not None:
                         result.page_count = page_count
 
                     candidates, toners_responded = self._collect_supplies(sock, ip, is_color)
@@ -772,21 +778,71 @@ class SNMPClient:
             return "A impressora não informa o nível deste cartucho."
         return None
 
-    def _page_count(self, sock: socket.socket, ip: str) -> Optional[int]:
-        """
-        Contador de paginas: o do fabricante quando o agente o tem (ver
-        OID_PAGE_COUNT_FABRICANTE), senao o prtMarkerLifeCount. Quem nao e
-        Kyocera responde noSuchObject na hora, sem esperar timeout.
+    # IPs cujo agente ja respondeu o contador do fabricante neste processo:
+    # para eles, nunca cair no padrao (ver _contador_exibido).
+    _IPS_COM_FABRICANTE: set[str] = set()
 
-        Trocar a fonte faz o contador "voltar" alguns milhares numa leitura;
-        o relatorio mensal soma so saltos positivos (monthly_report), entao
-        essa leitura conta zero em vez de virar pico ou perda.
+    def _contadores(self, sock: socket.socket, ip: str) -> tuple[Optional[int], Optional[int]]:
         """
+        (fabricante, padrao) — os dois lidos separadamente, None quando nao
+        vieram. Quem nao e Kyocera responde "nao existe" ao do fabricante na
+        hora, sem esperar timeout.
+        """
+        fabricante = None
         for oid in self.OID_PAGE_COUNT_FABRICANTE:
-            valor = self._get_numeric(sock, ip, oid)
-            if valor:
-                return valor
-        return self._get_numeric(sock, ip, self.OID_PAGE_COUNT)
+            estado, valor = self._get_numeric_estado(sock, ip, oid)
+            if estado == "ok" and valor:
+                fabricante = valor
+                self._IPS_COM_FABRICANTE.add(ip)
+                break
+            if estado == "ausente":
+                # O agente disse que nao tem: se o IP ja teve, e outro
+                # equipamento agora (IP reaproveitado).
+                self._IPS_COM_FABRICANTE.discard(ip)
+        padrao = self._get_numeric(sock, ip, self.OID_PAGE_COUNT)
+        return fabricante, (padrao or None)
+
+    def _contador_exibido(self, ip: str, fabricante: Optional[int], padrao: Optional[int]) -> Optional[int]:
+        """
+        O numero mostrado no painel e na folha de teste: o do fabricante
+        quando existe. Equipamento que TEM o do fabricante e desta vez nao
+        respondeu a ele fica sem numero nesta leitura, em vez de mostrar o
+        padrao — era essa troca que fazia o contador "pular" 11 mil paginas
+        para cima e para baixo (23/09/2026).
+        """
+        if fabricante is not None:
+            return fabricante
+        if ip in self._IPS_COM_FABRICANTE:
+            return None
+        return padrao
+
+    def _page_count(self, sock: socket.socket, ip: str) -> Optional[int]:
+        """Contador exibido (ver _contadores / _contador_exibido)."""
+        fabricante, padrao = self._contadores(sock, ip)
+        return self._contador_exibido(ip, fabricante, padrao)
+
+    def _get_numeric_estado(self, sock: socket.socket, ip: str, oid: str) -> tuple[str, Optional[int]]:
+        """
+        GET de um numero distinguindo: ("ok", n), ("ausente", None) — o
+        agente respondeu que o OID nao existe — e ("sem_resposta", None).
+        """
+        try:
+            request_id = self._next_request_id()
+            resposta = self._exchange(sock, ip, self._build_get(oid, request_id, self.PDU_GET), request_id)
+        except Exception:
+            return "sem_resposta", None
+        if not resposta:
+            return "sem_resposta", None
+        try:
+            varbinds = parse_varbinds(resposta)
+        except Exception:
+            return "ausente", None
+        if not varbinds:
+            return "ausente", None
+        vb_oid, tag, valor = varbinds[0]
+        if vb_oid != oid or tag in EXCEPTION_TAGS or tag not in NUMERIC_TAGS or not valor:
+            return "ausente", None
+        return "ok", _read_uint(valor)
 
     def _get_numeric(self, sock: socket.socket, ip: str, oid: str) -> Optional[int]:
         """GET de um valor numerico (INTEGER, Counter32, Gauge32, TimeTicks)."""

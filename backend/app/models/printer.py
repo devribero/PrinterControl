@@ -72,6 +72,15 @@ class PrinterReading(SQLModel, table=True):
     printer_id: int = Field(foreign_key="printers.id")
     status: str  # online, offline, atencao
     page_count: int
+    # Os DOIS contadores, separados (23/09/2026). A Kyocera tem o contador
+    # padrao (prtMarkerLifeCount) e o do fabricante, que difere dele em
+    # milhares de paginas. Com os dois misturados na mesma coluna — o do
+    # fabricante quando respondia a tempo, o padrao quando nao — cada troca
+    # virava "+11 mil paginas" no relatorio. As contas do mes comparam sempre
+    # o MESMO contador entre duas leituras (monthly_report). `page_count`
+    # continua sendo o numero exibido: o do fabricante quando existe.
+    counter_vendor: int | None = None
+    counter_std: int | None = None
     toner_k: int | None = None
     toner_c: int | None = None
     toner_m: int | None = None

@@ -257,6 +257,14 @@ def _migrate_printer_share_name():
             conn.commit()
         # printer_monthly.estimated_pages (21/09/2026): parte estimada do mes.
         # Linhas antigas ficam 0 — eram medidas ou importadas da planilha.
+        # printer_readings.counter_vendor/counter_std (23/09/2026): os dois
+        # contadores separados. Leituras antigas ficam NULL ate o reparo
+        # (services/counter_repair.py) classificar de qual contador vieram.
+        leituras = {row[1] for row in conn.execute(text("PRAGMA table_info(printer_readings)"))}
+        for coluna in ("counter_vendor", "counter_std"):
+            if leituras and coluna not in leituras:
+                conn.execute(text(f"ALTER TABLE printer_readings ADD COLUMN {coluna} INTEGER"))
+                conn.commit()
         mensais = {row[1] for row in conn.execute(text("PRAGMA table_info(printer_monthly)"))}
         if mensais and "estimated_pages" not in mensais:
             conn.execute(text("ALTER TABLE printer_monthly ADD COLUMN estimated_pages INTEGER NOT NULL DEFAULT 0"))

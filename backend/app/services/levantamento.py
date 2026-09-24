@@ -569,8 +569,7 @@ def _gerar(session: Session, mes: str, agora: datetime, automatico: bool) -> dic
                                 "usa o de maior contagem, sem somar."
                             )
                     else:
-                        inativa = all(not f.active for f in cas.filas)
-                        motivo = "sem leitura no período" + (" (inativa no sistema)" if inativa else "")
+                        motivo = _motivo_sem_leitura(session, cas.filas)
             elif cas.situacao == "ambiguo":
                 motivo = "IP repetido na planilha e sem serial que identifique o equipamento"
             elif cas.situacao == "conflito":
@@ -757,6 +756,29 @@ def _gerar(session: Session, mes: str, agora: datetime, automatico: bool) -> dic
         nome, previa, preenchidas, total_paginas, len(vazias), len(novos), base_atualizada,
     )
     return relatorio
+
+
+def _motivo_sem_leitura(session: Session, filas: list) -> str:
+    """
+    Por que o equipamento da linha nao tem numero no periodo, dito de um
+    jeito que ajude a decidir o que fazer (23/09/2026): nunca respondeu,
+    parou de responder em tal dia, ou saiu dos print servers.
+    """
+    ids = [f.id for f in filas]
+    ultima = session.exec(
+        select(func.max(PrinterReading.timestamp))
+        .where(PrinterReading.printer_id.in_(ids))
+        .where((PrinterReading.counter_std > 0) | (PrinterReading.counter_vendor > 0) | (PrinterReading.page_count > 0))
+    ).first()
+    fora_dos_servidores = all(not f.active for f in filas)
+    if ultima:
+        quando = (ultima - timedelta(hours=3)).strftime("%d/%m/%Y")
+        texto = f"sem leitura no período (último contador lido em {quando})"
+    else:
+        texto = "não responde na rede a partir do servidor do sistema (nunca lida)"
+    if fora_dos_servidores:
+        texto += "; fila não existe mais nos print servers"
+    return texto
 
 
 def _chaves_do_equipamento(cas, por_serial: dict) -> list[str]:

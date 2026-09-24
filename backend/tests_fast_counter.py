@@ -65,7 +65,9 @@ consultados = []
 def leitor(valores):
     def ler(ip):
         consultados.append(ip)
-        return valores.get(ip)
+        v = valores.get(ip)
+        # int = so contador padrao; tupla = (fabricante, padrao)
+        return v if isinstance(v, tuple) else (None, v)
     return ler
 
 
@@ -102,6 +104,23 @@ with patch.object(settings, "collection_mode", "real"):
         check("ninguem consultado", consultados, [])
     finally:
         printer_fleet._fleet_lock.release()
+
+    print("\n--- 4b. Kyocera: fabricante sem resposta nao grava o padrao ---")
+    with Session(engine) as s2:
+        ky = Printer(server="srv", name="KY", ip="10.7.0.9", model="ECOSYS", active=True)
+        s2.add(ky)
+        s2.commit()
+        s2.refresh(ky)
+        s2.add(PrinterReading(printer_id=ky.id, status="online", page_count=900000, counter_vendor=900000,
+                              counter_std=911000, timestamp=datetime.utcnow() - timedelta(minutes=2)))
+        s2.commit()
+        ky_id = ky.id
+    check("so padrao respondeu: nada gravado", run_fast_counter_poll(leitor({"10.7.0.9": (None, 911050)})), 0)
+    check("fabricante subiu: grava os dois", run_fast_counter_poll(leitor({"10.7.0.9": (900040, 911050)})), 1)
+    with Session(engine) as s2:
+        u = s2.exec(select(PrinterReading).where(PrinterReading.printer_id == ky_id)
+                    .order_by(PrinterReading.id.desc())).first()
+    check("contadores separados", (u.page_count, u.counter_vendor, u.counter_std), (900040, 900040, 911050))
 
 print("\n--- 5. endpoint de versao ---")
 from fastapi.testclient import TestClient  # noqa: E402

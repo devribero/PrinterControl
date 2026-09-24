@@ -191,6 +191,8 @@ class PrinterCollector:
             printer_id=printer_id,
             status=result.status,
             page_count=result.page_count or 0,
+            counter_vendor=result.counter_vendor,
+            counter_std=result.counter_std,
             toner_k=levels.get("K"),
             toner_c=levels.get("C"),
             toner_m=levels.get("M"),

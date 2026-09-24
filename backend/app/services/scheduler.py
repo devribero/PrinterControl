@@ -42,6 +42,7 @@ from sqlmodel import Session, select
 from app.config import settings
 from app.database import engine
 from app.services.monthly_report import close_pending_months
+from app.services.counter_repair import reparar_leituras
 from app.services.fast_counter import run_fast_counter_poll
 from app.services.print_server_autosync import run_auto_sync
 from app.services.printer_fleet import FleetCollectionBusyError, collect_fleet
@@ -91,6 +92,14 @@ def run_collection_cycle() -> None:
     )
     for err in result.errors[:10]:
         logger.warning("FALHA| %s", err)
+
+    # Leituras antigas ainda sem contador identificado (counter_repair): a
+    # coleta que acabou de rodar traz a referencia com os dois contadores.
+    try:
+        with Session(engine) as session:
+            reparar_leituras(session)
+    except Exception:
+        logger.exception("Reparo das leituras antigas falhou")
 
     # Fecha o mes anterior assim que existir leitura depois do fim dele — e
     # essa leitura que da o pedaco final do mes (monthly_report.month_pages).

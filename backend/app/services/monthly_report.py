@@ -15,9 +15,10 @@ lugares nao arrisquem calcular a mesma coisa de tres formas diferentes.
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
-from sqlmodel import Session, func, select
+from sqlmodel import Session, func, or_, select
 
 from app.models.printer import Printer, PrinterMonthly, PrinterReading
+from app.services.counter_series import ponto, saltos
 
 MONTH_LABELS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
 
@@ -108,13 +109,27 @@ def month_pages(session: Session, month_start: datetime, month_end: datetime) ->
     Filas que dividem o mesmo IP sao o mesmo contador: so uma, a
     representante, volta no resultado (ver _one_per_device).
     """
+    # Leitura com algum contador. Cada ponto e ((fabricante, padrao), ts):
+    # a conta entre duas leituras compara sempre o MESMO contador
+    # (counter_series.paginas_entre) — ver PrinterReading.counter_vendor.
+    com_contador = or_(
+        PrinterReading.page_count > 0, PrinterReading.counter_vendor > 0, PrinterReading.counter_std > 0
+    )
+
     def _leituras(filtro):
-        return session.exec(
-            select(PrinterReading.printer_id, PrinterReading.page_count, PrinterReading.timestamp)
-            .where(PrinterReading.page_count > 0)
+        linhas = session.exec(
+            select(
+                PrinterReading.printer_id,
+                PrinterReading.page_count,
+                PrinterReading.counter_vendor,
+                PrinterReading.counter_std,
+                PrinterReading.timestamp,
+            )
+            .where(com_contador)
             .where(filtro)
             .order_by(PrinterReading.printer_id, PrinterReading.id)
         ).all()
+        return [(pid, ponto(pc, v, s), ts) for pid, pc, v, s, ts in linhas]
 
     no_mes = _leituras((PrinterReading.timestamp >= month_start) & (PrinterReading.timestamp < month_end))
 
@@ -122,13 +137,13 @@ def month_pages(session: Session, month_start: datetime, month_end: datetime) ->
     ultimo_antes = (
         select(func.max(PrinterReading.id))
         .where(PrinterReading.timestamp < month_start)
-        .where(PrinterReading.page_count > 0)
+        .where(com_contador)
         .group_by(PrinterReading.printer_id)
     )
     primeiro_depois = (
         select(func.min(PrinterReading.id))
         .where(PrinterReading.timestamp >= month_end)
-        .where(PrinterReading.page_count > 0)
+        .where(com_contador)
         .group_by(PrinterReading.printer_id)
     )
     antes = {pid: (pc, ts) for pid, pc, ts in _leituras(PrinterReading.id.in_(ultimo_antes))}
@@ -143,11 +158,9 @@ def month_pages(session: Session, month_start: datetime, month_end: datetime) ->
     for pid in set(serie) | (set(antes) & set(depois)):
         pontos = ([antes[pid]] if pid in antes else []) + serie.get(pid, []) + ([depois[pid]] if pid in depois else [])
         soma = 0.0
-        for (pc_a, ts_a), (pc_b, ts_b) in zip(pontos, pontos[1:]):
-            salto = pc_b - pc_a
-            if salto <= 0:
-                continue
-            soma += salto * _fracao_no_mes(ts_a, ts_b, month_start, month_end)
+        for salto, ts_a, ts_b in saltos(pontos):
+            if salto > 0:
+                soma += salto * _fracao_no_mes(ts_a, ts_b, month_start, month_end)
         total[pid] = soma
 
         # Base da estimativa: so os saltos DENTRO do mes, nos primeiros 7 dias
@@ -158,8 +171,8 @@ def month_pages(session: Session, month_start: datetime, month_end: datetime) ->
             limite_janela = dentro[0][1] + _JANELA_MEDIA_ESTIMATIVA
             dentro = [ponto for ponto in dentro if ponto[1] <= limite_janela]
         if pid not in antes and len(dentro) >= 2:
-            saltos = sum(max(0, b[0] - a[0]) for a, b in zip(dentro, dentro[1:]))
-            medido_no_mes[pid] = (saltos, dentro[0][1], dentro[-1][1])
+            medido = sum(salto for salto, _, _ in saltos(dentro))
+            medido_no_mes[pid] = (medido, dentro[0][1], dentro[-1][1])
 
     representantes = _one_per_device(session, total)
 
@@ -168,12 +181,12 @@ def month_pages(session: Session, month_start: datetime, month_end: datetime) ->
     for chave, pid in representantes.items():
         estimado = 0.0
         if pid in medido_no_mes:
-            saltos, primeira, ultima = medido_no_mes[pid]
+            medido, primeira, ultima = medido_no_mes[pid]
             janela = ultima - primeira
             inicio_estimativa = max(month_start, fim_anterior.get(chave, month_start))
             lacuna = primeira - inicio_estimativa
             if janela >= _MIN_JANELA_ESTIMATIVA and lacuna > timedelta(0):
-                estimado = saltos / janela.total_seconds() * lacuna.total_seconds()
+                estimado = medido / janela.total_seconds() * lacuna.total_seconds()
         resultado.pages[pid] = round(total[pid] + estimado)
         if estimado >= 0.5:
             resultado.estimated[pid] = round(estimado)

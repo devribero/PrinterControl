@@ -366,7 +366,7 @@ def main():
     check("preenchidas", rel["preenchidas"]["linhas"], 3)
     motivos = {v["linha"]: v["motivo"] for v in rel["vazias"]}
     check("vazias: linhas 21, 22, 29", sorted(motivos), [21, 22, 29])
-    check("motivo sem leitura", motivos[21], "sem leitura no período")
+    check("motivo sem leitura diz que nunca respondeu", motivos[21].startswith("não responde na rede"), True)
     check("motivo nao encontrado", motivos[22], "não encontrado no sistema (sem IP na planilha)")
     check("motivo conflito", motivos[29].startswith("no IP da planilha o sistema lê outro equipamento"), True)
     novos = sorted(n["ip"] for n in rel["novos"])

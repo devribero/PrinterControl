@@ -28,6 +28,7 @@ from app.config import settings
 from app.database import engine
 from app.models.printer import Printer, PrinterReading
 from app.services import data_version, printer_fleet
+from app.services.counter_series import ponto
 from app.services.snmp import SNMPClient
 
 logger = logging.getLogger("printercontrol.fast_counter")
@@ -40,14 +41,15 @@ _TIMEOUT_SNMP = 1.0
 _WORKERS = 16
 
 
-def _ler_contador(ip: str) -> int | None:
-    cliente = SNMPClient(community=settings.snmp_community, timeout=_TIMEOUT_SNMP, retries=0)
+def _ler_contador(ip: str) -> tuple[int | None, int | None]:
+    """(fabricante, padrao), lidos separadamente — ver counter_series."""
+    cliente = SNMPClient(community=settings.snmp_community, timeout=_TIMEOUT_SNMP, retries=1)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(_TIMEOUT_SNMP)
     try:
-        return cliente._page_count(sock, ip)
+        return cliente._contadores(sock, ip)
     except Exception:
-        return None
+        return None, None
     finally:
         sock.close()
 
@@ -74,7 +76,8 @@ def run_fast_counter_poll(ler_contador=_ler_contador) -> int:
         for printer, leitura in linhas:
             if not _IPV4.match(printer.ip or ""):
                 continue
-            if leitura.status == "offline" or not leitura.page_count or leitura.timestamp < limite:
+            tem_contador = leitura.page_count or leitura.counter_vendor or leitura.counter_std
+            if leitura.status == "offline" or not tem_contador or leitura.timestamp < limite:
                 continue
             por_ip.setdefault(printer.ip, []).append((printer, leitura))
         if not por_ip:
@@ -86,17 +89,29 @@ def run_fast_counter_poll(ler_contador=_ler_contador) -> int:
         agora = datetime.utcnow()
         alterados = 0
         for ip, filas in por_ip.items():
-            novo = lidos.get(ip)
-            anterior = max(leitura.page_count for _, leitura in filas)
-            if not novo or novo == anterior:
+            fabricante, padrao = lidos.get(ip) or (None, None)
+            _, ultima = max(filas, key=lambda f: f[1].id)
+            anterior_fab, anterior_pad = ponto(ultima.page_count, ultima.counter_vendor, ultima.counter_std)
+            # Cada contador comparado com ele mesmo. Equipamento com contador
+            # do fabricante que desta vez nao o respondeu: espera a proxima
+            # rodada em vez de gravar so o padrao.
+            if anterior_fab and not fabricante:
+                continue
+            mudou = (fabricante and fabricante != anterior_fab) or (
+                not fabricante and padrao and padrao != anterior_pad
+            )
+            if not mudou:
                 continue
             alterados += 1
+            exibido = fabricante or padrao
             for printer, leitura in filas:
                 session.add(
                     PrinterReading(
                         printer_id=printer.id,
                         status=leitura.status,
-                        page_count=novo,
+                        page_count=exibido,
+                        counter_vendor=fabricante,
+                        counter_std=padrao,
                         toner_k=leitura.toner_k,
                         toner_c=leitura.toner_c,
                         toner_m=leitura.toner_m,
