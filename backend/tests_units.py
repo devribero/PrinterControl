@@ -18,6 +18,8 @@ _TMP = Path(tempfile.mkdtemp(prefix="printercontrol-units-"))
 os.environ["DATABASE_URL"] = f"sqlite:///{(_TMP / 'units.db').as_posix()}"
 os.environ["ENVIRONMENT"] = "development"
 os.environ["PRINT_SERVER_MODE"] = "mock"
+# As URLs de teste usam o TLD reservado .invalid (nunca resolvem).
+os.environ["WEBHOOK_ALLOWED_HOSTS"] = "invalid"
 
 import httpx  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
@@ -108,6 +110,9 @@ def main():
           client.post("/api/units", json={"name": "MANAUS"}, headers=admin).status_code, 409)
     check("http:// recusado 422",
           client.post("/api/units", json={"name": "X", "webhook_url": "http://inseguro.invalid/x"},
+                      headers=admin).status_code, 422)
+    check("dominio fora da lista (SSRF) recusado 422",
+          client.post("/api/units", json={"name": "X", "webhook_url": "https://intranet.local/admin"},
                       headers=admin).status_code, 422)
     check("lixo recusado 422",
           client.post("/api/units", json={"name": "X", "webhook_url": "nao e url"}, headers=admin).status_code, 422)

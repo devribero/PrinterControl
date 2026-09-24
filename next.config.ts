@@ -115,6 +115,33 @@ const nextConfig: NextConfig = {
    * mesma superficie de expor a 8000, so que por uma porta so — e a
    * autenticacao (JWT) continua valendo em todas as rotas protegidas.
    */
+  /**
+   * Cabecalhos de seguranca em todas as paginas do painel.
+   *
+   * O token fica no localStorage (lib/api.ts): qualquer script estranho que
+   * rode na pagina consegue le-lo. Estes cabecalhos fecham os caminhos mais
+   * comuns para isso acontecer — o painel ser embutido em iframe de outro
+   * site (clickjacking), o navegador "adivinhar" tipo de arquivo, e o
+   * endereco completo vazar no Referer para sites externos.
+   *
+   * Sem CSP por enquanto: o Next injeta scripts inline de hidratacao, e uma
+   * CSP que funcione exige nonce por requisicao (middleware). Fica como
+   * proximo passo, registrado em docs/TECHNICAL_DEBT.md.
+   */
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+    ];
+  },
+
   async rewrites() {
     return [
       { source: "/api/:path*", destination: `${BACKEND_ORIGIN}/api/:path*` },

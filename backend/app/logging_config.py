@@ -39,7 +39,7 @@ _PADROES_SENSIVEIS = [
     # vazamentos reais aparece — quase nunca como password=x.
     re.compile(
         r"(?i)[\"']?\b(secret_key|secret|password|senha|passwd|token|authorization|api_key|"
-        r"snmp_community|webhook_url|password_hash)\b[\"']?\s*[=:]\s*[\"']?([^\s,;\"'}\])]+)"
+        r"snmp_community|webhook_url|password_hash|smtp_password)\b[\"']?\s*[=:]\s*[\"']?([^\s,;\"'}\])]+)"
     ),
     # LGPD (Fase 16): dado pessoal, nao segredo tecnico — mas o mesmo raciocinio
     # de "nunca deveria sobreviver no arquivo de log" se aplica. Alvo especifico:

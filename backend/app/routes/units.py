@@ -17,8 +17,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, field_validator
 from sqlmodel import Session, func, select
 
+from app.config import settings
 from app.database import get_session
 from app.dependencies import require_active_user, require_admin
+from app.models.email_recipient import EmailRecipient
 from app.models.print_server import PrintServer
 from app.models.unit import UNIT_NAME_MAX, Unit
 from app.models.user import User
@@ -58,6 +60,13 @@ def _validar_webhook(value: str) -> str:
     if url.scheme != "https" or not url.host:
         # Mensagem sem ecoar o valor: ele pode ser a URL com assinatura.
         raise ValueError("URL do webhook deve comecar com https://")
+    if not settings.webhook_host_permitido(url.host):
+        # Protege contra SSRF: sem isto o backend postava em qualquer host
+        # https, inclusive servicos internos da rede. Ver WEBHOOK_ALLOWED_HOSTS.
+        raise ValueError(
+            "Dominio do webhook nao permitido. Use um webhook do Teams ou do "
+            "Power Automate, ou peca para incluir o dominio em WEBHOOK_ALLOWED_HOSTS."
+        )
     return limpo
 
 
@@ -265,9 +274,17 @@ def delete_unit(
         usuario.unit_id = None
         session.add(usuario)
 
+    # E-mails de alerta da unidade saem junto. Ficar sem unidade (NULL) os
+    # promoveria a destinatarios de TODAS as impressoras — o contrario do
+    # que quem os cadastrou pediu.
+    destinatarios = session.exec(select(EmailRecipient).where(EmailRecipient.unit_id == unit.id)).all()
+    for destinatario in destinatarios:
+        session.delete(destinatario)
+
     before = _snapshot(unit)
     before["server_count"] = len(servidores)
     before["user_count"] = len(usuarios)
+    before["email_recipient_count"] = len(destinatarios)
     audit_log.record(session, admin, "unit.delete", "unit", unit.id, before=before)
     session.delete(unit)
     session.commit()

@@ -621,6 +621,51 @@ export interface ApiWebhookTestResult {
   detail: string;
 }
 
+/** GET /api/notifications/email-status — nunca traz a senha do SMTP. */
+export interface ApiEmailStatus {
+  configured: boolean;
+  smtp_host: string;
+  sender: string;
+  /** Listas fixas do backend/.env — só leitura no painel. */
+  env_alert_recipients: string[];
+  env_report_recipients: string[];
+}
+
+export type EmailRecipientKind = "alert" | "report";
+
+export interface ApiEmailRecipient {
+  id: number;
+  email: string;
+  kind: EmailRecipientKind;
+  /** Só em alertas. null = recebe de todas as impressoras. */
+  unit_id: number | null;
+  unit_name: string | null;
+  created_at: string;
+}
+
+export const fetchEmailRecipients = (signal?: AbortSignal) =>
+  api.get<ApiEmailRecipient[]>("/api/notifications/email-recipients", { signal });
+
+export const addEmailRecipient = (email: string, kind: EmailRecipientKind, unitId: number | null) =>
+  api.post<ApiEmailRecipient>("/api/notifications/email-recipients", { email, kind, unit_id: unitId });
+
+export const removeEmailRecipient = (id: number) =>
+  api.delete<void>(`/api/notifications/email-recipients/${id}`);
+
+export interface ApiEmailTestResult {
+  configured: boolean;
+  sent: boolean;
+  /** "enviado" | "nao_configurado" | "autenticacao" | "recusado" | "timeout" | "erro_de_rede" */
+  detail: string;
+  to: string;
+}
+
+export const fetchEmailStatus = (signal?: AbortSignal) =>
+  api.get<ApiEmailStatus>("/api/notifications/email-status", { signal });
+
+export const sendTestEmail = (to?: string) =>
+  api.post<ApiEmailTestResult>("/api/notifications/test-email", to ? { to } : {});
+
 export interface ApiTestAlertResult {
   notification: ApiNotification;
   webhook: ApiWebhookTestResult;

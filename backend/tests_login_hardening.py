@@ -233,6 +233,70 @@ finally:
 
 login_limiter.reset()
 
+
+print("\n[7] Origem loopback (proxy do Next / tunel) nao vira contador global")
+from app.routes.auth import _chaves_do_limite, password_change_limiter  # noqa: E402
+
+check(
+    "loopback: so a chave da conta",
+    _chaves_do_limite(_Req({}, host="127.0.0.1"), "a@x.com"),
+    ["email:a@x.com"],
+)
+check("loopback IPv6 tambem", _chaves_do_limite(_Req({}, host="::1"), "a@x.com"), ["email:a@x.com"])
+check(
+    "IP real: conta + IP",
+    _chaves_do_limite(_Req({}, host="10.0.0.1"), "a@x.com"),
+    ["ip:10.0.0.1", "email:a@x.com"],
+)
+
+# O cenario do bug: varias senhas erradas em UMA conta pelo proxy nao podem
+# bloquear OUTRA conta que chega pelo mesmo 127.0.0.1.
+login_limiter.reset()
+for _ in range(login_limiter.max_tentativas + 1):
+    login_limiter.registrar_falha(_chaves_do_limite(_Req({}, host="127.0.0.1"), "atacada@x.com"))
+check(
+    "outra conta pelo mesmo proxy continua entrando",
+    login_limiter.verificar(_chaves_do_limite(_Req({}, host="127.0.0.1"), EMAIL.lower())).bloqueado,
+    False,
+)
+check(
+    "a conta atacada fica bloqueada",
+    login_limiter.verificar(_chaves_do_limite(_Req({}, host="127.0.0.1"), "atacada@x.com")).bloqueado,
+    True,
+)
+login_limiter.reset()
+
+
+print("\n[8] Troca de senha limita chutes da senha atual")
+token = client.post("/api/auth/login", json={"email": EMAIL, "password": SENHA}).json()["access_token"]
+auth = {"Authorization": f"Bearer {token}"}
+password_change_limiter.reset()
+codigos = [
+    client.post(
+        "/api/auth/change-password",
+        json={"current_password": "chute", "new_password": "nova-senha-123"},
+        headers=auth,
+    ).status_code
+    for _ in range(password_change_limiter.max_tentativas + 1)
+]
+check("erros viram 400 ate o limite", codigos[:-1], [400] * password_change_limiter.max_tentativas)
+check("passado o limite, 429", codigos[-1], 429)
+password_change_limiter.reset()
+
+
+print("\n[9] Sair de todos os dispositivos derruba os tokens emitidos")
+outro = client.post("/api/auth/login", json={"email": EMAIL, "password": SENHA}).json()["access_token"]
+check("token valido antes", client.get("/api/auth/me", headers=auth).status_code, 200)
+check("logout-all 204", client.post("/api/auth/logout-all", headers=auth).status_code, 204)
+check("token de quem chamou recusado", client.get("/api/auth/me", headers=auth).status_code, 401)
+check(
+    "token de outro dispositivo recusado",
+    client.get("/api/auth/me", headers={"Authorization": f"Bearer {outro}"}).status_code,
+    401,
+)
+check("novo login funciona", client.post("/api/auth/login", json={"email": EMAIL, "password": SENHA}).status_code, 200)
+login_limiter.reset()
+
 print("\n" + "=" * 70)
 if _falhas:
     print(f"FALHAS: {_falhas}")

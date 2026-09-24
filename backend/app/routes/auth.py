@@ -1,5 +1,6 @@
 import logging
 import secrets
+from ipaddress import ip_address
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlmodel import Session, select
@@ -28,6 +29,13 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 # o que isso implica (contagem zera no restart, nao e compartilhada entre
 # workers) e por que e aceitavel neste deploy.
 login_limiter = RateLimiter(
+    max_tentativas=settings.login_max_attempts,
+    janela_segundos=settings.login_window_seconds,
+)
+
+# Separado do login_limiter: errar a senha atual na tela de troca nao deve
+# consumir a cota de login da conta, e vice-versa.
+password_change_limiter = RateLimiter(
     max_tentativas=settings.login_max_attempts,
     janela_segundos=settings.login_window_seconds,
 )
@@ -90,6 +98,34 @@ def _ip_da_conexao(request: Request) -> str:
     return request.client.host if request.client else "desconhecido"
 
 
+def _chaves_do_limite(request: Request, chave_conta: str) -> list[str]:
+    """
+    Chaves do limitador de login: a da conta sempre, a do IP so quando o IP
+    identifica alguem.
+
+    Origem LOOPBACK nao identifica ninguem. O painel chama a API pelo proxy
+    do Next (next.config.ts, `rewrites`) e o Cloudflare Tunnel tambem roda
+    na propria maquina: nos dois caminhos TODO login chega de 127.0.0.1.
+    Contar por esse "IP" transformava o limite em um contador global — cinco
+    senhas erradas de qualquer pessoa bloqueavam o login de todo mundo por
+    LOGIN_WINDOW_SECONDS. A contagem por conta continua valendo e e ela que
+    segura a forca bruta nesse cenario.
+
+    Confiar no X-Forwarded-For vindo do Next NAO resolveria: o proxy do Next
+    repassa o cabecalho que o cliente mandou (so preenche quando ausente),
+    entao o valor seria escolhido pelo atacante.
+    """
+    chaves = [f"email:{chave_conta}"]
+    origem = _identificar_origem(request)
+    try:
+        loopback = ip_address(origem).is_loopback
+    except ValueError:
+        loopback = False
+    if not loopback:
+        chaves.insert(0, f"ip:{origem}")
+    return chaves
+
+
 @router.post("/login", response_model=TokenResponse)
 def login(
     credentials: UserLogin,
@@ -129,7 +165,7 @@ def login(
     # (normalizado): nao ha e-mail canonico para agrupar as tentativas, e
     # ainda assim precisa de UMA chave estavel para o limitador funcionar.
     chave_conta = user.email.strip().lower() if user else identificador.lower()
-    chaves = [f"ip:{_identificar_origem(request)}", f"email:{chave_conta}"]
+    chaves = _chaves_do_limite(request, chave_conta)
 
     limite = login_limiter.verificar(chaves)
     if limite.bloqueado:
@@ -239,7 +275,23 @@ def change_own_password(
     novo em `access_token`, para o painel substituir o antigo sem obrigar um
     novo login.
     """
+    # Mesmo limite do login, por conta: sem ele, um token roubado virava um
+    # oraculo ilimitado para descobrir a senha atual (e reusa-la em outros
+    # sistemas onde a pessoa repita a senha).
+    chave = [f"senha-atual:{user.email.strip().lower()}"]
+    limite = password_change_limiter.verificar(chave)
+    if limite.bloqueado:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=(
+                f"Muitas tentativas com a senha atual errada. Tente novamente em "
+                f"{max(1, limite.retry_after // 60)} minuto(s)."
+            ),
+            headers={"Retry-After": str(limite.retry_after)},
+        )
+
     if not verify_password(data.current_password, user.password_hash):
+        password_change_limiter.registrar_falha(chave)
         # 400, e nem 401 nem 403. A sessao e valida e tem permissao; o que
         # esta errado e o dado enviado. Um 401 faria o painel deslogar quem
         # so errou de digitacao, e um 403 apareceria como "sem permissao"
@@ -256,6 +308,7 @@ def change_own_password(
             detail="A nova senha precisa ser diferente da atual.",
         )
 
+    password_change_limiter.limpar(chave)
     user.password_hash = hash_password(data.new_password)
     # Troca feita pelo proprio dono, com a senha atual conferida: e a prova
     # de que a conta deixou de estar so em posse de quem a criou/resetou.
@@ -273,3 +326,24 @@ def change_own_password(
     return PasswordChangeResponse(
         access_token=create_access_token(data={"sub": user.email, "ver": user.token_version})
     )
+
+
+@router.post("/logout-all", status_code=status.HTTP_204_NO_CONTENT)
+def logout_all_sessions(
+    session: Session = Depends(get_session),
+    user: User = Depends(require_user),
+):
+    """
+    Encerra TODAS as sessoes da conta, inclusive a que fez a chamada.
+
+    O JWT e stateless, entao "sair" no painel so apagava o token do
+    navegador — uma copia roubada continuava valendo ate expirar. Subir
+    `token_version` faz require_user recusar todo token emitido antes,
+    o mesmo mecanismo da troca de senha (QA-04), sem exigir trocar a senha.
+
+    `require_user` (nao `require_active_user`): quem esta com troca de senha
+    pendente tambem precisa conseguir derrubar uma sessao suspeita.
+    """
+    user.token_version += 1
+    session.add(user)
+    session.commit()

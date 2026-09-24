@@ -123,6 +123,41 @@ class Settings(BaseSettings):
     webhook_timeout_seconds: float = 5.0
 
     # ------------------------------------------------------------------
+    # E-mail (SMTP) — alerta de toner e relatorio mensal (24/09/2026).
+    # SMTP_HOST vazio = e-mail desligado (nada quebra, so nao envia).
+    # Porta 587 + STARTTLS e o padrao do Gmail e do Microsoft 365; porta 465
+    # usa SSL direto (SMTP_SSL=true). A senha fica SO no backend/.env.
+    # ------------------------------------------------------------------
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    #: Remetente exibido. Vazio = o proprio SMTP_USER.
+    smtp_from: str = ""
+    smtp_starttls: bool = True
+    smtp_ssl: bool = False
+    smtp_timeout_seconds: float = 15.0
+    #: Quem recebe o alerta de toner critico (lista separada por virgulas).
+    alert_email_to: Annotated[list[str], NoDecode] = []
+    #: Quem recebe o relatorio mensal (levantamento em Excel, em anexo).
+    report_email_to: Annotated[list[str], NoDecode] = []
+
+    @property
+    def email_configurado(self) -> bool:
+        return bool(self.smtp_host.strip())
+
+    # Dominios aceitos na URL de webhook das UNIDADES (cadastrada pelo painel).
+    # Sem esta lista, qualquer https:// servia: um admin (ou quem roubasse o
+    # token dele) fazia o backend disparar POST para hosts internos da rede
+    # (SSRF). Casa pelo sufixo: "api.powerplatform.com" aceita
+    # "<ambiente>.environment.api.powerplatform.com". Vazio = sem restricao.
+    webhook_allowed_hosts: Annotated[list[str], NoDecode] = [
+        "webhook.office.com",
+        "logic.azure.com",
+        "api.powerplatform.com",
+    ]
+
+    # ------------------------------------------------------------------
     # Alerta de offline so depois de N coletas SEGUIDAS sem resposta.
     # Com 1 (o comportamento antigo), 43% dos alertas de offline de
     # setembro/2026 se resolveram sozinhos em ate 10 min — queda de rede ou
@@ -259,6 +294,29 @@ class Settings(BaseSettings):
 
             return [item.strip() for item in texto.split(",") if item.strip()]
         return value
+
+    @field_validator("alert_email_to", "report_email_to", mode="before")
+    @classmethod
+    def _emails_lista(cls, value):
+        """Aceita "a@x.com, b@x.com" (ou ";", como no Outlook) alem de JSON."""
+        if isinstance(value, str):
+            value = value.replace(";", ",")
+        lista = cls._cors_lista(value)
+        return [str(e).strip() for e in lista if str(e).strip()]
+
+    @field_validator("webhook_allowed_hosts", mode="before")
+    @classmethod
+    def _hosts_webhook_lista(cls, value):
+        """Aceita "a.com, b.com" alem de JSON, como CORS_ORIGINS."""
+        lista = cls._cors_lista(value)
+        return [str(h).strip().lower().lstrip(".") for h in lista if str(h).strip()]
+
+    def webhook_host_permitido(self, host: str) -> bool:
+        """True se `host` e um dos dominios de WEBHOOK_ALLOWED_HOSTS (ou subdominio)."""
+        if not self.webhook_allowed_hosts:
+            return True
+        host = host.strip().lower().rstrip(".")
+        return any(host == d or host.endswith("." + d) for d in self.webhook_allowed_hosts)
 
     @field_validator("trusted_proxy_ips", mode="before")
     @classmethod

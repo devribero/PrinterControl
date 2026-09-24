@@ -11,17 +11,21 @@ alerta e evento de impressora, notificacao e mensagem para gente. Ver o
 docstring de `app/models/notification.py` para o desenho completo.
 """
 from datetime import datetime
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from sqlmodel import Session, func, select
 
 from app.database import get_session
-from app.dependencies import require_active_user, require_admin
+from app.dependencies import rate_limited_action, require_active_user, require_admin
 from app.models.alert import Alert
+from app.models.email_recipient import EmailRecipient
 from app.models.notification import SEVERITIES, Notification
+from app.models.unit import Unit
 from app.models.user import User
 from app.schemas.common import RecursoId
+from app.services import audit_log, email_notifier
 from app.services.webhook_notifier import send_test_webhook
 
 router = APIRouter(
@@ -350,3 +354,160 @@ def send_test_alert(
         notification=_to_response(session, notificacao),
         webhook=WebhookTestResult(configured=motivo != "nao_configurado", sent=enviado, detail=motivo),
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────
+#  E-mail (24/09/2026)
+# ─────────────────────────────────────────────────────────────────────────
+
+class EmailStatus(BaseModel):
+    """Situacao do e-mail para a tela de Configuracoes. Nunca traz a senha."""
+
+    configured: bool
+    smtp_host: str
+    sender: str
+    #: Listas fixas do backend/.env — so leitura no painel.
+    env_alert_recipients: list[str]
+    env_report_recipients: list[str]
+
+
+class EmailRecipientCreate(BaseModel):
+    email: EmailStr
+    kind: Literal["alert", "report"]
+    #: So para kind="alert". None = recebe alertas de todas as impressoras.
+    unit_id: int | None = None
+
+
+class EmailRecipientResponse(BaseModel):
+    id: int
+    email: str
+    kind: str
+    unit_id: int | None
+    unit_name: str | None
+    created_at: datetime
+
+
+def _recipient_response(session: Session, r: EmailRecipient) -> EmailRecipientResponse:
+    unidade = session.get(Unit, r.unit_id) if r.unit_id else None
+    return EmailRecipientResponse(
+        id=r.id, email=r.email, kind=r.kind, unit_id=r.unit_id,
+        unit_name=unidade.name if unidade else None, created_at=r.created_at,
+    )
+
+
+def _recipient_snapshot(session: Session, r: EmailRecipient) -> dict:
+    return {"email": r.email, "kind": r.kind, "unit_id": r.unit_id,
+            "unit_name": _recipient_response(session, r).unit_name}
+
+
+class EmailTestRequest(BaseModel):
+    #: Vazio = o e-mail de quem clicou.
+    to: str | None = Field(default=None, max_length=254)
+
+    @field_validator("to")
+    @classmethod
+    def _endereco(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+        limpo = value.strip()
+        # Validacao simples de proposito: o SMTP e quem da a palavra final, e
+        # o objetivo aqui e so recusar lixo e injecao de cabecalho.
+        if "@" not in limpo or any(c in limpo for c in "\r\n,; <>"):
+            raise ValueError("Informe um unico endereco de e-mail valido.")
+        return limpo
+
+
+class EmailTestResult(BaseModel):
+    configured: bool
+    sent: bool
+    # "enviado", "nao_configurado", "autenticacao", "recusado", "timeout", "erro_de_rede"
+    detail: str
+    to: str
+
+
+@router.get("/email-status", response_model=EmailStatus)
+def get_email_status(_admin: User = Depends(require_admin)):
+    """Se o SMTP esta configurado e quantos destinatarios cada lista tem."""
+    return EmailStatus(**email_notifier.status())
+
+
+@router.post("/test-email", response_model=EmailTestResult)
+def send_test_email(
+    data: EmailTestRequest | None = None,
+    admin: User = Depends(rate_limited_action("test_email")),
+):
+    """
+    Envia um e-mail de TESTE e devolve o que aconteceu, para quem esta
+    configurando o SMTP ver na hora se deu certo (e por que nao).
+
+    Limitado como as acoes de rede: e um disparo real de e-mail, e um laco
+    no botao nao pode transformar o sistema em fonte de spam.
+    """
+    destino = (data.to if data and data.to else admin.email)
+    enviado, motivo = email_notifier.send_test_email(destino, requested_by=f"{admin.name} ({admin.email})")
+    return EmailTestResult(configured=motivo != "nao_configurado", sent=enviado, detail=motivo, to=destino)
+
+
+@router.get("/email-recipients", response_model=list[EmailRecipientResponse])
+def list_email_recipients(
+    session: Session = Depends(get_session),
+    _admin: User = Depends(require_admin),
+):
+    """Destinatarios cadastrados pelo painel (alerta e relatorio)."""
+    itens = session.exec(select(EmailRecipient).order_by(EmailRecipient.kind, EmailRecipient.email)).all()
+    return [_recipient_response(session, r) for r in itens]
+
+
+@router.post("/email-recipients", response_model=EmailRecipientResponse, status_code=status.HTTP_201_CREATED)
+def add_email_recipient(
+    data: EmailRecipientCreate,
+    session: Session = Depends(get_session),
+    admin: User = Depends(require_admin),
+):
+    """
+    Adiciona um destinatario. Mesmo endereco pode estar nas duas listas, e
+    em unidades diferentes; so nao pode repetir no mesmo lugar (409).
+    """
+    email = str(data.email).strip().lower()
+    unit_id = data.unit_id if data.kind == "alert" else None
+    if data.kind == "report" and data.unit_id is not None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="O relatorio mensal e um so para a empresa: nao escolha unidade.",
+        )
+    if unit_id is not None and session.get(Unit, unit_id) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unidade nao encontrada")
+
+    filtro_unidade = EmailRecipient.unit_id.is_(None) if unit_id is None else EmailRecipient.unit_id == unit_id
+    existente = session.exec(
+        select(EmailRecipient).where(
+            EmailRecipient.email == email, EmailRecipient.kind == data.kind, filtro_unidade
+        )
+    ).first()
+    if existente:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"{email} ja esta nesta lista.")
+
+    r = EmailRecipient(email=email, kind=data.kind, unit_id=unit_id)
+    session.add(r)
+    session.flush()
+    audit_log.record(session, admin, "email_recipient.create", "email_recipient", r.id,
+                     after=_recipient_snapshot(session, r))
+    session.commit()
+    session.refresh(r)
+    return _recipient_response(session, r)
+
+
+@router.delete("/email-recipients/{recipient_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_email_recipient(
+    recipient_id: RecursoId,
+    session: Session = Depends(get_session),
+    admin: User = Depends(require_admin),
+):
+    """Remove um destinatario cadastrado pelo painel (os do .env nao passam por aqui)."""
+    r = session.get(EmailRecipient, recipient_id)
+    if not r:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Destinatario nao encontrado")
+    audit_log.record(session, admin, "email_recipient.delete", "email_recipient", r.id,
+                     before=_recipient_snapshot(session, r))
+    session.delete(r)
+    session.commit()

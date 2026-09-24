@@ -25,19 +25,30 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 from jwt import InvalidTokenError
-from passlib.context import CryptContext
+from argon2 import PasswordHasher
+from argon2.exceptions import InvalidHashError, VerificationError
 
 from app.config import settings
 
-pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+# argon2-cffi direto, sem passlib (24/09/2026): o passlib esta sem manutencao
+# desde 2020 e ja quebra em versoes novas do Python/bcrypt. So usavamos o
+# argon2 dele, que e este mesmo pacote por baixo. O formato do hash
+# ($argon2id$v=19$...) e o mesmo, entao as senhas ja gravadas continuam
+# valendo sem ninguem precisar redefinir.
+_hasher = PasswordHasher()
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return _hasher.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return _hasher.verify(hashed_password, plain_password)
+    except (VerificationError, InvalidHashError):
+        # Senha errada ou hash corrompido/de outro formato: os dois sao
+        # "nao confere" para quem chama — nunca excecao na rota de login.
+        return False
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:

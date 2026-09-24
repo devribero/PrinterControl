@@ -10,8 +10,8 @@
  */
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Check, Eye, EyeOff, KeyRound, Loader2 } from "lucide-react";
-import { changeMyPassword, updateMyProfile, type Account } from "../../lib/auth";
+import { Check, Eye, EyeOff, KeyRound, Loader2, LogOut } from "lucide-react";
+import { changeMyPassword, logoutAllSessions, updateMyProfile, type Account } from "../../lib/auth";
 import { useApiErrorReporter } from "../../lib/apiErrors";
 import { useAppData } from "../../lib/app-data";
 import { ROLE_LABELS } from "../../lib/permissions";
@@ -275,5 +275,51 @@ export function PasswordSection() {
         )}
       </Card>
     </form>
+  );
+}
+
+/**
+ * "Sair de todos os dispositivos": derruba no servidor todo token emitido
+ * para a conta (inclusive o desta aba) e volta para o login. É o caminho
+ * para quando um computador ficou logado em algum lugar ou o token pode ter
+ * vazado — sem precisar trocar a senha.
+ */
+export function SessionsSection() {
+  const { handleLogout } = useAppData();
+  const relatarErro = useApiErrorReporter();
+  const [saindo, setSaindo] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+
+  async function sairDeTodos() {
+    if (!window.confirm("Encerrar a sessão em todos os dispositivos, inclusive neste?")) return;
+    setSaindo(true);
+    setErro(null);
+    try {
+      await logoutAllSessions();
+      handleLogout();
+    } catch (error) {
+      setErro(relatarErro(error, "Não foi possível encerrar as sessões"));
+      setSaindo(false);
+    }
+  }
+
+  return (
+    <Card
+      title="Sessões"
+      description="Encerra o acesso em todos os computadores e celulares onde esta conta está conectada."
+      footer={
+        <button type="button" onClick={() => void sairDeTodos()} disabled={saindo} className={styles.secondaryButton}>
+          {saindo ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />}
+          {saindo ? "Encerrando..." : "Sair de todos os dispositivos"}
+        </button>
+      }
+    >
+      <p className={styles.note}>Use se esqueceu a conta aberta em outra máquina. Você precisará entrar de novo.</p>
+      {erro && (
+        <p className={styles.formError} role="alert">
+          {erro}
+        </p>
+      )}
+    </Card>
   );
 }

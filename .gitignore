@@ -78,3 +78,10 @@ backend/data/
 # Companheiros do modo WAL do SQLite — estado transitorio, nunca versionado.
 *.db-wal
 *.db-shm
+
+# Copias de banco com qualquer sufixo (ex.: printer_control.db.RESGATE-...):
+# `*.db` nao pegava — e o arquivo foi para o repo com hashes de senha.
+*.db.*
+*.sqlite*
+# Frota real (IPs/departamentos) usada so pelo seed.py: fica local.
+backend/printers_data.json

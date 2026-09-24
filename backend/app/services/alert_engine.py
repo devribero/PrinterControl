@@ -41,6 +41,7 @@ from app.models.alert import Alert
 from app.models.notification import Notification
 from app.models.printer import Printer, PrinterReading
 from app.services.units import notification_recipients, unit_for_printer, unit_webhook_url
+from app.services.email_notifier import alert_recipients, send_toner_alert_email
 from app.services.webhook_notifier import send_toner_alert_webhook
 
 logger = logging.getLogger("printercontrol.alert_engine")
@@ -292,7 +293,11 @@ def evaluate_reading(session: Session, printer_id: int, reading: PrinterReading)
         if printer:
             # Teams: webhook da unidade da impressora + central (deduplicado
             # em webhook_notifier). Resolvido uma vez por leitura.
-            unit_url = unit_webhook_url(unit_for_printer(session, printer))
+            unidade = unit_for_printer(session, printer)
+            unit_url = unit_webhook_url(unidade)
+            # Unidade inativa continua recebendo so os e-mails sem unidade,
+            # como o webhook (unit_webhook_url devolve "" nesse caso).
+            emails = alert_recipients(session, unidade.id if unidade and unidade.active else None)
             for color, percent, alert in critical_toner_events:
                 _notify_all_active_users(
                     session,
@@ -314,5 +319,18 @@ def evaluate_reading(session: Session, printer_id: int, reading: PrinterReading)
                     # send_toner_alert_webhook ja captura tudo internamente;
                     # este except e defesa extra para nunca derrubar a coleta.
                     logger.warning("Webhook automatico falhou de forma inesperada | printer_id=%s", printer_id)
+                try:
+                    # E-mail (24/09/2026): mesmo evento, para ALERT_EMAIL_TO. Sai
+                    # por uma fila de fundo — nao espera o SMTP responder.
+                    send_toner_alert_email(
+                        printer_name=printer.name,
+                        model=printer.model,
+                        color=color,
+                        level_text=f"{percent}%",
+                        unit_name=unidade.name if unidade else None,
+                        destinatarios=emails,
+                    )
+                except Exception:
+                    logger.warning("E-mail automatico falhou de forma inesperada | printer_id=%s", printer_id)
 
     return actions

@@ -22,8 +22,9 @@ import { Accessibility, Bell, Info, KeyRound, Palette, Server, User } from "luci
 import { useAppData } from "../lib/app-data";
 import { cn } from "../lib/cn";
 import styles from "./SettingsView.module.css";
-import { PasswordSection, ProfileSection } from "./settings/AccountSections";
+import { PasswordSection, ProfileSection, SessionsSection } from "./settings/AccountSections";
 import { AccessibilitySection, AppearanceSection } from "./settings/PreferenceSections";
+import { EmailSection } from "./settings/EmailSection";
 import { AboutSection, CollectionSection, NotificationsSection } from "./settings/SystemSections";
 import { SettingsPanel } from "./settings/ui";
 
@@ -60,7 +61,7 @@ function secaoDoHash(): SecaoId | null {
 }
 
 export default function SettingsView() {
-  const { account } = useAppData();
+  const { account, can } = useAppData();
   const [ativa, setAtiva] = useState<SecaoId>("perfil");
   const abasRef = useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -129,11 +130,21 @@ export default function SettingsView() {
         {SECOES.map((s) => (
           <SettingsPanel key={s.id} id={s.id} title={s.label} description={s.description} active={s.id === ativa}>
             {s.id === "perfil" && <ProfileSection account={account} />}
-            {s.id === "seguranca" && <PasswordSection />}
+            {s.id === "seguranca" && (
+              <>
+                <PasswordSection />
+                <SessionsSection />
+              </>
+            )}
             {s.id === "aparencia" && <AppearanceSection />}
             {s.id === "acessibilidade" && <AccessibilitySection />}
             {s.id === "coleta" && <CollectionSection />}
-            {s.id === "notificacoes" && <NotificationsSection account={account} />}
+            {s.id === "notificacoes" && (
+              <>
+                <NotificationsSection account={account} />
+                {can.canAdmin && <EmailSection defaultTo={account.email} />}
+              </>
+            )}
             {s.id === "sobre" && <AboutSection />}
           </SettingsPanel>
         ))}

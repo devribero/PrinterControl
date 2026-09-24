@@ -92,6 +92,12 @@ app = FastAPI(
     description=DESCRIPTION,
     openapi_tags=TAGS_METADATA,
     lifespan=lifespan,
+    # Em producao a documentacao interativa sai do ar: /docs e /openapi.json
+    # entregam, sem login, o mapa completo da API (rotas, parametros,
+    # papeis exigidos) a quem alcancar o tunel.
+    docs_url=None if settings.is_production else "/docs",
+    redoc_url=None if settings.is_production else "/redoc",
+    openapi_url=None if settings.is_production else "/openapi.json",
 )
 
 # CORS — apenas o que o painel local usa de fato. O token vai no header

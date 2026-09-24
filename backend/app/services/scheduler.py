@@ -161,6 +161,18 @@ def run_levantamento_pendente() -> None:
             "Levantamento mensal gerado automaticamente | %s | preenchidas=%s vazias=%s novos=%s",
             relatorio["arquivo"], relatorio["preenchidas"]["linhas"], len(relatorio["vazias"]), len(relatorio["novos"]),
         )
+        # Relatorio por e-mail (24/09/2026). So o automatico do job mensal:
+        # uma geracao manual pelo painel e para quem clicou, nao para a lista.
+        from app.services.email_notifier import report_recipients, send_monthly_report_email
+        from app.services.levantamento import pasta_gerados
+
+        try:
+            with Session(engine) as session:
+                destinos = report_recipients(session)
+            enviado, motivo = send_monthly_report_email(relatorio, pasta_gerados() / relatorio["arquivo"], destinos)
+            logger.info("Relatorio mensal por e-mail | enviado=%s motivo=%s", enviado, motivo)
+        except Exception:
+            logger.exception("Envio do relatorio mensal por e-mail falhou")
 
 
 def run_print_server_sync() -> None:

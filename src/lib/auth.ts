@@ -257,6 +257,15 @@ export function withPasswordChanged(account: Account): Account {
   return updated;
 }
 
+/**
+ * Encerra TODAS as sessões da conta no servidor, inclusive esta (o backend
+ * sobe `token_version`). Quem chama ainda precisa limpar a sessão local —
+ * o token guardado aqui passou a ser recusado.
+ */
+export async function logoutAllSessions(): Promise<void> {
+  await api.post<void>("/api/auth/logout-all");
+}
+
 export function logout() {
   clearToken();
   if (typeof window !== "undefined") {

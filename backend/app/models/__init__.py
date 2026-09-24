@@ -5,6 +5,7 @@ from .print_server import PrintServer
 from .alert import Alert, TonerHistory
 from .notification import Notification
 from .audit_log import AuditLog
+from .email_recipient import EmailRecipient
 
 __all__ = [
     "Unit",
@@ -17,4 +18,5 @@ __all__ = [
     "TonerHistory",
     "Notification",
     "AuditLog",
+    "EmailRecipient",
 ]

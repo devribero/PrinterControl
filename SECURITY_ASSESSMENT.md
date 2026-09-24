@@ -3,6 +3,31 @@
 
 ---
 
+## Atualização — 24/09/2026
+
+Revisão nova, com achados que a avaliação abaixo não cobria. O texto
+original foi mantido como registro; **SEC-001 já está parcialmente
+resolvido** (revogação por `User.token_version`, e agora também
+`POST /api/auth/logout-all`).
+
+| ID | Achado | Severidade | Situação |
+|----|--------|-----------|----------|
+| SEC-006 | `SECRET_KEY` em uso era a mesma que ficou no histórico do Git (`backend/.env.dominio`, removido em `887d08c`) — permite forjar JWT de admin | 🔴 CRÍTICO | **Ação manual pendente:** gerar chave nova no `backend/.env` e limpar o histórico |
+| SEC-007 | Cópia do banco (`printer_control.db.RESGATE-...`, com hashes de senha) e `printers_data.json` (IPs reais) versionados | 🔴 ALTO | Removidos do índice e cobertos no `.gitignore`; continuam no histórico |
+| SEC-008 | Limite de login contava por IP, e pelo proxy do Next todo login vem de `127.0.0.1`: 5 senhas erradas de qualquer pessoa travavam o login de todos | 🟠 ALTO (DoS) | Corrigido — origem loopback conta só por conta (`routes/auth.py:_chaves_do_limite`) |
+| SEC-009 | FastAPI 0.109 / Starlette 0.35 / python-multipart 0.0.6 com CVEs de DoS (CVE-2024-24762, CVE-2024-47874, CVE-2024-53981) | 🟠 ALTO | Atualizados em `requirements.txt` |
+| SEC-010 | `/docs`, `/redoc`, `/openapi.json` públicos | 🟡 MÉDIO | Desligados com `ENVIRONMENT=production` |
+| SEC-011 | Troca de senha sem limite de tentativas da senha atual | 🟡 MÉDIO | Corrigido — mesmo limite do login |
+| SEC-012 | Webhook de unidade aceitava qualquer `https://` (SSRF para a rede interna) | 🟡 MÉDIO | Corrigido — `WEBHOOK_ALLOWED_HOSTS` (Teams/Power Automate) |
+| SEC-013 | Painel sem cabeçalhos de segurança | 🟡 MÉDIO | `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`. CSP com nonce ainda pendente |
+| SEC-014 | `passlib` sem manutenção | ⚪ BAIXO | Trocado por `argon2-cffi` direto (hashes compatíveis) |
+
+Ainda em aberto: backend com `ENVIRONMENT=development` na máquina que
+atende a rede, painel servido com `next dev`, tarefa rodando como SYSTEM,
+token em `localStorage` (SEC-002) e ausência de CI com varredura de segredos.
+
+---
+
 ## Executive Summary
 
 Uma avaliação de segurança 360° foi realizada no repositório **devribero/PrinterControl**, um painel de monitoramento de impressoras que combina:
